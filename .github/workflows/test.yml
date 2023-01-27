@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ groqflow==0.4.8
           pip install flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f setup.py ]; then pip install -e .; fi
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
