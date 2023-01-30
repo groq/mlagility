@@ -28,15 +28,18 @@ def _cleanOpList(input):
 
 
 def _getLog(model: build.State, logname, cache_dir):
-    with open(
-        os.path.join(
-            build.output_dir(cache_dir, model.config.build_name),
-            logname,
-        ),
-        "r",
-        encoding="utf8",
-    ) as log:
-        return log.read()
+    try:
+        with open(
+            os.path.join(
+                build.output_dir(cache_dir, model.config.build_name),
+                logname,
+            ),
+            "r",
+            encoding="utf8",
+        ) as log:
+            return log.read()
+    except FileNotFoundError:
+        return "No log file"
 
 
 summary_filename = "summary.csv"
@@ -128,7 +131,7 @@ class Results:
 
     parameters: ResultsColumn = ResultsColumn(
         "Parameters",
-        "Number of constant elements (ie, trained parameters) in the model.",
+        "Number of constant elements (ie, trained parameters) in the " "model.",
     )
 
     inputs: ResultsColumn = ResultsColumn(
@@ -152,7 +155,7 @@ class Results:
 
     chips_used: ResultsColumn = ResultsColumn(
         "# Chips Used",
-        "Actual number of GroqChip processors targeted by the compilation process.",
+        "Actual number of GroqChip processors targeted by the compilation " "process.",
     )
 
     estimated_groq_latency: ResultsColumn = ResultsColumn(
@@ -433,7 +436,7 @@ def summary_spreadsheet(args):
         )
 
         # Get the performance estimate for the build
-        if state.build_status == build.Status.SUCCESSFUL_BUILD:
+        if state.build_status == build.Status.SUCCESSFUL_BUILD and "assemble" in state.info.completed_build_stages:
             gmodel = groqmodel.load(state.config.build_name, args.cache_dir)
             estimated_perf = gmodel.estimate_performance()
             estimated_latency = estimated_perf.latency

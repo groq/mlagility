@@ -105,6 +105,7 @@ def benchit(
     build_name: Optional[str] = None,
     cache_dir: str = build.DEFAULT_CACHE_DIR,
     device: str = "groq",
+    build_only: bool = False,
 ):
     """
     Benchmark a model against some inputs on target hardware
@@ -115,10 +116,14 @@ def benchit(
             model=model, inputs=inputs, build_name=build_name, cache_dir=cache_dir
         )
         perf = gmodel.benchmark()
-    elif device == "gpu":
+    elif device == "nvidia":
         gmodel = exportit(
             model=model, inputs=inputs, build_name=build_name, cache_dir=cache_dir
         )
+
+        if build_only:
+            return
+
         gpu_model = gpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
@@ -126,10 +131,14 @@ def benchit(
 
         latency_ms = float(perf.latency["mean "].split(" ")[1])
         throughput_ips = float(perf.throughput.split(" ")[0])
-    elif device == "cpu":
+    elif device == "x86":
         gmodel = exportit(
             model=model, inputs=inputs, build_name=build_name, cache_dir=cache_dir
         )
+
+        if build_only:
+            return
+
         cpu_model = cpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
@@ -138,7 +147,9 @@ def benchit(
         latency_ms = float(perf.latency)
         throughput_ips = float(perf.throughput)
     else:
-        raise ValueError("Only groq, cpu or gpu are allowed values for device")
+        raise ValueError(
+            f"Only groq, x86, or nvidia are allowed values for device, but got {device}"
+        )
 
     print(
         f"\nPerformance of build {gmodel.state.config.build_name} on device {device} is:"

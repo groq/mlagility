@@ -7,7 +7,7 @@ import groqflow.common.exceptions as exceptions
 import groqflow.common.build
 import mlabench.slurm as slurm
 import mlabench.filesystem as filesystem
-from mlabench.analysis.analysis import evaluate_script, TracerArgs
+from mlabench.analysis.analysis import evaluate_script, TracerArgs, Action
 
 
 def main(args):
@@ -38,19 +38,22 @@ def main(args):
                     f"Script could not be found: {user_script_path}"
                 )
 
-    # Decode benchit device types into TracerArgs flags
+    # Decode benchit args into TracerArgs flags
     if args.analyze_only:
-        build = False
-        benchmark_cpu = False
-        benchmark_gpu = False
+        actions = [
+            Action.ANALYZE,
+        ]
     elif args.build_only:
-        build = True
-        benchmark_cpu = False
-        benchmark_gpu = False
+        actions = [
+            Action.ANALYZE,
+            Action.BUILD,
+        ]
     else:
-        build = True
-        benchmark_cpu = "x86" in args.devices
-        benchmark_gpu = "nvidia" in args.devices
+        actions = [
+            Action.ANALYZE,
+            Action.BUILD,
+            Action.BENCHMARK,
+        ]
 
     if args.use_slurm:
         jobs = slurm.jobs_in_queue()
@@ -61,66 +64,64 @@ def main(args):
             )
 
     for script in scripts:
-
-        if args.use_slurm:
-            slurm.run_autogroq(
-                op="benchmark",
-                script=script,
-                search_dir=args.search_dir,
-                cache_dir=args.cache_dir,
-                rebuild=args.rebuild,
-                compiler_flags=args.compiler_flags,
-                assembler_flags=args.assembler_flags,
-                num_chips=args.num_chips,
-                groqview=args.groqview,
-                devices=args.devices,
-                runtimes=args.runtimes,
-                ip=args.ip,
-                max_depth=args.max_depth,
-                analyze_only=args.analyze_only,
-                build_only=args.build_only,
-            )
-
-        else:
-
-            tracer_args = TracerArgs(
-                input=script,
-                labels=None,
-                lean_cache=args.lean_cache,
-                targets=[],
-                check_ops=False,
-                build=build,
-                max_depth=args.max_depth,
-                cache_dir=args.cache_dir,
-                rebuild=args.rebuild,
-                compiler_flags=args.compiler_flags,
-                assembler_flags=args.assembler_flags,
-                num_chips=args.num_chips,
-                groqview=args.groqview,
-                benchmark_cpu=benchmark_cpu,
-                benchmark_gpu=benchmark_gpu,
-            )
-
-            evaluate_script(tracer_args, args.script_args)
-
-            # Print performance info
-            if benchmark_cpu or benchmark_gpu:
-                builds = filesystem.get_builds_from_script(
-                    args.cache_dir, pathlib.Path(script).stem
+        for device in args.devices:
+            if args.use_slurm:
+                slurm.run_autogroq(
+                    op="benchmark",
+                    script=script,
+                    search_dir=args.search_dir,
+                    cache_dir=args.cache_dir,
+                    rebuild=args.rebuild,
+                    compiler_flags=args.compiler_flags,
+                    assembler_flags=args.assembler_flags,
+                    num_chips=args.num_chips,
+                    groqview=args.groqview,
+                    devices=device,
+                    runtimes=args.runtimes,
+                    ip=args.ip,
+                    max_depth=args.max_depth,
+                    analyze_only=args.analyze_only,
+                    build_only=args.build_only,
                 )
-                for build in builds:
-                    if "x86" in args.devices:
-                        perf_file = os.path.join(
-                            groqflow.common.build.output_dir(args.cache_dir, build),
-                            "cpu_performance.json",
-                        )
-                        with open(perf_file, "r", encoding="utf8") as stream:
-                            perf_data = json.loads(stream.read())
-                            printing.log_info(
-                                f"Performance of device {perf_data['CPU Name']} is:"
+
+            else:
+
+                tracer_args = TracerArgs(
+                    input=script,
+                    labels=None,
+                    lean_cache=args.lean_cache,
+                    targets=[],
+                    max_depth=args.max_depth,
+                    cache_dir=args.cache_dir,
+                    rebuild=args.rebuild,
+                    compiler_flags=args.compiler_flags,
+                    assembler_flags=args.assembler_flags,
+                    num_chips=args.num_chips,
+                    groqview=args.groqview,
+                    device=device,
+                    actions=actions,
+                )
+
+                evaluate_script(tracer_args, args.script_args)
+
+                # Print performance info
+                if args.devices and Action.BENCHMARK in actions:
+                    builds = filesystem.get_builds_from_script(
+                        args.cache_dir, pathlib.Path(script).stem
+                    )
+                    for build in builds:
+                        if "x86" in args.devices:
+                            perf_file = os.path.join(
+                                groqflow.common.build.output_dir(args.cache_dir, build),
+                                "cpu_performance.json",
                             )
-                            print(f"Latency: {perf_data['Mean Latency(ms)']} ms")
-                            print(f"Throughput: {perf_data['Throughput']} IPS")
+                            with open(perf_file, "r", encoding="utf8") as stream:
+                                perf_data = json.loads(stream.read())
+                                printing.log_info(
+                                    f"Performance of device {perf_data['CPU Name']} is:"
+                                )
+                                print(f"Latency: {perf_data['Mean Latency(ms)']} ms")
+                                print(f"Throughput: {perf_data['Throughput']} IPS")
 
     # Wait until all the Slurm jobs are done
     if args.use_slurm:

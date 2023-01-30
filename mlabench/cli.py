@@ -4,11 +4,11 @@
 import argparse
 import os
 import sys
-import pathlib
 import groqflow.common.build as build
 import mlabench.report as report
 import mlabench.filesystem as filesystem
 import mlabench.benchmark.benchmark as benchmark_command
+import mlabench
 
 
 class MyParser(argparse.ArgumentParser):
@@ -22,9 +22,7 @@ def print_version(_):
     """
     Print the package version number
     """
-    version_file = pathlib.Path(__file__).parent.resolve().parent / "VERSION_NUMBER"
-    with open(version_file, encoding="utf-8") as f:
-        print(f.readline().strip())
+    print(mlabench.__version__)
 
 
 def main():
@@ -121,9 +119,9 @@ def main():
         "--cache-dir",
         dest="cache_dir",
         help="Build cache directory where the resulting build directories will "
-        f"be stored (defaults to {build.DEFAULT_CACHE_DIR})",
+        f"be stored (defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
-        default=build.DEFAULT_CACHE_DIR,
+        default=filesystem.DEFAULT_CACHE_DIR,
     )
 
     # TODO: Implement this feature
@@ -277,9 +275,9 @@ def main():
         "--cache-dir",
         dest="cache_dir",
         help="The reports will be generated based on the builds in this GroqFlow "
-        f"build cache directory (defaults to {build.DEFAULT_CACHE_DIR})",
+        f"build cache directory (defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
-        default=build.DEFAULT_CACHE_DIR,
+        default=filesystem.DEFAULT_CACHE_DIR,
     )
 
     #######################################
@@ -296,9 +294,9 @@ def main():
         "--cache-dir",
         dest="cache_dir",
         help="The builds in this build cache directory will printed to the terminal "
-        f" (defaults to {build.DEFAULT_CACHE_DIR})",
+        f" (defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
-        default=build.DEFAULT_CACHE_DIR,
+        default=filesystem.DEFAULT_CACHE_DIR,
     )
 
     #######################################
@@ -314,9 +312,9 @@ def main():
         "-d",
         "--cache-dir",
         dest="cache_dir",
-        help="Search path for builds " f"(defaults to {build.DEFAULT_CACHE_DIR})",
+        help="Search path for builds " f"(defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
-        default=build.DEFAULT_CACHE_DIR,
+        default=filesystem.DEFAULT_CACHE_DIR,
     )
 
     delete_group = delete_parser.add_mutually_exclusive_group(required=True)

@@ -13,7 +13,7 @@ def update(models_found: Dict[str, ModelInfo], script_name: str) -> None:
 
     os.system("clear")
     printing.logn(
-        f"\nGroqable models found while running '{script_name}'\n",
+        f"\nModels found while running '{script_name}'\n",
         c=printing.Colors.BOLD,
     )
     recursive_print(models_found)
@@ -36,9 +36,9 @@ def print_model(model_info: ModelInfo, model_hash: Union[str, None]) -> None:
     printing.log(f"{ident}{model_info.name} ")
 
     # Show the number of times the model has been executed
-    # Only show the execution time if we are not running groqit() as this
+    # Only show the execution time if we are not running benchit() as this
     # impacts time measurement.
-    if model_info.exec_time == 0 or model_info.check_ops or model_info.build_model:
+    if model_info.exec_time == 0 or model_info.build_model:
         exec_time = ""
     else:
         exec_time = f" - {model_info.exec_time:.2f}s"
@@ -64,8 +64,8 @@ def print_model(model_info: ModelInfo, model_hash: Union[str, None]) -> None:
     print(f"{ident}\tParameters:\t{'{:,}'.format(model_info.params)} ({model_size} MB)")
     print(f"{ident}\tHash:\t\t" + model_hash)
 
-    # Print groqit results if groqit was run
-    if model_info.is_target and (model_info.check_ops or model_info.build_model):
+    # Print benchit results if benchit was run
+    if model_info.is_target and model_info.build_model:
         printing.log(f"{ident}\tStatus:\t\t")
         printing.logn(
             f"{model_info.status_message}\n", c=model_info.status_message_color

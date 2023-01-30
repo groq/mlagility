@@ -9,6 +9,7 @@ import groqflow.justgroqit.export as export
 import groqflow.justgroqit.stage as stage
 from groqflow.common import printing
 import groqflow.common.build as build
+import mlabench.filesystem as filesystem
 
 
 @dataclass
@@ -28,7 +29,6 @@ class ModelInfo:
     status_message: str = ""
     status_message_color: printing.Colors = printing.Colors.ENDC
     is_target: bool = False
-    check_ops: bool = False
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
 
@@ -59,7 +59,7 @@ check_ops_keras = stage.Sequence(
 )
 
 
-def clean_output_dir(output_dir: str = "~/.cache/groqflow") -> None:
+def clean_output_dir(output_dir: str = filesystem.DEFAULT_CACHE_DIR) -> None:
     """
     Delete all elements of the output directory that are not text files
     """

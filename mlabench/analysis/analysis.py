@@ -11,28 +11,35 @@ import dataclasses
 import pathlib
 from typing import Union, List, Dict
 from types import FrameType, TracebackType
+from enum import Enum
 import torch
 import transformers
 import tensorflow as tf
 import mlabench.analysis.status as status
 import mlabench.analysis.util as util
 from mlabench.analysis.util import ModelInfo
-import mlabench.benchmark.cloud as cloud
+from mlabench.api import benchit, exportit
+from mlabench import filesystem
 from groqflow.common import printing
 import groqflow.common.build as build
 import groqflow.common.exceptions as exp
-from groqflow import groqit
 import groqflow
+
+
+class Action(Enum):
+    ANALYZE = "analyze"
+    BUILD = "build"
+    BENCHMARK = "benchmark"
 
 
 @dataclasses.dataclass
 class TracerArgs:
     input: str
+    device: List[str]
+    actions: List[Action]
     labels: List[str]
     lean_cache: bool
     targets: List[str]
-    check_ops: bool
-    build: bool
     max_depth: int
     cache_dir: str
     rebuild: str
@@ -42,8 +49,6 @@ class TracerArgs:
     groqview: bool
     models_found: Dict[str, ModelInfo] = dataclasses.field(default_factory=dict)
     script_name: str = None
-    benchmark_gpu: bool = False
-    benchmark_cpu: bool = False
 
     @functools.cached_property
     def torch_activations(self) -> List[str]:
@@ -53,11 +58,11 @@ class TracerArgs:
         return act
 
 
-def call_groqit(
+def call_benchit(
     model_inputs: dict, model_info: ModelInfo, tracer_args: TracerArgs
 ) -> None:
     """
-    Calls the groqit function from within the model forward function
+    Calls the benchit function from within the model forward function
     """
 
     # Update status to "computing"
@@ -88,17 +93,8 @@ def call_groqit(
                 inputs[all_args[i]] = args[i]
     model_info.inputs = inputs
 
-    # Prepare other groqit parameters
-    if model_info.check_ops:
-        if model_info.model_type == build.ModelType.PYTORCH:
-            seq = util.check_ops_pytorch
-        elif model_info.model_type == build.ModelType.KERAS:
-            seq = util.check_ops_keras
-    else:
-        seq = None
-
     cache_dir = (
-        build.DEFAULT_CACHE_DIR
+        filesystem.DEFAULT_CACHE_DIR
         if tracer_args.cache_dir is None
         else tracer_args.cache_dir
     )
@@ -120,23 +116,22 @@ def call_groqit(
         fp.write(" ".join(labels))
 
     try:
-        groqit(
+        benchit(
             model_info.model,
             inputs,
-            sequence=seq,
+            device=tracer_args.device,
             build_name=build_name,
-            monitor=True,
-            rebuild=tracer_args.rebuild,
+            # monitor=True,
+            # rebuild=tracer_args.rebuild,
             cache_dir=cache_dir,
-            compiler_flags=tracer_args.compiler_flags,
-            assembler_flags=tracer_args.assembler_flags,
-            num_chips=tracer_args.num_chips,
-            groqview=tracer_args.groqview,
+            # compiler_flags=tracer_args.compiler_flags,
+            # assembler_flags=tracer_args.assembler_flags,
+            # num_chips=tracer_args.num_chips,
+            # groqview=tracer_args.groqview,
+            build_only=Action.BENCHMARK not in tracer_args.actions,
         )
-        if model_info.check_ops:
-            model_info.status_message = "All ops supported!"
-        else:
-            model_info.status_message = "Model successfully built!"
+
+        model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
     except groqflow.common.exceptions.GroqitStageError:
@@ -146,9 +141,7 @@ def call_groqit(
                 load_state.info.opt_onnx_unsupported_ops
             )
         else:
-            model_info.status_message = (
-                "GroqIt Stage Errror: see log files for details."
-            )
+            model_info.status_message = "Build Error: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
 
     except groqflow.common.exceptions.GroqFlowError:
@@ -159,38 +152,8 @@ def call_groqit(
     # not possible, as the tested software continuously evolves.
     except Exception as e:  # pylint: disable=broad-except
         util.stop_stdout_forward()
-        model_info.status_message = f"Unknown GroqIt error: {e}"
+        model_info.status_message = f"Unknown benchit error: {e}"
         model_info.status_message_color = printing.Colors.WARNING
-
-    # Execute the models found on GPU for competitive benchmarking
-    if tracer_args.benchmark_gpu:
-        load_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
-        if not load_state.info.opt_onnx_exported:
-            raise exp.GroqFlowError(
-                "GPU benchmarking failed because ONNX file was not created for this model"
-            )
-        log_execute_path = os.path.join(
-            build.output_dir(load_state.cache_dir, load_state.config.build_name),
-            "log_gpu_execute.txt",
-        )
-        # Due to tail latency issues, gpus runs are executed for 100 iterations and averaged
-        gpu_iterations = 100
-        cloud.execute_gpu_remotely(load_state, log_execute_path, gpu_iterations)
-
-    # Execute the models found on CPU for competitive benchmarking
-    if tracer_args.benchmark_cpu:
-        load_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
-        if not load_state.info.opt_onnx_exported:
-            raise exp.GroqFlowError(
-                "CPU benchmarking failed because ONNX file was not created for this model"
-            )
-        log_execute_path = os.path.join(
-            build.output_dir(load_state.cache_dir, load_state.config.build_name),
-            "log_cpu_execute.txt",
-        )
-        # Due to tail latency issues, cpus runs are executed for 100 iterations and averaged
-        cpu_iterations = 100
-        cloud.execute_cpu_remotely(load_state, log_execute_path, cpu_iterations)
 
     # Add metadata and clean cache if needed
     output_dir = os.path.join(cache_dir, build_name)
@@ -236,8 +199,7 @@ def store_model_info(
             hash=model_hash,
             parent_hash=parent_hash,
             is_target=model_hash in tracer_args.targets or tracer_args.targets == [],
-            check_ops=tracer_args.check_ops,
-            build_model=tracer_args.build,
+            build_model=Action.BUILD in tracer_args.actions,
             model_type=model_type,
         )
 
@@ -376,9 +338,9 @@ def explore_frame(
             if (
                 model_info.executed == 1
                 and model_info.is_target
-                and (model_info.check_ops or model_info.build_model)
+                and (model_info.build_model)
             ):
-                call_groqit(
+                call_benchit(
                     model_inputs=[args, kwargs],
                     model_info=model_info,
                     tracer_args=tracer_args,
@@ -477,26 +439,6 @@ def main():
     # You must be in the same directory as the Python file to run this script
     parser.add_argument("input", help="Input .py file")
 
-    # The user may perform one of the following operations
-    #   check_ops:  Checks whether all operations of the found models are supported
-    #               by Groq's compiler.
-    #   build:      Checks whether all operations of the found models are supported
-    #               by Groq's compiler, and attempts to build the found models
-    #               using groqit().
-    #
-    # Notes:
-    #   * If none of the above arguments are provided, autogroq will simply list
-    #     all models that have been found within the script. This list includes
-    #     information such as the name, hash, and size of each model.
-    #   * Those operations will target all models found within the script unless
-    #     specific models are selected. The user may select specific models by
-    #     providing the hashes of the models to be targeted.
-    #     Example: autogroq input.py --build a76awg8w
-    #   * Models must be called at least once in the input script.
-    mutually_exclusive = parser.add_mutually_exclusive_group()
-    mutually_exclusive.add_argument("--check-ops", type=str, nargs="*")
-    mutually_exclusive.add_argument("--build", type=str, nargs="*")
-
     # max_depth is used to look for models instantiated within models
     # This might be useful to analyze which sub-components of a lager
     # model are supported by groqit().
@@ -513,44 +455,35 @@ def main():
     # Arguments of the input script (all together as a string)
     parser.add_argument("--input-args", type=str, nargs=1)
 
-    # Argument to enable competitive GPU benchmarking
-    parser.add_argument("--benchmark-gpu", action="store_true")
-    parser.set_defaults(benchmark_gpu=False)
-
-    # Argument to enable competitive CPU benchmarking
-    parser.add_argument("--benchmark-cpu", action="store_true")
-    parser.set_defaults(benchmark_cpu=False)
-
     # Deletes all files generated by groqit() except logs and metadata
     # This is used to keep disk utilization low while also keeping track
     # of groqit's ability to build a given model.
     parser.add_argument("--lean-cache", action="store_true")
     parser.set_defaults(lean_cache=False)
 
+    # List of model hashes for autogroq to target
+    parser.add_argument("--targets", type=str, nargs="*", default=[])
+
+    # Device to benchmark on. Only takes effect if
+    # `Action.Benchmark in actions`
+    parser.add_argument("--device", type=str, default="x86")
+
+    parser.add_argument("--analyze-only", action="store_true")
+
     autogroq_args = parser.parse_args()
 
-    # Pack the results of check_ops and build in the targets variable
-    # This is used to simplify autogroq's code
-    if autogroq_args.check_ops is not None:
-        setattr(autogroq_args, "targets", autogroq_args.check_ops)
-    elif autogroq_args.build is not None:
-        setattr(autogroq_args, "targets", autogroq_args.build)
+    if autogroq_args.analyze_only:
+        actions = [Action.ANALYZE]
     else:
-        setattr(autogroq_args, "targets", [])
-
-    # Convert check_ops and build to booleans
-    autogroq_args.check_ops = autogroq_args.check_ops is not None
-    autogroq_args.build = autogroq_args.build is not None
+        actions = [Action.ANALYZE, Action.BUILD]
 
     tracer_args = TracerArgs(
         input=autogroq_args.input,
+        device=autogroq_args.device,
+        actions=actions,
         labels=autogroq_args.labels,
         lean_cache=autogroq_args.lean_cache,
-        benchmark_gpu=autogroq_args.benchmark_gpu,
-        benchmark_cpu=autogroq_args.benchmark_cpu,
         targets=autogroq_args.targets,
-        check_ops=autogroq_args.check_ops,
-        build=autogroq_args.build,
         max_depth=autogroq_args.max_depth,
         cache_dir=autogroq_args.cache_dir,
         rebuild="always",

@@ -3,6 +3,13 @@ import pathlib
 import groqflow.common.printing as printing
 import groqflow.common.cache as cache
 
+# Allow an environment variable to override the default
+# location for the build cache
+if os.environ.get("MLABENCH_CACHE_DIR"):
+    DEFAULT_CACHE_DIR = os.environ.get("MLABENCH_CACHE_DIR")
+else:
+    DEFAULT_CACHE_DIR = os.path.expanduser("~/.cache/mlabench")
+
 
 def full_model_path(corpora_dir, model_name):
     """

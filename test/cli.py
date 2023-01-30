@@ -7,6 +7,7 @@ import io
 from contextlib import redirect_stdout
 from mlabench.cli import main as benchitcli
 import mlabench.report as report
+from mlabench import filesystem
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 
@@ -73,7 +74,7 @@ print(f"Pytorch_outputs: {pytorch_outputs}")
 }
 
 corpus_dir = "test_corpus"
-os.makedirs(corpus_dir)
+os.makedirs(corpus_dir, exist_ok=True)
 
 for key, value in test_scripts_dot_py.items():
     model_path = os.path.join(corpus_dir, key)
@@ -92,7 +93,7 @@ def assert_success_of_builds(test_script_files: List[str]):
     # TODO: simplify this code when
     # https://git.groq.io/code/Groq/-/issues/16110
     # is done
-    builds = cache.get_all(build.DEFAULT_CACHE_DIR)
+    builds = cache.get_all(filesystem.DEFAULT_CACHE_DIR)
 
     for test_script in test_script_files:
         test_script_name = strip_dot_py(test_script)
@@ -109,7 +110,7 @@ def assert_success_of_builds(test_script_files: List[str]):
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
-        cache.rmdir(build.DEFAULT_CACHE_DIR)
+        cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
 
         return super().setUp()
 
@@ -199,7 +200,7 @@ class Testing(unittest.TestCase):
         # the summary csv
 
         summary_csv_path = os.path.join(
-            build.DEFAULT_CACHE_DIR, report.summary_filename
+            filesystem.DEFAULT_CACHE_DIR, report.summary_filename
         )
         with open(summary_csv_path, "r", encoding="utf8") as summary_csv:
             summary_csv_contents = summary_csv.read()

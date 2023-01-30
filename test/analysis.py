@@ -4,7 +4,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import numpy as np
-import groqflow.common.build as build
+import mlabench.filesystem as filesystem
 import groqflow.common.cache as cache
 
 # We generate a corpus on to the filesystem during the test
@@ -164,66 +164,53 @@ def run_analysis(args):
     output = subprocess.check_output(args, encoding="UTF-8")
 
     # Process outputs
-    output = output[output.rfind("Groqable models found") :]
+    output = output[output.rfind("Models found") :]
     models_executed = output.count("(executed")
-    models_checked = output.count("All ops supported!")
     models_built = output.count("Model successfully built!")
-    return models_executed, models_checked, models_built
+    return models_executed, 0, models_built
 
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
-        cache.rmdir(build.DEFAULT_CACHE_DIR)
+        cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
         return super().setUp()
 
     def test_01_basic(self):
-        pytorch_output = run_analysis(["analysis-cli", "linear_pytorch.py"])
+        pytorch_output = run_analysis(
+            ["autogroq", "linear_pytorch.py", "--analyze-only"]
+        )
         assert np.array_equal(pytorch_output, (1, 0, 0))
 
     def test_02_basic_keras(self):
-        keras_output = run_analysis(["analysis-cli", "linear_keras.py"])
+        keras_output = run_analysis(["autogroq", "linear_keras.py", "--analyze-only"])
         assert np.array_equal(keras_output, (1, 0, 0))
 
     def test_03_depth(self):
         # Depth is only tested for Pytorch, since Keras has no max_depth support
-        output = run_analysis(["analysis-cli", "linear_pytorch.py", "-d1"])
+        output = run_analysis(
+            ["autogroq", "linear_pytorch.py", "-d1", "--analyze-only"]
+        )
         assert np.array_equal(output, (2, 0, 0))
 
-    def test_04_check_ops(self):
+    def test_04_build(self):
         output = run_analysis(
-            ["analysis-cli", "linear_pytorch.py", "-d1", "--check-ops"]
-        )
-        assert np.array_equal(output, (2, 2, 0))
-
-    def test_05_check_ops_keras(self):
-        output = run_analysis(["analysis-cli", "linear_keras.py", "--check-ops"])
-        assert np.array_equal(output, (1, 1, 0))
-
-    def test_06_target(self):
-        output = run_analysis(
-            ["analysis-cli", "linear_pytorch.py", "-d1", "--check-ops", "60931adb"]
-        )
-        assert np.array_equal(output, (2, 1, 0))
-
-    def test_07_build(self):
-        output = run_analysis(
-            ["analysis-cli", "linear_pytorch.py", "-d1", "--build", "60931adb"]
+            ["autogroq", "linear_pytorch.py", "-d1", "--targets", "60931adb"]
         )
         assert np.array_equal(output, (2, 0, 1))
 
-    def test_08_build_keras(self):
-        output = run_analysis(["analysis-cli", "linear_keras.py", "--build"])
+    def test_05_build_keras(self):
+        output = run_analysis(["autogroq", "linear_keras.py"])
         assert np.array_equal(output, (1, 0, 1))
 
-    def test_09_cache(self):
+    def test_06_cache(self):
         model_hash = "60931adb"
         cache_dir = "cache-dir"
         run_analysis(
             [
-                "analysis-cli",
+                "autogroq",
                 "linear_pytorch.py",
                 "-d1",
-                "--check-ops",
+                "--targets",
                 model_hash,
                 "--cache-dir",
                 cache_dir,
@@ -235,37 +222,38 @@ class Testing(unittest.TestCase):
         metadata_found = len([x for x in files if ".txt" in x]) > 0
         assert metadata_found and cache_is_lean
 
-    def test_10_args(self):
+    def test_7_args(self):
         output = subprocess.check_output(
             [
-                "analysis-cli",
+                "autogroq",
                 "linear_pytorch.py",
                 "-d1",
                 "--input-args",
                 "--my-arg test_arg",
+                "--analyze-only",
             ],
             encoding="UTF-8",
         )
         assert "Received arg test_arg" in output
 
-    def test_11_pipeline(self):
-        output = run_analysis(["analysis-cli", "pipeline.py"])
+    def test_8_pipeline(self):
+        output = run_analysis(["autogroq", "pipeline.py", "--analyze-only"])
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_12_activation(self):
-        output = run_analysis(["analysis-cli", "activation.py"])
+    def test_9_activation(self):
+        output = run_analysis(["autogroq", "activation.py", "--analyze-only"])
         assert np.array_equal(output, (0, 0, 0))
 
-    def test_13_encoder_decoder(self):
-        output = run_analysis(["analysis-cli", "encoder_decoder.py"])
+    def test_10_encoder_decoder(self):
+        output = run_analysis(["autogroq", "encoder_decoder.py", "--analyze-only"])
         assert np.array_equal(output, (1, 0, 0))
 
     # Enable this test after the GPU machine boot up has been automated
-    # def test_14_benchmark_gpu(self):
+    # def test_11_benchmark_gpu(self):
     #     cache_dir = "cache-dir"
     #     run_analysis(
     #         [
-    #             "analysis-cli",
+    #             "autogroq",
     #             "linear_pytorch.py",
     #             "--cache-dir",
     #             cache_dir,
