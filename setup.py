@@ -17,7 +17,7 @@ setup(
     ),
     install_requires=[
         "transformers",
-        # "groqflow>=2.5.0",
+        "groqflow>=2.5.2",
     ],
     classifiers=[],
     entry_points={
