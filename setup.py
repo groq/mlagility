@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open("groqflow/version.py", encoding="utf-8") as fp:
+with open("mlabench/version.py", encoding="utf-8") as fp:
     version = fp.read().split('"')[1]
 
 setup(
