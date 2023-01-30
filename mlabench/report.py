@@ -436,7 +436,10 @@ def summary_spreadsheet(args):
         )
 
         # Get the performance estimate for the build
-        if state.build_status == build.Status.SUCCESSFUL_BUILD and "assemble" in state.info.completed_build_stages:
+        if (
+            state.build_status == build.Status.SUCCESSFUL_BUILD
+            and "assemble" in state.info.completed_build_stages
+        ):
             gmodel = groqmodel.load(state.config.build_name, args.cache_dir)
             estimated_perf = gmodel.estimate_performance()
             estimated_latency = estimated_perf.latency

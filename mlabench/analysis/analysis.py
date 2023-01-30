@@ -18,7 +18,7 @@ import tensorflow as tf
 import mlabench.analysis.status as status
 import mlabench.analysis.util as util
 from mlabench.analysis.util import ModelInfo
-from mlabench.api import benchit, exportit
+from mlabench.api import benchit
 from mlabench import filesystem
 from groqflow.common import printing
 import groqflow.common.build as build
