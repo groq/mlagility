@@ -128,7 +128,7 @@ class Results:
 
     parameters: ResultsColumn = ResultsColumn(
         "Parameters",
-        "Number of constant elements (ie, trained parameters) in the " "model.",
+        "Number of constant elements (ie, trained parameters) in the model.",
     )
 
     inputs: ResultsColumn = ResultsColumn(
@@ -152,7 +152,7 @@ class Results:
 
     chips_used: ResultsColumn = ResultsColumn(
         "# Chips Used",
-        "Actual number of GroqChip processors targeted by the compilation " "process.",
+        "Actual number of GroqChip processors targeted by the compilation process.",
     )
 
     estimated_groq_latency: ResultsColumn = ResultsColumn(
