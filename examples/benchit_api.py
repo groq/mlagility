@@ -1,5 +1,5 @@
 import torch
-from mlabench import benchit
+from mlagility import benchit
 
 torch.manual_seed(0)
 
