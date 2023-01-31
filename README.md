@@ -30,7 +30,7 @@ Tests are defined in `tests/` and run automatically on each PR, as defined in ou
 
 We don't have any fancy testing framework set up yet. If you want to run tests locally:
 - Run `python test.py` for each test script in `test/`
-- Run `pylint mlabench --rcfile .pylintrc` from the repo root
+- Run `pylint src --rcfile .pylintrc` from the repo root
 - __Note__: these commands will only succeed if you have already `pip install`ed the `mlagility` package
 
 ### Versioning
