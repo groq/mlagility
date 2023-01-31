@@ -28,6 +28,11 @@ Please have a discussion with the team before making major changes.
 
 Tests are defined in `tests/` and run automatically on each PR, as defined in our [testing action](https://github.com/groq/mlagility/blob/main/.github/workflows/test.yml). This action performs both linting and unit testing and must succeed before code can be merged.
 
+We don't have any fancy testing framework set up yet. If you want to run tests locally:
+- Run `python test.py` for each test script in `test/`
+- Run `pylint mlabench --rcfile .pylintrc` from the repo root
+- __Note__: these commands will only succeed if you have already `pip install`ed the `mlagility` package
+
 ### Versioning
 
 We use semantic versioning, as described in [versioning.md](https://github.com/groq/mlagility/blob/main/docs/versioning.md).
