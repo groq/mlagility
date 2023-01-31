@@ -1,3 +1,15 @@
+<table>
+<tr>
+<td>⚠️</td>
+<td>
+<strong>NOTE:</strong> Welcome to MLAgility. Our team is hard at work to bring you the best experience possible. However, as with any work in progress, there may be bugs, unfinished features, and other issues that need to be addressed. We appreciate your patience and understanding as we work to make this project the best it can be. Stay tuned for updates and improvements in the near future.
+Feel free to open issues with any early feedback.
+</td>
+<td>⚠️</td>
+</tr>
+</table>
+
+----
 # The MLAgility Project
 
 MLAgility is on a mission to create and benchmark an enormous corpus of deep learning models. All of the model scripts, benchmarking code will be published as open source software and the performance data will be available on the open web as a dashboard on a Huggingface Space (coming soon).
