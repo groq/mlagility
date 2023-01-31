@@ -6,7 +6,7 @@ import groqflow.justgroqit.stage as stage
 from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
 import groqflow.justgroqit.hummingbird as hummingbird
-from mlabench.benchmark import gpumodel, cpumodel
+from mlagility.benchmark import gpumodel, cpumodel
 
 
 class SuccessStage(stage.GroqitStage):

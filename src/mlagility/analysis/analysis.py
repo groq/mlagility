@@ -15,11 +15,11 @@ from enum import Enum
 import torch
 import transformers
 import tensorflow as tf
-import mlabench.analysis.status as status
-import mlabench.analysis.util as util
-from mlabench.analysis.util import ModelInfo
-from mlabench.api import benchit
-from mlabench import filesystem
+import mlagility.analysis.status as status
+import mlagility.analysis.util as util
+from mlagility.analysis.util import ModelInfo
+from mlagility.api import benchit
+from mlagility import filesystem
 from groqflow.common import printing
 import groqflow.common.build as build
 import groqflow.common.exceptions as exp
@@ -121,13 +121,7 @@ def call_benchit(
             inputs,
             device=tracer_args.device,
             build_name=build_name,
-            # monitor=True,
-            # rebuild=tracer_args.rebuild,
             cache_dir=cache_dir,
-            # compiler_flags=tracer_args.compiler_flags,
-            # assembler_flags=tracer_args.assembler_flags,
-            # num_chips=tracer_args.num_chips,
-            # groqview=tracer_args.groqview,
             build_only=Action.BENCHMARK not in tracer_args.actions,
         )
 

@@ -1,8 +1,8 @@
-# MLABench User Guide
+# MLAgility User Guide
 
-MLAgility Benchmarking (MLABench) is a Python package that provides a CLI, `benchit`, and API, `benchit()` for benchmarking machine learning and deep learning models. This document reviews the functionality provided by MLABench.
+The MLAgility Benchmarking and Tools package provides a CLI, `benchit`, and Python API, `benchit()` for benchmarking machine learning and deep learning models. This document reviews the functionality provided by MLAgility.
 
-MLABench currently supports the following combinations of runtimes and devices:
+MLAgility's tools currently support the following combinations of runtimes and devices:
 
 <span id="devices-runtimes-table">
 
@@ -24,12 +24,12 @@ MLABench currently supports the following combinations of runtimes and devices:
 
 ## Just Benchmark It
 
-The simplest way to get started with MLABench is to use our `benchit` command line interface (CLI), which can take any python script that instantiates and calls PyTorch/Keras model(s) and benchmark them on any supported device and runtime.
+The simplest way to get started with MLAgility's tools is to use our `benchit` command line interface (CLI), which can take any python script that instantiates and calls PyTorch/Keras model(s) and benchmark them on any supported device and runtime.
 
 On your command line:
 
 ```
-pip install mlabench
+pip install mlagility
 benchit your_script.py --device x86
 ```
 
@@ -57,7 +57,7 @@ The [build](#build) and [benchmark](#benchmark) functionality provided by the `b
 For example, the following script:
 
 ```python
-from mlabench import benchit
+from mlagility import benchit
 
 model = YourModel()
 results = model(**inputs)
@@ -82,7 +82,7 @@ Will print an output like this:
 
 ## Definitions
 
-MLABench uses the following definitions throughout.
+MLAgility uses the following definitions throughout.
 
 ### Model
 
@@ -132,7 +132,7 @@ benchit example.py --analyze-only
 
 **Build** is the process by which the `benchit()` API consumes a [model](#model) and produces ONNX files, Groq executables, and other artifacts needed for benchmarking.
 
-We refer to this collection of artifacts as the `build directory` and store each build in the MLABench `cache` for later use.
+We refer to this collection of artifacts as the `build directory` and store each build in the MLAgility `cache` for later use.
 
 We leverage ONNX files because of their broad compatibility with model frameworks (PyTorch, Keras, etc.), software (ONNX Runtime, TensorRT, Groq Compiler, etc.), and devices (CPUs, GPUs, GroqChip processors, etc.). You can learn more about ONNX [here](https://onnx.ai/).
 
@@ -150,7 +150,7 @@ The build functionality of `benchit` includes the following steps:
 * The model changed
 * The shape of the inputs changed
 * The arguments to `benchit` changed
-* MLABench was updated to a new, incompatible version
+* MLAgility was updated to a new, incompatible version
 
 ### Benchmark
 
@@ -163,11 +163,11 @@ By default, `benchit()` will run the model 100 times to collect the following st
 
 ## Devices and Runtimes
 
-MLABench can be used to benchmark a model across a variety of runtimes and devices, as long as the device is available and the device/runtime combination is supported by MLABench.
+MLAgility can be used to benchmark a model across a variety of runtimes and devices, as long as the device is available and the device/runtime combination is supported by MLAgility.
 
 ### Available Devices
 
-MLABench supports benchmarking on both locally installed devices, as well as devices on remote machines (e.g., cloud VMs).
+MLAgility supports benchmarking on both locally installed devices, as well as devices on remote machines (e.g., cloud VMs).
 
 If you are using a remote machine, it must:
 - be running
@@ -191,9 +191,9 @@ The following arguments are used to configure `benchit` to target a specific dev
   - Typically, this will point to a remote VM where a target device is installed.
   - Also available as an API argument, `benchit(ip=...,)`.
 - `--device TYPE` is the type of device to be used.
-  - _Note_: MLABench is flexible with respect to which specific devices can be used, as long as they meet the requirements in the [Devices and Runtimes table](#devices-runtimes-table).
+  - _Note_: MLAgility is flexible with respect to which specific devices can be used, as long as they meet the requirements in the [Devices and Runtimes table](#devices-runtimes-table).
     - The `benchit()` API will simply use whatever device, of the given `TYPE`, is available on the machine specified by `--ip`.
-    - For example, if you specify `--device nvidia` and an `IP` that corresponds to a VM with an Nvidia A100 40GB installed, then MLABench will use that Nvidia A100 40GB device.
+    - For example, if you specify `--device nvidia` and an `IP` that corresponds to a VM with an Nvidia A100 40GB installed, then MLAgility will use that Nvidia A100 40GB device.
   - Valid values include:
     - `x86` (default): Intel and AMD x86 CPUs.
     - `nvidia`: Nvidia GPUs.
@@ -216,7 +216,7 @@ The following arguments are used to configure `benchit` to target a specific dev
 
 The default usage of `benchit` is to directly provide it with a python script, for example `benchit example.py --device x86`. However, `benchit` also supports the usage `benchit COMMAND`, to accomplish some additional tasks.
 
-_Note_: Some of these tasks have to do with the MLABench `cache`, which stores the `build directories` (see [Build](#build)).
+_Note_: Some of these tasks have to do with the MLAgility `cache`, which stores the `build directories` (see [Build](#build)).
 
 The commands are:
 - `benchmark` (default command): benchmark the model(s) in one or more scripts
@@ -242,7 +242,7 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
   - Not available as an API argument.
 - `--lean-cache` Delete all build artifacts except for log files after the build
 - Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` MLABench build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlabench)
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility)
   - Also available as an API argument, `benchit(cache_dir=Str, ...)`.
 - `--rebuild REBUILD` Sets a cache policy that decides whether to load or rebuild a cached build.
   - Takes one of the following values:
@@ -279,7 +279,7 @@ Finally, you may find yourself wanting to run a subset of the benchmarking comma
 
 `delete` presents the following options:
 
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlabench)
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 - `-b BUILD_NAMES [BUILD_NAMES ...], --build-names BUILD_NAMES [BUILD_NAMES ...]` Name(s) of the specific builds to be deleted, within the cache directory
 - `--all` Delete all builds in the cache directory
 
@@ -289,7 +289,7 @@ _Note_: `delete` is not available as an API.
 
 `list` presents the following options:
 
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlabench)
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
 _Note_: `list` is not available as an API.
 
@@ -297,7 +297,7 @@ _Note_: `list` is not available as an API.
 
 `report` presents the following options:
 
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlabench)
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
 _Note_: `report` is not available as an API.
 

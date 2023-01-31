@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import json
 import numpy as np
 import torch
-import mlabench.benchmark.cloud as cloud
+import mlagility.benchmark.cloud as cloud
 import groqflow.common.printing as printing
 import groqflow.common.build as build
 

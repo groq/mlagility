@@ -2,7 +2,7 @@ import os
 from typing import Dict
 from typing import Union
 from groqflow.common import printing
-from mlabench.analysis.util import ModelInfo
+from mlagility.analysis.util import ModelInfo
 import groqflow.common.build as build
 
 

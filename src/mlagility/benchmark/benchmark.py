@@ -5,9 +5,9 @@ import pathlib
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
 import groqflow.common.build
-import mlabench.slurm as slurm
-import mlabench.filesystem as filesystem
-from mlabench.analysis.analysis import evaluate_script, TracerArgs, Action
+import mlagility.slurm as slurm
+import mlagility.filesystem as filesystem
+from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 
 
 def main(args):

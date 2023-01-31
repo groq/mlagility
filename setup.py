@@ -1,19 +1,18 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
-with open("mlabench/version.py", encoding="utf-8") as fp:
+with open("src/mlagility/version.py", encoding="utf-8") as fp:
     version = fp.read().split('"')[1]
 
 setup(
-    name="mlabench",
+    name="mlagility",
     version=version,
-    description="MLAgility Benchmarking Tools",
-    url="https://github.com/groq/mlabench",
+    description="MLAgility Benchmark and Tools",
+    url="https://github.com/groq/mlagility",
     author="Groq",
     author_email="sales@groq.com",
     license="MIT",
-    packages=find_packages(
-        exclude=["*.__pycache__.*"],
-    ),
+    package_dir={"": "src"},
+    packages=["mlagility"],
     install_requires=[
         "transformers",
         "groqflow>=2.5.2",
@@ -21,8 +20,8 @@ setup(
     classifiers=[],
     entry_points={
         "console_scripts": [
-            "benchit=mlabench:benchitcli",
-            "autogroq=mlabench:autogroq",
+            "benchit=mlagility:benchitcli",
+            "autogroq=mlagility:autogroq",
         ]
     },
     python_requires="==3.8.*",

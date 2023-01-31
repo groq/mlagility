@@ -7,7 +7,7 @@ import groqflow.common.printing as printing
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 from groqflow import groqmodel
-from mlabench.benchmark import gpumodel
+from mlagility.benchmark import gpumodel
 
 
 def _successCleanup(item):
