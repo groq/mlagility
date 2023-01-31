@@ -2,8 +2,8 @@ import os
 from typing import Dict
 from typing import Union
 from groqflow.common import printing
-from mlagility.analysis.util import ModelInfo
 import groqflow.common.build as build
+from mlagility.analysis.util import ModelInfo
 
 
 def update(models_found: Dict[str, ModelInfo], script_name: str) -> None:

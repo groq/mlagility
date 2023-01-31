@@ -3,9 +3,9 @@ from dataclasses import dataclass
 import json
 import numpy as np
 import torch
-import mlagility.benchmark.cloud as cloud
 import groqflow.common.printing as printing
 import groqflow.common.build as build
+import mlagility.benchmark.cloud as cloud
 
 
 @dataclass

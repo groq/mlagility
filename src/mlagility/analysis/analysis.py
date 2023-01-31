@@ -15,15 +15,15 @@ from enum import Enum
 import torch
 import transformers
 import tensorflow as tf
+from groqflow.common import printing
+import groqflow.common.build as build
+import groqflow.common.exceptions as exp
+import groqflow
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 from mlagility.analysis.util import ModelInfo
 from mlagility.api import benchit
 from mlagility import filesystem
-from groqflow.common import printing
-import groqflow.common.build as build
-import groqflow.common.exceptions as exp
-import groqflow
 
 
 class Action(Enum):
