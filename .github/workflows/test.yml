@@ -29,7 +29,7 @@ jobs:
           if [ -f setup.py ]; then pip install -e .; fi
       - name: Lint with PyLint
         run: |
-          pylint mlabench --rcfile .pylintrc
+          pylint src --rcfile .pylintrc
       - name: Test with unittest
         run: |
           python test/cli.py
