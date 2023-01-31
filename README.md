@@ -29,9 +29,10 @@ Please have a discussion with the team before making major changes.
 Tests are defined in `tests/` and run automatically on each PR, as defined in our [testing action](https://github.com/groq/mlagility/blob/main/.github/workflows/test.yml). This action performs both linting and unit testing and must succeed before code can be merged.
 
 We don't have any fancy testing framework set up yet. If you want to run tests locally:
-- Activate a `conda` environment that has `mlagility` and `pylint` installed
-- Run `python test.py` for each test script in `test/`
+- Activate a `conda` environment that has `mlagility` (this package) installed
+- Run `conda install pylint` if you haven't already (other pylint installs will give you a lot of import warnings)
 - Run `pylint src --rcfile .pylintrc` from the repo root
+- Run `python test.py` for each test script in `test/`
 
 ### Versioning
 
