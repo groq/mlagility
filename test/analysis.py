@@ -167,7 +167,6 @@ def run_analysis(args):
     output = output[output.rfind("Models found") :]
     models_executed = output.count("(executed")
     models_built = output.count("Model successfully built!")
-    print(models_executed, 0, models_built)
     return models_executed, 0, models_built
 
 
