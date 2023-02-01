@@ -126,12 +126,15 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
 
     if not all((ip, username)):
         # TODO (ramkrishna2910): Enabling localhost execution will be handled in a separate MR
-        print("User is responsible for ensuring the remote server has python>=3.8 and docker>=20.10 installed")
+        print(
+        "User is responsible for ensuring the remote server has python>=3.8 \
+            and docker>=20.10 installed"
+        )
         print("Provide your instance IP and hostname below:")
 
         ip = ip or input(f"{accelerator} instance ASA name (Do not use IP): ")
         username = username or input(f"Username for {ip}: ")
-        
+
         if not username or not ip:
             raise exp.GroqModelRuntimeError("Username and hostname are required")
 
