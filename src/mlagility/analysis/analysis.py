@@ -48,8 +48,11 @@ class TracerArgs:
     num_chips: int
     groqview: bool
     models_found: Dict[str, ModelInfo] = dataclasses.field(default_factory=dict)
-    labels: Dict[str, str] = dataclasses.field(default_factory=dict)
     script_name: str = None
+
+    @functools.cached_property
+    def labels(self) -> Dict[str, str]:
+        return labels.load_from_file(self.input)
 
     @functools.cached_property
     def torch_activations(self) -> List[str]:
@@ -451,9 +454,6 @@ def main():
 
     autogroq_args = parser.parse_args()
 
-    # Extract script labels so we can later save them as part of cache
-    script_labels = labels.load_from_file(autogroq_args.input)
-
     if autogroq_args.analyze_only:
         actions = [Action.ANALYZE]
     else:
@@ -463,7 +463,6 @@ def main():
         input=autogroq_args.input,
         device=autogroq_args.device,
         actions=actions,
-        labels=script_labels,
         lean_cache=autogroq_args.lean_cache,
         targets=autogroq_args.targets,
         max_depth=autogroq_args.max_depth,
