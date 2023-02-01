@@ -1,3 +1,4 @@
+# labels: test_group::selftest license::mit framework:pytorch tags::selftest,small
 import torch
 
 torch.manual_seed(0)

@@ -1,3 +1,4 @@
+# labels: test_group::selftest license::mit framework:keras tags::selftest,small
 import tensorflow as tf
 
 tf.random.set_seed(0)
