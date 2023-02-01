@@ -7,7 +7,6 @@ import yaml
 import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
-import groqflow.common.sdk_helpers as sdk
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -126,15 +125,14 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     ip, username = load_remote_config(accelerator)
 
     if not all((ip, username)):
-        # TODO (ramkrishna2910): Enabling localhost execution will be 
-        # handled in a separate MR
+        # TODO (ramkrishna2910): Enabling localhost execution will be handled in a separate MR
         print("User is responsible for ensuring the remote server has python>=3.8 and docker>=20.10 installed")
         print("Provide your instance IP and hostname below:")
 
         ip = ip or input(f"{accelerator} instance ASA name (Do not use IP): ")
         username = username or input(f"Username for {ip}: ")
         
-        if not username:
+        if not username or not ip:
             raise exp.GroqModelRuntimeError("Username and hostname are required")
 
         # Store information on yaml file
@@ -144,7 +142,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
 
 
 def setup_gpu_host(client) -> None:
-    # Make sure at least one GPU is available remotely
+    # Check if at least one NVIDIA GPU is available remotely
     stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
     if stdout == "" or exit_code == 1:
         msg = "No NVIDIA GPUs available on the remote machine"
@@ -155,6 +153,20 @@ def setup_gpu_host(client) -> None:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.put(f"{dir_path}/execute-gpu.py", "mlagility_remote_cache/execute-gpu.py")
+
+
+def setup_cpu_host(client) -> None:
+    # Check if x86_64 CPU is available remotely
+    stdout, exit_code = exec_command(client, "uname -i")
+    if stdout != "x86_64" or exit_code == 1:
+        msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
+        raise exp.GroqModelRuntimeError(msg)
+
+    # Transfer common files to host
+    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with MySFTPClient.from_transport(client.get_transport()) as s:
+        s.put(f"{dir_path}/execute-cpu.py", "mlagility_remote_cache/execute-cpu.py")
 
 
 def setup_connection(accelerator: str) -> paramiko.SSHClient:
@@ -234,20 +246,6 @@ def execute_gpu_remotely(
         s.remove(remote_errors_file)
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
-
-
-def setup_cpu_host(client) -> None:
-    # Check if x86_64 CPU is available remotely
-    stdout, exit_code = exec_command(client, "uname -i")
-    if stdout != "x86_64" or exit_code == 1:
-        msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-        raise exp.GroqModelRuntimeError(msg)
-
-    # Transfer common files to host
-    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute-cpu.py", "mlagility_remote_cache/execute-cpu.py")
 
 
 def execute_cpu_remotely(
