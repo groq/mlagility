@@ -1,3 +1,23 @@
+"""
+This model script contains a model, pytorch_model, which has
+two sub-modules, fc and fc2. You can use it to experiment with
+the --max-depth option, which analyzes/builds/benchmarks sub-modules
+of any modules in the top-level script.
+
+You can try it with:
+
+benchit max_depth.py --max-depth 1
+
+You should see data for pytorch_model, fc, and fc2.
+
+Meanwhile, if you were to run with the command:
+
+benchit max_depth.py --max-depth 0
+
+Then you will only see data for pytorch_model.
+
+"""
+
 import torch
 
 torch.manual_seed(0)
@@ -24,4 +44,4 @@ inputs = {"x": torch.rand(input_size)}
 pytorch_outputs = pytorch_model(**inputs)
 
 # Print results
-print(f"Pytorch_outputs: {pytorch_outputs}")
+print(f"pytorch_outputs: {pytorch_outputs}")
