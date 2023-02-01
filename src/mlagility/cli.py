@@ -355,7 +355,7 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        if sys.argv[1] not in subparsers.choices.keys() and sys.argv[1].endswith(".py"):
+        if sys.argv[1] not in subparsers.choices.keys() and ".py" in sys.argv[1]:
             sys.argv.insert(1, "-i")
             sys.argv.insert(1, "benchmark")
 
