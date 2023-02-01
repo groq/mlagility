@@ -7,6 +7,7 @@ import groqflow.common.exceptions as exceptions
 import groqflow.common.build
 import mlagility.slurm as slurm
 import mlagility.filesystem as filesystem
+import mlagility.helpers.labels as labels
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 
 
@@ -88,7 +89,7 @@ def main(args):
 
                 tracer_args = TracerArgs(
                     input=script,
-                    labels=None,
+                    labels=labels.load_from_file(script),
                     lean_cache=args.lean_cache,
                     targets=[],
                     max_depth=args.max_depth,

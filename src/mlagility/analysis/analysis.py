@@ -38,7 +38,6 @@ class TracerArgs:
     input: str
     device: List[str]
     actions: List[Action]
-    labels: Dict[str, str]
     lean_cache: bool
     targets: List[str]
     max_depth: int
@@ -49,6 +48,7 @@ class TracerArgs:
     num_chips: int
     groqview: bool
     models_found: Dict[str, ModelInfo] = dataclasses.field(default_factory=dict)
+    labels: Dict[str, str] = dataclasses.field(default_factory=dict)
     script_name: str = None
 
     @functools.cached_property
@@ -102,7 +102,7 @@ def call_benchit(
     build_name = f"{tracer_args.script_name}_{model_info.hash}"
 
     # Save model labels
-    tracer_args.labels["class"] = f"{type(model_info.model).__name__}"
+    tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
     labels.save_to_cache(cache_dir, build_name, tracer_args.labels)
 
     try:

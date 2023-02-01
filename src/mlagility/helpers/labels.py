@@ -2,7 +2,7 @@ import os
 from typing import Dict, List
 
 
-def load_from_file(file_path: str) -> Dict[str, str]:
+def load_from_file(file_path: str) -> Dict[str, List[str]]:
     """
     This function extracts labels from a Python file.
     Labels must be in the first line of a Python file and start with "# labels: "
@@ -25,7 +25,7 @@ def load_from_file(file_path: str) -> Dict[str, str]:
         return {}
 
 
-def load_from_cache(cache_dir: str, build_name: str) -> Dict[str, str]:
+def load_from_cache(cache_dir: str, build_name: str) -> Dict[str, List[str]]:
     """
     Loads labels from the cache directory
     """
@@ -41,7 +41,7 @@ def load_from_cache(cache_dir: str, build_name: str) -> Dict[str, str]:
     return label_dict
 
 
-def convert_to_dict(label_list: List[str]) -> Dict[str, str]:
+def convert_to_dict(label_list: List[str]) -> Dict[str, List[str]]:
     """
     Convert label list into a dictionary of labels
     """
@@ -61,7 +61,7 @@ def convert_to_dict(label_list: List[str]) -> Dict[str, str]:
     return label_dict
 
 
-def save_to_cache(cache_dir: str, build_name: str, label_dict: Dict[str, str]):
+def save_to_cache(cache_dir: str, build_name: str, label_dict: Dict[str, List[str]]):
     """
     Save labels as a stand-alone file as part of the cache directory
     """
