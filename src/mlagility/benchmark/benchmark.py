@@ -2,12 +2,33 @@ import time
 import os
 import json
 import pathlib
+from typing import Tuple, List
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
 import groqflow.common.build
 import mlagility.slurm as slurm
 import mlagility.filesystem as filesystem
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
+
+
+def decode_script_name(input: str) -> Tuple[str, List[str]]:
+    # Parse the targets out of the script name
+    # Targets use the format:
+    #   script_name.py:target0,target1,...,targetN
+    decoded_name = input.split(":")
+    script_name = decoded_name[0]
+
+    if len(decoded_name) == 2:
+        targets = decoded_name[1].split(",")
+    elif len(decoded_name) == 1:
+        targets = []
+    else:
+        raise ValueError(
+            "Each script input to benchit should have either 0 or 1 ':' in it."
+            f"However, {script_name} was received."
+        )
+
+    return script_name, targets
 
 
 def main(args):
@@ -31,7 +52,12 @@ def main(args):
         scripts = []
         for user_script in args.input_scripts:
             user_script_path = os.path.join(args.search_dir, user_script)
-            if os.path.exists(user_script_path):
+
+            # Ignore everything after the ':' symbol, if there is one
+            clean_user_script_path = user_script_path.split(":")[0]
+
+            # Validate that the script exists
+            if os.path.exists(clean_user_script_path):
                 scripts.append(user_script_path)
             else:
                 raise exceptions.GroqitArgError(
@@ -86,11 +112,16 @@ def main(args):
 
             else:
 
+                # Parse the targets out of the script name
+                script_name, targets = decode_script_name(script)
+
+                # Instantiate an object that holds all of the arguments
+                # for analysis, build, and benchmarking
                 tracer_args = TracerArgs(
-                    input=script,
+                    input=script_name,
                     labels=None,
                     lean_cache=args.lean_cache,
-                    targets=[],
+                    targets=targets,
                     max_depth=args.max_depth,
                     cache_dir=args.cache_dir,
                     rebuild=args.rebuild,
@@ -102,6 +133,8 @@ def main(args):
                     actions=actions,
                 )
 
+                # Run analysis, build, and benchmarking on every model
+                # in the script
                 evaluate_script(tracer_args, args.script_args)
 
                 # Print performance info
