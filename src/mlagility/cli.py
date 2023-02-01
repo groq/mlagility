@@ -355,7 +355,8 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        if sys.argv[1] not in subparsers.choices.keys() and ".py" in sys.argv[1]:
+        script_name, _ = benchmark_command.decode_script_name(sys.argv[1])
+        if sys.argv[1] not in subparsers.choices.keys() and ".py" in script_name:
             sys.argv.insert(1, "-i")
             sys.argv.insert(1, "benchmark")
 

@@ -2,12 +2,33 @@ import time
 import os
 import json
 import pathlib
+from typing import Tuple, List
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
 import groqflow.common.build
 import mlagility.slurm as slurm
 import mlagility.filesystem as filesystem
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
+
+
+def decode_script_name(input: str) -> Tuple[str, List[str]]:
+    # Parse the targets out of the script name
+    # Targets use the format:
+    #   script_name.py:target0,target1,...,targetN
+    decoded_name = input.split(":")
+    script_name = decoded_name[0]
+
+    if len(decoded_name) == 2:
+        targets = decoded_name[1].split(",")
+    elif len(decoded_name) == 1:
+        targets = []
+    else:
+        raise ValueError(
+            "Each script input to benchit should have either 0 or 1 ':' in it."
+            f"However, {script_name} was received."
+        )
+
+    return script_name, targets
 
 
 def main(args):
@@ -92,20 +113,7 @@ def main(args):
             else:
 
                 # Parse the targets out of the script name
-                # Targets use the format:
-                #   script_name.py:target0,target1,...,targetN
-                decoded_name = script.split(":")
-                script_name = decoded_name[0]
-
-                if len(decoded_name) == 2:
-                    targets = decoded_name[1].split(",")
-                elif len(decoded_name) == 1:
-                    targets = []
-                else:
-                    raise ValueError(
-                        "Each script input to benchit should have either 0 or 1 ':' in it."
-                        f"However, {script_name} was received."
-                    )
+                script_name, targets = decode_script_name(script)
 
                 # Instantiate an object that holds all of the arguments
                 # for analysis, build, and benchmarking
