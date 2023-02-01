@@ -187,7 +187,7 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
         # Check for CPU and transfer files
         setup_cpu_host(client)
     else:
-         raise ValueError(f"Only 'cpu' and 'gpu' are supported, but received {accelerator}")
+        raise ValueError(f"Only 'cpu' and 'gpu' are supported, but received {accelerator}")
 
     return client
 
