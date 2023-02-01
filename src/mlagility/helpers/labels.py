@@ -50,6 +50,8 @@ def convert_to_dict(label_list: List[str]) -> Dict[str, str]:
         try:
             label_key, label_value = item.split("::")
         except ValueError:
+            # FIXME: Create a proper warning for this once we have the right
+            # infrastructure for doing so.
             print(
                 f"Warning: Malformed label {item} found. ",
                 "Each label must have the format key::value1,value2,... ",
