@@ -100,7 +100,9 @@ A **device** is a piece of hardware capable of running a model.
 
 A **runtime** is a piece of software that executes a model on a device.
 
-- Different runtimes can produce different performance on the same device because A) runtimes often optimize the model prior to execution, and B) the runtime is responsible for orchestrating data movement, device invocation, etc.
+- Different runtimes can produce different performance results on the same device because:
+  - Runtimes often optimize the model prior to execution.
+  - The runtime is responsible for orchestrating data movement, device invocation, etc.
 - Examples: ONNX Runtime, TensorRT, PyTorch Eager Execution, etc.
 
 ### Analysis
