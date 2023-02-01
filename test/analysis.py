@@ -227,7 +227,7 @@ class Testing(unittest.TestCase):
         labels_found = labels.load_from_cache(cache_dir, build_name) != {}
         assert metadata_found and cache_is_lean and labels_found
 
-    def test_7_args(self):
+    def test_07_args(self):
         output = subprocess.check_output(
             [
                 "autogroq",
@@ -241,11 +241,11 @@ class Testing(unittest.TestCase):
         )
         assert "Received arg test_arg" in output
 
-    def test_8_pipeline(self):
+    def test_08_pipeline(self):
         output = run_analysis(["autogroq", "pipeline.py", "--analyze-only"])
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_9_activation(self):
+    def test_09_activation(self):
         output = run_analysis(["autogroq", "activation.py", "--analyze-only"])
         assert np.array_equal(output, (0, 0, 0))
 
@@ -253,22 +253,17 @@ class Testing(unittest.TestCase):
         output = run_analysis(["autogroq", "encoder_decoder.py", "--analyze-only"])
         assert np.array_equal(output, (1, 0, 0))
 
-    # Enable this test after the GPU machine boot up has been automated
-    # def test_11_benchmark_gpu(self):
-    #     cache_dir = "cache-dir"
-    #     run_analysis(
-    #         [
-    #             "autogroq",
-    #             "linear_pytorch.py",
-    #             "--cache-dir",
-    #             cache_dir,
-    #             "--benchmark-gpu",
-    #         ]
-    #     )
-    #     gpu_perf_file = os.listdir(
-    #         f"{cache_dir}/linear_pytorch/gpu_performance.json"
-    #     )
-    #     assert os.path.exists(gpu_perf_file) and os.stat(gpu_perf_file).st_size != 0
+    def test_11_benchit_hashes(self):
+        output = run_analysis(
+            [
+                "benchit",
+                "linear_pytorch.py:60931adb",
+                "--build-only",
+                "--max-depth",
+                "1",
+            ]
+        )
+        assert np.array_equal(output, (2, 0, 1))
 
 
 if __name__ == "__main__":
