@@ -21,6 +21,7 @@ import groqflow.common.exceptions as exp
 import groqflow
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
+import mlagility.helpers.labels as labels
 from mlagility.analysis.util import ModelInfo
 from mlagility.api import benchit
 from mlagility import filesystem
@@ -37,7 +38,7 @@ class TracerArgs:
     input: str
     device: List[str]
     actions: List[Action]
-    labels: List[str]
+    labels: Dict[str, str]
     lean_cache: bool
     targets: List[str]
     max_depth: int
@@ -101,19 +102,8 @@ def call_benchit(
     build_name = f"{tracer_args.script_name}_{model_info.hash}"
 
     # Save model labels
-    if not os.path.exists(cache_dir):
-        os.makedirs(cache_dir)
-    labels_dir = os.path.join(cache_dir, "labels")
-    if not os.path.exists(labels_dir):
-        os.makedirs(labels_dir)
-    labels = [] if tracer_args.labels is None else tracer_args.labels
-    labels = labels + [f"class::{type(model_info.model).__name__}"]
-    with open(
-        os.path.join(labels_dir, f"{build_name}.txt"),
-        "w",
-        encoding="utf8",
-    ) as fp:
-        fp.write(" ".join(labels))
+    tracer_args.labels["class"] = f"{type(model_info.model).__name__}"
+    labels.save_to_cache(cache_dir, build_name, tracer_args.labels)
 
     try:
         benchit(
@@ -438,11 +428,6 @@ def main():
     # model are supported by groqit().
     parser.add_argument("-d", "--max-depth", type=int, default=0)
 
-    # The user may save additional metadata to each built model through the
-    # labels argument. This metadata can then be later consumed by other
-    # tools to do things such as filtering models by author or task.
-    parser.add_argument("--labels", type=str, nargs="+")
-
     # Path to GroqFlow's cache
     parser.add_argument("--cache-dir", type=str)
 
@@ -466,6 +451,9 @@ def main():
 
     autogroq_args = parser.parse_args()
 
+    # Extract script labels so we can later save them as part of cache
+    script_labels = labels.load_from_file(autogroq_args.input)
+
     if autogroq_args.analyze_only:
         actions = [Action.ANALYZE]
     else:
@@ -475,7 +463,7 @@ def main():
         input=autogroq_args.input,
         device=autogroq_args.device,
         actions=actions,
-        labels=autogroq_args.labels,
+        labels=script_labels,
         lean_cache=autogroq_args.lean_cache,
         targets=autogroq_args.targets,
         max_depth=autogroq_args.max_depth,
