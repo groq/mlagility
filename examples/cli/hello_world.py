@@ -1,3 +1,13 @@
+"""
+Hello, world! This is the most basic benchit cli example.
+To try it out, run the following command:
+
+benchit hello_world.py
+
+You should see the analysis phase pick up the SmallModel instance
+and then benchmark it.
+"""
+
 import torch
 
 torch.manual_seed(0)
@@ -22,4 +32,4 @@ inputs = {"x": torch.rand(input_size)}
 pytorch_outputs = pytorch_model(**inputs)
 
 # Print results
-print(f"Pytorch_outputs: {pytorch_outputs}")
+print(f"pytorch_outputs: {pytorch_outputs}")
