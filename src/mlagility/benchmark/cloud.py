@@ -125,7 +125,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     ip, username = load_remote_config(accelerator)
 
     if not all((ip, username)):
-        # TODO (ramkrishna2910): Enabling localhost execution will be handled in a separate MR
+        # TODO (ramkrishna2910): Enabling localhost execution will be handled in a separate MR (Issue #5)
         print(
         "User is responsible for ensuring the remote server has python>=3.8 \
             and docker>=20.10 installed"
