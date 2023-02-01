@@ -196,34 +196,34 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (2, 0, 0))
 
-    # def test_04_build(self):
-    #     output = run_analysis(
-    #         ["benchit", "linear_pytorch.py:60931adb", "--max-depth", "1"]
-    #     )
-    #     assert np.array_equal(output, (2, 0, 1))
+    def test_04_build(self):
+        output = run_analysis(
+            ["benchit", "linear_pytorch.py:60931adb", "--max-depth", "1"]
+        )
+        assert np.array_equal(output, (2, 0, 1))
 
     def test_05_build_keras(self):
         output = run_analysis(["benchit", "linear_keras.py"])
         assert np.array_equal(output, (1, 0, 1))
 
-    # def test_06_cache(self):
-    #     model_hash = "60931adb"
-    #     cache_dir = "cache-dir"
-    #     run_analysis(
-    #         [
-    #             "benchit",
-    #             f"linear_pytorch.py:{model_hash}",
-    #             "--max-depth",
-    #             "1",
-    #             "--cache-dir",
-    #             cache_dir,
-    #             "--lean-cache",
-    #         ]
-    #     )
-    #     files = os.listdir(f"{cache_dir}/linear_pytorch_{model_hash}")
-    #     cache_is_lean = len([x for x in files if ".onnx" in x]) == 0
-    #     metadata_found = len([x for x in files if ".txt" in x]) > 0
-    #     assert metadata_found and cache_is_lean
+    def test_06_cache(self):
+        model_hash = "60931adb"
+        cache_dir = "cache-dir"
+        run_analysis(
+            [
+                "benchit",
+                f"linear_pytorch.py:{model_hash}",
+                "--max-depth",
+                "1",
+                "--cache-dir",
+                cache_dir,
+                "--lean-cache",
+            ]
+        )
+        files = os.listdir(f"{cache_dir}/linear_pytorch_{model_hash}")
+        cache_is_lean = len([x for x in files if ".onnx" in x]) == 0
+        metadata_found = len([x for x in files if ".txt" in x]) > 0
+        assert metadata_found and cache_is_lean
 
     def test_07_args(self):
         output = subprocess.check_output(
