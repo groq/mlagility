@@ -14,7 +14,7 @@ import groqflow.common.cache as cache
 
 test_models_dot_py = {
     "linear_pytorch": """
-# labels: test_group::selftest license::mit framework:pytorch tags::selftest,small
+# labels: test_group::selftest license::mit framework::pytorch tags::selftest,small
 import torch
 import argparse
 
@@ -49,7 +49,7 @@ output = model(**inputs)
 
 """,
     "linear_keras": """
-# labels: test_group::selftest license::mit framework:keras tags::selftest,small
+# labels: test_group::selftest license::mit framework::keras tags::selftest,small
 import tensorflow as tf
 
 tf.random.set_seed(0)
