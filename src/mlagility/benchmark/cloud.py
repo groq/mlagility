@@ -287,8 +287,10 @@ def execute_cpu_remotely(
     remote_outputs_file = "mlagility_remote_cache/outputs.txt"
     remote_errors_file = "mlagility_remote_cache/errors.txt"
     env_name = "ort_env"
-    exec_command(client, "bash mlagility_remote_cache/setup_ort_env.sh", ignore_error=True)
-    
+    exec_command(
+        client, "bash mlagility_remote_cache/setup_ort_env.sh", ignore_error=True
+    )
+
     print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
