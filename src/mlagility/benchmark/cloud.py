@@ -7,7 +7,6 @@ import yaml
 import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
-import groqflow.common.sdk_helpers as sdk
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -51,7 +50,6 @@ def load_remote_config(accelerator: str) -> Union[Tuple[str, str], Tuple[None, N
     # Create a configuration file if one doesn't exist already
     if not os.path.exists(config_file_path):
         conf: Dict[str, Any] = {
-            "remote_machine_groqchip": {"ip": None, "username": None},
             "remote_machine_gpu": {"ip": None, "username": None},
             "remote_machine_cpu": {"ip": None, "username": None},
         }
@@ -126,50 +124,20 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     # Load stored values
     ip, username = load_remote_config(accelerator)
 
-    if ip is None or username is None:
-        if accelerator == "groqchip":
-            # Print message
-            print("\n*** First Time Groq Cloud Setup ***")
-            print("Step 1 - Create a VM following this guide: go/cloudquickstart")
-            print(
-                "Step 2 - SSH into your vm, cd into the SDK and install it (./install)"
-            )
-            print("Step 3 - Provide your instance IP and hostname below")
+    if not all((ip, username)):
+        # TODO (ramkrishna2910): Enabling localhost execution will be handled
+        # in a separate MR (Issue #5)
+        print(
+        "User is responsible for ensuring the remote server has python>=3.8 \
+            and docker>=20.10 installed"
+        )
+        print("Provide your instance IP and hostname below:")
 
-            # Get IP
-            while ip is None or ip == "":
-                ip = input("Groq Cloud IP: ")
+        ip = ip or input(f"{accelerator} instance ASA name (Do not use IP): ")
+        username = username or input(f"Username for {ip}: ")
 
-            # Get username
-            if username is None:
-                username_input = input(f"Username for {ip} (default: ubuntu): ")
-                if username_input == "":
-                    username = "ubuntu"
-                else:
-                    username = username_input
-        else:  # gpu or cpu
-            # Print message
-            print(
-                "Refer to go/ml-systems for access to competitive accelerator based instances.\n"
-            )
-            print(
-                "User is responsible for ensuring the remote server has python>=3.8\
-                 and docker>=20.10 installed"
-            )
-            print("Provide your instance IP and hostname below:")
-
-            # Get IP
-            while ip is None or ip == "":
-                ip = input(f"{accelerator} instance ASA name (Do not use IP): ")
-
-            # Get username
-            if username is None:
-                username_input = input(f"Username for {ip}: ")
-                if username_input == "":
-                    msg = "Username is required, please use your Groq ssid"
-                    raise exp.GroqModelRuntimeError(msg)
-                else:
-                    username = username_input
+        if not username or not ip:
+            raise exp.GroqModelRuntimeError("Username and hostname are required")
 
         # Store information on yaml file
         save_remote_config(ip, username, accelerator)
@@ -177,36 +145,32 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     return ip, username
 
 
-def setup_groqchip_host(client) -> None:
-    # Make sure at least one GroqChip is available remotely
-    stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
-    if stdout == "" or exit_code == 1:
-        msg = "Failed to run lspci to get GroqChips available"
-        raise exp.GroqModelRuntimeError(msg)
-    num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
-    if num_chips_available < 1:
-        raise exp.GroqModelRuntimeError("No GroqChips found")
-    print(f"{num_chips_available} GroqChips found")
-
-    # Transfer common files to host
-    exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute.py", "groqflow_remote_cache/execute.py")
-
-
 def setup_gpu_host(client) -> None:
-    # Make sure at least one GPU is available remotely
+    # Check if at least one NVIDIA GPU is available remotely
     stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
     if stdout == "" or exit_code == 1:
         msg = "No NVIDIA GPUs available on the remote machine"
         raise exp.GroqModelRuntimeError(msg)
 
     # Transfer common files to host
-    exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
+    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute-gpu.py", "groqflow_remote_cache/execute-gpu.py")
+        s.put(f"{dir_path}/execute-gpu.py", "mlagility_remote_cache/execute-gpu.py")
+
+
+def setup_cpu_host(client) -> None:
+    # Check if x86_64 CPU is available remotely
+    stdout, exit_code = exec_command(client, "uname -i")
+    if stdout != "x86_64" or exit_code == 1:
+        msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
+        raise exp.GroqModelRuntimeError(msg)
+
+    # Transfer common files to host
+    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with MySFTPClient.from_transport(client.get_transport()) as s:
+        s.put(f"{dir_path}/execute-cpu.py", "mlagility_remote_cache/execute-cpu.py")
 
 
 def setup_connection(accelerator: str) -> paramiko.SSHClient:
@@ -216,85 +180,16 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
     # Connect to host
     client = connect_to_host(ip, username)
 
-    if accelerator == "groqchip":
-        # Check for GroqChips and transfer common files
-        setup_groqchip_host(client)
-    elif accelerator == "gpu":
+    if accelerator == "gpu":
         # Check for GPU and transfer files
         setup_gpu_host(client)
     elif accelerator == "cpu":
         # Check for CPU and transfer files
         setup_cpu_host(client)
+    else:
+        raise ValueError(f"Only 'cpu' and 'gpu' are supported, but received {accelerator}")
 
     return client
-
-
-def execute_groqchip_remotely(
-    bringup_topology: bool,
-    repetitions: int,
-    state: build.State,
-    log_execute_path: str,
-) -> None:
-    """
-    Execute Model on the remote machine
-    """
-
-    # Ask the user for credentials if needed
-    _, hostname = configure_remote("groqchip")
-
-    # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
-
-    # Connect to remote machine and transfer common files
-    client = setup_connection("groqchip")
-
-    # Transfer iop and inputs file
-    print("Transferring model and inputs...")
-    if not os.path.exists(state.execution_inputs_file):
-        msg = "Model input file not found"
-        raise exp.GroqModelRuntimeError(msg)
-
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir("groqflow_remote_cache/compile")
-        s.put_dir(state.compile_dir, "groqflow_remote_cache/compile")
-        s.put(state.execution_inputs_file, "groqflow_remote_cache/inputs.npy")
-
-    python_cmd = (
-        "export PYTHONPATH='/opt/groq/runtime/site-packages:$PYTHONPATH' && "
-        f"/home/{hostname}/miniconda3/envs/groqflow/bin/python"
-    )
-
-    # Run benchmarking script
-    output_dir = "groqflow_remote_cache"
-    remote_outputs_file = "groqflow_remote_cache/outputs.npy"
-    remote_latency_file = "groqflow_remote_cache/latency.npy"
-    print("Running benchmarking script...")
-
-    bringup_topology_arg = "" if bringup_topology else "--bringup_topology"
-    _, exit_code = exec_command(
-        client,
-        (
-            f"{python_cmd} groqflow_remote_cache/execute.py "
-            f"{state.num_chips_used} {output_dir} {remote_outputs_file} "
-            f"{remote_latency_file} {state.topology} {repetitions} "
-            f"{bringup_topology_arg}"
-        ),
-    )
-    if exit_code == 1:
-        msg = f"""
-        Failed to execute GroqChip(s) remotely.
-        Look at **{log_execute_path}** for details.
-        """
-        raise exp.GroqModelRuntimeError(msg)
-
-    # Get output files back
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.get(remote_outputs_file, state.outputs_file)
-        s.get(remote_latency_file, state.latency_file)
-        s.remove(remote_outputs_file)
-        s.remove(remote_latency_file)
-    # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
 
 
 def execute_gpu_remotely(
@@ -319,18 +214,18 @@ def execute_gpu_remotely(
         raise exp.GroqModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir("groqflow_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, "groqflow_remote_cache/onnxmodel/model.onnx")
+        s.mkdir("mlagility_remote_cache/onnxmodel")
+        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
 
     # Run benchmarking script
-    output_dir = "groqflow_remote_cache"
-    remote_outputs_file = "groqflow_remote_cache/outputs.txt"
-    remote_errors_file = "groqflow_remote_cache/errors.txt"
+    output_dir = "mlagility_remote_cache"
+    remote_outputs_file = "mlagility_remote_cache/outputs.txt"
+    remote_errors_file = "mlagility_remote_cache/errors.txt"
     print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
         (
-            f"/usr/bin/python3 groqflow_remote_cache/execute-gpu.py "
+            f"/usr/bin/python3 mlagility_remote_cache/execute-gpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
         ),
     )
@@ -359,20 +254,6 @@ def execute_gpu_remotely(
     sys.stdout = sys.stdout.terminal
 
 
-def setup_cpu_host(client) -> None:
-    # Make sure x86_64 CPU is available remotely
-    stdout, exit_code = exec_command(client, "uname -i")
-    if stdout != "x86_64" or exit_code == 1:
-        msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-        raise exp.GroqModelRuntimeError(msg)
-
-    # Transfer common files to host
-    exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute-cpu.py", "groqflow_remote_cache/execute-cpu.py")
-
-
 def execute_cpu_remotely(
     state: build.State, log_execute_path: str, iterations: int
 ) -> None:
@@ -395,13 +276,13 @@ def execute_cpu_remotely(
         raise exp.GroqModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir("groqflow_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, "groqflow_remote_cache/onnxmodel/model.onnx")
+        s.mkdir("mlagility_remote_cache/onnxmodel")
+        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
 
     # Run benchmarking script
-    output_dir = "groqflow_remote_cache"
-    remote_outputs_file = "groqflow_remote_cache/outputs.txt"
-    remote_errors_file = "groqflow_remote_cache/errors.txt"
+    output_dir = "mlagility_remote_cache"
+    remote_outputs_file = "mlagility_remote_cache/outputs.txt"
+    remote_errors_file = "mlagility_remote_cache/errors.txt"
     print("Running benchmarking script...")
     # TODO:
     # Check for python and pip in /usr/bin or return errors
@@ -414,7 +295,7 @@ def execute_cpu_remotely(
     _, exit_code = exec_command(
         client,
         (
-            "/usr/bin/python3 groqflow_remote_cache/execute-cpu.py "
+            "/usr/bin/python3 mlagility_remote_cache/execute-cpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
         ),
     )
