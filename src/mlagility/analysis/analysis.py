@@ -21,7 +21,7 @@ import groqflow.common.exceptions as exp
 import groqflow
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
-import mlagility.helpers.labels as labels
+import mlagility.common.labels as labels
 from mlagility.analysis.util import ModelInfo
 from mlagility.api import benchit
 from mlagility import filesystem

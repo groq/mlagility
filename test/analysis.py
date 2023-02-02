@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import numpy as np
 import mlagility.filesystem as filesystem
-import mlagility.helpers.labels as labels
+import mlagility.common.labels as labels
 import groqflow.common.cache as cache
 
 # We generate a corpus on to the filesystem during the test
