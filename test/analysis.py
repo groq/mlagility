@@ -181,29 +181,57 @@ class Testing(unittest.TestCase):
 
     def test_01_basic(self):
         pytorch_output = run_analysis(
-            ["benchit", "linear_pytorch.py", "--analyze-only"]
+            [
+                "benchit",
+                "linear_pytorch.py",
+                "--analyze-only",
+            ]
         )
         assert np.array_equal(pytorch_output, (1, 0, 0))
 
     def test_02_basic_keras(self):
-        keras_output = run_analysis(["benchit", "linear_keras.py", "--analyze-only"])
+        keras_output = run_analysis(
+            [
+                "benchit",
+                "linear_keras.py",
+                "--analyze-only",
+            ]
+        )
         assert np.array_equal(keras_output, (1, 0, 0))
 
     def test_03_depth(self):
         # Depth is only tested for Pytorch, since Keras has no max_depth support
         output = run_analysis(
-            ["benchit", "linear_pytorch.py", "--max-depth", "1", "--analyze-only"]
+            [
+                "benchit",
+                "linear_pytorch.py",
+                "--max-depth",
+                "1",
+                "--analyze-only",
+            ]
         )
         assert np.array_equal(output, (2, 0, 0))
 
     def test_04_build(self):
         output = run_analysis(
-            ["benchit", "linear_pytorch.py:60931adb", "--max-depth", "1"]
+            [
+                "benchit",
+                "linear_pytorch.py:60931adb",
+                "--max-depth",
+                "1",
+                "--build-only",
+            ]
         )
         assert np.array_equal(output, (2, 0, 1))
 
     def test_05_build_keras(self):
-        output = run_analysis(["benchit", "linear_keras.py"])
+        output = run_analysis(
+            [
+                "benchit",
+                "linear_keras.py",
+                "--build-only",
+            ]
+        )
         assert np.array_equal(output, (1, 0, 1))
 
     def test_06_cache(self):
@@ -218,6 +246,7 @@ class Testing(unittest.TestCase):
                 "--cache-dir",
                 cache_dir,
                 "--lean-cache",
+                "--build-only",
             ]
         )
         files = os.listdir(f"{cache_dir}/linear_pytorch_{model_hash}")
@@ -241,15 +270,33 @@ class Testing(unittest.TestCase):
         assert "Received arg test_arg" in output
 
     def test_08_pipeline(self):
-        output = run_analysis(["benchit", "pipeline.py", "--analyze-only"])
+        output = run_analysis(
+            [
+                "benchit",
+                "pipeline.py",
+                "--analyze-only",
+            ]
+        )
         assert np.array_equal(output, (1, 0, 0))
 
     def test_09_activation(self):
-        output = run_analysis(["benchit", "activation.py", "--analyze-only"])
+        output = run_analysis(
+            [
+                "benchit",
+                "activation.py",
+                "--analyze-only",
+            ]
+        )
         assert np.array_equal(output, (0, 0, 0))
 
     def test_10_encoder_decoder(self):
-        output = run_analysis(["benchit", "encoder_decoder.py", "--analyze-only"])
+        output = run_analysis(
+            [
+                "benchit",
+                "encoder_decoder.py",
+                "--analyze-only",
+            ]
+        )
         assert np.array_equal(output, (1, 0, 0))
 
     def test_11_benchit_hashes(self):
