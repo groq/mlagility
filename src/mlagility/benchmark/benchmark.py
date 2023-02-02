@@ -92,7 +92,7 @@ def main(args):
     for script in scripts:
         for device in args.devices:
             if args.use_slurm:
-                slurm.run_autogroq(
+                slurm.run_benchit(
                     op="benchmark",
                     script=script,
                     search_dir=args.search_dir,
@@ -119,7 +119,6 @@ def main(args):
                 # for analysis, build, and benchmarking
                 tracer_args = TracerArgs(
                     input=script_name,
-                    labels=None,
                     lean_cache=args.lean_cache,
                     targets=targets,
                     max_depth=args.max_depth,
