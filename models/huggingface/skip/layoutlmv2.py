@@ -1,4 +1,4 @@
-# labels: name::layoutlmv2 author::skip
+# labels: name::layoutlmv2 author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

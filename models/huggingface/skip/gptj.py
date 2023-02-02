@@ -1,4 +1,4 @@
-# labels: name::gptj author::skip
+# labels: name::gptj author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

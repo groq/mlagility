@@ -1,4 +1,4 @@
-# labels: name::mt5_xxl author::skip
+# labels: name::mt5_xxl author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

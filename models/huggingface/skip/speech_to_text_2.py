@@ -1,4 +1,4 @@
-# labels: name::speech_to_text_2 author::skip
+# labels: name::speech_to_text_2 author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::prophetnet author::skip
+# labels: name::prophetnet author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

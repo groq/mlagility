@@ -1,4 +1,4 @@
-# labels: name::clipVision author::skip
+# labels: name::clipVision author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::fnet author::skip
+# labels: name::fnet author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

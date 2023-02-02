@@ -1,4 +1,4 @@
-# labels: name::bert_japanese author::skip
+# labels: name::bert_japanese author::huggingface
 """
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::big_bird author::skip
+# labels: name::big_bird author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::clipText author::skip
+# labels: name::clipText author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

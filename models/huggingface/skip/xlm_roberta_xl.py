@@ -1,4 +1,4 @@
-# labels: name::xlm_roberta_xl author::skip
+# labels: name::xlm_roberta_xl author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

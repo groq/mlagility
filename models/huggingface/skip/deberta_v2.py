@@ -1,4 +1,4 @@
-# labels: name::deberta_v2 author::skip
+# labels: name::deberta_v2 author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

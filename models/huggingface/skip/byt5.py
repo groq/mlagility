@@ -1,4 +1,4 @@
-# labels: name::byt5 author::skip
+# labels: name::byt5 author::huggingface
 """
 import transformers
 import torch

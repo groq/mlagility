@@ -1,4 +1,4 @@
-# labels: name::dialogpt author::skip
+# labels: name::dialogpt author::huggingface
 """
 import transformers
 import torch

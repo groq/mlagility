@@ -1,4 +1,4 @@
-# labels: name::t5 author::skip
+# labels: name::t5 author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::vision_text_dual_encoder author::skip
+# labels: name::vision_text_dual_encoder author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

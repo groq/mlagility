@@ -1,4 +1,4 @@
-# labels: name::fsmt author::skip
+# labels: name::fsmt author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

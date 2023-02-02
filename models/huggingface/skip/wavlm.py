@@ -1,4 +1,4 @@
-# labels: name::wavlm author::skip
+# labels: name::wavlm author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::qdqbert author::skip
+# labels: name::qdqbert author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

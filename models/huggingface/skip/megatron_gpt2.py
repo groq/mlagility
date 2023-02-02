@@ -1,4 +1,4 @@
-# labels: name::megatron_gpt2 author::skip
+# labels: name::megatron_gpt2 author::huggingface
 """
 import transformers
 import torch

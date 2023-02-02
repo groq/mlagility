@@ -1,4 +1,4 @@
-# labels: name::gpt_neo author::skip
+# labels: name::gpt_neo author::huggingface
 from mlagility.parser import parse
 import transformers
 import torch

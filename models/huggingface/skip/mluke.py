@@ -1,4 +1,4 @@
-# labels: name::mluke author::skip
+# labels: name::mluke author::huggingface
 """
 import transformers
 import torch

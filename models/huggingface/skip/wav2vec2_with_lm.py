@@ -1,4 +1,4 @@
-# labels: name::wav2vec2_with_lm author::skip
+# labels: name::wav2vec2_with_lm author::huggingface
 """
 import transformers
 import torch

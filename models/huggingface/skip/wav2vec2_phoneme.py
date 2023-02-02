@@ -1,4 +1,4 @@
-# labels: name::wav2vec2_phoneme author::skip
+# labels: name::wav2vec2_phoneme author::huggingface
 """
 import transformers
 import torch

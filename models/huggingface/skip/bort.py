@@ -1,4 +1,4 @@
-# labels: name::bort author::skip
+# labels: name::bort author::huggingface
 """
 import transformers
 import torch

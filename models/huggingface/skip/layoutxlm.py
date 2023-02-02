@@ -1,4 +1,4 @@
-# labels: name::layoutxlm author::skip
+# labels: name::layoutxlm author::huggingface
 """
 import transformers
 import torch

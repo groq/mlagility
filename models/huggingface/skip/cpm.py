@@ -1,4 +1,4 @@
-# labels: name::cpm author::skip
+# labels: name::cpm author::huggingface
 """
 import transformers
 import torch
