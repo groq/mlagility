@@ -1,0 +1,24 @@
+# labels: test_group::mlagility name::bert_tiny_for_sequence_classification author::huggingface
+import mlagility
+import transformers
+import torch
+
+# Parsing command-line arguments
+batch_size, max_seq_length = mlagility.parse(["batch_size", "max_seq_length"])
+
+
+# This version of TinyBERT performs sequence classification,
+# while the default model outputs raw hidden states.
+
+# Model and input configurations
+model = transformers.AutoModelForSequenceClassification.from_pretrained(
+    "mrm8488/bert-tiny-finetuned-sms-spam-detection"
+)
+inputs = {
+    "input_ids": torch.ones(batch_size, max_seq_length, dtype=torch.long),
+    "attention_mask": torch.ones(batch_size, max_seq_length, dtype=torch.bool),
+}
+
+
+# Call model
+model(**inputs)
