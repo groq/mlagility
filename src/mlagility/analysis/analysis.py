@@ -23,7 +23,7 @@ import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 from mlagility.analysis.util import ModelInfo
 from mlagility.api.api import benchit
-from mlagility import filesystem
+import mlagility.common.filesystem as filesystem
 
 
 class Action(Enum):
