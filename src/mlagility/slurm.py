@@ -31,11 +31,11 @@ def jobs_in_queue(job_name=None) -> List[str]:
 
 
 def job_name(build_name) -> str:
-    return f"{build_name}_groqit"
+    return f"{build_name}_benchit"
 
 
 def run(
-    groqit_script: str,
+    cli: str,
     args: str,
     build_name: str,
     cache_dir: str,
@@ -44,10 +44,10 @@ def run(
     Run a GroqFlow job on Slurm
 
     args:
-        groqit_script: an executable script that knows how to take the following arguments.
-            Most of the time this will be `groqit-util`, however you can provide your own
+        cli: an executable script that knows how to take the following arguments.
+            Most of the time this will be `benchit`, however you can provide your own
             custom executable.
-        args: command line arguments passed to the groqit_script
+        args: command line arguments passed to the cli
         build_name: name of the build
         cache_dir: location of the GroqFlow build cache
 
@@ -77,7 +77,7 @@ def run(
         f"--output={slurm_log_file}",
         f"--job-name={job}",
         shell_script,
-        groqit_script,
+        cli,
         args,
     ]
 
@@ -114,7 +114,7 @@ def bool_arg(value, flag):
     return result
 
 
-def run_autogroq(
+def run_benchit(
     op: str,
     search_dir: str,
     script: str,
@@ -157,7 +157,7 @@ def run_autogroq(
     build_name = script.split(".")[0]
 
     run(
-        groqit_script="groqit",
+        cli="benchit",
         args=args,
         build_name=build_name,
         cache_dir=cache_dir,

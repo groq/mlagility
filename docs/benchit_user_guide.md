@@ -6,11 +6,11 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime      | Runtime arg | Specific Devices                                      |
-|-------------|------------|--------------|-------------|-------------------------------------------------------|
-| Nvidia GPU  | nvidia     | TensorRT     | trt         | Any Nvidia GPU supported by TensorRT 8.5.2            |
-| x86 CPU     | x86        | ONNX Runtime | ort         | Any Intel or AMD CPU supported by ONNX Runtime 1.14.0 |
-| Groq        | groq       | GroqFlow     | groq        | GroqChip1                                             |
+| Device Type | Device arg | Runtime      | Runtime arg | Specific Devices                                         |
+|-------------|------------|--------------|-------------|----------------------------------------------------------|
+| Nvidia GPU  | nvidia     | TensorRT     | trt         | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
+| x86 CPU     | x86        | ONNX Runtime | ort         | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
+| Groq        | groq       | GroqFlow     | groq        | GroqChip1                                                |
 
 </span>
 
@@ -100,14 +100,16 @@ A **device** is a piece of hardware capable of running a model.
 
 A **runtime** is a piece of software that executes a model on a device.
 
-- Different runtimes can produce different performance on the same device because A) runtimes often optimize the model prior to execution, and B) the runtime is responsible for orchestrating data movement, device invocation, etc.
+- Different runtimes can produce different performance results on the same device because:
+  - Runtimes often optimize the model prior to execution.
+  - The runtime is responsible for orchestrating data movement, device invocation, etc.
 - Examples: ONNX Runtime, TensorRT, PyTorch Eager Execution, etc.
 
 ### Analysis
 
 **Analysis** is the process by which `benchit` inspects a Python script and identifies the PyTorch/Keras models within.
 
-`benchit` performs analysis by running your script and profiling each line of code that is called. When a model object (see [Model](#model) is encountered, the `benchit` CLI can inspect it to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchit()` API for benchmarking.
+`benchit` performs analysis by running and profiling your script. When a model object (see [Model](#model) is encountered, the `benchit` CLI can inspect it to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchit()` API for benchmarking.
 
 _Note_: the `benchit` CLI runs your entire script. Please ensure that your script is safe to run, especially if you got it from the internet.
 
@@ -170,7 +172,7 @@ MLAgility can be used to benchmark a model across a variety of runtimes and devi
 MLAgility supports benchmarking on both locally installed devices, as well as devices on remote machines (e.g., cloud VMs).
 
 If you are using a remote machine, it must:
-- be running
+- turned on
 - be available via SSH
 - include the target device
 - have `python>=3.8` and `docker>=20.10` installed
