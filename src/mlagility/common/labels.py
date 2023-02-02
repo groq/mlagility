@@ -49,8 +49,7 @@ def load_from_cache(cache_dir: str, build_name: str) -> Dict[str, List[str]]:
     Loads labels from the cache directory
     """
     # Open file
-    labels_dir = os.path.join(cache_dir, "labels")
-    file_path = os.path.join(labels_dir, f"{build_name}.txt")
+    file_path = os.path.join(cache_dir, "labels", f"{build_name}.txt")
     with open(file_path, encoding="utf-8") as f:
         first_line = f.readline()
 
