@@ -119,7 +119,6 @@ def main(args):
                 # for analysis, build, and benchmarking
                 tracer_args = TracerArgs(
                     input=script_name,
-                    labels=None,
                     lean_cache=args.lean_cache,
                     targets=targets,
                     max_depth=args.max_depth,
