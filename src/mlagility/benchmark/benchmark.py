@@ -14,8 +14,8 @@ from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 def decode_script_name(input: str) -> Tuple[str, List[str]]:
     # Parse the targets out of the script name
     # Targets use the format:
-    #   script_name.py:target0,target1,...,targetN
-    decoded_name = input.split(":")
+    #   script_name.py::target0,target1,...,targetN
+    decoded_name = input.split("::")
     script_name = decoded_name[0]
 
     if len(decoded_name) == 2:
@@ -24,7 +24,7 @@ def decode_script_name(input: str) -> Tuple[str, List[str]]:
         targets = []
     else:
         raise ValueError(
-            "Each script input to benchit should have either 0 or 1 ':' in it."
+            "Each script input to benchit should have either 0 or 1 '::' in it."
             f"However, {script_name} was received."
         )
 
