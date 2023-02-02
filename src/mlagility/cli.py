@@ -1,6 +1,3 @@
-# mypy: ignore-errors
-# pylint: disable = not-callable
-
 import argparse
 import os
 import sys
