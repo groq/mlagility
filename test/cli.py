@@ -5,8 +5,8 @@ from unittest.mock import patch
 import sys
 import io
 from contextlib import redirect_stdout
-from mlagility.cli import main as benchitcli
-import mlagility.report as report
+from mlagility.cli.cli import main as benchitcli
+import mlagility.cli.report as report
 from mlagility import filesystem
 import groqflow.common.build as build
 import groqflow.common.cache as cache

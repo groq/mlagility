@@ -22,7 +22,7 @@ import groqflow
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 from mlagility.analysis.util import ModelInfo
-from mlagility.api import benchit
+from mlagility.api.api import benchit
 from mlagility import filesystem
 
 

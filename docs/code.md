@@ -1,0 +1,33 @@
+# MLAgility Code Structure
+
+## Repo Organization
+
+The MLAgility repository has a few major top-level directories:
+- `docs`: documentation for the entire project.
+- `examples`: example scripts for use with the MLAgility benchmarking tools.
+  - `examples/api`: examples scripts that invoke the `benchit()` API to benchmark models.
+  - `examples/cli`: example scripts that can be fed as input into the `benchit` CLI. These scripts each have a docstring that recommends one or more `benchit` CLI commands to try out.
+- `models`: the corpora of model scripts that makes up the MLAgility benchmark.
+  - Each subdirectory under `models` represents a corpus of models pulled from somewhere on the internet. For example, `models/torch_hub` is a corpus of models from [Torch Hub](https://github.com/pytorch/hub).
+- `src/mlagility`: source code for the MLAgility benchmarking tools (see [Benchmarking Tools](#benchmarking-tools) for a description of how the code is used).
+  - `src/mlagility/analysis`: functions for profiling a model script, discovering model instances, and invoking `benchit()` on those instances.
+  - `src/mlagility/api`: implements the `benchit()` API.
+  - `src/mlagility/cli`: implements the `benchit` CLI.
+  - `src/mlagility/common`: functions common to the other modules.
+  - `src/mlagility/version.py`: defines the package version number.
+- `test`: tests for the MLAgility benchmarking tools.
+  - `test/analysis.py`: tests focusing on the analysis of model scripts.
+  - `test/cli.py`: tests focusing on top-level CLI features.
+
+## Benchmarking Tools
+
+MLAgility provides two main tools, the `benchit` CLI and `benchit()` API. Instructions for how to use these tools are documented in the [benchit user guide](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md), while this section is about how the source code is invoked to implement the tools. All of the code below is located under `src/mlagility/`.
+
+1. The `benchit` CLI is the comprehensive frontend that wraps all the other code. It is implemented in [cli/cli.py](https://github.com/groq/mlagility/blob/main/src/mlagility/cli/cli.py).
+1. The default command for `benchit` CLI is the `benchmark` command, which is implemented in [cli/benchmark.py](https://github.com/groq/mlagility/blob/main/src/mlagility/cli/benchmark.py).
+    - Other CLI commands are also implemented in `cli/`, for example the `report` command is implemented in `cli/report.py`.
+1. The `benchmark` command takes in a set of model scripts to evaluate and passes each into the `evaluate_script()` function for analysis, which is implemented in [analysis/analysis.py](https://github.com/groq/mlagility/blob/main/src/mlagility/analysis/analysis.py).
+1. `evaluate_script()` uses a profiler to discover the model instance in the script, and passes each into the `benchit()` API, which is defined in [api/api.py](https://github.com/groq/mlagility/blob/main/src/mlagility/api/api.py).
+1. The `benchit()` API prepares the model for benchmarking (e.g., exporting and optimizing an ONNX file), which creates an instance of a `*Model` class, where `*` can be CPU, GPU, etc. The `*Model` classes are defined in [api/cpumodel.py](https://github.com/groq/mlagility/blob/main/src/mlagility/api/cpumodel.py), [api/gpumodel.py](https://github.com/groq/mlagility/blob/main/src/mlagility/api/gpumodel.py), etc.
+1. The `*Model` classes provide a `.benchmark()` method that benchmarks the model on the device and returns an instance of the `MeasuredPerformance` class, which includes the performance statistics acquired during benchmarking.
+1. `benchit()` and the `*Model` classes are built on top of the [GroqFlow](https://github.com/groq/groqflow) framework.

@@ -4,7 +4,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import numpy as np
-import mlagility.filesystem as filesystem
+import mlagility.common.filesystem as filesystem
 import groqflow.common.cache as cache
 
 # We generate a corpus on to the filesystem during the test

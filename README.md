@@ -26,6 +26,8 @@ MLAgility is open source software under the MIT license and we are welcoming con
 
 One of the easiest ways to contribute is to add a model to the benchmark. To do, simply add a `.py` file to `models/` that instantiates and calls a `PyTorch` or `Keras` model. The automated benchmarking infrastructure will do the rest!
 
+Please read about our [repo and code organization](https://github.com/groq/mlagility/blob/main/docs/code.md) before getting started.
+
 ### Issues
 
 Please file any bugs or feature requests you have as an [Issue](https://github.com/groq/mlagility/issues) and we will take a look.
