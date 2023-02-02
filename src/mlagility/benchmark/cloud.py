@@ -294,7 +294,8 @@ def execute_cpu_remotely(
     _, exit_code = exec_command(
         client,
         (
-            f"/home/{username}/miniconda3/envs/{env_name}/bin/python mlagility_remote_cache/ \
+            f"/home/{username}/miniconda3/envs/{env_name}/bin/python mlagility_remote_cache/"
+            "execute-cpu.py"
             execute-cpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
         ),
