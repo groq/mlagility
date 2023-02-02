@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import numpy as np
 import mlagility.common.filesystem as filesystem
+import mlagility.common.labels as labels
 import groqflow.common.cache as cache
 
 # We generate a corpus on to the filesystem during the test
@@ -17,6 +18,7 @@ import groqflow.common.cache as cache
 
 test_models_dot_py = {
     "linear_pytorch": """
+# labels: test_group::selftest license::mit framework::pytorch tags::selftest,small
 import torch
 import argparse
 
@@ -51,6 +53,7 @@ output = model(**inputs)
 
 """,
     "linear_keras": """
+# labels: test_group::selftest license::mit framework::keras tags::selftest,small
 import tensorflow as tf
 
 tf.random.set_seed(0)
@@ -216,7 +219,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py:60931adb",
+                "linear_pytorch.py::60931adb",
                 "--max-depth",
                 "1",
                 "--build-only",
@@ -240,7 +243,7 @@ class Testing(unittest.TestCase):
         run_analysis(
             [
                 "benchit",
-                f"linear_pytorch.py:{model_hash}",
+                f"linear_pytorch.py::{model_hash}",
                 "--max-depth",
                 "1",
                 "--cache-dir",
@@ -249,10 +252,12 @@ class Testing(unittest.TestCase):
                 "--build-only",
             ]
         )
-        files = os.listdir(f"{cache_dir}/linear_pytorch_{model_hash}")
+        build_name = f"linear_pytorch_{model_hash}"
+        files = os.listdir(f"{cache_dir}/{build_name}")
         cache_is_lean = len([x for x in files if ".onnx" in x]) == 0
         metadata_found = len([x for x in files if ".txt" in x]) > 0
-        assert metadata_found and cache_is_lean
+        labels_found = labels.load_from_cache(cache_dir, build_name) != {}
+        assert metadata_found and cache_is_lean and labels_found
 
     def test_07_args(self):
         output = subprocess.check_output(
@@ -303,7 +308,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py:60931adb",
+                "linear_pytorch.py::60931adb",
                 "--build-only",
                 "--max-depth",
                 "1",
