@@ -1,3 +1,7 @@
+"""
+Tests focused on the command-level functionality of benchit CLI
+"""
+
 import os
 from typing import List
 import unittest
@@ -7,7 +11,7 @@ import io
 from contextlib import redirect_stdout
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
-from mlagility import filesystem
+from mlagility.common import filesystem
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 

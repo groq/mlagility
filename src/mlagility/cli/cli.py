@@ -1,6 +1,3 @@
-# mypy: ignore-errors
-# pylint: disable = not-callable
-
 import argparse
 import os
 import sys
@@ -8,7 +5,7 @@ import groqflow.common.build as build
 import mlagility.cli.report as report
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.benchmark as benchmark_command
-import mlagility
+from mlagility.version import __version__ as mlagility_version
 
 
 class MyParser(argparse.ArgumentParser):
@@ -22,7 +19,7 @@ def print_version(_):
     """
     Print the package version number
     """
-    print(mlagility.__version__)
+    print(mlagility_version)
 
 
 def main():

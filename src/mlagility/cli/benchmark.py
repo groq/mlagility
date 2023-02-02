@@ -92,7 +92,7 @@ def main(args):
     for script in scripts:
         for device in args.devices:
             if args.use_slurm:
-                slurm.run_autogroq(
+                slurm.run_benchit(
                     op="benchmark",
                     script=script,
                     search_dir=args.search_dir,
