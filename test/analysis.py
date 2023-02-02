@@ -219,7 +219,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py:60931adb",
+                "linear_pytorch.py::60931adb",
                 "--max-depth",
                 "1",
                 "--build-only",
@@ -243,7 +243,7 @@ class Testing(unittest.TestCase):
         run_analysis(
             [
                 "benchit",
-                f"linear_pytorch.py:{model_hash}",
+                f"linear_pytorch.py::{model_hash}",
                 "--max-depth",
                 "1",
                 "--cache-dir",
@@ -308,7 +308,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py:60931adb",
+                "linear_pytorch.py::60931adb",
                 "--build-only",
                 "--max-depth",
                 "1",
