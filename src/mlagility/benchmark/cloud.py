@@ -171,6 +171,7 @@ def setup_cpu_host(client) -> None:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.put(f"{dir_path}/execute-cpu.py", "mlagility_remote_cache/execute-cpu.py")
+        s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
 
 
 def setup_connection(accelerator: str) -> paramiko.SSHClient:
@@ -283,19 +284,18 @@ def execute_cpu_remotely(
     output_dir = "mlagility_remote_cache"
     remote_outputs_file = "mlagility_remote_cache/outputs.txt"
     remote_errors_file = "mlagility_remote_cache/errors.txt"
-    print("Running benchmarking script...")
-    # TODO:
-    # Check for python and pip in /usr/bin or return errors
-    # Issuing sudo commands remotely is not good practice
-    # Clean this section in part 2 MR with setuptools
-    _, exit_code = exec_command(client, ("sudo apt -y install python3-pip"))
-    _, exit_code = exec_command(client, ("/usr/bin/python3 -m pip install numpy"))
-    _, exit_code = exec_command(client, ("/usr/bin/python3 -m pip install onnxruntime"))
+    print("Setting up environment...")
+    env_name = "ort_env"
+    process = subprocess.Popen(["bash", f"mlagility_remote_cache/setup_ort_env.sh {env_name}"],\
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.communicate()
 
+    print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
         (
-            "/usr/bin/python3 mlagility_remote_cache/execute-cpu.py "
+            f"/home/{username}/miniconda3/envs/{env_name}/bin/python mlagility_remote_cache/ \
+            execute-cpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
         ),
     )
