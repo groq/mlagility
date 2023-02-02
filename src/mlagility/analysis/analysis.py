@@ -19,6 +19,7 @@ import groqflow.common.build as build
 import groqflow.common.exceptions as exp
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
+import mlagility.common.labels as labels
 from mlagility.api import benchit
 from mlagility import filesystem
 
@@ -34,7 +35,6 @@ class TracerArgs:
     input: str
     device: List[str]
     actions: List[Action]
-    labels: List[str]
     lean_cache: bool
     targets: List[str]
     max_depth: int
@@ -46,6 +46,10 @@ class TracerArgs:
     groqview: bool
     models_found: Dict[str, util.ModelInfo] = dataclasses.field(default_factory=dict)
     script_name: str = None
+
+    @functools.cached_property
+    def labels(self) -> Dict[str, str]:
+        return labels.load_from_file(self.input)
 
     @functools.cached_property
     def torch_activations(self) -> List[str]:
@@ -98,19 +102,8 @@ def call_benchit(
     build_name = f"{tracer_args.script_name}_{model_info.hash}"
 
     # Save model labels
-    if not os.path.exists(cache_dir):
-        os.makedirs(cache_dir)
-    labels_dir = os.path.join(cache_dir, "labels")
-    if not os.path.exists(labels_dir):
-        os.makedirs(labels_dir)
-    labels = [] if tracer_args.labels is None else tracer_args.labels
-    labels = labels + [f"class::{type(model_info.model).__name__}"]
-    with open(
-        os.path.join(labels_dir, f"{build_name}.txt"),
-        "w",
-        encoding="utf8",
-    ) as fp:
-        fp.write(" ".join(labels))
+    tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
+    labels.save_to_cache(cache_dir, build_name, tracer_args.labels)
 
     try:
         benchit(
