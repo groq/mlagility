@@ -8,7 +8,7 @@ import groqflow.common.build as build
 import mlagility.report as report
 import mlagility.filesystem as filesystem
 import mlagility.benchmark.benchmark as benchmark_command
-import mlagility
+from mlagility.version import __version__ as mlagility_version
 
 
 class MyParser(argparse.ArgumentParser):
@@ -22,7 +22,7 @@ def print_version(_):
     """
     Print the package version number
     """
-    print(mlagility.__version__)
+    print(mlagility_version)
 
 
 def main():

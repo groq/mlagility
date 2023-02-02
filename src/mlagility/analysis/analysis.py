@@ -1,6 +1,5 @@
 import sys
 import os
-import argparse
 import inspect
 import importlib.util
 import copy
@@ -18,10 +17,8 @@ import tensorflow as tf
 from groqflow.common import printing
 import groqflow.common.build as build
 import groqflow.common.exceptions as exp
-import groqflow
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
-from mlagility.analysis.util import ModelInfo
 from mlagility.api import benchit
 from mlagility import filesystem
 
@@ -47,7 +44,7 @@ class TracerArgs:
     assembler_flags: List[str]
     num_chips: int
     groqview: bool
-    models_found: Dict[str, ModelInfo] = dataclasses.field(default_factory=dict)
+    models_found: Dict[str, util.ModelInfo] = dataclasses.field(default_factory=dict)
     script_name: str = None
 
     @functools.cached_property
@@ -59,7 +56,7 @@ class TracerArgs:
 
 
 def call_benchit(
-    model_inputs: dict, model_info: ModelInfo, tracer_args: TracerArgs
+    model_inputs: dict, model_info: util.ModelInfo, tracer_args: TracerArgs
 ) -> None:
     """
     Calls the benchit function from within the model forward function
@@ -128,7 +125,7 @@ def call_benchit(
         model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
-    except groqflow.common.exceptions.GroqitStageError:
+    except exp.GroqitStageError:
         load_state = build.load_state(build_name=build_name)
         if len(load_state.info.opt_onnx_unsupported_ops) > 0:
             model_info.status_message = "Unsupported op(s) " + ", ".join(
@@ -138,7 +135,7 @@ def call_benchit(
             model_info.status_message = "Build Error: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
 
-    except groqflow.common.exceptions.GroqFlowError:
+    except exp.GroqFlowError:
         model_info.status_message = "GroqFlowError: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
 
@@ -184,7 +181,7 @@ def store_model_info(
 
     # Keep track of all models details
     if model_hash not in tracer_args.models_found.keys():
-        tracer_args.models_found[model_hash] = ModelInfo(
+        tracer_args.models_found[model_hash] = util.ModelInfo(
             model=model,
             name=model_name,
             file=file,
