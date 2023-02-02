@@ -1,10 +1,10 @@
 # labels: name::clip author::skip
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 # Parsing command-line arguments
-batch_size, height, num_channels, width = mlagility.parse(
+batch_size, height, num_channels, width = parse(
     ["batch_size", "height", "num_channels", "width"]
 )
 

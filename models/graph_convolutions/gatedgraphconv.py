@@ -3,7 +3,7 @@
 The gated graph convolution operator from the `"Gated Graph Sequence Neural Networks"
 <https://arxiv.org/abs/1511.05493>`_ paper
 """
-import mlagility
+from mlagility.parser import parse
 import torch
 
 from torch_geometric.datasets import Planetoid
@@ -14,7 +14,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-num_layers, out_channels = mlagility.parse(["num_layers", "out_channels"])
+num_layers, out_channels = parse(["num_layers", "out_channels"])
 
 
 model = GatedGraphConv(out_channels, num_layers)

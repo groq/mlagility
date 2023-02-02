@@ -1,5 +1,5 @@
 # labels: name::visual_bert author::skip
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
@@ -11,7 +11,7 @@ import torch
     visual_embedding_dim,
     visual_embedding_dim,
     visual_seq_length,
-) = mlagility.parse(
+) = parse(
     [
         "batch_size",
         "max_seq_length",

@@ -1,10 +1,10 @@
 # labels: name::big_bird author::skip
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 # Parsing command-line arguments
-batch_size = mlagility.parse(["batch_size"])
+batch_size = parse(["batch_size"])
 
 
 # Model and input configurations

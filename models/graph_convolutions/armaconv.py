@@ -4,7 +4,7 @@ The ARMA graph convolutional operator from the `"Graph Neural Networks with Conv
 ARMA Filters"
 <https://arxiv.org/abs/1901.01343>`_ paper
 """
-import mlagility
+from mlagility.parser import parse
 import torch
 
 from torch_geometric.datasets import Planetoid
@@ -15,7 +15,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-out_channels = mlagility.parse(["out_channels"])
+out_channels = parse(["out_channels"])
 
 
 model = ARMAConv(dataset.num_features, out_channels)

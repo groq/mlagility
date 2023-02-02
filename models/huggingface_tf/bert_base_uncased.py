@@ -3,14 +3,14 @@
 https://huggingface.co/bert-base-uncased
 """
 
-import mlagility
+from mlagility.parser import parse
 import transformers
 import tensorflow as tf
 
 tf.random.set_seed(0)
 
 # Parsing command-line arguments
-batch_size, max_seq_length = mlagility.parse(["batch_size", "max_seq_length"])
+batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
 config = transformers.AutoConfig.from_pretrained("bert-base-uncased")

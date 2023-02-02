@@ -5,7 +5,7 @@ The dynamic neighborhood aggregation operator from the
 <https://arxiv.org/abs/1904.04849>`_ paper
 """
 
-import mlagility
+from mlagility.parser import parse
 import torch
 
 from torch_geometric.datasets import Planetoid
@@ -16,7 +16,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-num_layers, in_channels = mlagility.parse(["num_layers", "in_channels"])
+num_layers, in_channels = parse(["num_layers", "in_channels"])
 
 
 model = DNAConv(in_channels)

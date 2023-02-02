@@ -1,12 +1,12 @@
 # labels: test_group::mlagility name::sew author::huggingface
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 torch.manual_seed(0)
 
 # Parsing command-line arguments
-batch_size = mlagility.parse(["batch_size"])
+batch_size = parse(["batch_size"])
 
 
 # Model and input configurations

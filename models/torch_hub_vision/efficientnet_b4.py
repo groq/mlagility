@@ -1,11 +1,11 @@
 # labels: test_group::mlagility name::efficientnet_b4 author::torch_hub_vision
-import mlagility
+from mlagility.parser import parse
 import torch
 
 torch.manual_seed(0)
 
 # Parsing command-line arguments
-batch_size, num_channels, width, height = mlagility.parse(
+batch_size, num_channels, width, height = parse(
     ["batch_size", "num_channels", "width", "height"]
 )
 

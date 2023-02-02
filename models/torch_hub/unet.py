@@ -1,10 +1,10 @@
 # labels: test_group::mlagility name::unet author::torch_hub
 """https://pytorch.org/hub/mateuszbuda_brain-segmentation-pytorch_unet/"""
-import mlagility
+from mlagility.parser import parse
 import torch
 
 # Parsing command-line arguments
-batch_size, height, num_channels, width = mlagility.parse(
+batch_size, height, num_channels, width = parse(
     ["batch_size", "height", "num_channels", "width"]
 )
 

@@ -1,13 +1,13 @@
 # labels: test_group::mlagility name::biggan author::huggingface
 """https://github.com/huggingface/pytorch-pretrained-BigGAN/blob/master/README.md"""
-import mlagility
+from mlagility.parser import parse
 import torch
 
 from pytorch_pretrained_biggan import BigGAN
 
 
 # Parsing command-line arguments
-batch_size = mlagility.parse(["batch_size"])
+batch_size = parse(["batch_size"])
 noise_dim = 128
 class_vector_dim = 1000
 truncation_dim = 1

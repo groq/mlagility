@@ -1,11 +1,11 @@
 # labels: test_group::mlagility name::distil_wav2vec2_for_audio_classification author::huggingface
 """https://huggingface.co/bookbot/distil-wav2vec2-xls-r-adult-child-cls-89m"""
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 # Parsing command-line arguments
-batch_size, max_audio_seq_length = mlagility.parse(
+batch_size, max_audio_seq_length = parse(
     ["batch_size", "max_audio_seq_length"]
 )
 

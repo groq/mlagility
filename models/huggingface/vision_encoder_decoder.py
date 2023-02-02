@@ -1,12 +1,12 @@
 # labels: test_group::mlagility name::vision_encoder_decoder author::huggingface
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 torch.manual_seed(0)
 
 # Parsing command-line arguments
-batch_size, height, max_seq_length, width = mlagility.parse(
+batch_size, height, max_seq_length, width = parse(
     ["batch_size", "height", "max_seq_length", "width"]
 )
 

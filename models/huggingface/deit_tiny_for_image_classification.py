@@ -1,11 +1,11 @@
 # labels: test_group::mlagility name::deit_tiny_for_image_classification author::huggingface
 """https://huggingface.co/facebook/deit-tiny-patch16-224"""
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 # Parsing command-line arguments
-batch_size, height, num_channels, width = mlagility.parse(
+batch_size, height, num_channels, width = parse(
     ["batch_size", "height", "num_channels", "width"]
 )
 

@@ -1,11 +1,11 @@
 # labels: test_group::mlagility name::mobilevit_x_small_for_semantic_segmentation author::huggingface
 """https://huggingface.co/apple/deeplabv3-mobilevit-x-small"""
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 # Parsing command-line arguments
-batch_size, height, num_channels, width = mlagility.parse(
+batch_size, height, num_channels, width = parse(
     ["batch_size", "height", "num_channels", "width"]
 )
 

@@ -1,11 +1,11 @@
 # labels: test_group::mlagility name::minilmv2 author::huggingface
 """https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2"""
-import mlagility
+from mlagility.parser import parse
 import torch
 from transformers import AutoModel
 
 # Parsing command-line arguments
-batch_size, max_seq_length = mlagility.parse(["batch_size", "max_seq_length"])
+batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
 # This version of MiniLM generates token embeddings

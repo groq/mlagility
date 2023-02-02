@@ -3,12 +3,12 @@
 https://huggingface.co/openai-gpt
 """
 
-import mlagility
+from mlagility.parser import parse
 import transformers
 import tensorflow as tf
 
 # Parsing command-line arguments
-batch_size, max_seq_length = mlagility.parse(["batch_size", "max_seq_length"])
+batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
 model = transformers.TFAutoModel.from_pretrained("openai-gpt")

@@ -1,5 +1,5 @@
 # labels: name::deberta_v2 author::skip
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
@@ -7,7 +7,7 @@ import torch
 #   and we skip any model that requires > 16 GroqChip1 processors
 
 # Parsing command-line arguments
-batch_size, max_seq_length = mlagility.parse(["batch_size", "max_seq_length"])
+batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
 # Model and input configurations

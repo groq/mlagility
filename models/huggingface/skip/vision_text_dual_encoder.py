@@ -1,11 +1,11 @@
 # labels: name::vision_text_dual_encoder author::skip
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 
 # Parsing command-line arguments
-batch_size, height, max_seq_length, num_channels, width = mlagility.parse(
+batch_size, height, max_seq_length, num_channels, width = parse(
     ["batch_size", "height", "max_seq_length", "num_channels", "width"]
 )
 

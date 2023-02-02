@@ -4,7 +4,7 @@ The chebyshev spectral graph convolutional operator from the `"Convolutional
 Neural Networks on Graphs with Fast Localized Spectral Filtering"
 <https://arxiv.org/abs/1606.09375>`_ paper
 """
-import mlagility
+from mlagility.parser import parse
 import torch
 
 from torch_geometric.datasets import Planetoid
@@ -15,7 +15,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-k = mlagility.parse(["k"])
+k = parse(["k"])
 
 
 model = ChebConv(

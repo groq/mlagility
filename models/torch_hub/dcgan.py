@@ -1,11 +1,11 @@
 # labels: test_group::mlagility name::dcgan author::torch_hub
 """https://pytorch.org/hub/facebookresearch_pytorch-gan-zoo_dcgan/"""
 
-import mlagility
+from mlagility.parser import parse
 import torch
 
 # Parsing command-line arguments
-batch_size = mlagility.parse(["batch_size"])
+batch_size = parse(["batch_size"])
 noise_dim = 128
 
 # Model and input configurations

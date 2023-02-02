@@ -1,10 +1,10 @@
 # labels: test_group::mlagility name::marian author::huggingface
-import mlagility
+from mlagility.parser import parse
 import transformers
 import torch
 
 # Parsing command-line arguments
-batch_size, max_seq_length = mlagility.parse(["batch_size", "max_seq_length"])
+batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
 # Model and input configurations
