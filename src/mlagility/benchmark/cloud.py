@@ -128,7 +128,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
         # TODO (ramkrishna2910): Enabling localhost execution will be handled
         # in a separate MR (Issue #5)
         print(
-        "User is responsible for ensuring the remote server has python>=3.8 \
+            "User is responsible for ensuring the remote server has python>=3.8 \
             and docker>=20.10 installed"
         )
         print("Provide your instance IP and hostname below:")
@@ -188,7 +188,9 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
         # Check for CPU and transfer files
         setup_cpu_host(client)
     else:
-        raise ValueError(f"Only 'cpu' and 'gpu' are supported, but received {accelerator}")
+        raise ValueError(
+            f"Only 'cpu' and 'gpu' are supported, but received {accelerator}"
+        )
 
     return client
 
@@ -284,12 +286,9 @@ def execute_cpu_remotely(
     output_dir = "mlagility_remote_cache"
     remote_outputs_file = "mlagility_remote_cache/outputs.txt"
     remote_errors_file = "mlagility_remote_cache/errors.txt"
-    print("Setting up environment...")
     env_name = "ort_env"
-    process = subprocess.Popen(["bash", f"mlagility_remote_cache/setup_ort_env.sh {env_name}"],\
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.communicate()
-
+    exec_command(client, "bash mlagility_remote_cache/setup_ort_env.sh", ignore_error=True)
+    
     print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
