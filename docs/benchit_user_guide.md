@@ -294,7 +294,7 @@ _Note_: `list` is not available as an API.
 - `-b BUILD_NAMES [BUILD_NAMES ...], --build-names BUILD_NAMES [BUILD_NAMES ...]` Name(s) of the specific builds to be printed, within the cache directory
 - `--all` Delete all builds in the cache directory
 
-_Note_: `delete` is not available as an API.
+_Note_: `state` is not available as an API.
 
 ### `delete` Command
 
