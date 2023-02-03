@@ -105,6 +105,7 @@ def benchit(
     build_name: Optional[str] = None,
     cache_dir: str = build.DEFAULT_CACHE_DIR,
     device: str = "groq",
+    backend: str = "local",
     build_only: bool = False,
 ):
     """
@@ -127,7 +128,7 @@ def benchit(
         gpu_model = gpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
-        perf = gpu_model.benchmark()
+        perf = gpu_model.benchmark(backend=backend)
 
         latency_ms = float(perf.latency["mean "].split(" ")[1])
         throughput_ips = float(perf.throughput.split(" ")[0])
@@ -142,7 +143,7 @@ def benchit(
         cpu_model = cpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
-        perf = cpu_model.benchmark()
+        perf = cpu_model.benchmark(backend=backend)
 
         latency_ms = float(perf.latency)
         throughput_ips = float(perf.throughput)

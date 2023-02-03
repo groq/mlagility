@@ -87,7 +87,7 @@ def run(
 ):
 
     # TODO: Handle exception for failure
-    onnx_model = f"{output_dir}/onnxmodel/model.onnx"
+    onnx_model = f"{output_dir}/model.onnx"
     perf_result = run_ort_profile(onnx_model, num_iterations)
     # assert perf_result is list of int or float
     save_ort_results(perf_result, num_iterations)
@@ -152,11 +152,6 @@ if __name__ == "__main__":
         "iterations",
         type=int,
         help="Number of times to execute the received onnx model",
-    )
-    parser.add_argument(
-        "username",
-        type=str,
-        help="username to access CPU home directory",
     )
     args = vars(parser.parse_args())
 

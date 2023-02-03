@@ -216,7 +216,7 @@ def execute_gpu_remotely(
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.mkdir("mlagility_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
+        s.put(state.converted_onnx_file, "mlagility_remote_cache/model.onnx")
 
     # Run benchmarking script
     output_dir = "mlagility_remote_cache"
@@ -297,7 +297,7 @@ def execute_cpu_remotely(
         client,
         (
             "/usr/bin/python3 mlagility_remote_cache/execute-cpu.py "
-            f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
+            f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations}"
         ),
     )
     if exit_code == 1:
@@ -332,48 +332,54 @@ def execute_cpu_locally(
     """
 
     # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
+    # sys.stdout = build.Logger(log_execute_path)
 
     print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
 
-    # os.mkdir("mlagility_remote_cache/onnxmodel")
-    # shutil.copy(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
+    output_dir = f"{state.cache_dir}/mlagility_local_execution_cache"
+    outputs_file =  f"{output_dir}/outputs.txt"
+    errors_file =  f"{output_dir}/errors.txt"
+    
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir)
+    os.mkdir(f"{output_dir}")
+    shutil.copy(state.converted_onnx_file, f"{output_dir}/model.onnx")
 
     # Run benchmarking script
-    output_dir = "mlagility_remote_cache"
-    remote_outputs_file = "mlagility_remote_cache/outputs.txt"
-    remote_errors_file = "mlagility_remote_cache/errors.txt"
     
     print("Setting up OnnxRuntime env...")
     # Check if conda is installed
     conda_location = shutil.which("conda")
     if not conda_location:
-        raise exp.GroqitEnvError("conda installation not found.")
-
-    env_name = "ort_env"
-    setup_env = subprocess.Popen(["bash", f"setup_ort_venv.sh {env_name}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raise ValueError("conda installation not found.")
+    conda_src = conda_location.split("miniconda3")[0]
+    print("Creating environment...")
+    env_name = "abcd"
+    setup_env = subprocess.Popen(["bash", "setup_ort_venv.sh", f"{env_name}", f"{conda_src}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     setup_env.communicate()
     
     print("Running benchmarking script...")
-    conda = conda_location.split("miniconda3")[0]
-    run_benchmark = subprocess.Popen([f"{conda}/miniconda3/envs/{env_name}/bin/python execute-cpu.py", f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+    run_benchmark = subprocess.Popen([f"{conda_src}miniconda3/envs/{env_name}/bin/python", "execute-cpu.py", f"{output_dir}", f"{outputs_file}", f"{errors_file}", f"{iterations}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     run_benchmark.communicate()
     
     # Get output files back
-    shutil.copy(
-        remote_outputs_file,
+    shutil.move(
+        outputs_file,
         os.path.join(
             state.cache_dir, state.config.build_name, "cpu_performance.json"
         ),
     )
-    shutil.copy(
-        remote_errors_file,
+    shutil.move(
+        errors_file,
         os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
     )
-    shutil.copy(remote_outputs_file)
-    shutil.copy(remote_errors_file)
+
+    #TODO: Delete this dir
+    # shutil.remove(outputs_file)
+    # shutil.remove(errors_file)
     # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
+    # sys.stdout = sys.stdout.terminal
