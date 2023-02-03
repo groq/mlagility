@@ -356,7 +356,7 @@ def main():
     #######################################
 
     delete_parser = cache_subparsers.add_parser(
-        "delete", help="Delete builds in a GroqFlow build cache"
+        "delete", help="Delete one or more builds in a build cache"
     )
     delete_parser.set_defaults(func=filesystem.delete_builds)
 
@@ -374,7 +374,7 @@ def main():
     delete_group.add_argument(
         "build_name",
         nargs="?",
-        help="Name(s) of the specific builds to be deleted, within the cache directory",
+        help="Name of the specific build to be deleted, within the cache directory",
     )
 
     delete_group.add_argument(
