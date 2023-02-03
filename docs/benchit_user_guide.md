@@ -243,7 +243,7 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
 - `--use-slurm` Execute the build(s) on Slurm instead of using local compute resources
   - Not available as an API argument.
 - `--lean-cache` Delete all build artifacts except for log files after the build
-- Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
+  - Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility)
   - Also available as an API argument, `benchit(cache_dir=Str, ...)`.
 - `--rebuild REBUILD` Sets a cache policy that decides whether to load or rebuild a cached build.
