@@ -7,6 +7,7 @@ from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
 import groqflow.justgroqit.hummingbird as hummingbird
 from mlagility.api import gpumodel, cpumodel
+import mlagility.common.filesystem as filesystem
 
 
 class SuccessStage(stage.GroqitStage):
@@ -80,7 +81,7 @@ def exportit(
     model: Any,
     inputs: Dict[str, Any],
     build_name: Optional[str] = None,
-    cache_dir: str = build.DEFAULT_CACHE_DIR,
+    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
 ):
     """
     Export a model to ONNX and save it to the cache
@@ -103,7 +104,7 @@ def benchit(
     model: Any,
     inputs: Dict[str, Any],
     build_name: Optional[str] = None,
-    cache_dir: str = build.DEFAULT_CACHE_DIR,
+    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     device: str = "groq",
     build_only: bool = False,
 ):
