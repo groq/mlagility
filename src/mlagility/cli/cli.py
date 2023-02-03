@@ -24,14 +24,19 @@ def print_version(_):
 
 
 def print_state(args):
-    for build_dir in args.build_names:
-        printing.log_info(
-            f"The state of build {build_dir} in cache {args.cache_dir} is:"
-        )
-        with open(
-            build.state_file(args.cache_dir, build_dir), "r", encoding="utf-8"
-        ) as file:
+    printing.log_info(
+        f"The state of build {args.build_name} in cache {args.cache_dir} is:"
+    )
+
+    state_path = build.state_file(args.cache_dir, args.build_name)
+    if os.path.exists(state_path):
+        with open(state_path, "r", encoding="utf-8") as file:
             print(file.read())
+    else:
+        printing.log_error(
+            f"No build found with name: {build}. "
+            "Try running `benchit cache list` to see the builds in your build cache."
+        )
 
 
 def main():
@@ -271,10 +276,24 @@ def main():
     # )
 
     #######################################
-    # Parser for the "report" command
+    # Subparser for the "cache" command
     #######################################
 
-    report_parser = subparsers.add_parser(
+    cache_parser = subparsers.add_parser(
+        "cache", help="Commands for managing the build cache"
+    )
+
+    cache_subparsers = cache_parser.add_subparsers(
+        title="cache",
+        help="Commands for managing the build cache",
+        required=True,
+    )
+
+    #######################################
+    # Parser for the "cache report" command
+    #######################################
+
+    report_parser = cache_subparsers.add_parser(
         "report", help="Generate reports in CSV format"
     )
     report_parser.set_defaults(func=report.summary_spreadsheet)
@@ -290,10 +309,10 @@ def main():
     )
 
     #######################################
-    # Parser for the "list" command
+    # Parser for the "cache list" command
     #######################################
 
-    list_parser = subparsers.add_parser(
+    list_parser = cache_subparsers.add_parser(
         "list", help="List all builds in a target cache"
     )
     list_parser.set_defaults(func=filesystem.print_available_builds)
@@ -309,15 +328,15 @@ def main():
     )
 
     #######################################
-    # Parser for the "state" command
+    # Parser for the "cache print" command
     #######################################
 
-    state_parser = subparsers.add_parser(
-        "state", help="Print the state of a build in a target cache"
+    print_parser = cache_subparsers.add_parser(
+        "print", help="Print the state of a build in a target cache"
     )
-    state_parser.set_defaults(func=print_state)
+    print_parser.set_defaults(func=print_state)
 
-    state_parser.add_argument(
+    print_parser.add_argument(
         "-d",
         "--cache-dir",
         dest="cache_dir",
@@ -327,21 +346,16 @@ def main():
         default=filesystem.DEFAULT_CACHE_DIR,
     )
 
-    state_parser.add_argument(
-        "-b",
-        "--build-names",
-        nargs="+",
-        dest="build_names",
-        help="Name(s) of the specific builds to be printed, within the cache directory",
-        required=False,
-        default=None,
+    print_parser.add_argument(
+        "build_name",
+        help="Name of the specific build to be printed, within the cache directory",
     )
 
     #######################################
-    # Parser for the "delete" command
+    # Parser for the "cache delete" command
     #######################################
 
-    delete_parser = subparsers.add_parser(
+    delete_parser = cache_subparsers.add_parser(
         "delete", help="Delete builds in a GroqFlow build cache"
     )
     delete_parser.set_defaults(func=filesystem.delete_builds)
@@ -358,13 +372,9 @@ def main():
     delete_group = delete_parser.add_mutually_exclusive_group(required=True)
 
     delete_group.add_argument(
-        "-b",
-        "--build-names",
-        nargs="+",
-        dest="build_names",
+        "build_name",
+        nargs="?",
         help="Name(s) of the specific builds to be deleted, within the cache directory",
-        required=False,
-        default=None,
     )
 
     delete_group.add_argument(

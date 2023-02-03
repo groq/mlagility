@@ -122,16 +122,16 @@ def delete_builds(args):
     if args.delete_all:
         builds = get_available_builds(args.cache_dir)
     else:
-        builds = args.build_names
+        builds = [args.build_name]
 
     for build in builds:
         build_path = os.path.join(args.cache_dir, build)
         if cache.rmdir(build_path):
             printing.log_info(f"Deleted build: {build}")
         else:
-            printing.log_warning(
+            printing.log_error(
                 f"No build found with name: {build}. "
-                "Try running `groqit list_builds` to see the builds in your build cache."
+                "Try running `benchit cache list` to see the builds in your build cache."
             )
 
 
