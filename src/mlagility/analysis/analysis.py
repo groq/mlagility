@@ -20,8 +20,8 @@ import groqflow.common.exceptions as exp
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 import mlagility.common.labels as labels
-from mlagility.api import benchit
-from mlagility import filesystem
+from mlagility.api.api import benchit
+import mlagility.common.filesystem as filesystem
 
 
 class Action(Enum):
@@ -113,6 +113,11 @@ def call_benchit(
             build_name=build_name,
             cache_dir=cache_dir,
             build_only=Action.BENCHMARK not in tracer_args.actions,
+            lean_cache=tracer_args.lean_cache,
+            groq_num_chips=tracer_args.num_chips,
+            groq_compiler_flags=tracer_args.compiler_flags,
+            groq_assembler_flags=tracer_args.assembler_flags,
+            groqview=tracer_args.groqview,
         )
 
         model_info.status_message = "Model successfully built!"
@@ -138,13 +143,6 @@ def call_benchit(
         util.stop_stdout_forward()
         model_info.status_message = f"Unknown benchit error: {e}"
         model_info.status_message_color = printing.Colors.WARNING
-
-    # Add metadata and clean cache if needed
-    output_dir = os.path.join(cache_dir, build_name)
-    if os.path.isdir(output_dir):
-        # Delete all files except logs and other metadata
-        if tracer_args.lean_cache:
-            util.clean_output_dir(output_dir)
 
 
 def get_model_hash(

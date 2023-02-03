@@ -20,5 +20,5 @@ output_size = 500
 pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}
 
-benchit(pytorch_model, inputs, device="gpu")
-benchit(pytorch_model, inputs, device="cpu")
+benchit(pytorch_model, inputs, device="nvidia")
+benchit(pytorch_model, inputs, device="x86")
