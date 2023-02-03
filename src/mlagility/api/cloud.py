@@ -289,6 +289,13 @@ def execute_cpu_remotely(
         s.mkdir("mlagility_remote_cache/onnxmodel")
         s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
 
+    # TODO: Fix cloud execution with new setup script
+    # Check if conda is installed
+    # conda_location = shutil.which("conda")
+    # if not conda_location:
+    #     raise ValueError("conda installation not found.")
+    # conda_src = conda_location.split("miniconda3")[0]
+    
     # Run benchmarking script
     output_dir = "mlagility_remote_cache"
     remote_outputs_file = "mlagility_remote_cache/outputs.txt"
@@ -302,14 +309,9 @@ def execute_cpu_remotely(
     _, exit_code = exec_command(
         client,
         (
-<<<<<<< HEAD:src/mlagility/benchmark/cloud.py
-            "/usr/bin/python3 mlagility_remote_cache/execute-cpu.py "
-            f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations}"
-=======
             f"/home/{username}/miniconda3/envs/{env_name}/bin/python mlagility_remote_cache/"
             "execute-cpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
->>>>>>> main:src/mlagility/api/cloud.py
         ),
     )
     if exit_code == 1:
@@ -350,12 +352,14 @@ def execute_cpu_locally(
     """
 
     # Redirect all stdout to log_file
-    # sys.stdout = build.Logger(log_execute_path)
+    sys.stdout = build.Logger(log_execute_path)
 
+    # Check if ONNX file has been generated
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
 
+    # Setup local execution folders to save outputs/ errors
     output_dir = f"{state.cache_dir}/mlagility_local_execution_cache"
     outputs_file =  f"{output_dir}/outputs.txt"
     errors_file =  f"{output_dir}/errors.txt"
@@ -365,25 +369,28 @@ def execute_cpu_locally(
     os.makedirs(f"{output_dir}/onnxmodel")
     shutil.copy(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
 
-    # Run benchmarking script
-    
-    print("Setting up OnnxRuntime env...")
     # Check if conda is installed
     conda_location = shutil.which("conda")
     if not conda_location:
         raise ValueError("conda installation not found.")
     conda_src = conda_location.split("miniconda3")[0]
+
+    # Create/ update local conda environment for CPU benchmarking
     print("Creating environment...")
     env_name = "onnxruntime-env"
-    setup_env = subprocess.Popen(["bash", "setup_ort_env.sh", f"{env_name}", f"{conda_src}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    setup_env = subprocess.Popen(["bash", "setup_ort_env.sh", f"{env_name}", f"{conda_src}"], 
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     setup_env.communicate()
     
+    # Run the benchmark
     print("Running benchmarking script...")
-    
-    run_benchmark = subprocess.Popen([f"{conda_src}miniconda3/envs/{env_name}/bin/python", "execute-cpu.py", f"{output_dir}", f"{outputs_file}", f"{errors_file}", f"{iterations}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    run_benchmark = subprocess.Popen([f"{conda_src}miniconda3/envs/{env_name}/bin/python",
+                                       "execute-cpu.py", f"{output_dir}", f"{outputs_file}", 
+                                       f"{errors_file}", f"{iterations}"], stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
     run_benchmark.communicate()
     
-    # Get output files back
+    # Move output files back to the build cache
     shutil.move(
         outputs_file,
         os.path.join(
@@ -395,8 +402,5 @@ def execute_cpu_locally(
         os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
     )
 
-    #TODO: Delete this dir
-    # shutil.remove(outputs_file)
-    # shutil.remove(errors_file)
     # Stop redirecting stdout
-    # sys.stdout = sys.stdout.terminal
+    sys.stdout = sys.stdout.terminal

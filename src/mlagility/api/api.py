@@ -187,7 +187,7 @@ def benchit(
     print(f"throughput: {throughput_ips:.1f} ips")
 
     # Add metadata and clean cache if needed
-    output_dir = os.path.join(cache_dir, build_name)
+    output_dir = os.path.join(cache_dir, gmodel.state.config.build_name)
     if os.path.isdir(output_dir):
         # Delete all files except logs and other metadata
         if lean_cache:

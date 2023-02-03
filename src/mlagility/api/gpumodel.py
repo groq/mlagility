@@ -42,7 +42,9 @@ class GPUModel:
             "log_gpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100, backend: str = "local") -> GPUMeasuredPerformance:
+    def benchmark(
+        self, repetitions: int = 100, backend: str = "local"
+    ) -> GPUMeasuredPerformance:
 
         printing.log_info(
             (
@@ -80,12 +82,14 @@ class GPUModel:
         if os.path.isfile(self.gpu_error_file()):
             os.remove(self.gpu_error_file())
 
-        if (backend == "cloud"):
+        if backend == "cloud":
             cloud.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
-        elif (backend == "local"):
+        elif backend == "local":
             cloud.execute_gpu_locally(self.state, self.log_execute_path, repetitions)
         else:
-            raise ValueError(f"Only 'cloud' and 'local' are supported, but received {backend}")
+            raise ValueError(
+                f"Only 'cloud' and 'local' are supported, but received {backend}"
+            )
 
         return GPUMeasuredPerformance(self.gpu_performance_file())
 

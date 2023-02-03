@@ -42,14 +42,16 @@ class CPUModel:
             "log_cpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100, backend: str = "local") -> CPUMeasuredPerformance:
+    def benchmark(
+        self, repetitions: int = 100, backend: str = "local"
+    ) -> CPUMeasuredPerformance:
 
         printing.log_info(
             (
                 " CPU is not used for accuracy comparisons it's only used for"
                 " performance comparison. So dummy inputs are used.\n"
                 " User is responsible for ensuring the remote cpu server is turned on and"
-                " has miniconda3 @ /home/user/ and python>=3.8 installed."
+                " has miniconda3 and python>=3.8 installed."
             )
         )
 
@@ -79,12 +81,14 @@ class CPUModel:
         if os.path.isfile(self.cpu_error_file()):
             os.remove(self.cpu_error_file())
 
-        if (backend == "cloud"):
+        if backend == "cloud":
             cloud.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
-        elif (backend == "local"):
+        elif backend == "local":
             cloud.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
         else:
-            raise ValueError(f"Only 'cloud' and 'local' are supported, but received {backend}")
+            raise ValueError(
+                f"Only 'cloud' and 'local' are supported, but received {backend}"
+            )
 
         return CPUMeasuredPerformance(self.cpu_performance_file())
 
