@@ -241,18 +241,24 @@ def execute_gpu_remotely(
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.get(
-            remote_outputs_file,
-            os.path.join(
-                state.cache_dir, state.config.build_name, "gpu_performance.json"
-            ),
-        )
-        s.get(
-            remote_errors_file,
-            os.path.join(state.cache_dir, state.config.build_name, "gpu_error.npy"),
-        )
-        s.remove(remote_outputs_file)
-        s.remove(remote_errors_file)
+        try:
+            s.get(
+                remote_outputs_file,
+                os.path.join(
+                    state.cache_dir, state.config.build_name, "gpu_performance.json"
+                ),
+            )
+            s.get(
+                remote_errors_file,
+                os.path.join(state.cache_dir, state.config.build_name, "gpu_error.npy"),
+            )
+            s.remove(remote_outputs_file)
+            s.remove(remote_errors_file)
+        except FileNotFoundError as e:
+            print(
+                "Output/ error files not found! Please make sure your remote GPU machine is"
+                "turned ON and has all the required dependencies installed"
+            )
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
 
@@ -309,17 +315,23 @@ def execute_cpu_remotely(
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.get(
-            remote_outputs_file,
-            os.path.join(
-                state.cache_dir, state.config.build_name, "cpu_performance.json"
-            ),
-        )
-        s.get(
-            remote_errors_file,
-            os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
-        )
-        s.remove(remote_outputs_file)
-        s.remove(remote_errors_file)
+        try:
+            s.get(
+                remote_outputs_file,
+                os.path.join(
+                    state.cache_dir, state.config.build_name, "cpu_performance.json"
+                ),
+            )
+            s.get(
+                remote_errors_file,
+                os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
+            )
+            s.remove(remote_outputs_file)
+            s.remove(remote_errors_file)
+        except FileNotFoundError as e:
+            print(
+                "Output/ error files not found! Please make sure your remote CPU machine is"
+                "turned ON and has all the required dependencies installed"
+            )
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
