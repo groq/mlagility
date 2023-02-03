@@ -21,7 +21,6 @@ setup(
     entry_points={
         "console_scripts": [
             "benchit=mlagility:benchitcli",
-            "autogroq=mlagility:autogroq",
         ]
     },
     python_requires="==3.8.*",

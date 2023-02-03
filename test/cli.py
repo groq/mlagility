@@ -1,3 +1,7 @@
+"""
+Tests focused on the command-level functionality of benchit CLI
+"""
+
 import os
 from typing import List
 import unittest
