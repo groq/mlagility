@@ -128,7 +128,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
         # TODO (ramkrishna2910): Enabling localhost execution will be handled
         # in a separate MR (Issue #5)
         print(
-        "User is responsible for ensuring the remote server has python>=3.8 \
+            "User is responsible for ensuring the remote server has python>=3.8 \
             and docker>=20.10 installed"
         )
         print("Provide your instance IP and hostname below:")
@@ -171,6 +171,7 @@ def setup_cpu_host(client) -> None:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.put(f"{dir_path}/execute-cpu.py", "mlagility_remote_cache/execute-cpu.py")
+        s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
 
 
 def setup_connection(accelerator: str) -> paramiko.SSHClient:
@@ -187,7 +188,9 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
         # Check for CPU and transfer files
         setup_cpu_host(client)
     else:
-        raise ValueError(f"Only 'cpu' and 'gpu' are supported, but received {accelerator}")
+        raise ValueError(
+            f"Only 'cpu' and 'gpu' are supported, but received {accelerator}"
+        )
 
     return client
 
@@ -238,18 +241,24 @@ def execute_gpu_remotely(
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.get(
-            remote_outputs_file,
-            os.path.join(
-                state.cache_dir, state.config.build_name, "gpu_performance.json"
-            ),
-        )
-        s.get(
-            remote_errors_file,
-            os.path.join(state.cache_dir, state.config.build_name, "gpu_error.npy"),
-        )
-        s.remove(remote_outputs_file)
-        s.remove(remote_errors_file)
+        try:
+            s.get(
+                remote_outputs_file,
+                os.path.join(
+                    state.cache_dir, state.config.build_name, "gpu_performance.json"
+                ),
+            )
+            s.get(
+                remote_errors_file,
+                os.path.join(state.cache_dir, state.config.build_name, "gpu_error.npy"),
+            )
+            s.remove(remote_outputs_file)
+            s.remove(remote_errors_file)
+        except FileNotFoundError:
+            print(
+                "Output/ error files not found! Please make sure your remote GPU machine is"
+                "turned ON and has all the required dependencies installed"
+            )
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
 
@@ -283,19 +292,17 @@ def execute_cpu_remotely(
     output_dir = "mlagility_remote_cache"
     remote_outputs_file = "mlagility_remote_cache/outputs.txt"
     remote_errors_file = "mlagility_remote_cache/errors.txt"
-    print("Running benchmarking script...")
-    # TODO:
-    # Check for python and pip in /usr/bin or return errors
-    # Issuing sudo commands remotely is not good practice
-    # Clean this section in part 2 MR with setuptools
-    _, exit_code = exec_command(client, ("sudo apt -y install python3-pip"))
-    _, exit_code = exec_command(client, ("/usr/bin/python3 -m pip install numpy"))
-    _, exit_code = exec_command(client, ("/usr/bin/python3 -m pip install onnxruntime"))
+    env_name = "ort_env"
+    exec_command(
+        client, "bash mlagility_remote_cache/setup_ort_env.sh", ignore_error=True
+    )
 
+    print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
         (
-            "/usr/bin/python3 mlagility_remote_cache/execute-cpu.py "
+            f"/home/{username}/miniconda3/envs/{env_name}/bin/python mlagility_remote_cache/"
+            "execute-cpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"
         ),
     )
@@ -308,17 +315,23 @@ def execute_cpu_remotely(
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.get(
-            remote_outputs_file,
-            os.path.join(
-                state.cache_dir, state.config.build_name, "cpu_performance.json"
-            ),
-        )
-        s.get(
-            remote_errors_file,
-            os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
-        )
-        s.remove(remote_outputs_file)
-        s.remove(remote_errors_file)
+        try:
+            s.get(
+                remote_outputs_file,
+                os.path.join(
+                    state.cache_dir, state.config.build_name, "cpu_performance.json"
+                ),
+            )
+            s.get(
+                remote_errors_file,
+                os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
+            )
+            s.remove(remote_outputs_file)
+            s.remove(remote_errors_file)
+        except FileNotFoundError:
+            print(
+                "Output/ error files not found! Please make sure your remote CPU machine is"
+                "turned ON and has all the required dependencies installed"
+            )
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
