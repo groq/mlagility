@@ -4,6 +4,7 @@ import subprocess
 from typing import Tuple, Union, Dict, Any
 from stat import S_ISDIR
 import yaml
+import shutil
 import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
@@ -320,5 +321,59 @@ def execute_cpu_remotely(
         )
         s.remove(remote_outputs_file)
         s.remove(remote_errors_file)
+    # Stop redirecting stdout
+    sys.stdout = sys.stdout.terminal
+
+def execute_cpu_locally(
+    state: build.State, log_execute_path: str, iterations: int
+) -> None:
+    """
+    Execute Model on the local CPU
+    """
+
+    # Redirect all stdout to log_file
+    sys.stdout = build.Logger(log_execute_path)
+
+    print("Transferring model file...")
+    if not os.path.exists(state.converted_onnx_file):
+        msg = "Model file not found"
+        raise exp.GroqModelRuntimeError(msg)
+
+    # os.mkdir("mlagility_remote_cache/onnxmodel")
+    # shutil.copy(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
+
+    # Run benchmarking script
+    output_dir = "mlagility_remote_cache"
+    remote_outputs_file = "mlagility_remote_cache/outputs.txt"
+    remote_errors_file = "mlagility_remote_cache/errors.txt"
+    
+    print("Setting up OnnxRuntime env...")
+    # Check if conda is installed
+    conda_location = shutil.which("conda")
+    if not conda_location:
+        raise exp.GroqitEnvError("conda installation not found.")
+
+    env_name = "ort_env"
+    setup_env = subprocess.Popen(["bash", f"setup_ort_venv.sh {env_name}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    setup_env.communicate()
+    
+    print("Running benchmarking script...")
+    conda = conda_location.split("miniconda3")[0]
+    run_benchmark = subprocess.Popen([f"{conda}/miniconda3/envs/{env_name}/bin/python execute-cpu.py", f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations} {username}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    run_benchmark.communicate()
+    
+    # Get output files back
+    shutil.copy(
+        remote_outputs_file,
+        os.path.join(
+            state.cache_dir, state.config.build_name, "cpu_performance.json"
+        ),
+    )
+    shutil.copy(
+        remote_errors_file,
+        os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
+    )
+    shutil.copy(remote_outputs_file)
+    shutil.copy(remote_errors_file)
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal

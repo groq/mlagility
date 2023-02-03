@@ -42,7 +42,7 @@ class CPUModel:
             "log_cpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100) -> CPUMeasuredPerformance:
+    def benchmark(self, repetitions: int = 100, backend: str = "local") -> CPUMeasuredPerformance:
 
         printing.log_info(
             (
@@ -53,7 +53,7 @@ class CPUModel:
             )
         )
 
-        benchmark_results = self._execute(repetitions=repetitions)
+        benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.cpu_measured_latency = benchmark_results.latency
         self.state.info.cpu_measured_throughput = benchmark_results.throughput
         return benchmark_results
@@ -68,7 +68,7 @@ class CPUModel:
             self.state.cache_dir, self.state.config.build_name, "cpu_error.npy"
         )
 
-    def _execute(self, repetitions: int) -> CPUMeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str) -> CPUMeasuredPerformance:
         """
         Execute model on cpu and return the performance
         """
@@ -79,8 +79,12 @@ class CPUModel:
         if os.path.isfile(self.cpu_error_file()):
             os.remove(self.cpu_error_file())
 
-        # Only cloud execution of the CPU is supported, local execution is not supported
-        cloud.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
+        if (backend == "cloud"):
+            cloud.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
+        elif (backend == "local"):
+            cloud.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
+        else:
+            raise ValueError(f"Only 'cloud' and 'local' are supported, but received {backend}")
 
         return CPUMeasuredPerformance(self.cpu_performance_file())
 

@@ -196,10 +196,25 @@ def main():
         ],
         nargs="+",
         dest="devices",
-        help="Types(s) of hardware devices to be used for the benchmark "
+        help="Types(s) of hardware devices to be used for the benchmark"
         f'(defaults to ["{benchmark_default_device}"])',
         required=False,
         default=[benchmark_default_device],
+    )
+
+    benchmark_default_backend = "local"
+    benchmark_parser.add_argument(
+        "--backend",
+        choices=[
+            "local",
+            "cloud",
+        ],
+        nargs="+",
+        dest="backend",
+        help="Location hardware devices to be used for the benchmark"
+        f'(defaults to ["{benchmark_default_backend}"])',
+        required=False,
+        default=[benchmark_default_backend],
     )
 
     benchmark_default_runtime = "ort"

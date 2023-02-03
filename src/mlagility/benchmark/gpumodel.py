@@ -42,7 +42,7 @@ class GPUModel:
             "log_gpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100) -> GPUMeasuredPerformance:
+    def benchmark(self, repetitions: int = 100, backend: str = "local") -> GPUMeasuredPerformance:
 
         printing.log_info(
             (
@@ -54,7 +54,7 @@ class GPUModel:
             )
         )
 
-        benchmark_results = self._execute(repetitions=repetitions)
+        benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.gpu_measured_latency = benchmark_results.latency
         self.state.info.gpu_measured_throughput = benchmark_results.throughput
         return benchmark_results
@@ -69,7 +69,7 @@ class GPUModel:
             self.state.cache_dir, self.state.config.build_name, "gpu_error.npy"
         )
 
-    def _execute(self, repetitions: int) -> GPUMeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str) -> GPUMeasuredPerformance:
         """
         Execute model on GPU and return the performance
         """
@@ -80,8 +80,12 @@ class GPUModel:
         if os.path.isfile(self.gpu_error_file()):
             os.remove(self.gpu_error_file())
 
-        # Only cloud execution of the GPU is supported, local execution is not supported
-        cloud.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
+        if (backend == "cloud"):
+            cloud.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
+        elif (backend == "local"):
+            cloud.execute_gpu_locally(self.state, self.log_execute_path, repetitions)
+        else:
+            raise ValueError(f"Only 'cloud' and 'local' are supported, but received {backend}")
 
         return GPUMeasuredPerformance(self.gpu_performance_file())
 
