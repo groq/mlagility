@@ -21,8 +21,5 @@ inputs = {
     "input_ids": tf.ones(shape=(batch_size, max_seq_length), dtype=tf.int32),
 }
 
-model(**inputs)
-
-
 # Call model
 model(**inputs)
