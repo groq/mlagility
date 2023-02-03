@@ -254,7 +254,7 @@ def execute_gpu_remotely(
             )
             s.remove(remote_outputs_file)
             s.remove(remote_errors_file)
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             print(
                 "Output/ error files not found! Please make sure your remote GPU machine is"
                 "turned ON and has all the required dependencies installed"
@@ -328,7 +328,7 @@ def execute_cpu_remotely(
             )
             s.remove(remote_outputs_file)
             s.remove(remote_errors_file)
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             print(
                 "Output/ error files not found! Please make sure your remote CPU machine is"
                 "turned ON and has all the required dependencies installed"
