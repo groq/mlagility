@@ -15,7 +15,7 @@ class Arg:
 
     def add_arg(self, parser_obj):
         parser_obj.add_argument(
-            "--" + self.name, default=self.default, type=self.type, nargs=1
+            "--" + self.name, default=self.default, type=self.type, nargs="?"
         )
 
 
