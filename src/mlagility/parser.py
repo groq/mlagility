@@ -22,7 +22,7 @@ class Arg:
 
 def parse(valid_args: List):
 
-    # List valid ml-agility args
+    # List valid mlagility args
     mla_args = {
         "batch_size": Arg("batch_size", default=1, type=int, nargs="?"),
         "max_seq_length": Arg("max_seq_length", default=128, type=int, nargs="?"),
