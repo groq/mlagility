@@ -112,6 +112,7 @@ def get_available_builds(cache_dir):
 
 
 def print_available_builds(args):
+    printing.log_info(f"Builds available in cache {args.cache_dir}:")
     builds = get_available_builds(args.cache_dir)
     printing.list_table(builds)
     print()
