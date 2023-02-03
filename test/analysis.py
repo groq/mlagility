@@ -8,15 +8,16 @@ from pathlib import Path
 import shutil
 import subprocess
 import numpy as np
-import mlagility.filesystem as filesystem
+import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels
+from mlagility.parser import parse
 import groqflow.common.cache as cache
 
 # We generate a corpus on to the filesystem during the test
 # to get around how weird bake tests are when it comes to
 # filesystem access
 
-test_models_dot_py = {
+test_scripts_dot_py = {
     "linear_pytorch": """
 # labels: test_group::selftest license::mit framework::pytorch tags::selftest,small
 import torch
@@ -123,6 +124,14 @@ inputs = {
 }
 
 model(**inputs)""",
+    "mla_parser": """
+from mlagility.parser import parse
+
+parsed_args = parse(["height", "width", "num_channels"])
+
+print(parsed_args)
+
+""",
 }
 minimal_tokenizer = """
 {
@@ -153,7 +162,7 @@ if dirpath.is_dir():
 os.makedirs(test_dir)
 
 # Add files to test directory
-for key, value in test_models_dot_py.items():
+for key, value in test_scripts_dot_py.items():
     model_path = os.path.join(test_dir, f"{key}.py")
     with open(model_path, "w", encoding="utf") as f:
         f.write(value)
@@ -259,7 +268,7 @@ class Testing(unittest.TestCase):
         labels_found = labels.load_from_cache(cache_dir, build_name) != {}
         assert metadata_found and cache_is_lean and labels_found
 
-    def test_07_args(self):
+    def test_07_generic_args(self):
         output = subprocess.check_output(
             [
                 "benchit",
@@ -274,7 +283,32 @@ class Testing(unittest.TestCase):
         )
         assert "Received arg test_arg" in output
 
-    def test_08_pipeline(self):
+    def test_08_valid_mla_args(self):
+        height, width, num_channels = parse(["height", "width", "num_channels"])
+        cmd = [
+            "benchit",
+            "mla_parser.py",
+            "--script-args",
+            f"--num_channels {num_channels+1}",
+        ]
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        output = stdout.decode("utf-8").split("\n")[0]
+        expected_output = str([height, width, num_channels + 1])
+        assert output == expected_output, f"Got {output} but expected {expected_output}"
+
+    def test_09_invalid_mla_args(self):
+        cmd = [
+            "benchit",
+            "mla_parser.py",
+            "--script-args",
+            "--invalid_arg 123",
+        ]
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        _, stderr = process.communicate()
+        assert "error: unrecognized argument" in stderr.decode("utf-8")
+
+    def test_10_pipeline(self):
         output = run_analysis(
             [
                 "benchit",
@@ -284,7 +318,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_09_activation(self):
+    def test_11_activation(self):
         output = run_analysis(
             [
                 "benchit",
@@ -294,7 +328,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (0, 0, 0))
 
-    def test_10_encoder_decoder(self):
+    def test_12_encoder_decoder(self):
         output = run_analysis(
             [
                 "benchit",
@@ -304,7 +338,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_11_benchit_hashes(self):
+    def test_13_benchit_hashes(self):
         output = run_analysis(
             [
                 "benchit",
