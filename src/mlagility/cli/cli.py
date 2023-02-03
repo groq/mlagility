@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import groqflow.common.build as build
+import groqflow.common.printing as printing
 import mlagility.cli.report as report
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.benchmark as benchmark_command
@@ -20,6 +21,17 @@ def print_version(_):
     Print the package version number
     """
     print(mlagility_version)
+
+
+def print_state(args):
+    for build_dir in args.build_names:
+        printing.log_info(
+            f"The state of build {build_dir} in cache {args.cache_dir} is:"
+        )
+        with open(
+            build.state_file(args.cache_dir, build_dir), "r", encoding="utf-8"
+        ) as file:
+            print(file.read())
 
 
 def main():
@@ -294,6 +306,35 @@ def main():
         f" (defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
         default=filesystem.DEFAULT_CACHE_DIR,
+    )
+
+    #######################################
+    # Parser for the "state" command
+    #######################################
+
+    state_parser = subparsers.add_parser(
+        "state", help="Print the state of a build in a target cache"
+    )
+    state_parser.set_defaults(func=print_state)
+
+    state_parser.add_argument(
+        "-d",
+        "--cache-dir",
+        dest="cache_dir",
+        help="The state of a build in this build cache directory will printed to the terminal "
+        f" (defaults to {filesystem.DEFAULT_CACHE_DIR})",
+        required=False,
+        default=filesystem.DEFAULT_CACHE_DIR,
+    )
+
+    state_parser.add_argument(
+        "-b",
+        "--build-names",
+        nargs="+",
+        dest="build_names",
+        help="Name(s) of the specific builds to be printed, within the cache directory",
+        required=False,
+        default=None,
     )
 
     #######################################

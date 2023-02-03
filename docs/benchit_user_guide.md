@@ -221,11 +221,12 @@ The default usage of `benchit` is to directly provide it with a python script, f
 _Note_: Some of these tasks have to do with the MLAgility `cache`, which stores the `build directories` (see [Build](#build)).
 
 The commands are:
-- `benchmark` (default command): benchmark the model(s) in one or more scripts
-- `list`: list the available builds in the cache
-- `delete`: delete one or more builds from the cache
-- `report`: print a report in .csv format summarizing the results
-- `version`: print the `benchit` version number
+- [`benchmark`](#benchmark-command) (default command): benchmark the model(s) in one or more scripts
+- [`list`](#list-command): list the available builds in the cache
+- [`state`](#state-command): print the [state](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) of one or more builds from the cache
+- [`delete`](#delete-command): delete one or more builds from the cache
+- [`report`](#report-command): print a report in .csv format summarizing the results
+- [`version`](#version-command): print the `benchit` version number
 
 You can see the options available for any command by running `benchit COMMAND --help`.
 
@@ -277,6 +278,24 @@ Finally, you may find yourself wanting to run a subset of the benchmarking comma
   - _Note_: any benchmark-specific options will be ignored, such as `--ip`.
   - Available as an API argument, `benchit(build_only=True/False, ...)
 
+### `list` Command
+
+`list` presents the following options:
+
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
+
+_Note_: `list` is not available as an API.
+
+### `state` Command
+
+`state` prints out each selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) files, which contains useful information about that build. The `state` command presents the following options:
+
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
+- `-b BUILD_NAMES [BUILD_NAMES ...], --build-names BUILD_NAMES [BUILD_NAMES ...]` Name(s) of the specific builds to be printed, within the cache directory
+- `--all` Delete all builds in the cache directory
+
+_Note_: `delete` is not available as an API.
+
 ### `delete` Command
 
 `delete` presents the following options:
@@ -286,14 +305,6 @@ Finally, you may find yourself wanting to run a subset of the benchmarking comma
 - `--all` Delete all builds in the cache directory
 
 _Note_: `delete` is not available as an API.
-
-### `list` Command
-
-`list` presents the following options:
-
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
-
-_Note_: `list` is not available as an API.
 
 ### `report` Command
 
