@@ -1,5 +1,5 @@
-from typing import Any, Dict, Optional
-
+from typing import Any, Dict, Optional, List
+import os
 from groqflow import groqit
 import groqflow.common.build as build
 import groqflow.justgroqit.stage as stage
@@ -8,6 +8,9 @@ import groqflow.justgroqit.export as export
 import groqflow.justgroqit.hummingbird as hummingbird
 from mlagility.api import gpumodel, cpumodel
 import mlagility.common.filesystem as filesystem
+import mlagility.analysis.util as util
+
+MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
 
 class SuccessStage(stage.GroqitStage):
@@ -82,6 +85,7 @@ def exportit(
     inputs: Dict[str, Any],
     build_name: Optional[str] = None,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
+    rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
 ):
     """
     Export a model to ONNX and save it to the cache
@@ -95,6 +99,7 @@ def exportit(
         build_name=build_name,
         cache_dir=cache_dir,
         sequence=model_type_to_export_sequence[model_type],
+        rebuild=rebuild,
     )
 
     return gmodel
@@ -107,6 +112,12 @@ def benchit(
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     device: str = "groq",
     build_only: bool = False,
+    lean_cache: bool = False,
+    rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
+    groq_compiler_flags: Optional[List[str]] = None,
+    groq_assembler_flags: Optional[List[str]] = None,
+    groq_num_chips: Optional[int] = None,
+    groqview: bool = False,
 ):
     """
     Benchmark a model against some inputs on target hardware
@@ -114,12 +125,24 @@ def benchit(
 
     if device == "groq":
         gmodel = groqit(
-            model=model, inputs=inputs, build_name=build_name, cache_dir=cache_dir
+            model=model,
+            inputs=inputs,
+            build_name=build_name,
+            cache_dir=cache_dir,
+            rebuild=rebuild,
+            compiler_flags=groq_compiler_flags,
+            assembler_flags=groq_assembler_flags,
+            num_chips=groq_num_chips,
+            groqview=groqview,
         )
         perf = gmodel.benchmark()
     elif device == "nvidia":
         gmodel = exportit(
-            model=model, inputs=inputs, build_name=build_name, cache_dir=cache_dir
+            model=model,
+            inputs=inputs,
+            build_name=build_name,
+            cache_dir=cache_dir,
+            rebuild=rebuild,
         )
 
         if build_only:
@@ -134,7 +157,11 @@ def benchit(
         throughput_ips = float(perf.throughput.split(" ")[0])
     elif device == "x86":
         gmodel = exportit(
-            model=model, inputs=inputs, build_name=build_name, cache_dir=cache_dir
+            model=model,
+            inputs=inputs,
+            build_name=build_name,
+            cache_dir=cache_dir,
+            rebuild=rebuild,
         )
 
         if build_only:
@@ -157,3 +184,10 @@ def benchit(
     )
     print(f"latency: {latency_ms:.3f} ms")
     print(f"throughput: {throughput_ips:.1f} ips")
+
+    # Add metadata and clean cache if needed
+    output_dir = os.path.join(cache_dir, build_name)
+    if os.path.isdir(output_dir):
+        # Delete all files except logs and other metadata
+        if lean_cache:
+            util.clean_output_dir(output_dir)

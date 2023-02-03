@@ -243,7 +243,7 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
 - `--use-slurm` Execute the build(s) on Slurm instead of using local compute resources
   - Not available as an API argument.
 - `--lean-cache` Delete all build artifacts except for log files after the build
-- Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
+  - Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility)
   - Also available as an API argument, `benchit(cache_dir=Str, ...)`.
 - `--rebuild REBUILD` Sets a cache policy that decides whether to load or rebuild a cached build.
@@ -261,11 +261,11 @@ The following options can be used to customize the analysis process (see [Analys
 
 The following options are specific to Groq builds and benchmarks, and are passed into the [GroqFlow build tool](https://github.com/groq/groqflow):
 - `--compiler-flags COMPILER_FLAGS [COMPILER_FLAGS ...]` Sets the groqit(compiler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default compiler flags)
-  - Also available as an API argument, `benchit(compiler_flags=List, ...)`.
+  - Also available as an API argument, `benchit(groq_compiler_flags=List, ...)`.
 - `--assembler-flags ASSEMBLER_FLAGS [ASSEMBLER_FLAGS ...]` Sets the groqit(assembler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default assembler flags)
-  - Also available as an API argument, `benchit(assembler_flags=List, ...)`.
+  - Also available as an API argument, `benchit(groq_assembler_flags=List, ...)`.
 - `--num-chips NUM_CHIPS` Sets the groqit(num_chips=...) arg (default behavior is to let groqit() automatically select the number of chips)
-  - Also available as an API argument, `benchit(num_chips=Int, ...)`.
+  - Also available as an API argument, `benchit(groq_num_chips=Int, ...)`.
 - `--groqview` Enables GroqView for the build(s)
   - Also available as an API argument, `benchit(groqview=True/False,)`.
 
