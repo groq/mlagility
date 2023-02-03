@@ -87,7 +87,7 @@ def run(
 ):
 
     # TODO: Handle exception for failure
-    onnx_model = f"{output_dir}/model.onnx"
+    onnx_model = f"{output_dir}/onnxmodel/model.onnx"
     perf_result = run_ort_profile(onnx_model, num_iterations)
     # assert perf_result is list of int or float
     save_ort_results(perf_result, num_iterations)

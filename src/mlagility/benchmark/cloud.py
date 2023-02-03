@@ -334,7 +334,6 @@ def execute_cpu_locally(
     # Redirect all stdout to log_file
     # sys.stdout = build.Logger(log_execute_path)
 
-    print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -345,8 +344,8 @@ def execute_cpu_locally(
     
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
-    os.mkdir(f"{output_dir}")
-    shutil.copy(state.converted_onnx_file, f"{output_dir}/model.onnx")
+    os.makedirs(f"{output_dir}/onnxmodel")
+    shutil.copy(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
 
     # Run benchmarking script
     
@@ -357,8 +356,8 @@ def execute_cpu_locally(
         raise ValueError("conda installation not found.")
     conda_src = conda_location.split("miniconda3")[0]
     print("Creating environment...")
-    env_name = "abcd"
-    setup_env = subprocess.Popen(["bash", "setup_ort_venv.sh", f"{env_name}", f"{conda_src}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    env_name = "onnxruntime-env"
+    setup_env = subprocess.Popen(["bash", "setup_ort_env.sh", f"{env_name}", f"{conda_src}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     setup_env.communicate()
     
     print("Running benchmarking script...")
