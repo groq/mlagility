@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import groqflow.common.printing as printing
 import groqflow.common.build as build
-import mlagility.benchmark.cloud as cloud
+import mlagility.api.cloud as cloud
 
 
 @dataclass

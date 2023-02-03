@@ -6,8 +6,8 @@ from typing import Tuple, List
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
 import groqflow.common.build
-import mlagility.slurm as slurm
-import mlagility.filesystem as filesystem
+import mlagility.cli.slurm as slurm
+import mlagility.common.filesystem as filesystem
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 
 

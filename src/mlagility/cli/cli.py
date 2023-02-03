@@ -2,9 +2,9 @@ import argparse
 import os
 import sys
 import groqflow.common.build as build
-import mlagility.report as report
-import mlagility.filesystem as filesystem
-import mlagility.benchmark.benchmark as benchmark_command
+import mlagility.cli.report as report
+import mlagility.common.filesystem as filesystem
+import mlagility.cli.benchmark as benchmark_command
 from mlagility.version import __version__ as mlagility_version
 
 

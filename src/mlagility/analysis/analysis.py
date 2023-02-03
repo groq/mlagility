@@ -20,8 +20,8 @@ import groqflow.common.exceptions as exp
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 import mlagility.common.labels as labels
-from mlagility.api import benchit
-from mlagility import filesystem
+from mlagility.api.api import benchit
+import mlagility.common.filesystem as filesystem
 
 
 class Action(Enum):

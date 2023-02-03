@@ -8,7 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import numpy as np
-import mlagility.filesystem as filesystem
+import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels
 from mlagility.parser import parse
 import groqflow.common.cache as cache
