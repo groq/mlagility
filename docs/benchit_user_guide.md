@@ -222,10 +222,10 @@ _Note_: Some of these tasks have to do with the MLAgility `cache`, which stores 
 
 The commands are:
 - [`benchmark`](#benchmark-command) (default command): benchmark the model(s) in one or more scripts
-- [`list`](#list-command): list the available builds in the cache
-- [`state`](#state-command): print the [state](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) of one or more builds from the cache
-- [`delete`](#delete-command): delete one or more builds from the cache
-- [`report`](#report-command): print a report in .csv format summarizing the results
+- [`cache list`](#list-command): list the available builds in the cache
+- [`cache print`](#print-command): print the [state](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) of a build from the cache
+- [`cache delete`](#delete-command): delete one or more builds from the cache
+- [`cache report`](#report-command): print a report in .csv format summarizing the results of all builds in a cache
 - [`version`](#version-command): print the `benchit` version number
 
 You can see the options available for any command by running `benchit COMMAND --help`.
@@ -278,41 +278,40 @@ Finally, you may find yourself wanting to run a subset of the benchmarking comma
   - _Note_: any benchmark-specific options will be ignored, such as `--ip`.
   - Available as an API argument, `benchit(build_only=True/False, ...)
 
-### `list` Command
+### `cache list` Command
 
-`list` presents the following options:
-
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
-
-_Note_: `list` is not available as an API.
-
-### `state` Command
-
-`state` prints out each selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) files, which contains useful information about that build. The `state` command presents the following options:
+`cache list` prints the names of all of the builds in a build cache. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
-- `-b BUILD_NAMES [BUILD_NAMES ...], --build-names BUILD_NAMES [BUILD_NAMES ...]` Name(s) of the specific builds to be printed, within the cache directory
+
+_Note_: `cache list` is not available as an API.
+
+### `cache print` Command
+
+`cache print` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
+
+- `build_name` Name of the specific build to be printed, within the cache directory
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
+
+_Note_: `cache print` is not available as an API.
+
+### `cache delete` Command
+
+`cache delete` deletes one or builds from a build cache. It presents the following options:
+
+- `build_name` Name of the specific build to be deleted, within the cache directory
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 - `--all` Delete all builds in the cache directory
 
-_Note_: `state` is not available as an API.
+_Note_: `cache delete` is not available as an API.
 
-### `delete` Command
+### `cache report` Command
 
-`delete` presents the following options:
-
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
-- `-b BUILD_NAMES [BUILD_NAMES ...], --build-names BUILD_NAMES [BUILD_NAMES ...]` Name(s) of the specific builds to be deleted, within the cache directory
-- `--all` Delete all builds in the cache directory
-
-_Note_: `delete` is not available as an API.
-
-### `report` Command
-
-`report` presents the following options:
+`cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
-_Note_: `report` is not available as an API.
+_Note_: `cache report` is not available as an API.
 
 ### `version` Command
 
