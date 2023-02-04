@@ -6,6 +6,7 @@ from stat import S_ISDIR
 import yaml
 import shutil
 import paramiko
+import getpass
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 
@@ -211,9 +212,9 @@ def setup_local_cpu(state: build.State) -> None:
     if stdout != "x86_64" or check_device.returncode == 1:
         msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
         raise exp.GroqModelRuntimeError(msg)
-
+    username = getpass.getuser()
     # Transfer common files to host
-    output_dir = f"{state.cache_dir}/mlagility_local_cache"
+    output_dir = f"/home/{username}/mlagility_local_cache"
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
     subprocess.run(["mkdir", f"{output_dir}"])
@@ -233,9 +234,9 @@ def setup_local_gpu(state: build.State) -> None:
     if result.stdout == "" or result.returncode == 1:
         msg = "No NVIDIA GPUs available on the local machine"
         # raise exp.GroqModelRuntimeError(msg)
-
+    username = getpass.getuser()
     # Transfer common files to host
-    output_dir = f"{state.cache_dir}/mlagility_local_cache"
+    output_dir = f"/home/{username}/mlagility_local_cache"
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
     subprocess.run(["mkdir", f"{output_dir}"])
@@ -286,11 +287,11 @@ def execute_gpu_remotely(
         raise exp.GroqModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir(f"{state.cache_dir}/mlagility_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, f"{state.cache_dir}/mlagility_remote_cache/onnxmodel/model.onnx")
+        s.mkdir("mlagility_remote_cache/onnxmodel")
+        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
 
     # Run benchmarking script
-    output_dir = f"{state.cache_dir}/mlagility_remote_cache"
+    output_dir = "mlagility_remote_cache"
     remote_outputs_file = f"{output_dir}/outputs.txt"
     remote_errors_file = f"{output_dir}/errors.txt"
     print("Running benchmarking script...")
@@ -347,9 +348,9 @@ def execute_gpu_locally(
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
-
+    username = getpass.getuser()
     # Setup local execution folders to save outputs/ errors
-    output_dir = f"{state.cache_dir}/mlagility_local_cache"
+    output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
 
@@ -367,11 +368,11 @@ def execute_gpu_locally(
         raise ValueError("python installation not found.")
 
     print("Running benchmarking script...")
-    username = "rsivakumar"
+
     run_benchmark = subprocess.Popen(
         [
             python_location,
-            f"{state.cache_dir}/mlagility_local_cache/execute-gpu.py",
+            f"/home/{username}/mlagility_local_cache/execute-gpu.py",
             f"{output_dir}",
             f"{outputs_file}",
             f"{errors_file}",
@@ -496,14 +497,14 @@ def execute_cpu_locally(
     sys.stdout = build.Logger(log_execute_path)
 
     setup_local_cpu(state)
-
+    username = getpass.getuser()
     # Check if ONNX file has been generated
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
 
     # Setup local execution folders to save outputs/ errors
-    output_dir = f"{state.cache_dir}/mlagility_local_cache"
+    output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
 
@@ -522,7 +523,7 @@ def execute_cpu_locally(
     setup_env = subprocess.Popen(
         [
             "bash",
-            f"{state.cache_dir}/mlagility_local_cache/setup_ort_env.sh",
+            f"/home/{username}/mlagility_local_cache/setup_ort_env.sh",
             f"{env_name}",
             f"{conda_src}",
         ],
@@ -540,7 +541,7 @@ def execute_cpu_locally(
     run_benchmark = subprocess.Popen(
         [
             f"{conda_src}miniconda3/envs/{env_name}/bin/python",
-            f"{state.cache_dir}/mlagility_local_cache/execute-cpu.py",
+            f"/home/{username}/mlagility_local_cache/execute-cpu.py",
             f"{output_dir}",
             f"{outputs_file}",
             f"{errors_file}",

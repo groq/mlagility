@@ -15,8 +15,8 @@ def run(output_dir: str, repetitions: int, username: str):
     # GroqFlow maintainers to keep this up to date with the latest version of release container
     latest_trt_docker = "nvcr.io/nvidia/tensorrt:22.12-py3"
     docker_name = "tensorrt22.12"
-    location = output_dir.split(f"/home/{username}")[1]
-    onnx_model = f"/app/{location}/onnxmodel/model.onnx"
+    # location = output_dir.split(f"/home/{username}")[1]
+    onnx_model = f"/app/{output_dir}/onnxmodel/model.onnx"
     print (onnx_model)
 
     # docker run args:
