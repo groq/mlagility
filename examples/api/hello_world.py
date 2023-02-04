@@ -20,5 +20,8 @@ output_size = 500
 pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}
 
-benchit(pytorch_model, inputs, device="nvidia")
-benchit(pytorch_model, inputs, device="x86")
+# benchit(pytorch_model, inputs, device="nvidia", backend="local")
+# benchit(pytorch_model, inputs, device="x86", backend="local")
+
+benchit(pytorch_model, inputs, device="nvidia", backend="cloud")
+# benchit(pytorch_model, inputs, device="x86", backend="cloud")

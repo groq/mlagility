@@ -287,11 +287,11 @@ def execute_gpu_remotely(
         raise exp.GroqModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir("mlagility_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
+        s.mkdir(f"/home/{username}/mlagility_remote_cache/onnxmodel")
+        s.put(state.converted_onnx_file, f"/home/{username}/mlagility_remote_cache/onnxmodel/model.onnx")
 
     # Run benchmarking script
-    output_dir = "mlagility_remote_cache"
+    output_dir = f"/home/{username}/mlagility_remote_cache"
     remote_outputs_file = f"{output_dir}/outputs.txt"
     remote_errors_file = f"{output_dir}/errors.txt"
     print("Running benchmarking script...")
