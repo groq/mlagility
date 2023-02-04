@@ -15,16 +15,14 @@ def run(output_dir: str, repetitions: int, username: str):
     # GroqFlow maintainers to keep this up to date with the latest version of release container
     latest_trt_docker = "nvcr.io/nvidia/tensorrt:22.12-py3"
     docker_name = "tensorrt22.12"
-    # location = output_dir.split(f"/home/{username}")[1]
-    onnx_model = f"/app/{output_dir}/onnxmodel/model.onnx"
-    print (onnx_model)
+    onnx_model = f"/app/onnxmodel/model.onnx"
 
     # docker run args:
     # "--gpus all" - use all gpus available
     # "-v <path>" -  mount the home dir to access the model inside the docker
     # "-itd" - start the docker in interactive mode in the background
     # "--rm" - remove the container automatically upon stopping
-    docker_run_args = f"--gpus all -v /home/{username}/:/app  -itd --rm"
+    docker_run_args = f"--gpus all -v {output_dir}:/app  -itd --rm"
 
     # docker exec args:
     # "--onnx=<path>" - path to the onnx model in the mounted file
