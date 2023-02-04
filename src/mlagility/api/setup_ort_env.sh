@@ -8,6 +8,7 @@
 # Choose environment name (defaults to ort_env)
 ENV_NAME=${1:-ort_env}
 source $2miniconda3/etc/profile.d/conda.sh
+# conda init
 
 # Create environment (if it doen't exist)
 export CONDA_ALWAYS_YES="true"

@@ -219,7 +219,7 @@ def execute_gpu_remotely(
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.mkdir("mlagility_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, "mlagility_remote_cache/model.onnx")
+        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
 
     # Run benchmarking script
     output_dir = "mlagility_remote_cache"
@@ -262,6 +262,65 @@ def execute_gpu_remotely(
             )
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
+
+
+def execute_gpu_locally(
+    state: build.State, log_execute_path: str, iterations: int
+) -> None:
+    """
+    Execute Model on the local GPU
+    """
+
+    # Redirect all stdout to log_file
+    sys.stdout = build.Logger(log_execute_path)
+
+    if not os.path.exists(state.converted_onnx_file):
+        msg = "Model file not found"
+        raise exp.GroqModelRuntimeError(msg)
+
+    # Setup local execution folders to save outputs/ errors
+    output_dir = f"{state.cache_dir}/mlagility_local_execution_cache"
+    outputs_file =  f"{output_dir}/outputs.txt"
+    errors_file =  f"{output_dir}/errors.txt"
+    print(output_dir)
+    
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(f"{output_dir}/onnxmodel")
+    shutil.copy(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
+
+    # Check if docker is installed
+    docker_location = shutil.which("docker")
+    if not docker_location:
+        raise ValueError("docker installation not found.")
+    
+    # Check if python is installed
+    python_location = shutil.which("python")
+    if not python_location:
+        raise ValueError("python installation not found.")
+
+    print("Running benchmarking script...")
+    username = "rsivakumar"
+    run_benchmark = subprocess.Popen([python_location, "execute-gpu.py", f"{output_dir}", f"{outputs_file}", 
+                                       f"{errors_file}", f"{iterations}", f"{username}"], 
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    run_benchmark.communicate()
+
+    # Get output files back
+    # Move output files back to the build cache
+    shutil.move(
+        outputs_file,
+        os.path.join(
+            state.cache_dir, state.config.build_name, "gpu_performance.json"
+        ),
+    )
+    shutil.move(
+        errors_file,
+        os.path.join(state.cache_dir, state.config.build_name, "gpu_error.npy"),
+    )
+
+    # Stop redirecting stdout
+    # sys.stdout = sys.stdout.terminal
 
 
 def execute_cpu_remotely(
@@ -380,7 +439,11 @@ def execute_cpu_locally(
     env_name = "onnxruntime-env"
     setup_env = subprocess.Popen(["bash", "setup_ort_env.sh", f"{env_name}", f"{conda_src}"], 
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    setup_env.communicate()
+    stdout, stderr = setup_env.communicate()
+    if setup_env.returncode == 0:
+        print(f"Success: Setup/ updated conda environment - {stdout.decode().strip()}")
+    else:
+        print(f"Error: Failure to setup conda environment - {stderr.decode().strip()}")
     
     # Run the benchmark
     print("Running benchmarking script...")
@@ -388,7 +451,11 @@ def execute_cpu_locally(
                                        "execute-cpu.py", f"{output_dir}", f"{outputs_file}", 
                                        f"{errors_file}", f"{iterations}"], stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
-    run_benchmark.communicate()
+    stdout, stderr = run_benchmark.communicate()
+    if run_benchmark.returncode == 0:
+        print(f"Success: Running model using onnxrutime - {stdout.decode().strip()}")
+    else:
+        print(f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}")
     
     # Move output files back to the build cache
     shutil.move(

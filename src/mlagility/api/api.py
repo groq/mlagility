@@ -154,6 +154,7 @@ def benchit(
         )
         perf = gpu_model.benchmark(backend=backend)
 
+        print(perf.latency)
         latency_ms = float(perf.latency["mean "].split(" ")[1])
         throughput_ips = float(perf.throughput.split(" ")[0])
     elif device == "x86":
