@@ -176,30 +176,31 @@ def setup_cpu_host(client) -> None:
         s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
 
 
-# def setup_host(client, device_type: str) -> None:
-#     if device_type == "GPU":
-#         # Check if at least one NVIDIA GPU is available remotely
-#         stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
-#         if stdout == "" or exit_code == 1:
-#             msg = "No NVIDIA GPUs available on the remote machine"
-#             raise exp.GroqModelRuntimeError(msg)
-#         exec_file = "execute-gpu.py"
-#     elif device_type == "CPU":
-#         # Check if x86_64 CPU is available remotely
-#         stdout, exit_code = exec_command(client, "uname -i")
-#         if stdout != "x86_64" or exit_code == 1:
-#             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-#             raise exp.GroqModelRuntimeError(msg)
-#         exec_file = "execute-cpu.py"
-#         s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
-#     else:
-#         raise ValueError("Invalid device type")
+def setup_host(client, device_type: str) -> None:
+    if device_type == "gpu":
+        # Check if at least one NVIDIA GPU is available remotely
+        stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
+        if stdout == "" or exit_code == 1:
+            msg = "No NVIDIA GPUs available on the remote machine"
+            raise exp.GroqModelRuntimeError(msg)
+        exec_file = "execute-gpu.py"
+    elif device_type == "cpu":
+        # Check if x86_64 CPU is available remotely
+        stdout, exit_code = exec_command(client, "uname -i")
+        if stdout != "x86_64" or exit_code == 1:
+            msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
+            raise exp.GroqModelRuntimeError(msg)
+        exec_file = "execute-cpu.py"
+        with MySFTPClient.from_transport(client.get_transport()) as s:
+            s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
+    else:
+        raise ValueError(f"Only 'cpu' and 'gpu' are supported. But received {device_type}")
 
-#     # Transfer common files to host
-#     exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     with MySFTPClient.from_transport(client.get_transport()) as s:
-#         s.put(f"{dir_path}/{exec_file}", "mlagility_remote_cache/{exec_file}")
+    # Transfer common files to host
+    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with MySFTPClient.from_transport(client.get_transport()) as s:
+        s.put(f"{dir_path}/{exec_file}", "mlagility_remote_cache/{exec_file}")
 
 
 def setup_local_cpu(state: build.State) -> None:
@@ -250,17 +251,19 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
 
     # Connect to host
     client = connect_to_host(ip, username)
+    setup_host(client, device_type=accelerator)
 
-    if accelerator == "gpu":
-        # Check for GPU and transfer files
-        setup_gpu_host(client)
-    elif accelerator == "cpu":
-        # Check for CPU and transfer files
-        setup_cpu_host(client)
-    else:
-        raise ValueError(
-            f"Only 'cpu' and 'gpu' are supported, but received {accelerator}"
-        )
+    # if accelerator == "gpu":
+    #     # Check for GPU and transfer files
+    #     # setup_gpu_host(client)
+    #     setup_host(client, device_type=accelerator)
+    # elif accelerator == "cpu":
+    #     # Check for CPU and transfer files
+    #     setup_host(client, device_type=accelerator)
+    # else:
+    #     raise ValueError(
+    #         f"Only 'cpu' and 'gpu' are supported, but received {accelerator}"
+    #     )
 
     return client
 
