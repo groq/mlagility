@@ -49,7 +49,7 @@ class CPUModel:
                 " CPU is not used for accuracy comparisons it's only used for"
                 " performance comparison. So dummy inputs are used.\n"
                 " User is responsible for ensuring the remote cpu server is turned on and"
-                " has python>=3.8 installed."
+                " has miniconda3 @ /home/user/ and python>=3.8 installed."
             )
         )
 
