@@ -152,14 +152,14 @@ def setup_remote_host(client, device_type: str) -> None:
         if stdout == "" or exit_code == 1:
             msg = "No NVIDIA GPUs available on the remote machine"
             raise exp.GroqModelRuntimeError(msg)
-        exec_file = "execute-gpu.py"
+        files_to_transfer = ["execute-gpu.py"]
     elif device_type == "cpu":
         # Check if x86_64 CPU is available remotely
         stdout, exit_code = exec_command(client, "uname -i")
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        exec_file = "execute-cpu.py"
+        files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
     else:
         raise ValueError(f"Only 'cpu' and 'gpu' are supported. But received {device_type}")
 
@@ -167,11 +167,11 @@ def setup_remote_host(client, device_type: str) -> None:
     exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/{exec_file}", "mlagility_remote_cache/{exec_file}")
-        s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh") if device_type == "cpu" else None
+       for file in files_to_transfer:
+            s.put(f"{dir_path}/{file}", f"mlagility_remote_cache/{file}")
 
-def setup_local_host(state: build.State, device: str) -> None:
-    if device == "cpu":
+def setup_local_host(device_type: str, output_dir: str) -> None:
+    if device_type == "cpu":
         # Check if x86_64 CPU is available locally
         check_device = subprocess.run(
             ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -180,75 +180,34 @@ def setup_local_host(state: build.State, device: str) -> None:
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        execute_file = "execute-cpu.py"
-        setup_env_file = "setup_ort_env.sh"
-    elif device == "gpu":
+        files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
+
+    elif device_type == "gpu":
         # Check if at least one NVIDIA GPU is available locally
         result = subprocess.run(
-            ["lspci", "|", "grep", "-i", "nvidia"],
+            ["lspci"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             encoding="utf-8",
         )
-        if result.stdout == "" or result.returncode == 1:
+        print (result)
+        if "NVIDIA" not in result.stdout or result.returncode == 1:
             msg = "No NVIDIA GPUs available on the local machine"
             raise exp.GroqModelRuntimeError(msg)
-        execute_file = "execute-gpu.py"
+        files_to_transfer = ["execute-gpu.py"]
+        
     else:
-        raise ValueError(f"Invalid device type: {device}")
+        raise ValueError(f"Invalid device type: {device_type}")
 
     username = getpass.getuser()
     # Transfer files to host
-    output_dir = f"/home/{username}/mlagility_local_cache"
+    # output_dir = f"/home/{username}/mlagility_local_cache"
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
     subprocess.run(["mkdir", f"{output_dir}"])
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    shutil.copy(f"{dir_path}/{execute_file}", f"{output_dir}/{execute_file}")
-    if device == "cpu":
-        shutil.copy(f"{dir_path}/{setup_env_file}", f"{output_dir}/{setup_env_file}")
-
-# def setup_local_cpu(state: build.State) -> None:
-#     # Check if x86_64 CPU is available locally
-#     check_device = subprocess.run(
-#         ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-#     )
-#     # stdout, stderr = check_device.communicate()
-#     stdout = check_device.stdout.decode().strip()
-#     if stdout != "x86_64" or check_device.returncode == 1:
-#         msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-#         raise exp.GroqModelRuntimeError(msg)
-#     username = getpass.getuser()
-#     # Transfer common files to host
-#     output_dir = f"/home/{username}/mlagility_local_cache"
-#     if os.path.isdir(output_dir):
-#         shutil.rmtree(output_dir)
-#     subprocess.run(["mkdir", f"{output_dir}"])
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     shutil.copy(f"{dir_path}/execute-cpu.py", f"{output_dir}/execute-cpu.py")
-#     shutil.copy(f"{dir_path}/setup_ort_env.sh", f"{output_dir}/setup_ort_env.sh")
-
-
-# def setup_local_gpu(state: build.State) -> None:
-#     # Check if at least one NVIDIA GPU is available locally
-#     result = subprocess.run(
-#         ["lspci", "|", "grep", "-i", "nvidia"],
-#         stdout=subprocess.PIPE,
-#         stderr=subprocess.PIPE,
-#         encoding="utf-8",
-#     )
-#     if result.stdout == "" or result.returncode == 1:
-#         msg = "No NVIDIA GPUs available on the local machine"
-#         # raise exp.GroqModelRuntimeError(msg)
-#     username = getpass.getuser()
-#     # Transfer common files to host
-#     output_dir = f"/home/{username}/mlagility_local_cache"
-#     if os.path.isdir(output_dir):
-#         shutil.rmtree(output_dir)
-#     subprocess.run(["mkdir", f"{output_dir}"])
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     shutil.copy(f"{dir_path}/execute-gpu.py", f"{output_dir}/execute-gpu.py")
-
+    for file in files_to_transfer:
+        shutil.copy(f"{dir_path}/{file}", f"{output_dir}/{file}")
 
 def setup_connection(accelerator: str) -> paramiko.SSHClient:
     # Setup authentication scheme if needed
@@ -339,16 +298,17 @@ def execute_gpu_locally(
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
 
-    setup_local_host(state, device="gpu")
+    # Setup local execution folders to save outputs/ errors
+    username = getpass.getuser()
+    output_dir = f"/home/{username}/mlagility_local_cache"
+    outputs_file = f"{output_dir}/outputs.txt"
+    errors_file = f"{output_dir}/errors.txt"
+
+    setup_local_host(device_type="gpu", output_dir=output_dir)
 
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
-    username = getpass.getuser()
-    # Setup local execution folders to save outputs/ errors
-    output_dir = f"/home/{username}/mlagility_local_cache"
-    outputs_file = f"{output_dir}/outputs.txt"
-    errors_file = f"{output_dir}/errors.txt"
 
     os.makedirs(f"{output_dir}/onnxmodel")
     shutil.copy(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
@@ -356,19 +316,19 @@ def execute_gpu_locally(
     # Check if docker is installed
     docker_location = shutil.which("docker")
     if not docker_location:
-        raise ValueError("docker installation not found.")
+        raise ValueError("'docker' installation not found. Please install docker>=20.10")
 
     # Check if python is installed
     python_location = shutil.which("python")
     if not python_location:
-        raise ValueError("python installation not found.")
+        raise ValueError("'python' installation not found. Please install python>=3.8")
 
     print("Running benchmarking script...")
 
     run_benchmark = subprocess.Popen(
         [
             python_location,
-            f"/home/{username}/mlagility_local_cache/execute-gpu.py",
+            f"{output_dir}/execute-gpu.py",
             f"{output_dir}",
             f"{outputs_file}",
             f"{errors_file}",
@@ -386,7 +346,6 @@ def execute_gpu_locally(
             f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}"
         )
 
-    # Get output files back
     # Move output files back to the build cache
     shutil.move(
         outputs_file,
@@ -396,6 +355,10 @@ def execute_gpu_locally(
         errors_file,
         os.path.join(state.cache_dir, state.config.build_name, "gpu_error.npy"),
     )
+
+    # Delete the local cache folder created
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir)
 
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal
@@ -492,17 +455,18 @@ def execute_cpu_locally(
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
 
-    setup_local_host(state, device="cpu")
+    # Setup local execution folders to save outputs/ errors
     username = getpass.getuser()
+    output_dir = f"/home/{username}/mlagility_local_cache"
+    outputs_file = f"{output_dir}/outputs.txt"
+    errors_file = f"{output_dir}/errors.txt"
+    
+    setup_local_host(device_type="cpu", output_dir=output_dir)
+
     # Check if ONNX file has been generated
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
-
-    # Setup local execution folders to save outputs/ errors
-    output_dir = f"/home/{username}/mlagility_local_cache"
-    outputs_file = f"{output_dir}/outputs.txt"
-    errors_file = f"{output_dir}/errors.txt"
 
     os.makedirs(f"{output_dir}/onnxmodel")
     shutil.copy(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
@@ -519,7 +483,7 @@ def execute_cpu_locally(
     setup_env = subprocess.Popen(
         [
             "bash",
-            f"/home/{username}/mlagility_local_cache/setup_ort_env.sh",
+            f"{output_dir}/setup_ort_env.sh",
             f"{env_name}",
             f"{conda_src}",
         ],
@@ -537,7 +501,7 @@ def execute_cpu_locally(
     run_benchmark = subprocess.Popen(
         [
             f"{conda_src}miniconda3/envs/{env_name}/bin/python",
-            f"/home/{username}/mlagility_local_cache/execute-cpu.py",
+            f"{output_dir}/execute-cpu.py",
             f"{output_dir}",
             f"{outputs_file}",
             f"{errors_file}",
@@ -563,6 +527,10 @@ def execute_cpu_locally(
         errors_file,
         os.path.join(state.cache_dir, state.config.build_name, "cpu_error.npy"),
     )
+
+    # Delete the local cache folder created
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir)
 
     # Stop redirecting stdout
     sys.stdout = sys.stdout.terminal

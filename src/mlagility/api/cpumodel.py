@@ -48,9 +48,9 @@ class CPUModel:
 
         printing.log_info(
             (
-                " CPU is not used for accuracy comparisons it's only used for"
+                " CPU is not used for accuracy comparisons, it's only used for"
                 " performance comparison. So dummy inputs are used.\n"
-                " User is responsible for ensuring the remote cpu server is turned on and"
+                " User is responsible for ensuring the CPU is available and"
                 " has miniconda3 and python>=3.8 installed."
             )
         )

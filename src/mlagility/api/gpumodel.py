@@ -51,8 +51,8 @@ class GPUModel:
                 "GPU is not used for accuracy comparisons it's only used for"
                 " performance comparison. So inputs provided during model"
                 " compilation is used.\n"
-                " User is responsible for ensuring the remote GPU server is turned on and"
-                " has python>=3.8, docker>=20.10 installed."
+                " User is responsible for ensuring the GPU is available and"
+                " the system has python>=3.8, docker>=20.10 installed."
             )
         )
 
