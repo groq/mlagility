@@ -152,9 +152,6 @@ def benchit(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
         perf = gpu_model.benchmark()
-
-        latency_ms = float(perf.latency["mean "].split(" ")[1])
-        throughput_ips = float(perf.throughput.split(" ")[0])
     elif device == "x86":
         gmodel = exportit(
             model=model,
@@ -171,22 +168,20 @@ def benchit(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
         perf = cpu_model.benchmark()
-
-        latency_ms = float(perf.latency)
-        throughput_ips = float(perf.throughput)
     else:
         raise ValueError(
-            f"Only groq, x86, or nvidia are allowed values for device, but got {device}"
+            f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
         )
 
     print(
-        f"\nPerformance of build {gmodel.state.config.build_name} on device {device} is:"
+        f"\nPerformance of build {gmodel.state.config.build_name} on {perf.device_type} device "
+        f"{perf.device} is:"
     )
-    print(f"latency: {latency_ms:.3f} ms")
-    print(f"throughput: {throughput_ips:.1f} ips")
+    print(f"latency: {perf.mean_latency:.3f} {perf.latency_units}")
+    print(f"throughput: {perf.throughput:.1f} {perf.throughput_units}")
 
     # Add metadata and clean cache if needed
-    output_dir = os.path.join(cache_dir, build_name)
+    output_dir = os.path.join(cache_dir, perf.build_name)
     if os.path.isdir(output_dir):
         # Delete all files except logs and other metadata
         if lean_cache:
