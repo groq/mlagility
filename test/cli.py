@@ -300,7 +300,7 @@ class Testing(unittest.TestCase):
             script_name = strip_dot_py(test_script)
             assert script_name not in f.getvalue()
 
-    def test_cli_print(self):
+    def test_cli_stats(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -329,7 +329,7 @@ class Testing(unittest.TestCase):
                     testargs = [
                         "benchit",
                         "cache",
-                        "print",
+                        "stats",
                         build_name,
                     ]
                     with patch.object(sys, "argv", testargs):

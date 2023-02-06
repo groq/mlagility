@@ -15,6 +15,11 @@ class MyParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)
 
+    def print_cache_help(self):
+        print("Error: a cache command is required")
+        self.print_help()
+        sys.exit(2)
+
 
 def print_version(_):
     """
@@ -280,13 +285,15 @@ def main():
     #######################################
 
     cache_parser = subparsers.add_parser(
-        "cache", help="Commands for managing the build cache"
+        "cache",
+        help="Commands for managing the build cache",
     )
 
     cache_subparsers = cache_parser.add_subparsers(
         title="cache",
         help="Commands for managing the build cache",
         required=True,
+        dest="cache_cmd",
     )
 
     #######################################
@@ -328,27 +335,27 @@ def main():
     )
 
     #######################################
-    # Parser for the "cache print" command
+    # Parser for the "cache stats" command
     #######################################
 
-    print_parser = cache_subparsers.add_parser(
-        "print", help="Print the state of a build in a target cache"
+    stats_parser = cache_subparsers.add_parser(
+        "stats", help="Print stats about a build in a target cache"
     )
-    print_parser.set_defaults(func=print_state)
+    stats_parser.set_defaults(func=print_state)
 
-    print_parser.add_argument(
+    stats_parser.add_argument(
         "-d",
         "--cache-dir",
         dest="cache_dir",
-        help="The state of a build in this build cache directory will printed to the terminal "
+        help="The stats of a build in this build cache directory will printed to the terminal "
         f" (defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
         default=filesystem.DEFAULT_CACHE_DIR,
     )
 
-    print_parser.add_argument(
+    stats_parser.add_argument(
         "build_name",
-        help="Name of the specific build to be printed, within the cache directory",
+        help="Name of the specific build whose stats are to be printed, within the cache directory",
     )
 
     #######################################

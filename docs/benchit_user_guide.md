@@ -286,14 +286,14 @@ Finally, you may find yourself wanting to run a subset of the benchmarking comma
 
 _Note_: `cache list` is not available as an API.
 
-### `cache print` Command
+### `cache stats` Command
 
-`cache print` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
+`cache stats` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
 
-- `build_name` Name of the specific build to be printed, within the cache directory
+- `build_name` Name of the specific build whose stats are to be printed, within the cache directory
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
-_Note_: `cache print` is not available as an API.
+_Note_: `cache stats` is not available as an API.
 
 ### `cache delete` Command
 
