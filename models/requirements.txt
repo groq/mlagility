@@ -12,3 +12,9 @@ pytorch-pretrained-biggan>=0.1.1
 timm>=0.6.7
 tensorflow-cpu>=2.9.1
 diffusers>=0.2.4
+requests
+Pillow
+nltk
+sentence_transformers
+scipy
+numpy
