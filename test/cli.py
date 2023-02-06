@@ -195,6 +195,7 @@ class Testing(unittest.TestCase):
 
         testargs = [
             "benchit",
+            "cache",
             "report",
         ]
         with patch.object(sys, "argv", testargs):
@@ -233,6 +234,7 @@ class Testing(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as f:
             testargs = [
                 "benchit",
+                "cache",
                 "list",
             ]
             with patch.object(sys, "argv", testargs):
@@ -264,6 +266,7 @@ class Testing(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as f:
             testargs = [
                 "benchit",
+                "cache",
                 "list",
             ]
             with patch.object(sys, "argv", testargs):
@@ -276,6 +279,7 @@ class Testing(unittest.TestCase):
         # Delete the builds
         testargs = [
             "benchit",
+            "cache",
             "delete",
             "--all",
         ]
@@ -286,6 +290,7 @@ class Testing(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as f:
             testargs = [
                 "benchit",
+                "cache",
                 "list",
             ]
             with patch.object(sys, "argv", testargs):
@@ -294,6 +299,43 @@ class Testing(unittest.TestCase):
         for test_script in test_scripts_dot_py.keys():
             script_name = strip_dot_py(test_script)
             assert script_name not in f.getvalue()
+
+    def test_cli_stats(self):
+
+        # NOTE: this is not a unit test, it relies on other command
+        # If this test is failing, make sure the following tests are passing:
+        # - test_cli_corpus
+
+        # Build the test corpus so we have builds to print
+        testargs = [
+            "benchit",
+            "benchmark",
+            "-s",
+            corpus_dir,
+            "--build-only",
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        # Make sure we can print the builds in the cache
+        for test_script in test_scripts_dot_py.keys():
+            script_name = strip_dot_py(test_script)
+            builds = filesystem.get_builds_from_script(
+                filesystem.DEFAULT_CACHE_DIR, script_name
+            )
+
+            for build_name in builds:
+                with redirect_stdout(io.StringIO()) as f:
+                    testargs = [
+                        "benchit",
+                        "cache",
+                        "stats",
+                        build_name,
+                    ]
+                    with patch.object(sys, "argv", testargs):
+                        benchitcli()
+
+                    assert script_name in f.getvalue()
 
     def test_cli_version(self):
 

@@ -221,11 +221,12 @@ The default usage of `benchit` is to directly provide it with a python script, f
 _Note_: Some of these tasks have to do with the MLAgility `cache`, which stores the `build directories` (see [Build](#build)).
 
 The commands are:
-- `benchmark` (default command): benchmark the model(s) in one or more scripts
-- `list`: list the available builds in the cache
-- `delete`: delete one or more builds from the cache
-- `report`: print a report in .csv format summarizing the results
-- `version`: print the `benchit` version number
+- [`benchmark`](#benchmark-command) (default command): benchmark the model(s) in one or more scripts
+- [`cache list`](#list-command): list the available builds in the cache
+- [`cache print`](#print-command): print the [state](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) of a build from the cache
+- [`cache delete`](#delete-command): delete one or more builds from the cache
+- [`cache report`](#report-command): print a report in .csv format summarizing the results of all builds in a cache
+- [`version`](#version-command): print the `benchit` version number
 
 You can see the options available for any command by running `benchit COMMAND --help`.
 
@@ -243,7 +244,7 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
 - `--use-slurm` Execute the build(s) on Slurm instead of using local compute resources
   - Not available as an API argument.
 - `--lean-cache` Delete all build artifacts except for log files after the build
-- Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
+  - Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility)
   - Also available as an API argument, `benchit(cache_dir=Str, ...)`.
 - `--rebuild REBUILD` Sets a cache policy that decides whether to load or rebuild a cached build.
@@ -261,11 +262,11 @@ The following options can be used to customize the analysis process (see [Analys
 
 The following options are specific to Groq builds and benchmarks, and are passed into the [GroqFlow build tool](https://github.com/groq/groqflow):
 - `--compiler-flags COMPILER_FLAGS [COMPILER_FLAGS ...]` Sets the groqit(compiler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default compiler flags)
-  - Also available as an API argument, `benchit(compiler_flags=List, ...)`.
+  - Also available as an API argument, `benchit(groq_compiler_flags=List, ...)`.
 - `--assembler-flags ASSEMBLER_FLAGS [ASSEMBLER_FLAGS ...]` Sets the groqit(assembler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default assembler flags)
-  - Also available as an API argument, `benchit(assembler_flags=List, ...)`.
+  - Also available as an API argument, `benchit(groq_assembler_flags=List, ...)`.
 - `--num-chips NUM_CHIPS` Sets the groqit(num_chips=...) arg (default behavior is to let groqit() automatically select the number of chips)
-  - Also available as an API argument, `benchit(num_chips=Int, ...)`.
+  - Also available as an API argument, `benchit(groq_num_chips=Int, ...)`.
 - `--groqview` Enables GroqView for the build(s)
   - Also available as an API argument, `benchit(groqview=True/False,)`.
 
@@ -277,31 +278,40 @@ Finally, you may find yourself wanting to run a subset of the benchmarking comma
   - _Note_: any benchmark-specific options will be ignored, such as `--ip`.
   - Available as an API argument, `benchit(build_only=True/False, ...)
 
-### `delete` Command
+### `cache list` Command
 
-`delete` presents the following options:
+`cache list` prints the names of all of the builds in a build cache. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
-- `-b BUILD_NAMES [BUILD_NAMES ...], --build-names BUILD_NAMES [BUILD_NAMES ...]` Name(s) of the specific builds to be deleted, within the cache directory
+
+_Note_: `cache list` is not available as an API.
+
+### `cache stats` Command
+
+`cache stats` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
+
+- `build_name` Name of the specific build whose stats are to be printed, within the cache directory
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
+
+_Note_: `cache stats` is not available as an API.
+
+### `cache delete` Command
+
+`cache delete` deletes one or builds from a build cache. It presents the following options:
+
+- `build_name` Name of the specific build to be deleted, within the cache directory
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 - `--all` Delete all builds in the cache directory
 
-_Note_: `delete` is not available as an API.
+_Note_: `cache delete` is not available as an API.
 
-### `list` Command
+### `cache report` Command
 
-`list` presents the following options:
-
-- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
-
-_Note_: `list` is not available as an API.
-
-### `report` Command
-
-`report` presents the following options:
+`cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
-_Note_: `report` is not available as an API.
+_Note_: `cache report` is not available as an API.
 
 ### `version` Command
 
