@@ -1,35 +1,11 @@
 import os
-from dataclasses import dataclass
 import json
 import numpy as np
 import torch
 import groqflow.common.printing as printing
 import groqflow.common.build as build
 import mlagility.api.cloud as cloud
-
-
-@dataclass
-class CPUMeasuredPerformance:
-    cpu_performance_file: str
-    throughput_units: str = "inferences per second"
-
-    @property
-    def latency(self):
-        if os.path.exists(self.cpu_performance_file):
-            with open(self.cpu_performance_file, encoding="utf-8") as f:
-                performance = json.load(f)
-            return performance["Mean Latency(ms)"]
-        else:
-            return "-"
-
-    @property
-    def throughput(self):
-        if os.path.exists(self.cpu_performance_file):
-            with open(self.cpu_performance_file, encoding="utf-8") as f:
-                performance = json.load(f)
-            return performance["Throughput"]
-        else:
-            return "-"
+from mlagility.api.performance import MeasuredPerformance
 
 
 class CPUModel:
@@ -42,7 +18,7 @@ class CPUModel:
             "log_cpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100) -> CPUMeasuredPerformance:
+    def benchmark(self, repetitions: int = 100) -> MeasuredPerformance:
 
         printing.log_info(
             (
@@ -54,35 +30,63 @@ class CPUModel:
         )
 
         benchmark_results = self._execute(repetitions=repetitions)
-        self.state.info.cpu_measured_latency = benchmark_results.latency
+        self.state.info.cpu_measured_latency = benchmark_results.mean_latency
         self.state.info.cpu_measured_throughput = benchmark_results.throughput
         return benchmark_results
 
-    def cpu_performance_file(self):
+    @property
+    def _cpu_performance_file(self):
         return os.path.join(
             self.state.cache_dir, self.state.config.build_name, "cpu_performance.json"
         )
 
-    def cpu_error_file(self):
+    def _get_stat(self, stat):
+        if os.path.exists(self._cpu_performance_file):
+            with open(self._cpu_performance_file, encoding="utf-8") as f:
+                performance = json.load(f)
+            return performance[stat]
+        else:
+            return "-"
+
+    @property
+    def _mean_latency(self):
+        return float(self._get_stat("Mean Latency(ms)"))
+
+    @property
+    def _throughput(self):
+        return float(self._get_stat("Throughput"))
+
+    @property
+    def _device(self):
+        return self._get_stat("CPU Name")
+
+    @property
+    def _cpu_error_file(self):
         return os.path.join(
             self.state.cache_dir, self.state.config.build_name, "cpu_error.npy"
         )
 
-    def _execute(self, repetitions: int) -> CPUMeasuredPerformance:
+    def _execute(self, repetitions: int) -> MeasuredPerformance:
         """
         Execute model on cpu and return the performance
         """
 
         # Remove previously stored latency/outputs
-        if os.path.isfile(self.cpu_performance_file()):
-            os.remove(self.cpu_performance_file())
-        if os.path.isfile(self.cpu_error_file()):
-            os.remove(self.cpu_error_file())
+        if os.path.isfile(self._cpu_performance_file):
+            os.remove(self._cpu_performance_file)
+        if os.path.isfile(self._cpu_error_file):
+            os.remove(self._cpu_error_file)
 
         # Only cloud execution of the CPU is supported, local execution is not supported
         cloud.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
 
-        return CPUMeasuredPerformance(self.cpu_performance_file())
+        return MeasuredPerformance(
+            mean_latency=self._mean_latency,
+            throughput=self._throughput,
+            device=self._device,
+            device_type="x86",
+            build_name=self.state.config.build_name,
+        )
 
 
 class PytorchModelWrapper(CPUModel):
