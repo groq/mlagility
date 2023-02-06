@@ -127,8 +127,6 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     ip, username = load_remote_config(accelerator)
 
     if not all((ip, username)):
-        # TODO (ramkrishna2910): Enabling localhost execution will be handled
-        # in a separate MR (Issue #5)
         print(
             "User is responsible for ensuring the remote server has python>=3.8 \
             and docker>=20.10 installed"
@@ -147,36 +145,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     return ip, username
 
 
-def setup_gpu_host(client) -> None:
-    # Check if at least one NVIDIA GPU is available remotely
-    stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
-    if stdout == "" or exit_code == 1:
-        msg = "No NVIDIA GPUs available on the remote machine"
-        raise exp.GroqModelRuntimeError(msg)
-
-    # Transfer common files to host
-    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute-gpu.py", "mlagility_remote_cache/execute-gpu.py")
-
-
-def setup_cpu_host(client) -> None:
-    # Check if x86_64 CPU is available remotely
-    stdout, exit_code = exec_command(client, "uname -i")
-    if stdout != "x86_64" or exit_code == 1:
-        msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-        raise exp.GroqModelRuntimeError(msg)
-
-    # Transfer common files to host
-    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute-cpu.py", "mlagility_remote_cache/execute-cpu.py")
-        s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
-
-
-def setup_host(client, device_type: str) -> None:
+def setup_remote_host(client, device_type: str) -> None:
     if device_type == "gpu":
         # Check if at least one NVIDIA GPU is available remotely
         stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
@@ -191,8 +160,6 @@ def setup_host(client, device_type: str) -> None:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
         exec_file = "execute-cpu.py"
-        with MySFTPClient.from_transport(client.get_transport()) as s:
-            s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh")
     else:
         raise ValueError(f"Only 'cpu' and 'gpu' are supported. But received {device_type}")
 
@@ -201,48 +168,86 @@ def setup_host(client, device_type: str) -> None:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.put(f"{dir_path}/{exec_file}", "mlagility_remote_cache/{exec_file}")
+        s.put(f"{dir_path}/setup_ort_env.sh", "mlagility_remote_cache/setup_ort_env.sh") if device_type == "cpu" else None
 
+def setup_local_host(state: build.State, device: str) -> None:
+    if device == "cpu":
+        # Check if x86_64 CPU is available locally
+        check_device = subprocess.run(
+            ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        stdout = check_device.stdout.decode().strip()
+        if stdout != "x86_64" or check_device.returncode == 1:
+            msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
+            raise exp.GroqModelRuntimeError(msg)
+        execute_file = "execute-cpu.py"
+        setup_env_file = "setup_ort_env.sh"
+    elif device == "gpu":
+        # Check if at least one NVIDIA GPU is available locally
+        result = subprocess.run(
+            ["lspci", "|", "grep", "-i", "nvidia"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+        )
+        if result.stdout == "" or result.returncode == 1:
+            msg = "No NVIDIA GPUs available on the local machine"
+            raise exp.GroqModelRuntimeError(msg)
+        execute_file = "execute-gpu.py"
+    else:
+        raise ValueError(f"Invalid device type: {device}")
 
-def setup_local_cpu(state: build.State) -> None:
-    # Check if x86_64 CPU is available locally
-    check_device = subprocess.run(
-        ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    # stdout, stderr = check_device.communicate()
-    stdout = check_device.stdout.decode().strip()
-    if stdout != "x86_64" or check_device.returncode == 1:
-        msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-        raise exp.GroqModelRuntimeError(msg)
     username = getpass.getuser()
-    # Transfer common files to host
+    # Transfer files to host
     output_dir = f"/home/{username}/mlagility_local_cache"
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
     subprocess.run(["mkdir", f"{output_dir}"])
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    shutil.copy(f"{dir_path}/execute-cpu.py", f"{output_dir}/execute-cpu.py")
-    shutil.copy(f"{dir_path}/setup_ort_env.sh", f"{output_dir}/setup_ort_env.sh")
+    shutil.copy(f"{dir_path}/{execute_file}", f"{output_dir}/{execute_file}")
+    if device == "cpu":
+        shutil.copy(f"{dir_path}/{setup_env_file}", f"{output_dir}/{setup_env_file}")
+
+# def setup_local_cpu(state: build.State) -> None:
+#     # Check if x86_64 CPU is available locally
+#     check_device = subprocess.run(
+#         ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+#     )
+#     # stdout, stderr = check_device.communicate()
+#     stdout = check_device.stdout.decode().strip()
+#     if stdout != "x86_64" or check_device.returncode == 1:
+#         msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
+#         raise exp.GroqModelRuntimeError(msg)
+#     username = getpass.getuser()
+#     # Transfer common files to host
+#     output_dir = f"/home/{username}/mlagility_local_cache"
+#     if os.path.isdir(output_dir):
+#         shutil.rmtree(output_dir)
+#     subprocess.run(["mkdir", f"{output_dir}"])
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     shutil.copy(f"{dir_path}/execute-cpu.py", f"{output_dir}/execute-cpu.py")
+#     shutil.copy(f"{dir_path}/setup_ort_env.sh", f"{output_dir}/setup_ort_env.sh")
 
 
-def setup_local_gpu(state: build.State) -> None:
-    # Check if at least one NVIDIA GPU is available locally
-    result = subprocess.run(
-        ["lspci", "|", "grep", "-i", "nvidia"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    if result.stdout == "" or result.returncode == 1:
-        msg = "No NVIDIA GPUs available on the local machine"
-        # raise exp.GroqModelRuntimeError(msg)
-    username = getpass.getuser()
-    # Transfer common files to host
-    output_dir = f"/home/{username}/mlagility_local_cache"
-    if os.path.isdir(output_dir):
-        shutil.rmtree(output_dir)
-    subprocess.run(["mkdir", f"{output_dir}"])
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    shutil.copy(f"{dir_path}/execute-gpu.py", f"{output_dir}/execute-gpu.py")
+# def setup_local_gpu(state: build.State) -> None:
+#     # Check if at least one NVIDIA GPU is available locally
+#     result = subprocess.run(
+#         ["lspci", "|", "grep", "-i", "nvidia"],
+#         stdout=subprocess.PIPE,
+#         stderr=subprocess.PIPE,
+#         encoding="utf-8",
+#     )
+#     if result.stdout == "" or result.returncode == 1:
+#         msg = "No NVIDIA GPUs available on the local machine"
+#         # raise exp.GroqModelRuntimeError(msg)
+#     username = getpass.getuser()
+#     # Transfer common files to host
+#     output_dir = f"/home/{username}/mlagility_local_cache"
+#     if os.path.isdir(output_dir):
+#         shutil.rmtree(output_dir)
+#     subprocess.run(["mkdir", f"{output_dir}"])
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     shutil.copy(f"{dir_path}/execute-gpu.py", f"{output_dir}/execute-gpu.py")
 
 
 def setup_connection(accelerator: str) -> paramiko.SSHClient:
@@ -251,20 +256,8 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
 
     # Connect to host
     client = connect_to_host(ip, username)
-    setup_host(client, device_type=accelerator)
-
-    # if accelerator == "gpu":
-    #     # Check for GPU and transfer files
-    #     # setup_gpu_host(client)
-    #     setup_host(client, device_type=accelerator)
-    # elif accelerator == "cpu":
-    #     # Check for CPU and transfer files
-    #     setup_host(client, device_type=accelerator)
-    # else:
-    #     raise ValueError(
-    #         f"Only 'cpu' and 'gpu' are supported, but received {accelerator}"
-    #     )
-
+    setup_remote_host(client, device_type=accelerator)
+    
     return client
 
 
@@ -346,7 +339,7 @@ def execute_gpu_locally(
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
 
-    setup_local_gpu(state)
+    setup_local_host(state, device="gpu")
 
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
@@ -499,7 +492,7 @@ def execute_cpu_locally(
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
 
-    setup_local_cpu(state)
+    setup_local_host(state, device="cpu")
     username = getpass.getuser()
     # Check if ONNX file has been generated
     if not os.path.exists(state.converted_onnx_file):
