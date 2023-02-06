@@ -145,7 +145,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     return ip, username
 
 
-def setup_remote_host(client, device_type: str) -> None:
+def setup_remote_host(client, device_type: str, output_dir: str) -> None:
     if device_type == "gpu":
         # Check if at least one NVIDIA GPU is available remotely
         stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
@@ -164,11 +164,11 @@ def setup_remote_host(client, device_type: str) -> None:
         raise ValueError(f"Only 'cpu' and 'gpu' are supported. But received {device_type}")
 
     # Transfer common files to host
-    exec_command(client, "mkdir mlagility_remote_cache", ignore_error=True)
+    exec_command(client, f"mkdir {output_dir}", ignore_error=True)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
        for file in files_to_transfer:
-            s.put(f"{dir_path}/{file}", f"mlagility_remote_cache/{file}")
+            s.put(f"{dir_path}/{file}", f"{output_dir}/{file}")
 
 def setup_local_host(device_type: str, output_dir: str) -> None:
     if device_type == "cpu":
@@ -199,9 +199,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
     else:
         raise ValueError(f"Invalid device type: {device_type}")
 
-    username = getpass.getuser()
     # Transfer files to host
-    # output_dir = f"/home/{username}/mlagility_local_cache"
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
     subprocess.run(["mkdir", f"{output_dir}"])
@@ -209,13 +207,13 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
     for file in files_to_transfer:
         shutil.copy(f"{dir_path}/{file}", f"{output_dir}/{file}")
 
-def setup_connection(accelerator: str) -> paramiko.SSHClient:
+def setup_connection(device_type: str, output_dir: str) -> paramiko.SSHClient:
     # Setup authentication scheme if needed
-    ip, username = configure_remote(accelerator)
+    ip, username = configure_remote(device_type)
 
     # Connect to host
     client = connect_to_host(ip, username)
-    setup_remote_host(client, device_type=accelerator)
+    setup_remote_host(client, device_type=device_type, output_dir=output_dir)
     
     return client
 
@@ -233,8 +231,13 @@ def execute_gpu_remotely(
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
 
+    # Setup remote execution folders to save outputs/ errors
+    output_dir = f"/home/{username}/mlagility_remote_cache"
+    remote_outputs_file = f"{output_dir}/outputs.txt"
+    remote_errors_file = f"{output_dir}/errors.txt"
+
     # Connect to remote machine and transfer common files
-    client = setup_connection("gpu")
+    client = setup_connection(device_type="gpu", output_dir=output_dir)
 
     print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
@@ -242,13 +245,10 @@ def execute_gpu_remotely(
         raise exp.GroqModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir(f"/home/{username}/mlagility_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, f"/home/{username}/mlagility_remote_cache/onnxmodel/model.onnx")
+        s.mkdir(f"{output_dir}/onnxmodel")
+        s.put(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
 
     # Run benchmarking script
-    output_dir = f"/home/{username}/mlagility_remote_cache"
-    remote_outputs_file = f"{output_dir}/outputs.txt"
-    remote_errors_file = f"{output_dir}/errors.txt"
     print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
@@ -375,10 +375,15 @@ def execute_cpu_remotely(
     _ip, username = configure_remote("cpu")
 
     # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
+    # sys.stdout = build.Logger(log_execute_path)
 
+    # Setup remote execution folders to save outputs/ errors
+    output_dir = f"/home/{username}/mlagility_remote_cache"
+    remote_outputs_file = f"{output_dir}/outputs.txt"
+    remote_errors_file = f"{output_dir}/errors.txt"
+    
     # Connect to remote machine and transfer common files
-    client = setup_connection("cpu")
+    client = setup_connection(device_type="cpu", output_dir=output_dir)
 
     print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
@@ -386,30 +391,28 @@ def execute_cpu_remotely(
         raise exp.GroqModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.mkdir("mlagility_remote_cache/onnxmodel")
-        s.put(state.converted_onnx_file, "mlagility_remote_cache/onnxmodel/model.onnx")
+        s.mkdir(f"{output_dir}/onnxmodel")
+        s.put(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
 
-    # TODO: Fix cloud execution with new setup script
-    # Check if conda is installed
-    # conda_location = shutil.which("conda")
-    # if not conda_location:
-    #     raise ValueError("conda installation not found.")
-    # conda_src = conda_location.split("miniconda3")[0]
-
+    # Check if conda is installed on the remote machine
+    conda_location, exit_code = exec_command("which conda")
+    print (conda_location)
+    if not conda_location:
+        raise ValueError("conda installation not found on the remote machine.")
+    conda_src = conda_location.split(" ")[-1].split("miniconda3")[0]
+    
+    
     # Run benchmarking script
-    output_dir = "mlagility_remote_cache"
-    remote_outputs_file = "mlagility_remote_cache/outputs.txt"
-    remote_errors_file = "mlagility_remote_cache/errors.txt"
-    env_name = "ort_env"
+    env_name = "onnxruntime_env"
     exec_command(
-        client, "bash mlagility_remote_cache/setup_ort_env.sh", ignore_error=True
+        client, f"bash {output_dir}/setup_ort_env.sh {env_name} {conda_src}", ignore_error=True
     )
 
     print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
         (
-            f"/home/{username}/miniconda3/envs/{env_name}/bin/python mlagility_remote_cache/"
+            f"/home/{username}/miniconda3/envs/{env_name}/bin/python {output_dir}/"
             "execute-cpu.py "
             f"{output_dir} {remote_outputs_file} {remote_errors_file} {iterations}"
         ),
@@ -442,7 +445,7 @@ def execute_cpu_remotely(
                 "turned ON and has all the required dependencies installed"
             )
     # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
+    # sys.stdout = sys.stdout.terminal
 
 
 def execute_cpu_locally(
