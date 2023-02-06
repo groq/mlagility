@@ -9,6 +9,7 @@ import groqflow.justgroqit.hummingbird as hummingbird
 from mlagility.api import gpumodel, cpumodel
 import mlagility.common.filesystem as filesystem
 import mlagility.analysis.util as util
+from mlagility.api.performance import MeasuredPerformance
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
@@ -135,7 +136,18 @@ def benchit(
             num_chips=groq_num_chips,
             groqview=groqview,
         )
-        perf = gmodel.benchmark()
+        groq_perf = gmodel.benchmark()
+
+        # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
+        # class used by the MLAgility project
+        perf = MeasuredPerformance(
+            throughput=groq_perf.throughput,
+            mean_latency=groq_perf.latency,
+            device="GroqChip1",
+            device_type="groq",
+            build_name=gmodel.state.config.build_name,
+        )
+
     elif device == "nvidia":
         gmodel = exportit(
             model=model,
