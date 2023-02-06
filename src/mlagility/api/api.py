@@ -186,7 +186,7 @@ def benchit(
         )
 
     print(
-        f"\nPerformance of build {gmodel.state.config.build_name} on {perf.device_type} device "
+        f"\nPerformance of build {perf.build_name} on {perf.device_type} device "
         f"{perf.device} is:"
     )
     print(f"latency: {perf.mean_latency:.3f} {perf.latency_units}")
