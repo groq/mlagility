@@ -7,6 +7,8 @@ import yaml
 import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
+import groqflow.common.sdk_helpers as sdk
+import groqflow.groqmodel.groqmodel as groqmodel
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -169,7 +171,7 @@ def setup_groqchip_host(client) -> None:
 
     # Transfer common files to host
     exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(groqmodel.__file__)
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.put(f"{dir_path}/execute.py", "groqflow_remote_cache/execute.py")
 
