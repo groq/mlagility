@@ -375,7 +375,7 @@ def execute_cpu_remotely(
     _ip, username = configure_remote("cpu")
 
     # Redirect all stdout to log_file
-    # sys.stdout = build.Logger(log_execute_path)
+    sys.stdout = build.Logger(log_execute_path)
 
     # Setup remote execution folders to save outputs/ errors
     output_dir = f"/home/{username}/mlagility_remote_cache"
@@ -395,13 +395,12 @@ def execute_cpu_remotely(
         s.put(state.converted_onnx_file, f"{output_dir}/onnxmodel/model.onnx")
 
     # Check if conda is installed on the remote machine
-    conda_location, exit_code = exec_command("which conda")
-    print (conda_location)
-    if not conda_location:
-        raise ValueError("conda installation not found on the remote machine.")
-    conda_src = conda_location.split(" ")[-1].split("miniconda3")[0]
-    
-    
+    conda_location, exit_code = exec_command(client, f"ls /home/{username}")
+    if "miniconda3" not in conda_location:
+        raise ValueError(f"conda installation not found in /home/{username}. Please install miniconda3")
+    # TODO: Remove requirement that conda has to be installed on the /home/user
+    conda_src = f"/home/{username}"
+
     # Run benchmarking script
     env_name = "onnxruntime_env"
     exec_command(
@@ -445,7 +444,7 @@ def execute_cpu_remotely(
                 "turned ON and has all the required dependencies installed"
             )
     # Stop redirecting stdout
-    # sys.stdout = sys.stdout.terminal
+    sys.stdout = sys.stdout.terminal
 
 
 def execute_cpu_locally(
