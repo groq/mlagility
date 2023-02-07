@@ -132,7 +132,7 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
             print(
                 (
                     "User is responsible for ensuring the remote server has the Groq "
-                    "SDK and a minoconda environment named 'groqflow' installed."
+                    "SDK and a miniconda environment named 'groqflow' installed."
                 )
             )
         else:
