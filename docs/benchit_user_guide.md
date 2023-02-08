@@ -6,11 +6,11 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime      | Runtime arg | Specific Devices                                         |
-|-------------|------------|--------------|-------------|----------------------------------------------------------|
-| Nvidia GPU  | nvidia     | TensorRT     | trt         | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
-| x86 CPU     | x86        | ONNX Runtime | ort         | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
-| Groq        | groq       | GroqFlow     | groq        | GroqChip1                                                |
+| Device Type | Device arg | Runtime      | Specific Devices                                         |
+|-------------|------------|--------------|----------------------------------------------------------|
+| Nvidia GPU  | nvidia     | TensorRT     | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
+| x86 CPU     | x86        | ONNX Runtime | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
+| Groq        | groq       | GroqFlow     | GroqChip1                                                |
 
 </span>
 
