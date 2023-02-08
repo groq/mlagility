@@ -159,15 +159,15 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
 
 
 def setup_groqchip_host(client) -> None:
-    # Make sure at least one GroqChip is available remotely
+    # Make sure at least one GroqChip Processor is available remotely
     stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
     if stdout == "" or exit_code == 1:
-        msg = "Failed to run lspci to get GroqChips available"
+        msg = "Failed to run lspci to get GroqChip Processors available"
         raise exp.GroqModelRuntimeError(msg)
     num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
     if num_chips_available < 1:
-        raise exp.GroqModelRuntimeError("No GroqChips found")
-    print(f"{num_chips_available} GroqChips found")
+        raise exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
+    print(f"{num_chips_available} GroqChip Processor(s) found")
 
     # Transfer common files to host
     exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
@@ -282,7 +282,7 @@ def execute_groqchip_remotely(
     )
     if exit_code == 1:
         msg = f"""
-        Failed to execute GroqChip(s) remotely.
+        Failed to execute GroqChip Processor(s) remotely.
         Look at **{log_execute_path}** for details.
         """
         raise exp.GroqModelRuntimeError(msg)
