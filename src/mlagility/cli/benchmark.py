@@ -44,25 +44,23 @@ def main(args):
     available_scripts = filesystem.get_available_scripts(args.search_dir)
 
     # Filter based on the model names provided by the user
-    if args.input_scripts == ["all"]:
+    if args.benchmark_all:
         scripts = [
             os.path.join(args.search_dir, script) for script in available_scripts
         ]
     else:
-        scripts = []
-        for user_script in args.input_scripts:
-            user_script_path = os.path.join(args.search_dir, user_script)
+        user_script_path = os.path.join(args.search_dir, args.input_script)
 
-            # Ignore everything after the ':' symbol, if there is one
-            clean_user_script_path = user_script_path.split(":")[0]
+        # Ignore everything after the ':' symbol, if there is one
+        clean_user_script_path = user_script_path.split(":")[0]
 
-            # Validate that the script exists
-            if os.path.exists(clean_user_script_path):
-                scripts.append(user_script_path)
-            else:
-                raise exceptions.GroqitArgError(
-                    f"Script could not be found: {user_script_path}"
-                )
+        # Validate that the script exists
+        if os.path.exists(clean_user_script_path):
+            scripts = [user_script_path]
+        else:
+            raise exceptions.GroqitArgError(
+                f"Script could not be found: {user_script_path}"
+            )
 
     # Decode benchit args into TracerArgs flags
     if args.analyze_only:
