@@ -126,7 +126,6 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            "-i",
             os.path.join(corpus_dir, test_script),
             "--build-only",
         ]
@@ -143,10 +142,9 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            test_script,
             "-s",
             corpus_dir,
-            "-i",
-            test_script,
             "--build-only",
         ]
         with patch.object(sys, "argv", testargs):
@@ -165,6 +163,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            "--all",
             "-s",
             corpus_dir,
             "--build-only",
@@ -186,6 +185,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            "--all",
             "-s",
             corpus_dir,
             "--build-only",
@@ -223,6 +223,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            "--all",
             "-s",
             corpus_dir,
             "--build-only",
@@ -255,6 +256,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            "--all",
             "-s",
             corpus_dir,
             "--build-only",
@@ -310,6 +312,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            "--all",
             "-s",
             corpus_dir,
             "--build-only",
@@ -364,10 +367,9 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
+            test_script,
             "-s",
             corpus_dir,
-            "-i",
-            test_script,
             "--rebuild",
             "always",
             "--num-chips",
