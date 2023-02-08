@@ -85,16 +85,20 @@ def main():
         default=os.getcwd(),
     )
 
-    benchmark_parser.add_argument(
-        "-i",
-        "--input-scripts",
-        nargs="+",
-        dest="input_scripts",
-        help="Name(s) of script (.py) files, within the search directory, "
-        "to be benchmarked (defaults to "
-        '["all"], which uses all script files)',
-        required=False,
-        default=["all"],
+    benchmark_group = benchmark_parser.add_mutually_exclusive_group(required=True)
+
+    benchmark_group.add_argument(
+        "input_script",
+        nargs="?",
+        help="Name of the script (.py) file, within the search directory, "
+        "to be benchmarked",
+    )
+
+    benchmark_group.add_argument(
+        "--all",
+        dest="benchmark_all",
+        help="Benchmark all models within all scripts in the search directory",
+        action="store_true",
     )
 
     benchmark_parser.add_argument(
@@ -396,7 +400,6 @@ def main():
     if len(sys.argv) > 1:
         script_name, _ = benchmark_command.decode_script_name(sys.argv[1])
         if sys.argv[1] not in subparsers.choices.keys() and script_name.endswith(".py"):
-            sys.argv.insert(1, "-i")
             sys.argv.insert(1, "benchmark")
 
     args = parser.parse_args()

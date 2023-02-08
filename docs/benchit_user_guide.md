@@ -235,13 +235,14 @@ You can see the options available for any command by running `benchit COMMAND --
 
 The `benchmark` command supports the arguments from [Devices and Runtimes](#devices-and-runtimes), as well as:
 
+- `input_script` Name of the script (.py) file, within the search directory, to be benchmarked.
+  - You can leverage model hashes (see [Model Hashes](#model-hashes)) at build or benchmarking time in the following manner:
+    - `benchit benchmark example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
+    - You can also supply multiple hashes, for example `benchit benchmark example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
+  - Not available as an API argument.
 - `-s SEARCH_DIR, --search-dir SEARCH_DIR` Path to a directory (defaults to the command line command line location), which serves as the search path for input scripts
   - Not available as an API argument.
-- `-i INPUT_SCRIPTS [INPUT_SCRIPTS ...], --input-scripts INPUT_SCRIPTS [INPUT_SCRIPTS ...]` Name(s) of script (.py) files, within the search directory, to be built (defaults to ["all"], which uses all script files).
-  - You can leverage model hashes (see [Model Hashes](#model-hashes)) at build or benchmarking time in the following manner:
-    - `benchit benchmark -i example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
-    - You can also supply multiple hashes, for example `benchit benchmark -i example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
-  - Not available as an API argument.
+- `--all` Benchmark all models within all script (.py) files in the search directory.
 - `--use-slurm` Execute the build(s) on Slurm instead of using local compute resources
   - Not available as an API argument.
 - `--lean-cache` Delete all build artifacts except for log files after the build
