@@ -136,6 +136,10 @@ def benchit(
             num_chips=groq_num_chips,
             groqview=groqview,
         )
+
+        if build_only:
+            return
+
         groq_perf = gmodel.benchmark()
 
         # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance

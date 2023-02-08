@@ -7,6 +7,8 @@ import yaml
 import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
+import groqflow.common.sdk_helpers as sdk
+import groqflow.groqmodel.groqmodel as groqmodel
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -52,6 +54,7 @@ def load_remote_config(accelerator: str) -> Union[Tuple[str, str], Tuple[None, N
         conf: Dict[str, Any] = {
             "remote_machine_gpu": {"ip": None, "username": None},
             "remote_machine_cpu": {"ip": None, "username": None},
+            "remote_machine_groqchip": {"ip": None, "username": None},
         }
         with open(config_file_path, "w", encoding="utf8") as outfile:
             yaml.dump(conf, outfile)
@@ -125,12 +128,22 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
     ip, username = load_remote_config(accelerator)
 
     if not all((ip, username)):
-        # TODO (ramkrishna2910): Enabling localhost execution will be handled
-        # in a separate MR (Issue #5)
-        print(
-            "User is responsible for ensuring the remote server has python>=3.8 \
-            and docker>=20.10 installed"
-        )
+        if accelerator == "groqchip":
+            print(
+                (
+                    "User is responsible for ensuring the remote server has the Groq "
+                    "SDK and a miniconda environment named 'groqflow' installed."
+                )
+            )
+        else:
+            # TODO (ramkrishna2910): Enabling localhost execution will be handled
+            # in a separate MR (Issue #5)
+            print(
+                (
+                    "User is responsible for ensuring the remote server has python>=3.8"
+                    "and docker>=20.10 installed"
+                )
+            )
         print("Provide your instance IP and hostname below:")
 
         ip = ip or input(f"{accelerator} instance ASA name (Do not use IP): ")
@@ -143,6 +156,24 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
         save_remote_config(ip, username, accelerator)
 
     return ip, username
+
+
+def setup_groqchip_host(client) -> None:
+    # Make sure at least one GroqChip Processor is available remotely
+    stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
+    if stdout == "" or exit_code == 1:
+        msg = "Failed to run lspci to get GroqChip Processors available"
+        raise exp.GroqModelRuntimeError(msg)
+    num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
+    if num_chips_available < 1:
+        raise exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
+    print(f"{num_chips_available} GroqChip Processor(s) found")
+
+    # Transfer common files to host
+    exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
+    dir_path = os.path.dirname(groqmodel.__file__)
+    with MySFTPClient.from_transport(client.get_transport()) as s:
+        s.put(f"{dir_path}/execute.py", "groqflow_remote_cache/execute.py")
 
 
 def setup_gpu_host(client) -> None:
@@ -181,7 +212,10 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
     # Connect to host
     client = connect_to_host(ip, username)
 
-    if accelerator == "gpu":
+    if accelerator == "groqchip":
+        # Check for GroqChips and transfer common files
+        setup_groqchip_host(client)
+    elif accelerator == "gpu":
         # Check for GPU and transfer files
         setup_gpu_host(client)
     elif accelerator == "cpu":
@@ -193,6 +227,74 @@ def setup_connection(accelerator: str) -> paramiko.SSHClient:
         )
 
     return client
+
+
+def execute_groqchip_remotely(
+    bringup_topology: bool,
+    repetitions: int,
+    state: build.State,
+    log_execute_path: str,
+) -> None:
+    """
+    Execute Model on the remote machine
+    """
+
+    # Ask the user for credentials if needed
+    _, hostname = configure_remote("groqchip")
+
+    # Redirect all stdout to log_file
+    sys.stdout = build.Logger(log_execute_path)
+
+    # Connect to remote machine and transfer common files
+    client = setup_connection("groqchip")
+
+    # Transfer iop and inputs file
+    print("Transferring model and inputs...")
+    if not os.path.exists(state.execution_inputs_file):
+        msg = "Model input file not found"
+        raise exp.GroqModelRuntimeError(msg)
+
+    with MySFTPClient.from_transport(client.get_transport()) as s:
+        s.mkdir("groqflow_remote_cache/compile")
+        s.put_dir(state.compile_dir, "groqflow_remote_cache/compile")
+        s.put(state.execution_inputs_file, "groqflow_remote_cache/inputs.npy")
+
+    python_cmd = (
+        "export PYTHONPATH='/opt/groq/runtime/site-packages:$PYTHONPATH' && "
+        f"/home/{hostname}/miniconda3/envs/groqflow/bin/python"
+    )
+
+    # Run benchmarking script
+    output_dir = "groqflow_remote_cache"
+    remote_outputs_file = "groqflow_remote_cache/outputs.npy"
+    remote_latency_file = "groqflow_remote_cache/latency.npy"
+    print("Running benchmarking script...")
+
+    bringup_topology_arg = "" if bringup_topology else "--bringup_topology"
+    _, exit_code = exec_command(
+        client,
+        (
+            f"{python_cmd} groqflow_remote_cache/execute.py "
+            f"{state.num_chips_used} {output_dir} {remote_outputs_file} "
+            f"{remote_latency_file} {state.topology} {repetitions} "
+            f"{bringup_topology_arg}"
+        ),
+    )
+    if exit_code == 1:
+        msg = f"""
+        Failed to execute GroqChip Processor(s) remotely.
+        Look at **{log_execute_path}** for details.
+        """
+        raise exp.GroqModelRuntimeError(msg)
+
+    # Get output files back
+    with MySFTPClient.from_transport(client.get_transport()) as s:
+        s.get(remote_outputs_file, state.outputs_file)
+        s.get(remote_latency_file, state.latency_file)
+        s.remove(remote_outputs_file)
+        s.remove(remote_latency_file)
+    # Stop redirecting stdout
+    sys.stdout = sys.stdout.terminal
 
 
 def execute_gpu_remotely(
