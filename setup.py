@@ -16,6 +16,7 @@ setup(
     install_requires=[
         "transformers",
         "groqflow>=2.5.2",
+        "invoke>=2.0.0"
     ],
     classifiers=[],
     entry_points={
