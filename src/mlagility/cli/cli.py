@@ -85,14 +85,16 @@ def main():
         default=os.getcwd(),
     )
 
-    benchmark_parser.add_argument(
+    benchmark_group = benchmark_parser.add_mutually_exclusive_group(required=True)
+
+    benchmark_group.add_argument(
         "input_script",
         nargs="?",
         help="Name of the script (.py) file, within the search directory, "
         "to be benchmarked",
     )
 
-    benchmark_parser.add_argument(
+    benchmark_group.add_argument(
         "--all",
         dest="benchmark_all",
         help="Benchmark all models within all scripts in the search directory",
