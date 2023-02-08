@@ -6,11 +6,11 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime      | Runtime arg | Specific Devices                                         |
-|-------------|------------|--------------|-------------|----------------------------------------------------------|
-| Nvidia GPU  | nvidia     | TensorRT     | trt         | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
-| x86 CPU     | x86        | ONNX Runtime | ort         | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
-| Groq        | groq       | GroqFlow     | groq        | GroqChip1                                                |
+| Device Type | Device arg | Runtime      | Specific Devices                                         |
+|-------------|------------|--------------|----------------------------------------------------------|
+| Nvidia GPU  | nvidia     | TensorRT     | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
+| x86 CPU     | x86        | ONNX Runtime | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
+| Groq        | groq       | GroqFlow     | GroqChip1                                                |
 
 </span>
 
@@ -175,7 +175,7 @@ If you are using a remote machine, it must:
 - turned on
 - be available via SSH
 - include the target device
-- have `python>=3.8` and `docker>=20.10` installed
+- have `miniconda`, `python>=3.8`, and `docker>=20.10` installed
 
 When you call `benchit`, the following actions are performed on your behalf:
 1. Perform a `build`, which exports all models from the script to ONNX and prepares for benchmarking.
@@ -201,7 +201,8 @@ The following arguments are used to configure `benchit` to target a specific dev
     - `nvidia`: Nvidia GPUs.
     - `groq`: Groq GroqChip processors.
   - Also available as an API argument, `benchit(device=...,)`.
-- `--runtime SW` is the runtime to be used.
+- [future] `--runtime SW` is the runtime to be used.
+  - _Note_: We will add support for user-selected runtimes in the future, when `benchit` supports multiple runtimes per device. At the time of this writing, there is a 1:1 mapping between all supported runtimes and devices, so there is no need for the `--runtime` argument yet.
   - _Note_: Each device type has its own default runtime, as indicated below.
   - Valid values include:
     - `ort`: ONNX Runtime (default for `x86` device type).
@@ -210,7 +211,7 @@ The following arguments are used to configure `benchit` to target a specific dev
     - [future] `pytorch1`: PyTorch 1.x-style eager execution.
     - [future] `pytorch2`: PyTorch 2.x-style compiled graph execution.
     - [future] `ort-*`: Specific [ONNX Runtime execution providers](#https://onnxruntime.ai/docs/execution-providers/)
-  - Also available as an API argument, `benchit(runtime=...,)`.
+  - [future] Also available as an API argument, `benchit(runtime=...,)`.
 
 ## Additional Commands and Options
 

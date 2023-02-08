@@ -228,22 +228,6 @@ def main():
         default=[benchmark_default_device],
     )
 
-    benchmark_default_runtime = "ort"
-    benchmark_parser.add_argument(
-        "--runtime",
-        choices=[
-            "ort",
-            "trt",
-            "groq",
-        ],
-        nargs="+",
-        dest="runtimes",
-        help="Name(s) of the software runtimes to be used for the benchmark "
-        f'(defaults to ["{benchmark_default_runtime}"])',
-        required=False,
-        default=["benchmark_default_runtime"],
-    )
-
     benchmark_parser.add_argument(
         "--analyze-only",
         dest="analyze_only",
