@@ -34,7 +34,7 @@ def run(
     groqit_script: str,
     args: str,
     job_name: str,
-    target_file_folder: str,
+    working_directory: str,
 ):
     """
     Run a GroqFlow job on Slurm
@@ -70,9 +70,8 @@ def run(
         shell_script,
         groqit_script,
         args,
-        target_file_folder,
+        working_directory,
     ]
 
     print(f"Submitting job {job_name} to Slurm")
-
     subprocess.check_call(slurm_command)

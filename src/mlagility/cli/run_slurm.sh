@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 script="$1"
 args="$2"
-target_file_folder="$3"
+working_directory="$3"
 
 # shellcheck disable=SC1090
 source /net/home/"$USER"/miniconda3/etc/profile.d/conda.sh
@@ -17,7 +17,7 @@ export GROQFLOW_INTERNAL_FEATURES="True"
 export GROQFLOW_SKIP_SDK_CHECK="True"
 umask 002
 python login.py --key "${HUGGINGFACE_API_KEY}"
-cd "$target_file_folder" || exit
+cd "$working_directory" || exit
 # shellcheck disable=SC2116,SC2046
 "$script" $(echo "$args")
 conda deactivate
