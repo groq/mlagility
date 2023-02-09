@@ -171,7 +171,7 @@ def benchit(
 
         perf = gpu_model.benchmark(backend=backend)
 
-  elif device == "x86":
+    elif device == "x86":
         gmodel = exportit(
             model=model,
             inputs=inputs,
