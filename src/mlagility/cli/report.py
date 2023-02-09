@@ -7,7 +7,6 @@ import groqflow.common.printing as printing
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 from groqflow import groqmodel
-from mlagility.api import gpumodel
 
 
 def _successCleanup(item):
@@ -387,26 +386,6 @@ class Results:
 
 #     def add_value(self, column, value):
 #         columns[column][VALUES].append(value)
-
-
-def _get_gpu_measured_latency(state: build.State) -> str:
-    return gpumodel.GPUMeasuredPerformance(
-        os.path.join(
-            state.cache_dir,
-            state.config.build_name,
-            "gpu_performance.json",
-        )
-    ).latency
-
-
-def _get_gpu_measured_throughput(state: build.State) -> str:
-    return gpumodel.GPUMeasuredPerformance(
-        os.path.join(
-            state.cache_dir,
-            state.config.build_name,
-            "gpu_performance.json",
-        )
-    ).throughput
 
 
 def summary_spreadsheet(args):

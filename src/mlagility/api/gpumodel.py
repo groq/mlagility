@@ -1,35 +1,11 @@
 import os
-from dataclasses import dataclass
 import json
 import numpy as np
 import torch
 import groqflow.common.printing as printing
 import groqflow.common.build as build
 import mlagility.api.cloud as cloud
-
-
-@dataclass
-class GPUMeasuredPerformance:
-    gpu_performance_file: str
-    throughput_units: str = "inferences per second"
-
-    @property
-    def latency(self):
-        if os.path.exists(self.gpu_performance_file):
-            with open(self.gpu_performance_file, encoding="utf-8") as f:
-                performance = json.load(f)
-            return performance["Total Latency"]
-        else:
-            return "-"
-
-    @property
-    def throughput(self):
-        if os.path.exists(self.gpu_performance_file):
-            with open(self.gpu_performance_file, encoding="utf-8") as f:
-                performance = json.load(f)
-            return performance["Throughput"]
-        else:
-            return "-"
+from mlagility.api.performance import MeasuredPerformance
 
 
 class GPUModel:
@@ -44,7 +20,8 @@ class GPUModel:
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
-    ) -> GPUMeasuredPerformance:
+    ) -> MeasuredPerformance:
+
 
         printing.log_info(
             (
@@ -56,31 +33,54 @@ class GPUModel:
             )
         )
 
+
         benchmark_results = self._execute(repetitions=repetitions, backend=backend)
-        self.state.info.gpu_measured_latency = benchmark_results.latency
+        self.state.info.gpu_measured_latency = benchmark_results.mean_latency
         self.state.info.gpu_measured_throughput = benchmark_results.throughput
         return benchmark_results
 
-    def gpu_performance_file(self):
+    @property
+    def _gpu_performance_file(self):
         return os.path.join(
             self.state.cache_dir, self.state.config.build_name, "gpu_performance.json"
         )
 
-    def gpu_error_file(self):
+    def _get_stat(self, stat):
+        if os.path.exists(self._gpu_performance_file):
+            with open(self._gpu_performance_file, encoding="utf-8") as f:
+                performance = json.load(f)
+            return performance[stat]
+        else:
+            return "-"
+
+    @property
+    def _mean_latency(self):
+        return float(self._get_stat("Total Latency")["mean "].split(" ")[1])
+
+    @property
+    def _throughput(self):
+        return float(self._get_stat("Throughput").split(" ")[0])
+
+    @property
+    def _device(self):
+        return self._get_stat("Selected Device")
+
+    @property
+    def _gpu_error_file(self):
         return os.path.join(
             self.state.cache_dir, self.state.config.build_name, "gpu_error.npy"
         )
 
-    def _execute(self, repetitions: int, backend: str) -> GPUMeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str) -> MeasuredPerformance:
         """
         Execute model on GPU and return the performance
         """
 
         # Remove previously stored latency/outputs
-        if os.path.isfile(self.gpu_performance_file()):
-            os.remove(self.gpu_performance_file())
-        if os.path.isfile(self.gpu_error_file()):
-            os.remove(self.gpu_error_file())
+        if os.path.isfile(self._gpu_performance_file):
+            os.remove(self._gpu_performance_file)
+        if os.path.isfile(self._gpu_error_file):
+            os.remove(self._gpu_error_file)
 
         if backend == "cloud":
             cloud.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
@@ -91,7 +91,13 @@ class GPUModel:
                 f"Only 'cloud' and 'local' are supported, but received {backend}"
             )
 
-        return GPUMeasuredPerformance(self.gpu_performance_file())
+        return MeasuredPerformance(
+            mean_latency=self._mean_latency,
+            throughput=self._throughput,
+            device=self._device,
+            device_type="nvidia",
+            build_name=self.state.config.build_name,
+        )
 
 
 class PytorchModelWrapper(GPUModel):

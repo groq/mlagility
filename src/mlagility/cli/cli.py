@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import groqflow.common.build as build
+import groqflow.common.printing as printing
 import mlagility.cli.report as report
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.benchmark as benchmark_command
@@ -14,12 +15,33 @@ class MyParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)
 
+    def print_cache_help(self):
+        print("Error: a cache command is required")
+        self.print_help()
+        sys.exit(2)
+
 
 def print_version(_):
     """
     Print the package version number
     """
     print(mlagility_version)
+
+
+def print_state(args):
+    printing.log_info(
+        f"The state of build {args.build_name} in cache {args.cache_dir} is:"
+    )
+
+    state_path = build.state_file(args.cache_dir, args.build_name)
+    if os.path.exists(state_path):
+        with open(state_path, "r", encoding="utf-8") as file:
+            print(file.read())
+    else:
+        printing.log_error(
+            f"No build found with name: {build}. "
+            "Try running `benchit cache list` to see the builds in your build cache."
+        )
 
 
 def main():
@@ -63,16 +85,20 @@ def main():
         default=os.getcwd(),
     )
 
-    benchmark_parser.add_argument(
-        "-i",
-        "--input-scripts",
-        nargs="+",
-        dest="input_scripts",
-        help="Name(s) of script (.py) files, within the search directory, "
-        "to be benchmarked (defaults to "
-        '["all"], which uses all script files)',
-        required=False,
-        default=["all"],
+    benchmark_group = benchmark_parser.add_mutually_exclusive_group(required=True)
+
+    benchmark_group.add_argument(
+        "input_script",
+        nargs="?",
+        help="Name of the script (.py) file, within the search directory, "
+        "to be benchmarked",
+    )
+
+    benchmark_group.add_argument(
+        "--all",
+        dest="benchmark_all",
+        help="Benchmark all models within all scripts in the search directory",
+        action="store_true",
     )
 
     benchmark_parser.add_argument(
@@ -202,22 +228,6 @@ def main():
         default=[benchmark_default_device],
     )
 
-    benchmark_default_runtime = "ort"
-    benchmark_parser.add_argument(
-        "--runtime",
-        choices=[
-            "ort",
-            "trt",
-            "groq",
-        ],
-        nargs="+",
-        dest="runtimes",
-        help="Name(s) of the software runtimes to be used for the benchmark "
-        f'(defaults to ["{benchmark_default_runtime}"])',
-        required=False,
-        default=["benchmark_default_runtime"],
-    )
-
     benchmark_parser.add_argument(
         "--analyze-only",
         dest="analyze_only",
@@ -259,10 +269,26 @@ def main():
     # )
 
     #######################################
-    # Parser for the "report" command
+    # Subparser for the "cache" command
     #######################################
 
-    report_parser = subparsers.add_parser(
+    cache_parser = subparsers.add_parser(
+        "cache",
+        help="Commands for managing the build cache",
+    )
+
+    cache_subparsers = cache_parser.add_subparsers(
+        title="cache",
+        help="Commands for managing the build cache",
+        required=True,
+        dest="cache_cmd",
+    )
+
+    #######################################
+    # Parser for the "cache report" command
+    #######################################
+
+    report_parser = cache_subparsers.add_parser(
         "report", help="Generate reports in CSV format"
     )
     report_parser.set_defaults(func=report.summary_spreadsheet)
@@ -278,10 +304,10 @@ def main():
     )
 
     #######################################
-    # Parser for the "list" command
+    # Parser for the "cache list" command
     #######################################
 
-    list_parser = subparsers.add_parser(
+    list_parser = cache_subparsers.add_parser(
         "list", help="List all builds in a target cache"
     )
     list_parser.set_defaults(func=filesystem.print_available_builds)
@@ -297,11 +323,35 @@ def main():
     )
 
     #######################################
-    # Parser for the "delete" command
+    # Parser for the "cache stats" command
     #######################################
 
-    delete_parser = subparsers.add_parser(
-        "delete", help="Delete builds in a GroqFlow build cache"
+    stats_parser = cache_subparsers.add_parser(
+        "stats", help="Print stats about a build in a target cache"
+    )
+    stats_parser.set_defaults(func=print_state)
+
+    stats_parser.add_argument(
+        "-d",
+        "--cache-dir",
+        dest="cache_dir",
+        help="The stats of a build in this build cache directory will printed to the terminal "
+        f" (defaults to {filesystem.DEFAULT_CACHE_DIR})",
+        required=False,
+        default=filesystem.DEFAULT_CACHE_DIR,
+    )
+
+    stats_parser.add_argument(
+        "build_name",
+        help="Name of the specific build whose stats are to be printed, within the cache directory",
+    )
+
+    #######################################
+    # Parser for the "cache delete" command
+    #######################################
+
+    delete_parser = cache_subparsers.add_parser(
+        "delete", help="Delete one or more builds in a build cache"
     )
     delete_parser.set_defaults(func=filesystem.delete_builds)
 
@@ -317,13 +367,9 @@ def main():
     delete_group = delete_parser.add_mutually_exclusive_group(required=True)
 
     delete_group.add_argument(
-        "-b",
-        "--build-names",
-        nargs="+",
-        dest="build_names",
-        help="Name(s) of the specific builds to be deleted, within the cache directory",
-        required=False,
-        default=None,
+        "build_name",
+        nargs="?",
+        help="Name of the specific build to be deleted, within the cache directory",
     )
 
     delete_group.add_argument(
@@ -354,7 +400,6 @@ def main():
     if len(sys.argv) > 1:
         script_name, _ = benchmark_command.decode_script_name(sys.argv[1])
         if sys.argv[1] not in subparsers.choices.keys() and script_name.endswith(".py"):
-            sys.argv.insert(1, "-i")
             sys.argv.insert(1, "benchmark")
 
     args = parser.parse_args()

@@ -9,6 +9,7 @@ import groqflow.justgroqit.hummingbird as hummingbird
 from mlagility.api import gpumodel, cpumodel
 import mlagility.common.filesystem as filesystem
 import mlagility.analysis.util as util
+from mlagility.api.performance import MeasuredPerformance
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
@@ -136,7 +137,22 @@ def benchit(
             num_chips=groq_num_chips,
             groqview=groqview,
         )
-        perf = gmodel.benchmark()
+
+        if build_only:
+            return
+
+        groq_perf = gmodel.benchmark()
+
+        # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
+        # class used by the MLAgility project
+        perf = MeasuredPerformance(
+            throughput=groq_perf.throughput,
+            mean_latency=groq_perf.latency,
+            device="GroqChip1",
+            device_type="groq",
+            build_name=gmodel.state.config.build_name,
+        )
+
     elif device == "nvidia":
         gmodel = exportit(
             model=model,
@@ -152,12 +168,10 @@ def benchit(
         gpu_model = gpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
+
         perf = gpu_model.benchmark(backend=backend)
 
-        print(perf.latency)
-        latency_ms = float(perf.latency["mean "].split(" ")[1])
-        throughput_ips = float(perf.throughput.split(" ")[0])
-    elif device == "x86":
+  elif device == "x86":
         gmodel = exportit(
             model=model,
             inputs=inputs,
@@ -174,21 +188,21 @@ def benchit(
         )
         perf = cpu_model.benchmark(backend=backend)
 
-        latency_ms = float(perf.latency)
-        throughput_ips = float(perf.throughput)
     else:
         raise ValueError(
-            f"Only groq, x86, or nvidia are allowed values for device, but got {device}"
+            f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
         )
 
     print(
-        f"\nPerformance of build {gmodel.state.config.build_name} on device {device} is:"
+        f"\nPerformance of build {perf.build_name} on {perf.device_type} device "
+        f"{perf.device} is:"
     )
-    print(f"latency: {latency_ms:.3f} ms")
-    print(f"throughput: {throughput_ips:.1f} ips")
+    print(f"latency: {perf.mean_latency:.3f} {perf.latency_units}")
+    print(f"throughput: {perf.throughput:.1f} {perf.throughput_units}")
 
     # Add metadata and clean cache if needed
-    output_dir = os.path.join(cache_dir, gmodel.state.config.build_name)
+    output_dir = os.path.join(cache_dir, perf.build_name)
+
     if os.path.isdir(output_dir):
         # Delete all files except logs and other metadata
         if lean_cache:
