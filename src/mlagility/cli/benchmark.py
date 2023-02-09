@@ -134,25 +134,6 @@ def main(args):
                 # in the script
                 evaluate_script(tracer_args, args.script_args)
 
-                # Print performance info
-                if args.devices and Action.BENCHMARK in actions:
-                    builds = filesystem.get_builds_from_script(
-                        args.cache_dir, pathlib.Path(script).stem
-                    )
-                    for build in builds:
-                        if "x86" in args.devices:
-                            perf_file = os.path.join(
-                                groqflow.common.build.output_dir(args.cache_dir, build),
-                                "cpu_performance.json",
-                            )
-                            with open(perf_file, "r", encoding="utf8") as stream:
-                                perf_data = json.loads(stream.read())
-                                printing.log_info(
-                                    f"Performance of device {perf_data['CPU Name']} is:"
-                                )
-                                print(f"Latency: {perf_data['Mean Latency(ms)']} ms")
-                                print(f"Throughput: {perf_data['Throughput']} IPS")
-
     # Wait until all the Slurm jobs are done
     if args.use_slurm:
         while len(slurm.jobs_in_queue()) != 0:
