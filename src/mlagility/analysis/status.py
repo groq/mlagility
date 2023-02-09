@@ -65,14 +65,26 @@ def print_model(model_info: ModelInfo, model_hash: Union[str, None]) -> None:
     print(f"{ident}\tHash:\t\t" + model_hash)
 
     # Print benchit results if benchit was run
-    if model_info.is_target and model_info.build_model:
+    if model_info.performance:
         printing.log(f"{ident}\tStatus:\t\t")
         printing.logn(
-            f"{model_info.status_message}\n", c=model_info.status_message_color
+            f"Model successfully benchmarked on {model_info.performance.device}",
+            c=model_info.status_message_color,
         )
+        printing.logn(
+            f"{ident}\t\t\tMean Latency:\t{model_info.performance.mean_latency:.3f}"
+            f"\t{model_info.performance.latency_units}"
+        )
+        printing.logn(
+            f"{ident}\t\t\tThroughput:\t{model_info.performance.throughput:.1f}"
+            f"\t{model_info.performance.throughput_units}"
+        )
+        print()
     else:
-        print("")
-
-    # Print benchmark results if benchmark was run
-    if model_info.performance:
-        model_info.performance.print()
+        if model_info.is_target and model_info.build_model:
+            printing.log(f"{ident}\tStatus:\t\t")
+            printing.logn(
+                f"{model_info.status_message}\n", c=model_info.status_message_color
+            )
+        else:
+            print("")
