@@ -50,48 +50,6 @@ def run(output_dir: str, repetitions: int, username: str):
 
     save_trt_results(str(trtexec_output), str(trtexec_error))
 
-
-# def save_trt_results(output: str, error: str):
-#     decoded_output = bytes(output, "utf-8").decode("unicode_escape")
-#     decoded_error = bytes(error, "utf-8").decode("unicode_escape")
-#     with open("temp.txt", "w", encoding="utf-8") as f:
-#         f.writelines(decoded_output)
-
-#     # Outline risk: Dependence on trtexec output format
-#     temp = open("temp.txt", "r", encoding="utf-8")
-
-#     field_mapping = {
-#         "Selected Device": "Selected Device",
-#         "TensorRT version": "TensorRT version",
-#         "H2D Latency:": "Host to Device Latency",
-#         "GPU Compute Time:": "GPU Compute Time:",
-#         "D2H Latency:": "Device to Host Latency",
-#         "Throughput": "Throughput",
-#         "Latency:": "Total Latency",
-#     }
-
-#     def format_field(line: str):
-#         all_metrics = line.split(":")[-1].strip()
-#         if "," not in all_metrics:
-#             return all_metrics
-#         metrics = {
-#             k: v for k, v in (m.strip().split("=") for m in all_metrics.split(","))
-#         }
-#         return metrics
-
-#     gpu_performance = {}
-#     for line in temp:
-#         for field, key in field_mapping.items():
-#             if field in line:
-#                 gpu_performance[key] = format_field(line)
-#                 break
-#     temp.close()
-#     os.remove("temp.txt")
-#     with open(args["outputs_file"], "w", encoding="utf-8") as out_file:
-#         json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
-
-#     with open(args["errors_file"], "w", encoding="utf-8") as e:
-#         e.writelines(decoded_error)
 def save_trt_results(output: str, error: str):
     decoded_output = bytes(output, "utf-8").decode("unicode_escape")
     decoded_error = bytes(error, "utf-8").decode("unicode_escape")
