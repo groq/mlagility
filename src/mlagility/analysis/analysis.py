@@ -152,7 +152,7 @@ def call_benchit(
 def get_model_hash(
     model: Union[torch.nn.Module, tf.keras.Model], model_type: build.ModelType
 ):
-    return build.hash_model(model, model_type, hash_params=False)[:8]
+    return build.hash_model(model, model_type, hash_params=True)[:8]
 
 
 def store_model_info(
@@ -187,6 +187,7 @@ def store_model_info(
             is_target=model_hash in tracer_args.targets or tracer_args.targets == [],
             build_model=Action.BUILD in tracer_args.actions,
             model_type=model_type,
+            script_name=tracer_args.script_name,
         )
 
 

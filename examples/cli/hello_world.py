@@ -10,7 +10,7 @@ and then benchmark it.
 
 import torch
 
-torch.manual_seed(0)
+torch.manual_seed(1)
 
 # Define model class
 class SmallModel(torch.nn.Module):
