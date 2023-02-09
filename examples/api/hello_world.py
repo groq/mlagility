@@ -20,14 +20,17 @@ output_size = 500
 pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}
 
-print ("Benchmarking local NVIDIA GPU...")
-benchit(pytorch_model, inputs, device="nvidia", backend="local")
-
 print ("Benchmarking local x86 CPU...")
 benchit(pytorch_model, inputs, device="x86", backend="local")
 
-print ("Benchmarking remote NVIDIA GPU...")
-benchit(pytorch_model, inputs, device="nvidia", backend="cloud")
+# Enable if your system has local NVIDIA GPU
+# print ("Benchmarking local NVIDIA GPU...")
+# benchit(pytorch_model, inputs, device="nvidia", backend="local")
 
-print ("Benchmarking remote x86 CPU...")
-benchit(pytorch_model, inputs, device="x86", backend="cloud")
+# Enable if you have access to a remote NVIDIA GPU
+# print ("Benchmarking remote NVIDIA GPU...")
+# benchit(pytorch_model, inputs, device="nvidia", backend="cloud")
+
+# Enable if you have access to a remote x86 CPU
+# print ("Benchmarking remote x86 CPU...")
+# benchit(pytorch_model, inputs, device="x86", backend="cloud")
