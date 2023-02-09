@@ -6,6 +6,7 @@ import groqflow.justgroqit.stage as stage
 from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
 import groqflow.justgroqit.hummingbird as hummingbird
+import groqflow.common.printing as printing
 from mlagility.api import gpumodel, cpumodel
 import mlagility.common.filesystem as filesystem
 import mlagility.analysis.util as util
@@ -120,7 +121,7 @@ def benchit(
     groq_assembler_flags: Optional[List[str]] = None,
     groq_num_chips: Optional[int] = None,
     groqview: bool = False,
-):
+) -> MeasuredPerformance:
     """
     Benchmark a model against some inputs on target hardware
     """
@@ -141,6 +142,7 @@ def benchit(
         if build_only:
             return
 
+        printing.log_info("Starting benchmark...")
         groq_perf = gmodel.benchmark()
 
         # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
@@ -165,6 +167,7 @@ def benchit(
         if build_only:
             return
 
+        printing.log_info("Starting benchmark...")
         gpu_model = gpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
@@ -183,6 +186,7 @@ def benchit(
         if build_only:
             return
 
+        printing.log_info("Starting benchmark...")
         cpu_model = cpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
@@ -193,13 +197,6 @@ def benchit(
             f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
         )
 
-    print(
-        f"\nPerformance of build {perf.build_name} on {perf.device_type} device "
-        f"{perf.device} is:"
-    )
-    print(f"latency: {perf.mean_latency:.3f} {perf.latency_units}")
-    print(f"throughput: {perf.throughput:.1f} {perf.throughput_units}")
-
     # Add metadata and clean cache if needed
     output_dir = os.path.join(cache_dir, perf.build_name)
 
@@ -207,3 +204,9 @@ def benchit(
         # Delete all files except logs and other metadata
         if lean_cache:
             util.clean_output_dir(output_dir)
+
+    if not build_only:
+        perf.print()
+        return perf
+    else:
+        return None
