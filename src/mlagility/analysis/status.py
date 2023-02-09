@@ -72,3 +72,7 @@ def print_model(model_info: ModelInfo, model_hash: Union[str, None]) -> None:
         )
     else:
         print("")
+
+    # Print benchmark results if benchmark was run
+    if model_info.performance:
+        model_info.performance.print()

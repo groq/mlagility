@@ -106,7 +106,7 @@ def call_benchit(
     labels.save_to_cache(cache_dir, build_name, tracer_args.labels)
 
     try:
-        benchit(
+        perf = benchit(
             model_info.model,
             inputs,
             device=tracer_args.device,
@@ -120,7 +120,11 @@ def call_benchit(
             groqview=tracer_args.groqview,
         )
 
-        model_info.status_message = "Model successfully built!"
+        if Action.BENCHMARK in tracer_args.actions:
+            model_info.status_message = "Model successfully benchmarked!"
+            model_info.performance = perf
+        else:
+            model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.GroqitStageError:
