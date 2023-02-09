@@ -17,6 +17,7 @@ from mlagility.api.performance import MeasuredPerformance
 class ModelInfo:
     model: torch.nn.Module
     name: str
+    script_name: str
     file: str = ""
     line: int = 0
     params: int = 0
