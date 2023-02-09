@@ -9,13 +9,13 @@ import subprocess
 import json
 
 
-def run(output_dir: str, repetitions: int, username: str):
+def run(output_dir: str, repetitions: int):
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
     # GroqFlow maintainers to keep this up to date with the latest version of release container
     latest_trt_docker = "nvcr.io/nvidia/tensorrt:22.12-py3"
     docker_name = "tensorrt22.12"
-    onnx_model = f"/app/onnxmodel/model.onnx"
+    onnx_model = "/app/onnxmodel/model.onnx"
 
     # docker run args:
     # "--gpus all" - use all gpus available
@@ -107,5 +107,4 @@ if __name__ == "__main__":
     run(
         args["output_dir"],
         args["iterations"],
-        args["username"],
     )

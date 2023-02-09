@@ -36,7 +36,7 @@ def run_ort_profile(source_onnx, num_iterations=100):
         start = timer()
         try:
             onnx_session.run([output_name], input_feed)
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except
             exception = e
         end = timer()
         iteration_latency = end - start
@@ -101,7 +101,7 @@ def save_ort_results(perf_result, num_iterations, exception):
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
     cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
-    cpu_info_output, cpu_info_error = cpu_info.communicate()
+    cpu_info_output, _ = cpu_info.communicate()
     decoded_info = bytes(str(cpu_info_output), "utf-8").decode("unicode_escape")
 
     field_mapping = {

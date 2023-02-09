@@ -3,10 +3,10 @@ import sys
 import subprocess
 from typing import Tuple, Union, Dict, Any
 from stat import S_ISDIR
-import yaml
-import shutil
-import paramiko
 import getpass
+import shutil
+import yaml
+import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
@@ -192,19 +192,19 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
     else:
         raise ValueError(f"Only 'cpu' and 'gpu' are supported. But received {device_type}")
-        
+
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
-       for file in files_to_transfer:
+        for file in files_to_transfer:
             s.put(f"{dir_path}/{file}", f"{output_dir}/{file}")
 
 def setup_local_host(device_type: str, output_dir: str) -> None:
     if device_type == "cpu":
         # Check if x86_64 CPU is available locally
         check_device = subprocess.run(
-            ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
         )
         stdout = check_device.stdout.decode().strip()
         if stdout != "x86_64" or check_device.returncode == 1:
@@ -219,41 +219,42 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             encoding="utf-8",
+            check=False
         )
         print (result)
         if "NVIDIA" not in result.stdout or result.returncode == 1:
             msg = "No NVIDIA GPUs available on the local machine"
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = ["execute-gpu.py"]
-        
+
     else:
         raise ValueError(f"Invalid device type: {device_type}")
 
     # Transfer files to host
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
-    subprocess.run(["mkdir", f"{output_dir}"])
+    subprocess.run(["mkdir", f"{output_dir}"], check=False)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     for file in files_to_transfer:
         shutil.copy(f"{dir_path}/{file}", f"{output_dir}/{file}")
 
-def setup_connection(device_type: str, output_dir: str) -> paramiko.SSHClient:
+def setup_connection(device_type: str, output_dir: str = None) -> paramiko.SSHClient:
     # Setup authentication scheme if needed
     ip, username = configure_remote(device_type)
 
     # Connect to host
     client = connect_to_host(ip, username)
-    
+
     if device_type == "groqchip":
         # Check for GroqChips and transfer common files
         setup_groqchip_host(client)
     elif device_type == "cpu" or device_type == "gpu":
-       setup_remote_host(client, device_type=device_type, output_dir=output_dir)
+        setup_remote_host(client, device_type=device_type, output_dir=output_dir)
     else:
         raise ValueError(
-            f"Only 'cpu' and 'gpu' are supported, but received {accelerator}"
+            f"Only 'cpu' and 'gpu' are supported, but received {device_type}"
         )
-    
+
     return client
 
 
@@ -488,7 +489,7 @@ def execute_cpu_remotely(
     output_dir = f"/home/{username}/mlagility_remote_cache"
     remote_outputs_file = f"{output_dir}/outputs.txt"
     remote_errors_file = f"{output_dir}/errors.txt"
-    
+
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type="cpu", output_dir=output_dir)
 
@@ -504,7 +505,9 @@ def execute_cpu_remotely(
     # Check if conda is installed on the remote machine
     conda_location, exit_code = exec_command(client, f"ls /home/{username}")
     if "miniconda3" not in conda_location:
-        raise ValueError(f"conda installation not found in /home/{username}. Please install miniconda3")
+        raise ValueError(
+                f"conda installation not found in /home/{username}. Please install miniconda3"
+            )
     # TODO: Remove requirement that conda has to be installed on the /home/user
     conda_src = f"/home/{username}"
 
@@ -569,7 +572,7 @@ def execute_cpu_locally(
     output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
-    
+
     setup_local_host(device_type="cpu", output_dir=output_dir)
 
     # Check if ONNX file has been generated

@@ -71,7 +71,7 @@ class CPUModel:
             self.state.cache_dir, self.state.config.build_name, "cpu_error.npy"
         )
 
-    def _execute(self, repetitions: int, backend: str) -> MeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
 
         """
         Execute model on cpu and return the performance

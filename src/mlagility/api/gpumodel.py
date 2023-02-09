@@ -71,7 +71,7 @@ class GPUModel:
             self.state.cache_dir, self.state.config.build_name, "gpu_error.npy"
         )
 
-    def _execute(self, repetitions: int, backend: str) -> MeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
         """
         Execute model on GPU and return the performance
         """
