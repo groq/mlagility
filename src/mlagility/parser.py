@@ -30,11 +30,19 @@ def parse(valid_args: List[str]) -> List[Union[int, float]]:
     # List valid mlagility args
     mla_args = {
         # General args
+        # Batch size for the input to the model that will be used for benchmarking
         "batch_size": Arg("batch_size", default=1, type=int),
+        # Maximum sequence length for the model's input;
+        # also the input sequence length that will be used for benchmarking
         "max_seq_length": Arg("max_seq_length", default=128, type=int),
+        # Maximum sequence length for the model's audio input;
+        # also the input sequence length that will be used for benchmarking
         "max_audio_seq_length": Arg("max_audio_seq_length", default=25600, type=int),
+        # Height of the input image that will be used for benchmarking
         "height": Arg("height", default=224, type=int),
+        # Number of channels in the input image that will be used for benchmarking
         "num_channels": Arg("num_channels", default=3, type=int),
+        # Width of the input image that will be used for benchmarking
         "width": Arg("width", default=224, type=int),
         # Args for Graph Neural Networks
         "k": Arg("k", default=8, type=int),
