@@ -180,7 +180,7 @@ def run_analysis(args):
     output = subprocess.check_output(args, encoding="UTF-8")
 
     # Process outputs
-    output = output[output.rfind("Models found") :]
+    output = output[output.rfind("Models discovered") :]
     models_executed = output.count("(executed")
     models_built = output.count("Model successfully built!")
     return models_executed, 0, models_built

@@ -152,7 +152,7 @@ def call_benchit(
 def get_model_hash(
     model: Union[torch.nn.Module, tf.keras.Model], model_type: build.ModelType
 ):
-    return build.hash_model(model, model_type, hash_params=True)[:8]
+    return build.hash_model(model, model_type, hash_params=False)[:8]
 
 
 def store_model_info(
@@ -175,7 +175,17 @@ def store_model_info(
     line = frame.f_lineno if event == "return" else frame.f_lineno - 1
 
     # Keep track of all models details
-    if model_hash not in tracer_args.models_found.keys():
+
+    # If we have already found a model, don't add it to models_found again
+    # We have to use both the model hash and the script name, since we don't
+    # want to ignore a model if it was explicitly called in two different scripts
+    identifier = f"{model_hash}_{tracer_args.script_name}"
+    model_already_found = False
+    for model_info in tracer_args.models_found.values():
+        if identifier == f"{model_info.hash}_{model_info.script_name}":
+            model_already_found = True
+
+    if not model_already_found:
         tracer_args.models_found[model_hash] = util.ModelInfo(
             model=model,
             name=model_name,
