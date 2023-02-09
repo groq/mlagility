@@ -1,11 +1,8 @@
 import time
 import os
-import json
-import pathlib
 from typing import Tuple, List
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
-import groqflow.common.build
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
@@ -133,25 +130,6 @@ def main(args):
                 # Run analysis, build, and benchmarking on every model
                 # in the script
                 evaluate_script(tracer_args, args.script_args)
-
-                # Print performance info
-                if args.devices and Action.BENCHMARK in actions:
-                    builds = filesystem.get_builds_from_script(
-                        args.cache_dir, pathlib.Path(script).stem
-                    )
-                    for build in builds:
-                        if "x86" in args.devices:
-                            perf_file = os.path.join(
-                                groqflow.common.build.output_dir(args.cache_dir, build),
-                                "cpu_performance.json",
-                            )
-                            with open(perf_file, "r", encoding="utf8") as stream:
-                                perf_data = json.loads(stream.read())
-                                printing.log_info(
-                                    f"Performance of device {perf_data['CPU Name']} is:"
-                                )
-                                print(f"Latency: {perf_data['Mean Latency(ms)']} ms")
-                                print(f"Throughput: {perf_data['Throughput']} IPS")
 
     # Wait until all the Slurm jobs are done
     if args.use_slurm:
