@@ -69,7 +69,7 @@ def call_benchit(
     # Update status to "computing"
     model_info.status_message = "Computing..."
     model_info.status_message_color = printing.Colors.OKBLUE
-    status.update(tracer_args.models_found, tracer_args.script_name)
+    status.update(tracer_args.models_found)
 
     # Get a copy of the keyword arguments
     args, kwargs = model_inputs
@@ -330,7 +330,7 @@ def explore_frame(
                 # Ensure that groqit() doesn't interfere with our execution count
                 model_info.executed = 1
 
-            status.update(tracer_args.models_found, tracer_args.script_name)
+            status.update(tracer_args.models_found)
 
             # Turn tracing on again after computing the outputs
             sys.setprofile(tracer)
@@ -408,7 +408,9 @@ def recursive_search(
                 )
 
 
-def evaluate_script(tracer_args: TracerArgs, input_args: str = None):
+def evaluate_script(
+    tracer_args: TracerArgs, input_args: str = None
+) -> Dict[str, util.ModelInfo]:
     # Trim the ".py"
     tracer_args.script_name = pathlib.Path(tracer_args.input).stem
 
@@ -435,3 +437,5 @@ def evaluate_script(tracer_args: TracerArgs, input_args: str = None):
     # Import input script. Each executed frame of the input script will
     # trigger the tracefunc() callback function (defined above)
     spec.loader.exec_module(module)
+
+    return tracer_args.models_found

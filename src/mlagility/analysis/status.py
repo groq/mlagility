@@ -6,14 +6,14 @@ import groqflow.common.build as build
 from mlagility.analysis.util import ModelInfo
 
 
-def update(models_found: Dict[str, ModelInfo], script_name: str) -> None:
+def update(models_found: Dict[str, ModelInfo]) -> None:
     """
     Prints all models and submodels found
     """
 
     os.system("clear")
     printing.logn(
-        f"\nModels found while running '{script_name}'\n",
+        "\nModels discovered during profiling:\n",
         c=printing.Colors.BOLD,
     )
     recursive_print(models_found)
