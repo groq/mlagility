@@ -100,12 +100,12 @@ def main(args):
                     assembler_flags=args.assembler_flags,
                     num_chips=args.num_chips,
                     groqview=args.groqview,
-                    devices=device,
-                    runtimes=args.runtimes,
+                    devices=[device],
                     ip=args.ip,
                     max_depth=args.max_depth,
                     analyze_only=args.analyze_only,
                     build_only=args.build_only,
+                    lean_cache=args.lean_cache,
                 )
 
             else:

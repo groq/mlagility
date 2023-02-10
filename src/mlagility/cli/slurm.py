@@ -3,7 +3,7 @@ import subprocess
 import pathlib
 import time
 import getpass
-from typing import List
+from typing import List, Optional
 
 
 def jobs_in_queue(job_name=None) -> List[str]:
@@ -30,27 +30,79 @@ def jobs_in_queue(job_name=None) -> List[str]:
     return output
 
 
-def run(
-    groqit_script: str,
-    args: str,
-    job_name: str,
-    working_directory: str,
-    conda_directory: str,
-    ml_cache: str,
+def list_arg(values, flag):
+    if values is not None:
+        result = " ".join(values)
+        result = f" {flag} {result}"
+    else:
+        result = ""
+
+    return result
+
+
+def value_arg(value, flag):
+    if value is not None:
+        result = f" {flag} {value}"
+    else:
+        result = ""
+
+    return result
+
+
+def bool_arg(value, flag):
+    if value:
+        result = f" {flag}"
+    else:
+        result = ""
+
+    return result
+
+
+def run_benchit(
+    op: str,
+    script: str,
+    cache_dir: str,
+    search_dir: Optional[str] = None,
+    rebuild: Optional[str] = None,
+    compiler_flags: Optional[List[str]] = None,
+    assembler_flags: Optional[List[str]] = None,
+    num_chips: Optional[int] = None,
+    groqview: Optional[bool] = None,
+    devices: Optional[List[str]] = None,
+    ip: Optional[str] = None,
+    max_depth: Optional[int] = None,
+    analyze_only: Optional[bool] = None,
+    build_only: Optional[bool] = None,
+    lean_cache: Optional[bool] = None,
+    working_dir: str = os.getcwd(),
+    ml_cache_dir: Optional[str] = None,
+    max_jobs: int = 50,
 ):
-    """
-    Run a GroqFlow job on Slurm
 
-    args:
-        groqit_script: an executable script that knows how to take the following arguments.
-            Most of the time this will be `groqit-util`, however you can provide your own
-            custom executable.
-        args: command line arguments passed to the groqit_script
-        build_name: name of the build
+    # Convert args to strings
+    cache_dir_str = value_arg(cache_dir, "--cache-dir")
+    search_dir_str = value_arg(search_dir, "--search-dir")
+    rebuild_str = value_arg(rebuild, "--rebuild")
+    compiler_flags_str = list_arg(compiler_flags, "--compiler-flags")
+    assembler_flags_str = list_arg(assembler_flags, "--assembler-flags")
+    num_chips_str = value_arg(num_chips, "--num-chips")
+    groqview_str = bool_arg(groqview, "--groqview")
+    devices_str = list_arg(devices, "--devices")
+    ip_str = value_arg(ip, "--ip")
+    max_depth_str = value_arg(max_depth, "--max-depth")
+    analyze_only_str = bool_arg(analyze_only, "--analyze-only")
+    build_only_str = bool_arg(build_only, "--build-only")
+    lean_cache_str = bool_arg(lean_cache, "--lean_cache")
 
-    """
+    args = (
+        f"{op} {script} {cache_dir_str}{search_dir_str}{rebuild_str}"
+        f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
+        f"{devices_str}{ip_str}{max_depth_str}{analyze_only_str}"
+        f"{build_only_str}{lean_cache_str}"
+    )
 
-    max_jobs = 50
+    # Remove the .py extension from the build name
+    job_name = script.split("/")[-1].split(".")[0]
 
     while len(jobs_in_queue()) >= max_jobs:
         print(
@@ -70,12 +122,12 @@ def run(
         "--time=00-02:00:00",  # days-hh:mm:ss"
         f"--job-name={job_name}",
         shell_script,
-        groqit_script,
+        "benchit",
         args,
-        working_directory,
-        conda_directory,
-        ml_cache,
+        working_dir,
     ]
+    if ml_cache_dir is not None:
+        slurm_command.append(ml_cache_dir)
 
     print(f"Submitting job {job_name} to Slurm")
     subprocess.check_call(slurm_command)
