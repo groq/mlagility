@@ -6,6 +6,7 @@ import os
 import unittest
 from pathlib import Path
 import shutil
+import glob
 import subprocess
 import numpy as np
 import mlagility.common.filesystem as filesystem
@@ -170,6 +171,13 @@ with open(os.path.join(test_dir, "tokenizer.json"), "w", encoding="utf") as f:
     f.write(minimal_tokenizer)
 
 
+def cache_is_lean(cache_dir, build_name):
+    files = list(glob.glob(f"{cache_dir}/{build_name}/**/*", recursive=True))
+    is_lean = len([x for x in files if ".onnx" in x]) == 0
+    metadata_found = len([x for x in files if ".txt" in x]) > 0
+    return is_lean and metadata_found
+
+
 # Change CWD
 os.chdir(test_dir)
 
@@ -263,11 +271,8 @@ class Testing(unittest.TestCase):
             ]
         )
         build_name = f"linear_pytorch_{model_hash}"
-        files = os.listdir(f"{cache_dir}/{build_name}")
-        cache_is_lean = len([x for x in files if ".onnx" in x]) == 0
-        metadata_found = len([x for x in files if ".txt" in x]) > 0
         labels_found = labels.load_from_cache(cache_dir, build_name) != {}
-        assert metadata_found and cache_is_lean and labels_found
+        assert cache_is_lean(cache_dir, build_name) and labels_found
 
     def test_07_generic_args(self):
         output = subprocess.check_output(
