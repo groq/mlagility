@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+CURR_DIR="$( dirname -- "$0"; )"
 SCRIPT="$1"
 ARGS="$2"
 WORKING_DIRECTORY="$3"
@@ -21,7 +22,7 @@ fi
 export GROQFLOW_INTERNAL_FEATURES="True"
 export GROQFLOW_SKIP_SDK_CHECK="True"
 umask 002
-python login.py --key "${HUGGINGFACE_API_KEY}"
+python "$CURR_DIR"/login.py --key "${HUGGINGFACE_API_KEY}"
 cd "$WORKING_DIRECTORY" || exit
 # shellcheck disable=SC2116,SC2046
 "$SCRIPT" $(echo "$ARGS")
