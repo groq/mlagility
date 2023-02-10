@@ -62,6 +62,9 @@ def main(args):
                 f"Script could not be found: {user_script_path}"
             )
 
+    # Get absolute path of scripts
+    scripts = [os.path.abspath(s) for s in scripts]
+
     # Decode benchit args into TracerArgs flags
     if args.analyze_only:
         actions = [
