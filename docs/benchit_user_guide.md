@@ -245,6 +245,7 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
 - `--all` Benchmark all models within all script (.py) files in the search directory.
 - `--use-slurm` Execute the build(s) on Slurm instead of using local compute resources
   - Not available as an API argument.
+  - Requires setting up Slurm as shown [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 - `--lean-cache` Delete all build artifacts except for log files after the build
   - Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility)
