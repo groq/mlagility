@@ -14,6 +14,7 @@ import mlagility.common.labels as labels
 from mlagility.parser import parse
 import groqflow.common.cache as cache
 
+
 # We generate a corpus on to the filesystem during the test
 # to get around how weird bake tests are when it comes to
 # filesystem access
@@ -157,6 +158,7 @@ minimal_tokenizer = """
 
 # Create a test directory
 test_dir = "analysis_test_dir"
+cache_dir = "cache-dir"
 dirpath = Path(test_dir)
 if dirpath.is_dir():
     shutil.rmtree(dirpath)
@@ -196,8 +198,7 @@ def run_analysis(args):
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
-        filesystem.DEFAULT_CACHE_DIR = "test_cache"
-        cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
+        cache.rmdir(cache_dir)
         return super().setUp()
 
     def test_01_basic(self):
@@ -241,6 +242,8 @@ class Testing(unittest.TestCase):
                 "--max-depth",
                 "1",
                 "--build-only",
+                "--cache-dir",
+                cache_dir,
             ]
         )
         assert np.array_equal(output, (2, 0, 1))
@@ -251,13 +254,14 @@ class Testing(unittest.TestCase):
                 "benchit",
                 "linear_keras.py",
                 "--build-only",
+                "--cache-dir",
+                cache_dir,
             ]
         )
         assert np.array_equal(output, (1, 0, 1))
 
     def test_06_cache(self):
         model_hash = "60931adb"
-        cache_dir = "cache-dir"
         run_analysis(
             [
                 "benchit",
@@ -352,6 +356,8 @@ class Testing(unittest.TestCase):
                 "--build-only",
                 "--max-depth",
                 "1",
+                "--cache-dir",
+                cache_dir,
             ]
         )
         assert np.array_equal(output, (2, 0, 1))

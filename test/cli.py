@@ -8,12 +8,15 @@ import unittest
 from unittest.mock import patch
 import sys
 import io
+from pathlib import Path
+import shutil
 from contextlib import redirect_stdout
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
 from mlagility.common import filesystem
 import groqflow.common.build as build
 import groqflow.common.cache as cache
+
 
 # We generate a corpus on to the filesystem during the test
 # to get around how weird bake tests are when it comes to
@@ -98,6 +101,16 @@ def get_sequence():
     """
 }
 
+# Change CWD
+# Create a test directory
+test_dir = "cli_test_dir"
+cache_dir = "cache-dir"
+dirpath = Path(test_dir)
+if dirpath.is_dir():
+    shutil.rmtree(dirpath)
+os.makedirs(test_dir)
+os.chdir(test_dir)
+
 corpus_dir = "test_corpus"
 extras_dir = os.path.join(corpus_dir, "extras")
 os.makedirs(extras_dir, exist_ok=True)
@@ -128,7 +141,7 @@ def assert_success_of_builds(
     # TODO: simplify this code when
     # https://git.groq.io/code/Groq/-/issues/16110
     # is done
-    builds = cache.get_all(filesystem.DEFAULT_CACHE_DIR)
+    builds = cache.get_all(cache_dir)
 
     for test_script in test_script_files:
         test_script_name = strip_dot_py(test_script)
@@ -150,8 +163,7 @@ def assert_success_of_builds(
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
-        filesystem.DEFAULT_CACHE_DIR = "test_cache"
-        cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
+        cache.rmdir(cache_dir)
 
         return super().setUp()
 
@@ -165,6 +177,8 @@ class Testing(unittest.TestCase):
             "benchmark",
             os.path.join(corpus_dir, test_script),
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -183,6 +197,8 @@ class Testing(unittest.TestCase):
             "-s",
             corpus_dir,
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -204,6 +220,8 @@ class Testing(unittest.TestCase):
             "-s",
             corpus_dir,
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -226,6 +244,8 @@ class Testing(unittest.TestCase):
             "-s",
             corpus_dir,
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -234,6 +254,8 @@ class Testing(unittest.TestCase):
             "benchit",
             "cache",
             "report",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -241,9 +263,7 @@ class Testing(unittest.TestCase):
         # Make sure our test models are mentioned in
         # the summary csv
 
-        summary_csv_path = os.path.join(
-            filesystem.DEFAULT_CACHE_DIR, report.summary_filename
-        )
+        summary_csv_path = os.path.join(cache_dir, report.summary_filename)
         with open(summary_csv_path, "r", encoding="utf8") as summary_csv:
             summary_csv_contents = summary_csv.read()
             for test_script in test_scripts:
@@ -264,6 +284,8 @@ class Testing(unittest.TestCase):
             "-s",
             corpus_dir,
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -274,6 +296,8 @@ class Testing(unittest.TestCase):
                 "benchit",
                 "cache",
                 "list",
+                "--cache-dir",
+                cache_dir,
             ]
             with patch.object(sys, "argv", testargs):
                 benchitcli()
@@ -297,6 +321,8 @@ class Testing(unittest.TestCase):
             "-s",
             corpus_dir,
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -307,6 +333,8 @@ class Testing(unittest.TestCase):
                 "benchit",
                 "cache",
                 "list",
+                "--cache-dir",
+                cache_dir,
             ]
             with patch.object(sys, "argv", testargs):
                 benchitcli()
@@ -321,6 +349,8 @@ class Testing(unittest.TestCase):
             "cache",
             "delete",
             "--all",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -331,6 +361,8 @@ class Testing(unittest.TestCase):
                 "benchit",
                 "cache",
                 "list",
+                "--cache-dir",
+                cache_dir,
             ]
             with patch.object(sys, "argv", testargs):
                 benchitcli()
@@ -353,6 +385,8 @@ class Testing(unittest.TestCase):
             "-s",
             corpus_dir,
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -360,9 +394,7 @@ class Testing(unittest.TestCase):
         # Make sure we can print the builds in the cache
         for test_script in test_scripts_dot_py.keys():
             script_name = strip_dot_py(test_script)
-            builds = filesystem.get_builds_from_script(
-                filesystem.DEFAULT_CACHE_DIR, script_name
-            )
+            builds = filesystem.get_builds_from_script(cache_dir, script_name)
 
             for build_name in builds:
                 with redirect_stdout(io.StringIO()) as f:
@@ -371,6 +403,8 @@ class Testing(unittest.TestCase):
                         "cache",
                         "stats",
                         build_name,
+                        "--cache-dir",
+                        cache_dir,
                     ]
                     with patch.object(sys, "argv", testargs):
                         benchitcli()
@@ -415,6 +449,8 @@ class Testing(unittest.TestCase):
             "--compiler-flags=--large-program",
             "--assembler-flags=--no-metrics",
             "--build-only",
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
@@ -433,6 +469,8 @@ class Testing(unittest.TestCase):
             "--build-only",
             "--sequence-file",
             os.path.join(extras_dir, example_sequence_file),
+            "--cache-dir",
+            cache_dir,
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()

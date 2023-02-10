@@ -181,7 +181,7 @@ def benchit(
         )
 
     # Clean cache if needed
-    output_dir = os.path.join(cache_dir, build_name)
+    output_dir = os.path.join(cache_dir, gmodel.state.config.build_name)
     if os.path.isdir(output_dir):
         # Delete all files except logs and other metadata
         # FIXME: --lean-cache only works if the build/benchmark process succeeds
