@@ -576,6 +576,15 @@ def execute_cpu_locally(
     # Create/ update local conda environment for CPU benchmarking
     print("Creating environment...")
     env_name = "mlagility-onnxruntime-env"
+
+    def available_conda_envs():
+        result = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result.stdout.decode()
+
+    if env_name not in available_conda_envs():
+        print("Creating a new conda environment to benchmark on CPU. This takes a few seconds..."
+              , file=sys.stdout.terminal)
+    
     setup_env = subprocess.Popen(
         [
             "bash",
@@ -608,7 +617,7 @@ def execute_cpu_locally(
     )
     stdout, stderr = run_benchmark.communicate()
     if run_benchmark.returncode == 0:
-        print(f"Success: Running model using onnxrutime - {stdout.decode().strip()}")
+        print(f"Success: Running model using onnxruntime - {stdout.decode().strip()}")
     else:
         print(
             f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}"

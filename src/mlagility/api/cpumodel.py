@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import groqflow.common.printing as printing
 import groqflow.common.build as build
-import mlagility.api.cloud as cloud
+import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
 
 
@@ -84,9 +84,9 @@ class CPUModel:
             os.remove(self._cpu_error_file)
 
         if backend == "cloud":
-            cloud.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
+            devices.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
         elif backend == "local":
-            cloud.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
+            devices.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
         else:
             raise ValueError(
                 f"Only 'cloud' and 'local' are supported, but received {backend}"

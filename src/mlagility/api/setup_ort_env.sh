@@ -28,3 +28,4 @@ python -m pip install --upgrade pip
 # Install/ upgrade onnxruntime to the latest version
 python -m pip install onnxruntime --upgrade
 python -m pip install numpy --upgrade
+python -m pip install tqdm --upgrade
