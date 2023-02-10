@@ -36,6 +36,7 @@ def run(
     job_name: str,
     working_directory: str,
     conda_directory: str,
+    ml_cache: str,
 ):
     """
     Run a GroqFlow job on Slurm
@@ -73,6 +74,7 @@ def run(
         args,
         working_directory,
         conda_directory,
+        ml_cache,
     ]
 
     print(f"Submitting job {job_name} to Slurm")
