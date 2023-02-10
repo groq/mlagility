@@ -2,9 +2,10 @@
 script="$1"
 args="$2"
 working_directory="$3"
+conda_directory="$4"
 
 # shellcheck disable=SC1090
-conda init
+source "$conda_directory"/etc/profile.d/conda.sh
 conda activate tracker_slurm
 export USING_SLURM="TRUE"
 export HF_DATASETS_CACHE="/net/ml-cache/huggingface"
