@@ -4,7 +4,7 @@ args="$2"
 working_directory="$3"
 
 # shellcheck disable=SC1090
-source /net/home/"$USER"/miniconda3/etc/profile.d/conda.sh
+conda init
 conda activate tracker_slurm
 export USING_SLURM="TRUE"
 export HF_DATASETS_CACHE="/net/ml-cache/huggingface"
