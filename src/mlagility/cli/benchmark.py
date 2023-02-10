@@ -1,8 +1,11 @@
 import time
 import os
-from typing import Tuple, List, Dict
+import types
+import importlib.machinery
+from typing import Tuple, List, Dict, Optional
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
+from groqflow.justgroqit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
@@ -29,25 +32,44 @@ def decode_script_name(input: str) -> Tuple[str, List[str]]:
     return script_name, targets
 
 
-def main(args):
+def benchmark_script(
+    search_dir: str = os.getcwd(),
+    input_script: str = None,
+    benchmark_all: bool = False,
+    use_slurm: bool = False,
+    lean_cache: bool = False,
+    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
+    rebuild: Optional[str] = None,
+    compiler_flags: Optional[List[str]] = None,
+    assembler_flags: Optional[List[str]] = None,
+    num_chips: Optional[int] = None,
+    groqview: bool = False,
+    devices: List[str] = None,
+    analyze_only: bool = False,
+    build_only: bool = False,
+    script_args: str = "",
+    max_depth: int = 0,
+    sequence: Sequence = None,
+):
+
+    if devices is None:
+        devices = ["x86"]
 
     # Force the user to specify a legal cache dir in NFS if they are using slurm
-    if not os.path.expanduser(args.cache_dir).startswith("/net") and args.use_slurm:
+    if not os.path.expanduser(cache_dir).startswith("/net") and use_slurm:
         raise ValueError(
             "You must specify a --cache-dir in `/net` when using groqit-util with Slurm, "
-            f"however your current --cache-dir is set to {os.path.expanduser(args.cache_dir)}"
+            f"however your current --cache-dir is set to {os.path.expanduser(cache_dir)}"
         )
 
     # Get a specific list of models to process
-    available_scripts = filesystem.get_available_scripts(args.search_dir)
+    available_scripts = filesystem.get_available_scripts(search_dir)
 
     # Filter based on the model names provided by the user
-    if args.benchmark_all:
-        scripts = [
-            os.path.join(args.search_dir, script) for script in available_scripts
-        ]
+    if benchmark_all:
+        scripts = [os.path.join(search_dir, script) for script in available_scripts]
     else:
-        user_script_path = os.path.join(args.search_dir, args.input_script)
+        user_script_path = os.path.join(search_dir, input_script)
 
         # Ignore everything after the ':' symbol, if there is one
         clean_user_script_path = user_script_path.split(":")[0]
@@ -61,11 +83,11 @@ def main(args):
             )
 
     # Decode benchit args into TracerArgs flags
-    if args.analyze_only:
+    if analyze_only:
         actions = [
             Action.ANALYZE,
         ]
-    elif args.build_only:
+    elif build_only:
         actions = [
             Action.ANALYZE,
             Action.BUILD,
@@ -77,7 +99,7 @@ def main(args):
             Action.BENCHMARK,
         ]
 
-    if args.use_slurm:
+    if use_slurm:
         jobs = slurm.jobs_in_queue()
         if len(jobs) > 0:
             printing.log_warning(f"There are already slurm jobs in your queue: {jobs}")
@@ -90,24 +112,22 @@ def main(args):
     models_found: Dict[str, ModelInfo] = {}
 
     for script in scripts:
-        for device in args.devices:
-            if args.use_slurm:
+        for device in devices:
+            if use_slurm:
                 slurm.run_benchit(
                     op="benchmark",
                     script=script,
-                    search_dir=args.search_dir,
-                    cache_dir=args.cache_dir,
-                    rebuild=args.rebuild,
-                    compiler_flags=args.compiler_flags,
-                    assembler_flags=args.assembler_flags,
-                    num_chips=args.num_chips,
-                    groqview=args.groqview,
+                    search_dir=search_dir,
+                    cache_dir=cache_dir,
+                    rebuild=rebuild,
+                    compiler_flags=compiler_flags,
+                    assembler_flags=assembler_flags,
+                    num_chips=num_chips,
+                    groqview=groqview,
                     devices=device,
-                    runtimes=args.runtimes,
-                    ip=args.ip,
-                    max_depth=args.max_depth,
-                    analyze_only=args.analyze_only,
-                    build_only=args.build_only,
+                    max_depth=max_depth,
+                    analyze_only=analyze_only,
+                    build_only=build_only,
                 )
 
             else:
@@ -119,26 +139,27 @@ def main(args):
                 # for analysis, build, and benchmarking
                 tracer_args = TracerArgs(
                     input=script_name,
-                    lean_cache=args.lean_cache,
+                    lean_cache=lean_cache,
                     targets=targets,
-                    max_depth=args.max_depth,
-                    cache_dir=args.cache_dir,
-                    rebuild=args.rebuild,
-                    compiler_flags=args.compiler_flags,
-                    assembler_flags=args.assembler_flags,
-                    num_chips=args.num_chips,
-                    groqview=args.groqview,
+                    max_depth=max_depth,
+                    cache_dir=cache_dir,
+                    rebuild=rebuild,
+                    compiler_flags=compiler_flags,
+                    assembler_flags=assembler_flags,
+                    num_chips=num_chips,
+                    groqview=groqview,
                     device=device,
                     actions=actions,
                     models_found=models_found,
+                    sequence=sequence,
                 )
 
                 # Run analysis, build, and benchmarking on every model
                 # in the script
-                models_found = evaluate_script(tracer_args, args.script_args)
+                models_found = evaluate_script(tracer_args, script_args)
 
     # Wait until all the Slurm jobs are done
-    if args.use_slurm:
+    if use_slurm:
         while len(slurm.jobs_in_queue()) != 0:
             print(
                 f"Waiting: {len(slurm.jobs_in_queue())} "
@@ -149,4 +170,38 @@ def main(args):
     printing.log_success(
         "The 'benchmark' command is complete. Use the 'report' command to get a .csv "
         "file that summarizes results across all builds in the cache."
+    )
+
+
+def main(args):
+    if args.sequence_file is not None:
+        if args.use_slurm:
+            # The slurm node will need to load the sequence file
+            sequence = args.sequence_file
+        else:
+            loader = importlib.machinery.SourceFileLoader("a_b", args.sequence_file)
+            mod = types.ModuleType(loader.name)
+            loader.exec_module(mod)
+            # pylint: disable = no-member
+            sequence = mod.get_sequence()
+    else:
+        sequence = None
+
+    benchmark_script(
+        search_dir=args.search_dir,
+        input_script=args.input_script,
+        benchmark_all=args.benchmark_all,
+        use_slurm=args.use_slurm,
+        lean_cache=args.lean_cache,
+        cache_dir=args.cache_dir,
+        rebuild=args.rebuild,
+        compiler_flags=args.compiler_flags,
+        assembler_flags=args.assembler_flags,
+        num_chips=args.num_chips,
+        groqview=args.groqview,
+        devices=args.devices,
+        analyze_only=args.analyze_only,
+        build_only=args.build_only,
+        script_args=args.script_args,
+        sequence=sequence,
     )

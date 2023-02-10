@@ -188,6 +188,7 @@ def run_analysis(args):
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
+        filesystem.DEFAULT_CACHE_DIR = "test_cache"
         cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
         return super().setUp()
 

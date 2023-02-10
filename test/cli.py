@@ -3,7 +3,7 @@ Tests focused on the command-level functionality of benchit CLI
 """
 
 import os
-from typing import List
+from typing import List, Tuple, Any
 import unittest
 from unittest.mock import patch
 import sys
@@ -77,8 +77,30 @@ print(f"Pytorch_outputs: {pytorch_outputs}")
 """,
 }
 
+example_sequence_file = "example_sequence.py"
+
+extras_dot_py = {
+    example_sequence_file: """
+from groqflow.justgroqit.stage import Sequence
+import groqflow.justgroqit.export as export
+from mlagility.common.groqflow_helpers import SuccessStage
+
+def get_sequence():
+    return Sequence(
+        unique_name="example_sequence",
+        monitor_message="Example pytorch sequence that only exports ONNX",
+        stages=[
+            export.ExportPytorchModel(),
+            SuccessStage(),
+        ],
+        enable_model_validation=True,
+    )
+    """
+}
+
 corpus_dir = "test_corpus"
-os.makedirs(corpus_dir, exist_ok=True)
+extras_dir = os.path.join(corpus_dir, "extras")
+os.makedirs(extras_dir, exist_ok=True)
 
 for key, value in test_scripts_dot_py.items():
     model_path = os.path.join(corpus_dir, key)
@@ -86,12 +108,21 @@ for key, value in test_scripts_dot_py.items():
     with open(model_path, "w", encoding="utf") as f:
         f.write(value)
 
+for key, value in extras_dot_py.items():
+    file_path = os.path.join(extras_dir, key)
+
+    with open(file_path, "w", encoding="utf") as f:
+        f.write(value)
+
 
 def strip_dot_py(test_script_file: str) -> str:
     return test_script_file.split(".")[0]
 
 
-def assert_success_of_builds(test_script_files: List[str]):
+def assert_success_of_builds(
+    test_script_files: List[str],
+    info_property: Tuple[str, Any] = None,
+):
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
     # TODO: simplify this code when
@@ -109,11 +140,17 @@ def assert_success_of_builds(test_script_files: List[str]):
                 assert build_state.build_status == build.Status.SUCCESSFUL_BUILD
                 script_build_found = True
 
+                if info_property is not None:
+                    assert (
+                        build_state.info.__dict__[info_property[0]] == info_property[1]
+                    ), f"{build_state.info.__dict__[info_property[0]]} == {info_property[1]}"
+
         assert script_build_found
 
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
+        filesystem.DEFAULT_CACHE_DIR = "test_cache"
         cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
 
         return super().setUp()
@@ -383,6 +420,26 @@ class Testing(unittest.TestCase):
             benchitcli()
 
         assert_success_of_builds([test_script])
+
+    def test_cli_sequence(self):
+
+        # Test the first model in the corpus
+        test_script = list(test_scripts_dot_py.keys())[0]
+
+        testargs = [
+            "benchit",
+            "benchmark",
+            os.path.join(corpus_dir, test_script),
+            "--build-only",
+            "--sequence-file",
+            os.path.join(extras_dir, example_sequence_file),
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert_success_of_builds(
+            [test_script], ("all_build_stages", ["export_pytorch", "set_success"])
+        )
 
 
 if __name__ == "__main__":
