@@ -31,6 +31,17 @@ Go to the mlagility folder, run the following command and wait for the Slurm job
 sbatch src/mlagility/cli/setup_venv.sh
 ```
 
+### Get an API token from Huggingface.co (optional)
+
+Some models from Huggingface.co might require the use of an API token. You can find your api token under Settings from your Hugging Face account.
+
+To allow slurm to use your api token, simply export your token as an environment variable as shown below:
+
+
+```
+export HUGGINGFACE_API_KEY=<YOUR_API_KEY>
+```
+
 ### Test it
 
 Go to the mlagility folder and build multiple models simultaneously using Slurm.
