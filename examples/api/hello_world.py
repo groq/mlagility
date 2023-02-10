@@ -1,3 +1,4 @@
+import argparse
 import torch
 from mlagility import benchit
 
@@ -20,17 +21,29 @@ output_size = 500
 pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}
 
-print ("Benchmarking local x86 CPU...")
-benchit(pytorch_model, inputs, device="x86", backend="local")
+def main():
+    # Define the argument parser
+    parser = argparse.ArgumentParser(description='Benchmark a PyTorch model on a specified device and backend.')
 
-# Enable if your system has local NVIDIA GPU
-# print ("Benchmarking local NVIDIA GPU...")
-# benchit(pytorch_model, inputs, device="nvidia", backend="local")
+    # Add the arguments
+    parser.add_argument('--device', type=str, choices=['x86', 'nvidia'], 
+                        default='x86', help='The device to benchmark on (x86 or nvidia)')
+    parser.add_argument('--backend', type=str, choices=['local', 'cloud'], 
+                        default='local', help='The backend to use (local or cloud)')
 
-# Enable if you have access to a remote NVIDIA GPU
-# print ("Benchmarking remote NVIDIA GPU...")
-# benchit(pytorch_model, inputs, device="nvidia", backend="cloud")
+    # Parse the arguments
+    args = parser.parse_args()
 
-# Enable if you have access to a remote x86 CPU
-# print ("Benchmarking remote x86 CPU...")
-# benchit(pytorch_model, inputs, device="x86", backend="cloud")
+    # Instantiate model and generate inputs
+    torch.manual_seed(0)
+    input_size = 1000
+    output_size = 500
+    pytorch_model = SmallModel(input_size, output_size)
+    inputs = {"x": torch.rand(input_size)}
+
+    # Benchmark the model on the specified device and backend
+    print(f"Benchmarking on {args.device} {args.backend}...")
+    benchit(pytorch_model, inputs, device=args.device, backend=args.backend)
+
+if __name__ == "__main__":
+    main()

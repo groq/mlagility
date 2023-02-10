@@ -126,6 +126,7 @@ def benchit(
     Benchmark a model against some inputs on target hardware
     """
 
+    printing.log_info(f"Benchmarking on {backend} {device}...")
     if device == "groq":
         gmodel = groqit(
             model=model,
@@ -142,7 +143,6 @@ def benchit(
         if build_only:
             return
 
-        printing.log_info("Starting benchmark...")
         groq_perf = gmodel.benchmark()
 
         # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
@@ -167,7 +167,6 @@ def benchit(
         if build_only:
             return
 
-        printing.log_info("Starting benchmark...")
         gpu_model = gpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )
@@ -186,7 +185,6 @@ def benchit(
         if build_only:
             return
 
-        printing.log_info("Starting benchmark...")
         cpu_model = cpumodel.load(
             gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
         )

@@ -3,7 +3,6 @@ import sys
 import subprocess
 from typing import Tuple, Union, Dict, Any
 from stat import S_ISDIR
-import getpass
 import shutil
 import yaml
 import paramiko
@@ -47,15 +46,15 @@ class MySFTPClient(paramiko.SFTPClient):
             self.rm_dir(path)
 
 
-def load_remote_config(accelerator: str) -> Union[Tuple[str, str], Tuple[None, None]]:
+def load_remote_config(device: str) -> Union[Tuple[str, str], Tuple[None, None]]:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     config_file_path = f"{dir_path}/config.yaml"
 
     # Create a configuration file if one doesn't exist already
     if not os.path.exists(config_file_path):
         conf: Dict[str, Any] = {
-            "remote_machine_gpu": {"ip": None, "username": None},
-            "remote_machine_cpu": {"ip": None, "username": None},
+            "remote_machine_nvidia": {"ip": None, "username": None},
+            "remote_machine_x86": {"ip": None, "username": None},
             "remote_machine_groqchip": {"ip": None, "username": None},
         }
         with open(config_file_path, "w", encoding="utf8") as outfile:
@@ -65,17 +64,17 @@ def load_remote_config(accelerator: str) -> Union[Tuple[str, str], Tuple[None, N
     config_file = open(config_file_path, encoding="utf8")
     conf = yaml.load(config_file, Loader=yaml.FullLoader)
     return (
-        conf[f"remote_machine_{accelerator}"]["ip"],
-        conf[f"remote_machine_{accelerator}"]["username"],
+        conf[f"remote_machine_{device}"]["ip"],
+        conf[f"remote_machine_{device}"]["username"],
     )
 
 
-def save_remote_config(ip, username, accelerator) -> None:
+def save_remote_config(ip, username, device) -> None:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     config_file = open(f"{dir_path}/config.yaml", encoding="utf8")
     conf = yaml.load(config_file, Loader=yaml.FullLoader)
-    conf[f"remote_machine_{accelerator}"]["ip"] = ip
-    conf[f"remote_machine_{accelerator}"]["username"] = username
+    conf[f"remote_machine_{device}"]["ip"] = ip
+    conf[f"remote_machine_{device}"]["username"] = username
     with open(f"{dir_path}/config.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(conf, outfile)
 
@@ -125,12 +124,12 @@ def exec_command(client, command, ignore_error=False) -> Tuple[str, str]:
     return stdout, exit_code
 
 
-def configure_remote(accelerator: str) -> Tuple[str, str]:
+def configure_remote(device: str) -> Tuple[str, str]:
     # Load stored values
-    ip, username = load_remote_config(accelerator)
+    ip, username = load_remote_config(device)
 
     if not all((ip, username)):
-        if accelerator == "groqchip":
+        if device == "groqchip":
             print(
                 (
                     "User is responsible for ensuring the remote server has the Groq "
@@ -147,51 +146,45 @@ def configure_remote(accelerator: str) -> Tuple[str, str]:
 
         print("Provide your instance IP and hostname below:")
 
-        ip = ip or input(f"{accelerator} instance ASA name (Do not use IP): ")
+        ip = ip or input(f"{device} instance ASA name (Do not use IP): ")
         username = username or input(f"Username for {ip}: ")
 
         if not username or not ip:
             raise exp.GroqModelRuntimeError("Username and hostname are required")
 
         # Store information on yaml file
-        save_remote_config(ip, username, accelerator)
+        save_remote_config(ip, username, device)
 
     return ip, username
 
-def setup_groqchip_host(client) -> None:
-    # Make sure at least one GroqChip Processor is available remotely
-    stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
-    if stdout == "" or exit_code == 1:
-        msg = "Failed to run lspci to get GroqChip Processors available"
-        raise exp.GroqModelRuntimeError(msg)
-    num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
-    if num_chips_available < 1:
-        raise exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
-    print(f"{num_chips_available} GroqChip Processor(s) found")
-
-    # Transfer common files to host
-    exec_command(client, "mkdir groqflow_remote_cache", ignore_error=True)
-    dir_path = os.path.dirname(groqmodel.__file__)
-    with MySFTPClient.from_transport(client.get_transport()) as s:
-        s.put(f"{dir_path}/execute.py", "groqflow_remote_cache/execute.py")
-
 def setup_remote_host(client, device_type: str, output_dir: str) -> None:
-    if device_type == "gpu":
+    if device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available remotely
         stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
         if stdout == "" or exit_code == 1:
             msg = "No NVIDIA GPUs available on the remote machine"
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = ["execute-gpu.py"]
-    elif device_type == "cpu":
+    elif device_type == "x86":
         # Check if x86_64 CPU is available remotely
         stdout, exit_code = exec_command(client, "uname -i")
         if stdout != "x86_64" or exit_code == 1:
-            msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
+            msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
+    elif device_type == "groqchip":
+        # Check if at least one GroqChip Processor is available remotely
+        stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
+        if stdout == "" or exit_code == 1:
+            msg = "Failed to run lspci to get GroqChip Processors available"
+            raise exp.GroqModelRuntimeError(msg)
+        num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
+        if num_chips_available < 1:
+            raise exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
+        print(f"{num_chips_available} GroqChip Processor(s) found")
+        files_to_transfer = ["execute.py"]
     else:
-        raise ValueError(f"Only 'cpu' and 'gpu' are supported. But received {device_type}")
+        raise ValueError(f"Only 'nvidia', 'x86' and 'groqchip' are supported. But received {device_type}")
 
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
@@ -201,7 +194,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
             s.put(f"{dir_path}/{file}", f"{output_dir}/{file}")
 
 def setup_local_host(device_type: str, output_dir: str) -> None:
-    if device_type == "cpu":
+    if device_type == "x86":
         # Check if x86_64 CPU is available locally
         check_device = subprocess.run(
             ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
@@ -212,7 +205,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
 
-    elif device_type == "gpu":
+    elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
         result = subprocess.run(
             ["lspci"],
@@ -244,16 +237,7 @@ def setup_connection(device_type: str, output_dir: str = None) -> paramiko.SSHCl
 
     # Connect to host
     client = connect_to_host(ip, username)
-
-    if device_type == "groqchip":
-        # Check for GroqChips and transfer common files
-        setup_groqchip_host(client)
-    elif device_type == "cpu" or device_type == "gpu":
-        setup_remote_host(client, device_type=device_type, output_dir=output_dir)
-    else:
-        raise ValueError(
-            f"Only 'cpu' and 'gpu' are supported, but received {device_type}"
-        )
+    setup_remote_host(client, device_type=device_type, output_dir=output_dir)
 
     return client
 
@@ -334,7 +318,7 @@ def execute_gpu_remotely(
     """
 
     # Ask the user for credentials if needed
-    _ip, username = configure_remote("gpu")
+    _ip, username = configure_remote("nvidia")
 
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
@@ -345,7 +329,7 @@ def execute_gpu_remotely(
     remote_errors_file = f"{output_dir}/errors.txt"
 
     # Connect to remote machine and transfer common files
-    client = setup_connection(device_type="gpu", output_dir=output_dir)
+    client = setup_connection(device_type="nvidia", output_dir=output_dir)
 
     print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
@@ -407,12 +391,12 @@ def execute_gpu_locally(
     sys.stdout = build.Logger(log_execute_path)
 
     # Setup local execution folders to save outputs/ errors
-    username = getpass.getuser()
+    username = os.environ.get('USER')
     output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
 
-    setup_local_host(device_type="gpu", output_dir=output_dir)
+    setup_local_host(device_type="nvidia", output_dir=output_dir)
 
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
@@ -480,7 +464,7 @@ def execute_cpu_remotely(
     """
 
     # Ask the user for credentials if needed
-    _ip, username = configure_remote("cpu")
+    _ip, username = configure_remote("x86")
 
     # Redirect all stdout to log_file
     sys.stdout = build.Logger(log_execute_path)
@@ -491,7 +475,7 @@ def execute_cpu_remotely(
     remote_errors_file = f"{output_dir}/errors.txt"
 
     # Connect to remote machine and transfer common files
-    client = setup_connection(device_type="cpu", output_dir=output_dir)
+    client = setup_connection(device_type="x86", output_dir=output_dir)
 
     print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
@@ -512,7 +496,7 @@ def execute_cpu_remotely(
     conda_src = f"/home/{username}"
 
     # Run benchmarking script
-    env_name = "onnxruntime_env"
+    env_name = "mlagility-onnxruntime-env"
     exec_command(
         client, f"bash {output_dir}/setup_ort_env.sh {env_name} {conda_src}", ignore_error=True
     )
@@ -568,12 +552,12 @@ def execute_cpu_locally(
     sys.stdout = build.Logger(log_execute_path)
 
     # Setup local execution folders to save outputs/ errors
-    username = getpass.getuser()
+    username = os.environ.get('USER')
     output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
 
-    setup_local_host(device_type="cpu", output_dir=output_dir)
+    setup_local_host(device_type="x86", output_dir=output_dir)
 
     # Check if ONNX file has been generated
     if not os.path.exists(state.converted_onnx_file):
@@ -591,7 +575,7 @@ def execute_cpu_locally(
 
     # Create/ update local conda environment for CPU benchmarking
     print("Creating environment...")
-    env_name = "onnxruntime-env"
+    env_name = "mlagility-onnxruntime-env"
     setup_env = subprocess.Popen(
         [
             "bash",
