@@ -7,7 +7,7 @@ from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
 import groqflow.justgroqit.hummingbird as hummingbird
 import groqflow.common.printing as printing
-from mlagility.api import gpumodel, cpumodel
+from mlagility.api import trtmodel, ortmodel
 import mlagility.common.filesystem as filesystem
 import mlagility.analysis.util as util
 from mlagility.api.performance import MeasuredPerformance
@@ -162,7 +162,7 @@ def benchit(
 
         if not build_only:
             printing.log_info("Starting benchmark...")
-            gpu_model = gpumodel.load(
+            gpu_model = trtmodel.load(
                 gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
             )
             perf = gpu_model.benchmark()
@@ -178,10 +178,11 @@ def benchit(
 
         if not build_only:
             printing.log_info("Starting benchmark...")
-            cpu_model = cpumodel.load(
+            cpu_model = ortmodel.load(
                 gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
             )
             perf = cpu_model.benchmark()
+
     else:
         raise ValueError(
             f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
