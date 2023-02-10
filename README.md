@@ -20,6 +20,10 @@ This repository is home to both:
 - Automated benchmarking tools, the `benchit` CLI and API, for CPUs, GPUs, and GroqChip processors, in `src/`
   - See the [benchit CLI/API user guide](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) to learn more
 
+## Installation
+
+Please refer to our [mlagility installation guide](https://github.com/groq/mlagility/blob/main/docs/install.md) to get instructions on how to install mlagility.
+
 ## Contributing
 
 MLAgility is open source software under the MIT license and we are welcoming contributions. While MLAgility is funded by Groq, we aspire for the tools and benchmarks to be as vendor-neutral as possible.
