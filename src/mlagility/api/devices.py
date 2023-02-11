@@ -156,6 +156,7 @@ def configure_remote(device: str) -> Tuple[str, str]:
 
     return ip, username
 
+
 def setup_remote_host(client, device_type: str, output_dir: str) -> None:
     if device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available remotely
@@ -183,8 +184,10 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         print(f"{num_chips_available} GroqChip Processor(s) found")
         files_to_transfer = ["execute.py"]
     else:
-        raise ValueError("Only 'nvidia', 'x86' and 'groqchip' are supported." 
-                         f"But received {device_type}")
+        raise ValueError(
+            "Only 'nvidia', 'x86' and 'groqchip' are supported."
+            f"But received {device_type}"
+        )
 
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
@@ -192,6 +195,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
     with MySFTPClient.from_transport(client.get_transport()) as s:
         for file in files_to_transfer:
             s.put(f"{dir_path}/{file}", f"{output_dir}/{file}")
+
 
 def setup_local_host(device_type: str, output_dir: str) -> None:
     if device_type == "x86":
@@ -212,9 +216,9 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             encoding="utf-8",
-            check=False
+            check=False,
         )
-        print (result)
+        print(result)
         if "NVIDIA" not in result.stdout or result.returncode == 1:
             msg = "No NVIDIA GPUs available on the local machine"
             raise exp.GroqModelRuntimeError(msg)
@@ -230,6 +234,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
     dir_path = os.path.dirname(os.path.realpath(__file__))
     for file in files_to_transfer:
         shutil.copy(f"{dir_path}/{file}", f"{output_dir}/{file}")
+
 
 def setup_connection(device_type: str, output_dir: str = None) -> paramiko.SSHClient:
     # Setup authentication scheme if needed
@@ -391,7 +396,7 @@ def execute_gpu_locally(
     sys.stdout = build.Logger(log_execute_path)
 
     # Setup local execution folders to save outputs/ errors
-    username = os.environ.get('USER')
+    username = os.environ.get("USER")
     output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
@@ -408,7 +413,9 @@ def execute_gpu_locally(
     # Check if docker is installed
     docker_location = shutil.which("docker")
     if not docker_location:
-        raise ValueError("'docker' installation not found. Please install docker>=20.10")
+        raise ValueError(
+            "'docker' installation not found. Please install docker>=20.10"
+        )
 
     # Check if python is installed
     python_location = shutil.which("python")
@@ -490,15 +497,17 @@ def execute_cpu_remotely(
     conda_location, exit_code = exec_command(client, f"ls /home/{username}")
     if "miniconda3" not in conda_location:
         raise ValueError(
-                f"conda installation not found in /home/{username}. Please install miniconda3"
-            )
+            f"conda installation not found in /home/{username}. Please install miniconda3"
+        )
     # TODO: Remove requirement that conda has to be installed on the /home/user
     conda_src = f"/home/{username}"
 
     # Run benchmarking script
     env_name = "mlagility-onnxruntime-env"
     exec_command(
-        client, f"bash {output_dir}/setup_ort_env.sh {env_name} {conda_src}", ignore_error=True
+        client,
+        f"bash {output_dir}/setup_ort_env.sh {env_name} {conda_src}",
+        ignore_error=True,
     )
 
     print("Running benchmarking script...")
@@ -552,7 +561,7 @@ def execute_cpu_locally(
     sys.stdout = build.Logger(log_execute_path)
 
     # Setup local execution folders to save outputs/ errors
-    username = os.environ.get('USER')
+    username = os.environ.get("USER")
     output_dir = f"/home/{username}/mlagility_local_cache"
     outputs_file = f"{output_dir}/outputs.txt"
     errors_file = f"{output_dir}/errors.txt"
@@ -578,13 +587,19 @@ def execute_cpu_locally(
     env_name = "mlagility-onnxruntime-env"
 
     def available_conda_envs():
-        result = subprocess.run(["conda", "env", "list"], 
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        result = subprocess.run(
+            ["conda", "env", "list"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
         return result.stdout.decode()
 
     if env_name not in available_conda_envs():
-        print("Creating a new conda environment to benchmark on CPU. This takes a few seconds..."
-              , file=sys.stdout.terminal)
+        print(
+            "Creating a new conda environment to benchmark on CPU. This takes a few seconds...",
+            file=sys.stdout.terminal,
+        )
 
     setup_env = subprocess.Popen(
         [
