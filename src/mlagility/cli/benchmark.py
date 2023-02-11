@@ -1,11 +1,12 @@
 import time
 import os
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
+from mlagility.analysis.util import ModelInfo
 
 
 def decode_script_name(input: str) -> Tuple[str, List[str]]:
@@ -84,6 +85,10 @@ def main(args):
                 "Suggest quitting benchit, running 'scancel -u $USER' and trying again."
             )
 
+    # Use this data structure to keep a running index of all models
+    # found across all scripts when running in --all mode
+    models_found: Dict[str, ModelInfo] = {}
+
     for script in scripts:
         for device in args.devices:
             if args.use_slurm:
@@ -125,11 +130,12 @@ def main(args):
                     groqview=args.groqview,
                     device=device,
                     actions=actions,
+                    models_found=models_found,
                 )
 
                 # Run analysis, build, and benchmarking on every model
                 # in the script
-                evaluate_script(tracer_args, args.script_args)
+                models_found = evaluate_script(tracer_args, args.script_args)
 
     # Wait until all the Slurm jobs are done
     if args.use_slurm:

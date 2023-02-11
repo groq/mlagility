@@ -69,7 +69,7 @@ def call_benchit(
     # Update status to "computing"
     model_info.status_message = "Computing..."
     model_info.status_message_color = printing.Colors.OKBLUE
-    status.update(tracer_args.models_found, tracer_args.script_name)
+    status.update(tracer_args.models_found)
 
     # Get a copy of the keyword arguments
     args, kwargs = model_inputs
@@ -175,7 +175,17 @@ def store_model_info(
     line = frame.f_lineno if event == "return" else frame.f_lineno - 1
 
     # Keep track of all models details
-    if model_hash not in tracer_args.models_found.keys():
+
+    # If we have already found a model, don't add it to models_found again
+    # We have to use both the model hash and the script name, since we don't
+    # want to ignore a model if it was explicitly called in two different scripts
+    identifier = f"{model_hash}_{tracer_args.script_name}"
+    model_already_found = False
+    for model_info in tracer_args.models_found.values():
+        if identifier == f"{model_info.hash}_{model_info.script_name}":
+            model_already_found = True
+
+    if not model_already_found:
         tracer_args.models_found[model_hash] = util.ModelInfo(
             model=model,
             name=model_name,
@@ -187,6 +197,7 @@ def store_model_info(
             is_target=model_hash in tracer_args.targets or tracer_args.targets == [],
             build_model=Action.BUILD in tracer_args.actions,
             model_type=model_type,
+            script_name=tracer_args.script_name,
         )
 
 
@@ -334,7 +345,7 @@ def explore_frame(
                 # Ensure that groqit() doesn't interfere with our execution count
                 model_info.executed = 1
 
-            status.update(tracer_args.models_found, tracer_args.script_name)
+            status.update(tracer_args.models_found)
 
             # Turn tracing on again after computing the outputs
             sys.setprofile(tracer)
@@ -412,7 +423,9 @@ def recursive_search(
                 )
 
 
-def evaluate_script(tracer_args: TracerArgs, input_args: str = None):
+def evaluate_script(
+    tracer_args: TracerArgs, input_args: str = None
+) -> Dict[str, util.ModelInfo]:
     # Trim the ".py"
     tracer_args.script_name = pathlib.Path(tracer_args.input).stem
 
@@ -439,3 +452,5 @@ def evaluate_script(tracer_args: TracerArgs, input_args: str = None):
     # Import input script. Each executed frame of the input script will
     # trigger the tracefunc() callback function (defined above)
     spec.loader.exec_module(module)
+
+    return tracer_args.models_found

@@ -8,7 +8,7 @@ import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
 
 
-class CPUModel:
+class ORTModel:
     def __init__(self, state: build.State, tensor_type=np.array):
 
         self.tensor_type = tensor_type
@@ -101,7 +101,7 @@ class CPUModel:
         )
 
 
-class PytorchModelWrapper(CPUModel):
+class PytorchModelWrapper(ORTModel):
     def __init__(self, state):
         tensor_type = torch.tensor
         super(PytorchModelWrapper, self).__init__(state, tensor_type)
@@ -111,10 +111,10 @@ class PytorchModelWrapper(CPUModel):
         return self._execute(repetitions=100)
 
 
-def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> CPUModel:
+def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> ORTModel:
     state = build.load_state(cache_dir=cache_dir, build_name=build_name)
 
     if state.model_type == build.ModelType.PYTORCH:
         return PytorchModelWrapper(state)
     else:
-        return CPUModel(state)
+        return ORTModel(state)
