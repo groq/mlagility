@@ -125,11 +125,8 @@ def benchit(
     """
     Benchmark a model against some inputs on target hardware
     """
-<<<<<<< HEAD
 
     printing.log_info(f"Benchmarking on {backend} {device}...")
-=======
->>>>>>> main
     if device == "groq":
         gmodel = groqit(
             model=model,
@@ -143,16 +140,9 @@ def benchit(
             groqview=groqview,
         )
 
-<<<<<<< HEAD
-        if build_only:
-            return
-
-        groq_perf = gmodel.benchmark()
-=======
         if not build_only:
             printing.log_info("Starting benchmark...")
             groq_perf = gmodel.benchmark()
->>>>>>> main
 
             # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
             # class used by the MLAgility project
@@ -180,15 +170,6 @@ def benchit(
             )
             perf = gpu_model.benchmark()
 
-<<<<<<< HEAD
-        gpu_model = gpumodel.load(
-            gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
-        )
-
-        perf = gpu_model.benchmark(backend=backend)
-
-=======
->>>>>>> main
     elif device == "x86":
         gmodel = exportit(
             model=model,
@@ -205,27 +186,13 @@ def benchit(
             )
             perf = cpu_model.benchmark()
 
-<<<<<<< HEAD
-        cpu_model = cpumodel.load(
-            gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
-        )
-        perf = cpu_model.benchmark(backend=backend)
-
-=======
->>>>>>> main
     else:
         raise ValueError(
             f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
         )
 
-<<<<<<< HEAD
-    # Add metadata and clean cache if needed
-    output_dir = os.path.join(cache_dir, perf.build_name)
-
-=======
     # Clean cache if needed
     output_dir = os.path.join(cache_dir, build_name)
->>>>>>> main
     if os.path.isdir(output_dir):
         # Delete all files except logs and other metadata
         # FIXME: --lean-cache only works if the build/benchmark process succeeds
