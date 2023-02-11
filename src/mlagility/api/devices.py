@@ -9,7 +9,6 @@ import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
-import groqflow.groqmodel.groqmodel as groqmodel
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -184,7 +183,8 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         print(f"{num_chips_available} GroqChip Processor(s) found")
         files_to_transfer = ["execute.py"]
     else:
-        raise ValueError(f"Only 'nvidia', 'x86' and 'groqchip' are supported. But received {device_type}")
+        raise ValueError("Only 'nvidia', 'x86' and 'groqchip' are supported." 
+                         f"But received {device_type}")
 
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
@@ -578,13 +578,14 @@ def execute_cpu_locally(
     env_name = "mlagility-onnxruntime-env"
 
     def available_conda_envs():
-        result = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(["conda", "env", "list"], 
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         return result.stdout.decode()
 
     if env_name not in available_conda_envs():
         print("Creating a new conda environment to benchmark on CPU. This takes a few seconds..."
               , file=sys.stdout.terminal)
-    
+
     setup_env = subprocess.Popen(
         [
             "bash",
