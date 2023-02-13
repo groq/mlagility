@@ -7,7 +7,7 @@ MLAgility's tools currently support the following combinations of runtimes and d
 <span id="devices-runtimes-table">
 
 | Device Type | Device arg | Runtime      | Specific Devices                                         |
-|-------------|------------|--------------|----------------------------------------------------------|
+| ----------- | ---------- | ------------ | -------------------------------------------------------- |
 | Nvidia GPU  | nvidia     | TensorRT     | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
 | x86 CPU     | x86        | ONNX Runtime | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
 | Groq        | groq       | GroqFlow     | GroqChip1                                                |
@@ -48,7 +48,7 @@ The `benchit` CLI performs the following steps:
 2. [Build](#build): call the `benchit()` [API](#the-benchit-api) to prepare each model for benchmarking
 3. [Benchmark](#benchmark): call the `benchit()` [API](#the-benchit-api) on each model to gather performance statistics
 
-_Note_: The benchmarking methodology is defined [here](#benchmark).
+_Note_: The benchmarking methodology is defined [here](#benchmark). If you are looking for more detailed instructions on how to install mlagility, you can find that [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 
 ## The benchit() API
 
@@ -245,6 +245,7 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
 - `--all` Benchmark all models within all script (.py) files in the search directory.
 - `--use-slurm` Execute the build(s) on Slurm instead of using local compute resources
   - Not available as an API argument.
+  - Requires setting up Slurm as shown [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 - `--lean-cache` Delete all build artifacts except for log files after the build
   - Also available as an API argument, `benchit(lean_cache=True/False, ...)`.
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility)

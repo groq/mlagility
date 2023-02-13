@@ -109,6 +109,9 @@ def benchmark_script(
                 f"Script could not be found: {user_script_path}"
             )
 
+    # Get absolute path of scripts
+    scripts = [os.path.abspath(s) for s in scripts]
+
     # Decode benchit args into TracerArgs flags
     if analyze_only:
         actions = [
@@ -151,10 +154,11 @@ def benchmark_script(
                     assembler_flags=assembler_flags,
                     num_chips=num_chips,
                     groqview=groqview,
-                    devices=device,
+                    devices=[device],
                     max_depth=max_depth,
                     analyze_only=analyze_only,
                     build_only=build_only,
+                    lean_cache=lean_cache,
                 )
 
             else:
