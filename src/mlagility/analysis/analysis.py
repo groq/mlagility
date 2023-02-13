@@ -12,14 +12,13 @@ from typing import Union, List, Dict
 from types import FrameType, TracebackType
 from enum import Enum
 import torch
-import transformers
-import tensorflow as tf
 from groqflow.common import printing
 import groqflow.common.build as build
 import groqflow.common.exceptions as exp
 from groqflow.justgroqit.stage import Sequence
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
+import mlagility.analysis.tf_helpers as tf_helpers
 import mlagility.common.labels as labels
 from mlagility.api.api import benchit
 import mlagility.common.filesystem as filesystem
@@ -56,8 +55,7 @@ class TracerArgs:
     @functools.cached_property
     def torch_activations(self) -> List[str]:
         act = util.get_classes(torch.nn.modules.activation)
-        if "activations" in dir(transformers):
-            act += util.get_classes(transformers.activations)
+        act += tf_helpers.get_transformers_activations()
         return act
 
 
@@ -153,13 +151,13 @@ def call_benchit(
 
 
 def get_model_hash(
-    model: Union[torch.nn.Module, tf.keras.Model], model_type: build.ModelType
+    model: Union[torch.nn.Module, "tf.keras.Model"], model_type: build.ModelType
 ):
     return build.hash_model(model, model_type, hash_params=False)[:8]
 
 
 def store_model_info(
-    model: Union[torch.nn.Module, tf.keras.Model],
+    model: Union[torch.nn.Module, "tf.keras.Model"],
     model_name: str,
     model_type: build.ModelType,
     frame: FrameType,
@@ -226,7 +224,7 @@ def explore_frame(
             if type(local_var) in tracer_args.torch_activations:
                 return
             model_type = build.ModelType.PYTORCH
-        elif issubclass(type(local_var), tf.keras.Model):
+        elif tf_helpers.is_keras_subclass(local_var):
             model_type = build.ModelType.KERAS
         else:
             return
@@ -249,7 +247,9 @@ def explore_frame(
     if "self" in frame.f_locals:
         self_var = frame.f_locals["self"]
         inside_class = type(self_var)
-        inside_nn_subclass = issubclass(inside_class, (torch.nn.Module, tf.keras.Model))
+        inside_nn_subclass = issubclass(
+            inside_class, torch.nn.Module
+        ) or tf_helpers.is_keras_subclass(inside_class)
 
     if not hasattr(local_var, "forward_instrumented") and not inside_nn_subclass:
 
@@ -402,7 +402,7 @@ def tracefunc(
 def recursive_search(
     frame: FrameType,
     event: str,
-    model: Union[torch.nn.Module, tf.keras.Model],
+    model: Union[torch.nn.Module, "tf.keras.Model"],
     depth: int,
     parent_hash: Union[str, None],
     tracer_args: TracerArgs,
