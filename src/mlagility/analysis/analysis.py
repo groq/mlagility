@@ -23,6 +23,14 @@ import mlagility.common.labels as labels
 from mlagility.api.api import benchit
 import mlagility.common.filesystem as filesystem
 
+try:
+    import transformers
+except ImportError as e:
+    raise ImportError(
+        "The Huggingface transformers library is required for running this test. "
+        "Install it with `pip install transformers`"
+    )
+
 
 class Action(Enum):
     ANALYZE = "analyze"
@@ -224,7 +232,7 @@ def explore_frame(
             if type(local_var) in tracer_args.torch_activations:
                 return
             model_type = build.ModelType.PYTORCH
-        elif tf_helpers.is_keras_subclass(local_var):
+        elif tf_helpers.is_keras_subclass(type(local_var)):
             model_type = build.ModelType.KERAS
         else:
             return
@@ -455,5 +463,8 @@ def evaluate_script(
     # Import input script. Each executed frame of the input script will
     # trigger the tracefunc() callback function (defined above)
     spec.loader.exec_module(module)
+
+    # Stop profiling when we're done executing the module
+    sys.setprofile(None)
 
     return tracer_args.models_found

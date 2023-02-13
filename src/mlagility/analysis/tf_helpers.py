@@ -16,9 +16,9 @@ from typing import List
 import mlagility.analysis.util as util
 
 
-def is_keras_subclass(local_var) -> bool:
+def is_keras_subclass(obj_type) -> bool:
     if "tensorflow" in sys.modules:
-        return issubclass(type(local_var), sys.modules["tensorflow"].keras.Model)
+        return issubclass(obj_type, sys.modules["tensorflow"].keras.Model)
     else:
         return False
 
@@ -30,6 +30,6 @@ def get_transformers_activations() -> List:
     transformers activation if user code has not already imported transformers
     """
     if "transformers" in sys.modules:
-        util.get_classes(sys.modules["transfomers"].activations)
+        return util.get_classes(sys.modules["transformers"].activations)
     else:
         return []
