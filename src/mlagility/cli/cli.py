@@ -58,6 +58,7 @@ def benchmark_script_argparse(args):
         cache_dir=args.cache_dir,
         rebuild=args.rebuild,
         devices=args.devices,
+        backend=args.backend,
         analyze_only=args.analyze_only,
         build_only=args.build_only,
         script_args=args.script_args,

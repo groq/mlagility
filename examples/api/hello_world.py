@@ -39,9 +39,9 @@ def main():
     parser.add_argument(
         "--backend",
         type=str,
-        choices=["local", "cloud"],
+        choices=["local", "remote"],
         default="local",
-        help="The backend to use (local or cloud)",
+        help="The backend to use (local or remote)",
     )
 
     # Parse the arguments

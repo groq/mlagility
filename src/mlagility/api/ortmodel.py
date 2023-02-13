@@ -18,7 +18,6 @@ class ORTModel:
             "log_cpu_execute.txt",
         )
 
-
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
     ) -> MeasuredPerformance:
@@ -31,8 +30,6 @@ class ORTModel:
                 " has miniconda3 and python>=3.8 installed."
             )
         )
-
-
 
         benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.cpu_measured_latency = benchmark_results.mean_latency
@@ -83,13 +80,13 @@ class ORTModel:
         if os.path.isfile(self._cpu_error_file):
             os.remove(self._cpu_error_file)
 
-        if backend == "cloud":
+        if backend == "remote":
             devices.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
         elif backend == "local":
             devices.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
         else:
             raise ValueError(
-                f"Only 'cloud' and 'local' are supported, but received {backend}"
+                f"Only 'remote' and 'local' are supported, but received {backend}"
             )
 
         return MeasuredPerformance(

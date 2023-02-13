@@ -33,7 +33,8 @@ class Action(Enum):
 @dataclasses.dataclass
 class TracerArgs:
     input: str
-    device: List[str]
+    device: str
+    backend: str
     actions: List[Action]
     lean_cache: bool
     targets: List[str]
@@ -110,6 +111,7 @@ def call_benchit(
             model_info.model,
             inputs,
             device=tracer_args.device,
+            backend=tracer_args.backend,
             build_name=build_name,
             cache_dir=cache_dir,
             build_only=Action.BENCHMARK not in tracer_args.actions,

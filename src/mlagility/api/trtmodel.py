@@ -22,7 +22,6 @@ class GPUModel:
         self, repetitions: int = 100, backend: str = "local"
     ) -> MeasuredPerformance:
 
-
         printing.log_info(
             (
                 "GPU is not used for accuracy comparisons it's only used for"
@@ -32,7 +31,6 @@ class GPUModel:
                 " the system has python>=3.8, docker>=20.10 installed."
             )
         )
-
 
         benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.gpu_measured_latency = benchmark_results.mean_latency
@@ -82,13 +80,13 @@ class GPUModel:
         if os.path.isfile(self._gpu_error_file):
             os.remove(self._gpu_error_file)
 
-        if backend == "cloud":
+        if backend == "remote":
             devices.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
         elif backend == "local":
             devices.execute_gpu_locally(self.state, self.log_execute_path, repetitions)
         else:
             raise ValueError(
-                f"Only 'cloud' and 'local' are supported, but received {backend}"
+                f"Only 'remote' and 'local' are supported, but received {backend}"
             )
 
         return MeasuredPerformance(

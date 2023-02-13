@@ -41,6 +41,7 @@ def benchmark_script(
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     rebuild: Optional[str] = None,
     devices: List[str] = None,
+    backend: str = "local",
     analyze_only: bool = False,
     build_only: bool = False,
     script_args: str = "",
@@ -130,6 +131,11 @@ def benchmark_script(
         ]
 
     if use_slurm:
+        if backend != "local":
+            raise ValueError(
+                "Slurm only works with local benchmarking, set the `backend` "
+                "argument to 'local'."
+            )
         jobs = slurm.jobs_in_queue()
         if len(jobs) > 0:
             printing.log_warning(f"There are already slurm jobs in your queue: {jobs}")
@@ -180,6 +186,7 @@ def benchmark_script(
                     groq_num_chips=groq_num_chips,
                     groqview=groqview,
                     device=device,
+                    backend=backend,
                     actions=actions,
                     models_found=models_found,
                     sequence=custom_sequence,

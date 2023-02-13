@@ -159,7 +159,7 @@ def benchmark_model(
             gpu_model = trtmodel.load(
                 gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
             )
-            perf = gpu_model.benchmark()
+            perf = gpu_model.benchmark(backend=backend)
 
     elif device == "x86":
         gmodel = exportit(
@@ -176,7 +176,7 @@ def benchmark_model(
             cpu_model = ortmodel.load(
                 gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
             )
-            perf = cpu_model.benchmark()
+            perf = cpu_model.benchmark(backend=backend)
 
     else:
         raise ValueError(
