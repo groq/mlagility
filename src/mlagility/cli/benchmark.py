@@ -2,7 +2,7 @@ import time
 import os
 import types
 import importlib.machinery
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict, Optional, Union
 import groqflow.common.printing as printing
 import groqflow.common.exceptions as exceptions
 from groqflow.justgroqit.stage import Sequence
@@ -49,8 +49,35 @@ def benchmark_script(
     build_only: bool = False,
     script_args: str = "",
     max_depth: int = 0,
-    sequence: Sequence = None,
+    sequence: Union[str, Sequence] = None,
 ):
+
+    # Import the sequence file to get a custom sequence, if the user provided
+    # one
+    if sequence is not None:
+        if use_slurm:
+            # The slurm node will need to load a sequence file
+            if not isinstance(sequence, str):
+                raise ValueError(
+                    "The 'sequence' arg must be a str (path to a sequence file) "
+                    "when use_slurm=True."
+                )
+            custom_sequence = sequence
+        elif isinstance(sequence, str):
+            loader = importlib.machinery.SourceFileLoader("a_b", sequence)
+            mod = types.ModuleType(loader.name)
+            loader.exec_module(mod)
+            # pylint: disable = no-member
+            custom_sequence = mod.get_sequence()
+        elif isinstance(sequence, Sequence):
+            custom_sequence = sequence
+        else:
+            raise ValueError(
+                "The 'sequence' arg must be a str (path to a sequence file) "
+                "or an instance of the Sequence class."
+            )
+    else:
+        custom_sequence = None
 
     if devices is None:
         devices = ["x86"]
@@ -151,7 +178,7 @@ def benchmark_script(
                     device=device,
                     actions=actions,
                     models_found=models_found,
-                    sequence=sequence,
+                    sequence=custom_sequence,
                 )
 
                 # Run analysis, build, and benchmarking on every model
@@ -174,18 +201,6 @@ def benchmark_script(
 
 
 def main(args):
-    if args.sequence_file is not None:
-        if args.use_slurm:
-            # The slurm node will need to load the sequence file
-            sequence = args.sequence_file
-        else:
-            loader = importlib.machinery.SourceFileLoader("a_b", args.sequence_file)
-            mod = types.ModuleType(loader.name)
-            loader.exec_module(mod)
-            # pylint: disable = no-member
-            sequence = mod.get_sequence()
-    else:
-        sequence = None
 
     benchmark_script(
         search_dir=args.search_dir,
@@ -204,5 +219,5 @@ def main(args):
         build_only=args.build_only,
         script_args=args.script_args,
         max_depth=args.max_depth,
-        sequence=sequence,
+        sequence=args.sequence_file,
     )
