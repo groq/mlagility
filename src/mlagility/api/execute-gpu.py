@@ -9,20 +9,20 @@ import subprocess
 import json
 
 
-def run(output_dir: str, repetitions: int, username: str):
+def run(output_dir: str, repetitions: int):
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
     # GroqFlow maintainers to keep this up to date with the latest version of release container
     latest_trt_docker = "nvcr.io/nvidia/tensorrt:22.12-py3"
     docker_name = "tensorrt22.12"
-    onnx_model = f"/app/{output_dir}/onnxmodel/model.onnx"
+    onnx_model = "/app/onnxmodel/model.onnx"
 
     # docker run args:
     # "--gpus all" - use all gpus available
     # "-v <path>" -  mount the home dir to access the model inside the docker
     # "-itd" - start the docker in interactive mode in the background
     # "--rm" - remove the container automatically upon stopping
-    docker_run_args = f"--gpus all -v /home/{username}/:/app  -itd --rm"
+    docker_run_args = f"--gpus all -v {output_dir}:/app  -itd --rm"
 
     # docker exec args:
     # "--onnx=<path>" - path to the onnx model in the mounted file
@@ -50,15 +50,9 @@ def run(output_dir: str, repetitions: int, username: str):
 
     save_trt_results(str(trtexec_output), str(trtexec_error))
 
-
 def save_trt_results(output: str, error: str):
     decoded_output = bytes(output, "utf-8").decode("unicode_escape")
     decoded_error = bytes(error, "utf-8").decode("unicode_escape")
-    with open("temp.txt", "w", encoding="utf-8") as f:
-        f.writelines(decoded_output)
-
-    # Outline risk: Dependence on trtexec output format
-    temp = open("temp.txt", "r", encoding="utf-8")
 
     field_mapping = {
         "Selected Device": "Selected Device",
@@ -80,19 +74,17 @@ def save_trt_results(output: str, error: str):
         return metrics
 
     gpu_performance = {}
-    for line in temp:
+    for line in decoded_output.splitlines():
         for field, key in field_mapping.items():
             if field in line:
                 gpu_performance[key] = format_field(line)
                 break
-    temp.close()
 
     with open(args["outputs_file"], "w", encoding="utf-8") as out_file:
         json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
 
     with open(args["errors_file"], "w", encoding="utf-8") as e:
         e.writelines(decoded_error)
-
 
 if __name__ == "__main__":
     # Parse Inputs
@@ -115,5 +107,4 @@ if __name__ == "__main__":
     run(
         args["output_dir"],
         args["iterations"],
-        args["username"],
     )

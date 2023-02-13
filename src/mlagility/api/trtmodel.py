@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import groqflow.common.printing as printing
 import groqflow.common.build as build
-import mlagility.api.cloud as cloud
+import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
 
 
@@ -18,19 +18,23 @@ class GPUModel:
             "log_gpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100) -> MeasuredPerformance:
+    def benchmark(
+        self, repetitions: int = 100, backend: str = "local"
+    ) -> MeasuredPerformance:
+
 
         printing.log_info(
             (
                 "GPU is not used for accuracy comparisons it's only used for"
                 " performance comparison. So inputs provided during model"
                 " compilation is used.\n"
-                " User is responsible for ensuring the remote GPU server is turned on and"
-                " has python>=3.8, docker>=20.10 installed."
+                " User is responsible for ensuring the GPU is available and"
+                " the system has python>=3.8, docker>=20.10 installed."
             )
         )
 
-        benchmark_results = self._execute(repetitions=repetitions)
+
+        benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.gpu_measured_latency = benchmark_results.mean_latency
         self.state.info.gpu_measured_throughput = benchmark_results.throughput
         return benchmark_results
@@ -67,7 +71,7 @@ class GPUModel:
             self.state.cache_dir, self.state.config.build_name, "gpu_error.npy"
         )
 
-    def _execute(self, repetitions: int) -> MeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
         """
         Execute model on GPU and return the performance
         """
@@ -78,8 +82,14 @@ class GPUModel:
         if os.path.isfile(self._gpu_error_file):
             os.remove(self._gpu_error_file)
 
-        # Only cloud execution of the GPU is supported, local execution is not supported
-        cloud.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
+        if backend == "cloud":
+            devices.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
+        elif backend == "local":
+            devices.execute_gpu_locally(self.state, self.log_execute_path, repetitions)
+        else:
+            raise ValueError(
+                f"Only 'cloud' and 'local' are supported, but received {backend}"
+            )
 
         return MeasuredPerformance(
             mean_latency=self._mean_latency,

@@ -169,7 +169,7 @@ MLAgility can be used to benchmark a model across a variety of runtimes and devi
 
 ### Available Devices
 
-MLAgility supports benchmarking on both locally installed devices, as well as devices on remote machines (e.g., cloud VMs).
+MLAgility supports benchmarking on both locally installed devices (including x86 CPUs/ NVIDIA GPUs), as well as devices on remote machines (e.g., cloud VMs).
 
 If you are using a remote machine, it must:
 - turned on
@@ -181,7 +181,7 @@ When you call `benchit`, the following actions are performed on your behalf:
 1. Perform a `build`, which exports all models from the script to ONNX and prepares for benchmarking.
     - If the device type selected is `groq`, this step also compiles the ONNX file into a Groq executable.
 1. [Remote mode only] `ssh` into the remote machine and transfer the `build`.
-1. Set up the benchmarking environment by loading a container and/or setting up a Python virtual environment.
+1. Set up the benchmarking environment by loading a container and/or setting up a conda environment.
 1. Run the benchmarks.
 1. [Remote mode only] Transfer the results back to your local machine.
 

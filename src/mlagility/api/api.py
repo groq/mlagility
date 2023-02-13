@@ -101,6 +101,7 @@ def benchit(
     build_name: Optional[str] = None,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     device: str = "groq",
+    backend: str = "local",
     build_only: bool = False,
     lean_cache: bool = False,
     rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
@@ -113,6 +114,8 @@ def benchit(
     """
     Benchmark a model against some inputs on target hardware
     """
+
+    printing.log_info(f"Benchmarking on {backend} {device}...")
     if device == "groq":
         gmodel = groqit(
             model=model,
