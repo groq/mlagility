@@ -17,6 +17,7 @@ import tensorflow as tf
 from groqflow.common import printing
 import groqflow.common.build as build
 import groqflow.common.exceptions as exp
+from groqflow.justgroqit.stage import Sequence
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 import mlagility.common.labels as labels
@@ -46,6 +47,7 @@ class TracerArgs:
     groqview: bool
     models_found: Dict[str, util.ModelInfo] = dataclasses.field(default_factory=dict)
     script_name: str = None
+    sequence: Sequence = None
 
     @functools.cached_property
     def labels(self) -> Dict[str, str]:
@@ -118,6 +120,7 @@ def call_benchit(
             groq_compiler_flags=tracer_args.compiler_flags,
             groq_assembler_flags=tracer_args.assembler_flags,
             groqview=tracer_args.groqview,
+            sequence=tracer_args.sequence,
         )
 
         if Action.BENCHMARK in tracer_args.actions:
