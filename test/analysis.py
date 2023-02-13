@@ -1,5 +1,5 @@
 """
-Tests focused on the analysis capabilities of benchit CLI"
+Tests focused on the analysis capabilities of benchit CLI
 """
 
 import os
@@ -17,6 +17,15 @@ from mlagility.cli.cli import main as benchitcli
 import mlagility.common.labels as labels
 from mlagility.parser import parse
 import groqflow.common.cache as cache
+
+try:
+    # pylint: disable=unused-import
+    import transformers
+except ImportError as e:
+    raise ImportError(
+        "The Huggingface transformers library is required for running this test. "
+        "Install it with `pip install transformers`"
+    )
 
 
 # We generate a corpus on to the filesystem during the test

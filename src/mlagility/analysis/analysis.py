@@ -23,14 +23,6 @@ import mlagility.common.labels as labels
 from mlagility.api.api import benchit
 import mlagility.common.filesystem as filesystem
 
-try:
-    import transformers
-except ImportError as e:
-    raise ImportError(
-        "The Huggingface transformers library is required for running this test. "
-        "Install it with `pip install transformers`"
-    )
-
 
 class Action(Enum):
     ANALYZE = "analyze"
