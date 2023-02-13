@@ -27,6 +27,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
           if [ -f setup.py ]; then pip install -e .; fi
+
+          #Install miniconda
+          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+          bash Miniconda3-latest-Linux-x86_64.sh -b -u
+      - name: Check installation of model requirements on isolated conda env
+        run: |
+          python test/check_install.py models/requirements.txt --expect_failure
+          source ~/miniconda3/bin/activate
+          bash src/mlagility/cli/setup_venv.sh $PWD test_env
+          conda activate test_env
+          python test/check_install.py models/requirements.txt
+          conda deactivate
       - name: Lint with PyLint
         run: |
           pylint src --rcfile .pylintrc
