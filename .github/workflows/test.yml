@@ -32,6 +32,9 @@ jobs:
           #Install miniconda
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
           bash Miniconda3-latest-Linux-x86_64.sh -b -u
+      - name: Lint with PyLint
+        run: |
+          pylint src --rcfile .pylintrc
       - name: Check installation of model requirements on isolated conda env
         run: |
           python test/check_install.py models/requirements.txt --expect_failure
@@ -41,9 +44,6 @@ jobs:
           python test/check_install.py models/requirements.txt
           conda deactivate
           python test/check_install.py models/requirements.txt --expect_failure
-      - name: Lint with PyLint
-        run: |
-          pylint src --rcfile .pylintrc
       - name: Test with unittest
         run: |
           python test/cli.py

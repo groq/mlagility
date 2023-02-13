@@ -18,10 +18,12 @@ def check_requirements(requirements_file: str, expect_failure: bool = False):
         try:
             pkg_resources.require(dep)
         except pkg_resources.DistributionNotFound as e:
-            print("DistributionNotFound: ", e, file=sys.stderr)
+            if not expect_failure:
+                print("DistributionNotFound: ", e, file=sys.stderr)
             all_deps_ok = False
         except pkg_resources.VersionConflict as e:
-            print("VersionConflict: ", e, file=sys.stderr)
+            if not expect_failure:
+                print("VersionConflict: ", e, file=sys.stderr)
             all_deps_ok = False
 
     # Raise exceptions if needed
