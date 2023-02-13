@@ -48,7 +48,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--expect_failure",
-        help="Description for foo argument",
+        help="Raise an exception if all requirements are correctly installed",
         action="store_true",
         required=False,
     )
