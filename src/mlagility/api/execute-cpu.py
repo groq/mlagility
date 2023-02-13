@@ -17,13 +17,14 @@ import onnxruntime as ort
 BATCHSIZE = 1
 
 
-def run_ort_profile(source_onnx, num_iterations=100) -> str:
+def run_ort_profile(source_onnx, num_iterations=100):
     # Run the provided onnx model using onnxruntime and measure average latency
 
     per_iteration_latency = []
+    exception = None
     sess_options = ort.SessionOptions()
     sess_options.graph_optimization_level = (
-        ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        ort.GraphOptimizationLevel.ORT_ENABLE_ALL
     )
     onnx_session = ort.InferenceSession(source_onnx, sess_options)
     sess_input = onnx_session.get_inputs()
@@ -33,12 +34,15 @@ def run_ort_profile(source_onnx, num_iterations=100) -> str:
 
     for _ in range(num_iterations):
         start = timer()
-        onnx_session.run([output_name], input_feed)
+        try:
+            onnx_session.run([output_name], input_feed)
+        except Exception as e: # pylint: disable=broad-except
+            exception = e
         end = timer()
         iteration_latency = end - start
         per_iteration_latency.append(iteration_latency)
 
-    return per_iteration_latency
+    return per_iteration_latency, exception
 
 
 def _dummy_inputs(sess_input) -> dict:
@@ -88,23 +92,17 @@ def run(
 
     # TODO: Handle exception for failure
     onnx_model = f"{output_dir}/onnxmodel/model.onnx"
-    perf_result = run_ort_profile(onnx_model, num_iterations)
+    perf_result, exception = run_ort_profile(onnx_model, num_iterations)
     # assert perf_result is list of int or float
-    save_ort_results(perf_result, num_iterations)
+    save_ort_results(perf_result, num_iterations, exception)
 
-
-def save_ort_results(perf_result, num_iterations):
+def save_ort_results(perf_result, num_iterations, exception):
 
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
     cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
-    cpu_info_output, cpu_info_error = cpu_info.communicate()
+    cpu_info_output, _ = cpu_info.communicate()
     decoded_info = bytes(str(cpu_info_output), "utf-8").decode("unicode_escape")
-
-    with open("cpu_info.txt", "w", encoding="utf-8") as f:
-        f.writelines(decoded_info)
-
-    info_file = open("cpu_info.txt", "r", encoding="utf-8")
 
     field_mapping = {
         "Architecture": "CPU Architecture",
@@ -120,7 +118,7 @@ def save_ort_results(perf_result, num_iterations):
         return line.split(":")[-1].strip()
 
     cpu_performance = {}
-    for line in info_file:
+    for line in decoded_info.split("\n"):
         for field, key in field_mapping.items():
             if field in line:
                 cpu_performance[key] = format_field(line)
@@ -134,13 +132,11 @@ def save_ort_results(perf_result, num_iterations):
     cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000 / num_iterations)
     cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000 / num_iterations)
 
-    info_file.close()
     with open(args["outputs_file"], "w", encoding="utf-8") as out_file:
         json.dump(cpu_performance, out_file, ensure_ascii=False, indent=4)
 
     with open(args["errors_file"], "w", encoding="utf-8") as e:
-        e.writelines(str(cpu_info_error))
-
+        e.writelines(str(exception))
 
 if __name__ == "__main__":
     # Parse Inputs
@@ -152,11 +148,6 @@ if __name__ == "__main__":
         "iterations",
         type=int,
         help="Number of times to execute the received onnx model",
-    )
-    parser.add_argument(
-        "username",
-        type=str,
-        help="username to access CPU home directory",
     )
     args = vars(parser.parse_args())
 
