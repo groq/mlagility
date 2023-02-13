@@ -64,9 +64,9 @@ def run_benchit(
     cache_dir: str,
     search_dir: Optional[str] = None,
     rebuild: Optional[str] = None,
-    compiler_flags: Optional[List[str]] = None,
-    assembler_flags: Optional[List[str]] = None,
-    num_chips: Optional[int] = None,
+    groq_compiler_flags: Optional[List[str]] = None,
+    groq_assembler_flags: Optional[List[str]] = None,
+    groq_num_chips: Optional[int] = None,
     groqview: Optional[bool] = None,
     devices: Optional[List[str]] = None,
     max_depth: Optional[int] = None,
@@ -82,9 +82,9 @@ def run_benchit(
     cache_dir_str = value_arg(cache_dir, "--cache-dir")
     search_dir_str = value_arg(search_dir, "--search-dir")
     rebuild_str = value_arg(rebuild, "--rebuild")
-    compiler_flags_str = list_arg(compiler_flags, "--compiler-flags")
-    assembler_flags_str = list_arg(assembler_flags, "--assembler-flags")
-    num_chips_str = value_arg(num_chips, "--num-chips")
+    compiler_flags_str = list_arg(groq_compiler_flags, "--groq-compiler-flags")
+    assembler_flags_str = list_arg(groq_assembler_flags, "--groq-assembler-flags")
+    num_chips_str = value_arg(groq_num_chips, "--groq-num-chips")
     groqview_str = bool_arg(groqview, "--groqview")
     devices_str = list_arg(devices, "--devices")
     max_depth_str = value_arg(max_depth, "--max-depth")

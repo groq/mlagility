@@ -95,7 +95,7 @@ def exportit(
     return gmodel
 
 
-def benchit(
+def benchmark_model(
     model: Any,
     inputs: Dict[str, Any],
     build_name: Optional[str] = None,

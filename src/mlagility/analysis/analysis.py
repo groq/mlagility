@@ -21,7 +21,7 @@ from groqflow.justgroqit.stage import Sequence
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 import mlagility.common.labels as labels
-from mlagility.api.api import benchit
+from mlagility.api.model_api import benchmark_model
 import mlagility.common.filesystem as filesystem
 
 
@@ -41,9 +41,9 @@ class TracerArgs:
     max_depth: int
     cache_dir: str
     rebuild: str
-    compiler_flags: List[str]
-    assembler_flags: List[str]
-    num_chips: int
+    groq_compiler_flags: List[str]
+    groq_assembler_flags: List[str]
+    groq_num_chips: int
     groqview: bool
     models_found: Dict[str, util.ModelInfo] = dataclasses.field(default_factory=dict)
     script_name: str = None
@@ -108,7 +108,7 @@ def call_benchit(
     labels.save_to_cache(cache_dir, build_name, tracer_args.labels)
 
     try:
-        perf = benchit(
+        perf = benchmark_model(
             model_info.model,
             inputs,
             device=tracer_args.device,
@@ -116,9 +116,9 @@ def call_benchit(
             cache_dir=cache_dir,
             build_only=Action.BENCHMARK not in tracer_args.actions,
             lean_cache=tracer_args.lean_cache,
-            groq_num_chips=tracer_args.num_chips,
-            groq_compiler_flags=tracer_args.compiler_flags,
-            groq_assembler_flags=tracer_args.assembler_flags,
+            groq_num_chips=tracer_args.groq_num_chips,
+            groq_compiler_flags=tracer_args.groq_compiler_flags,
+            groq_assembler_flags=tracer_args.groq_assembler_flags,
             groqview=tracer_args.groqview,
             sequence=tracer_args.sequence,
         )
