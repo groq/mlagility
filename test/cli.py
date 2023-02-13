@@ -101,8 +101,7 @@ def get_sequence():
     """
 }
 
-# Change CWD
-# Create a test directory
+# Create a test directory and make it the CWD
 test_dir = "cli_test_dir"
 cache_dir = "cache-dir"
 dirpath = Path(test_dir)
