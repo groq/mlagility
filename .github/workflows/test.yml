@@ -28,6 +28,8 @@ jobs:
           pip install pylint
           if [ -f setup.py ]; then pip install -e .; fi
           pip install transformers
+          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+          bash Miniconda3-latest-Linux-x86_64.sh
       - name: Lint with PyLint
         run: |
           pylint src --rcfile .pylintrc
