@@ -33,5 +33,7 @@ jobs:
           pylint src --rcfile .pylintrc
       - name: Test with unittest
         run: |
+          python examples/api/hello_world.py
           python test/cli.py
           python test/analysis.py
+          python test/model_api.py

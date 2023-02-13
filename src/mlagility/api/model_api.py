@@ -100,7 +100,7 @@ def benchmark_model(
     inputs: Dict[str, Any],
     build_name: Optional[str] = None,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
-    device: str = "groq",
+    device: str = "x86",
     backend: str = "local",
     build_only: bool = False,
     lean_cache: bool = False,
