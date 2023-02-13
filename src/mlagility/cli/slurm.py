@@ -125,8 +125,6 @@ def run_benchit(
     num_chips: int,
     groqview: bool,
     devices: Optional[List[str]],
-    runtimes: Optional[List[str]],
-    ip: str,
     max_depth: int,
     analyze_only: bool,
     build_only: bool,
@@ -139,9 +137,6 @@ def run_benchit(
     groqview_str = bool_arg(groqview, "--groqview")
 
     devices_str = list_arg(devices, "--devices")
-    runtimes_str = list_arg(runtimes, "--runtimes")
-
-    ip_str = value_arg(ip, "--ip")
     max_depth_str = value_arg(max_depth, "--max-depth")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
     build_only_str = bool_arg(build_only, "--build-only")
@@ -150,7 +145,7 @@ def run_benchit(
         f"{op} -s {search_dir} -i {script} -d {cache_dir} "
         f"--rebuild {rebuild}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
-        f"{devices_str}{runtimes_str}{ip_str}{max_depth_str}{analyze_only_str}{build_only_str}"
+        f"{devices_str}{max_depth_str}{analyze_only_str}{build_only_str}"
     )
 
     # Remove the .py extension from the build name
