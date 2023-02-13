@@ -1,5 +1,5 @@
 """
-Tests focused on the analysis capabilities of benchit CLI"
+Tests focused on the analysis capabilities of benchit CLI
 """
 
 import os
@@ -9,10 +9,23 @@ import shutil
 import glob
 import subprocess
 import numpy as np
-import mlagility.common.filesystem as filesystem
+from contextlib import redirect_stdout
+from unittest.mock import patch
+import io
+import sys
+from mlagility.cli.cli import main as benchitcli
 import mlagility.common.labels as labels
 from mlagility.parser import parse
 import groqflow.common.cache as cache
+
+try:
+    # pylint: disable=unused-import
+    import transformers
+except ImportError as e:
+    raise ImportError(
+        "The Huggingface transformers library is required for running this test. "
+        "Install it with `pip install transformers`"
+    )
 
 
 # We generate a corpus on to the filesystem during the test
@@ -184,10 +197,17 @@ def cache_is_lean(cache_dir, build_name):
 os.chdir(test_dir)
 
 
+def run_cli(args):
+    with redirect_stdout(io.StringIO()) as f:
+        with patch.object(sys, "argv", args):
+            benchitcli()
+
+            return f.getvalue()
+
+
 def run_analysis(args):
 
-    # Running cli
-    output = subprocess.check_output(args, encoding="UTF-8")
+    output = run_cli(args)
 
     # Process outputs
     output = output[output.rfind("Models discovered") :]
@@ -279,7 +299,7 @@ class Testing(unittest.TestCase):
         assert cache_is_lean(cache_dir, build_name) and labels_found
 
     def test_07_generic_args(self):
-        output = subprocess.check_output(
+        output = run_cli(
             [
                 "benchit",
                 "linear_pytorch.py",
@@ -288,8 +308,7 @@ class Testing(unittest.TestCase):
                 "--script-args",
                 "--my-arg test_arg",
                 "--analyze-only",
-            ],
-            encoding="UTF-8",
+            ]
         )
         assert "Received arg test_arg" in output
 
