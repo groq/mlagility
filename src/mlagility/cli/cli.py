@@ -147,17 +147,16 @@ def main():
         default=filesystem.DEFAULT_CACHE_DIR,
     )
 
-    # TODO: Implement this feature
-    # benchmark_parser.add_argument(
-    #     "--sequence-file",
-    #     dest="sequence_file",
-    #     help="Path to a python script that implements the GroqFlow sequence.py template, "
-    #     "which returns an instance of a custom build Sequence that will be passed to the "
-    #     "groqit(sequence=...) arg (default behavior is to use the default groqit() "
-    #     "build sequence)",
-    #     required=False,
-    #     default=None,
-    # )
+    benchmark_parser.add_argument(
+        "--sequence-file",
+        dest="sequence_file",
+        help="Path to a python script that implements the GroqFlow sequence.py template, "
+        "which returns an instance of a custom build Sequence that will be passed to the "
+        "groqit(sequence=...) arg (default behavior is to use the default groqit() "
+        "build sequence)",
+        required=False,
+        default=None,
+    )
 
     benchmark_parser.add_argument(
         "--rebuild",

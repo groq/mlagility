@@ -10,12 +10,14 @@ import groqflow.justgroqit.stage as stage
 from groqflow.common import printing
 import groqflow.common.build as build
 import mlagility.common.filesystem as filesystem
+from mlagility.api.performance import MeasuredPerformance
 
 
 @dataclass
 class ModelInfo:
     model: torch.nn.Module
     name: str
+    script_name: str
     file: str = ""
     line: int = 0
     params: int = 0
@@ -31,6 +33,7 @@ class ModelInfo:
     is_target: bool = False
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
+    performance: MeasuredPerformance = None
 
     def __post_init__(self):
         self.params = count_parameters(self.model, self.model_type)

@@ -6,12 +6,14 @@ import os
 import unittest
 from pathlib import Path
 import shutil
+import glob
 import subprocess
 import numpy as np
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels
 from mlagility.parser import parse
 import groqflow.common.cache as cache
+
 
 # We generate a corpus on to the filesystem during the test
 # to get around how weird bake tests are when it comes to
@@ -156,6 +158,7 @@ minimal_tokenizer = """
 
 # Create a test directory
 test_dir = "analysis_test_dir"
+cache_dir = "cache-dir"
 dirpath = Path(test_dir)
 if dirpath.is_dir():
     shutil.rmtree(dirpath)
@@ -170,6 +173,13 @@ with open(os.path.join(test_dir, "tokenizer.json"), "w", encoding="utf") as f:
     f.write(minimal_tokenizer)
 
 
+def cache_is_lean(cache_dir, build_name):
+    files = list(glob.glob(f"{cache_dir}/{build_name}/**/*", recursive=True))
+    is_lean = len([x for x in files if ".onnx" in x]) == 0
+    metadata_found = len([x for x in files if ".txt" in x]) > 0
+    return is_lean and metadata_found
+
+
 # Change CWD
 os.chdir(test_dir)
 
@@ -180,7 +190,7 @@ def run_analysis(args):
     output = subprocess.check_output(args, encoding="UTF-8")
 
     # Process outputs
-    output = output[output.rfind("Models found") :]
+    output = output[output.rfind("Models discovered") :]
     models_executed = output.count("(executed")
     models_built = output.count("Model successfully built!")
     return models_executed, 0, models_built
@@ -188,7 +198,7 @@ def run_analysis(args):
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
-        cache.rmdir(filesystem.DEFAULT_CACHE_DIR)
+        cache.rmdir(cache_dir)
         return super().setUp()
 
     def test_01_basic(self):
@@ -232,6 +242,8 @@ class Testing(unittest.TestCase):
                 "--max-depth",
                 "1",
                 "--build-only",
+                "--cache-dir",
+                cache_dir,
             ]
         )
         assert np.array_equal(output, (2, 0, 1))
@@ -242,13 +254,14 @@ class Testing(unittest.TestCase):
                 "benchit",
                 "linear_keras.py",
                 "--build-only",
+                "--cache-dir",
+                cache_dir,
             ]
         )
         assert np.array_equal(output, (1, 0, 1))
 
     def test_06_cache(self):
         model_hash = "60931adb"
-        cache_dir = "cache-dir"
         run_analysis(
             [
                 "benchit",
@@ -262,11 +275,8 @@ class Testing(unittest.TestCase):
             ]
         )
         build_name = f"linear_pytorch_{model_hash}"
-        files = os.listdir(f"{cache_dir}/{build_name}")
-        cache_is_lean = len([x for x in files if ".onnx" in x]) == 0
-        metadata_found = len([x for x in files if ".txt" in x]) > 0
         labels_found = labels.load_from_cache(cache_dir, build_name) != {}
-        assert metadata_found and cache_is_lean and labels_found
+        assert cache_is_lean(cache_dir, build_name) and labels_found
 
     def test_07_generic_args(self):
         output = subprocess.check_output(
@@ -346,6 +356,8 @@ class Testing(unittest.TestCase):
                 "--build-only",
                 "--max-depth",
                 "1",
+                "--cache-dir",
+                cache_dir,
             ]
         )
         assert np.array_equal(output, (2, 0, 1))

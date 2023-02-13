@@ -69,7 +69,6 @@ def run_benchit(
     num_chips: Optional[int] = None,
     groqview: Optional[bool] = None,
     devices: Optional[List[str]] = None,
-    ip: Optional[str] = None,
     max_depth: Optional[int] = None,
     analyze_only: Optional[bool] = None,
     build_only: Optional[bool] = None,
@@ -88,7 +87,6 @@ def run_benchit(
     num_chips_str = value_arg(num_chips, "--num-chips")
     groqview_str = bool_arg(groqview, "--groqview")
     devices_str = list_arg(devices, "--devices")
-    ip_str = value_arg(ip, "--ip")
     max_depth_str = value_arg(max_depth, "--max-depth")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
     build_only_str = bool_arg(build_only, "--build-only")
@@ -97,7 +95,7 @@ def run_benchit(
     args = (
         f"{op} {script} {cache_dir_str}{search_dir_str}{rebuild_str}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
-        f"{devices_str}{ip_str}{max_depth_str}{analyze_only_str}"
+        f"{devices_str}{max_depth_str}{analyze_only_str}"
         f"{build_only_str}{lean_cache_str}"
     )
 

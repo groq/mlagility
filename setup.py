@@ -15,7 +15,8 @@ setup(
     packages=["mlagility"],
     install_requires=[
         "transformers",
-        "groqflow>=2.5.2",
+        "groqflow @ https://test-files.pythonhosted.org/packages/a0/96/2eba6c53f93e9aa1b9de3f80f01ac23db7256b62d31d932d9814a0367ed4/groqflow-3.0.1.tar.gz",
+        "invoke>=2.0.0",
     ],
     classifiers=[],
     entry_points={

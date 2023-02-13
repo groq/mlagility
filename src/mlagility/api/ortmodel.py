@@ -4,11 +4,11 @@ import numpy as np
 import torch
 import groqflow.common.printing as printing
 import groqflow.common.build as build
-import mlagility.api.cloud as cloud
+import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
 
 
-class CPUModel:
+class ORTModel:
     def __init__(self, state: build.State, tensor_type=np.array):
 
         self.tensor_type = tensor_type
@@ -18,18 +18,23 @@ class CPUModel:
             "log_cpu_execute.txt",
         )
 
-    def benchmark(self, repetitions: int = 100) -> MeasuredPerformance:
+
+    def benchmark(
+        self, repetitions: int = 100, backend: str = "local"
+    ) -> MeasuredPerformance:
 
         printing.log_info(
             (
-                " CPU is not used for accuracy comparisons it's only used for"
+                " CPU is not used for accuracy comparisons, it's only used for"
                 " performance comparison. So dummy inputs are used.\n"
-                " User is responsible for ensuring the remote cpu server is turned on and"
-                " has miniconda3 @ /home/user/ and python>=3.8 installed."
+                " User is responsible for ensuring the CPU is available and"
+                " has miniconda3 and python>=3.8 installed."
             )
         )
 
-        benchmark_results = self._execute(repetitions=repetitions)
+
+
+        benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.cpu_measured_latency = benchmark_results.mean_latency
         self.state.info.cpu_measured_throughput = benchmark_results.throughput
         return benchmark_results
@@ -66,7 +71,8 @@ class CPUModel:
             self.state.cache_dir, self.state.config.build_name, "cpu_error.npy"
         )
 
-    def _execute(self, repetitions: int) -> MeasuredPerformance:
+    def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
+
         """
         Execute model on cpu and return the performance
         """
@@ -77,8 +83,14 @@ class CPUModel:
         if os.path.isfile(self._cpu_error_file):
             os.remove(self._cpu_error_file)
 
-        # Only cloud execution of the CPU is supported, local execution is not supported
-        cloud.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
+        if backend == "cloud":
+            devices.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
+        elif backend == "local":
+            devices.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
+        else:
+            raise ValueError(
+                f"Only 'cloud' and 'local' are supported, but received {backend}"
+            )
 
         return MeasuredPerformance(
             mean_latency=self._mean_latency,
@@ -89,7 +101,7 @@ class CPUModel:
         )
 
 
-class PytorchModelWrapper(CPUModel):
+class PytorchModelWrapper(ORTModel):
     def __init__(self, state):
         tensor_type = torch.tensor
         super(PytorchModelWrapper, self).__init__(state, tensor_type)
@@ -99,10 +111,10 @@ class PytorchModelWrapper(CPUModel):
         return self._execute(repetitions=100)
 
 
-def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> CPUModel:
+def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> ORTModel:
     state = build.load_state(cache_dir=cache_dir, build_name=build_name)
 
     if state.model_type == build.ModelType.PYTORCH:
         return PytorchModelWrapper(state)
     else:
-        return CPUModel(state)
+        return ORTModel(state)
