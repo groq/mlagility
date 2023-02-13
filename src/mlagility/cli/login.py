@@ -18,4 +18,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update huggingface credentials")
     parser.add_argument("--key", help="API key", required=True)
     args = vars(parser.parse_args())
-    login(args.key)
+    login(args["key"])
