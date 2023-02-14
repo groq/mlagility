@@ -40,7 +40,7 @@ jobs:
           sudo service munge start
           
           # Submit a test job that requires low memory usage
-          export MLAGILITY_SLURM_MEMORY=256
+          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
 
           # Check results
