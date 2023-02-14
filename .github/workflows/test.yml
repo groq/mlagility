@@ -22,16 +22,21 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.8"
-      - name: Install dependencies
+      - name: Install and start slurm
         run: |
-          python -m pip install --upgrade pip
-          pip install pylint
-          if [ -f setup.py ]; then pip install -e .; fi
-          pip install transformers
-      - name: Lint with PyLint
-        run: |
-          pylint src --rcfile .pylintrc
-      - name: Test with unittest
-        run: |
-          python test/cli.py
-          python test/analysis.py
+          sudo apt update -y
+          sudo apt install slurm-wlm -y
+          mv slurm.conf /etc/slurm/slurm.conf
+          sudo service slurmd start
+          sudo service slurmctld start
+          sudo service munge start
+          #scontrol update NodeName=dhnoronha state=RESUME
+          #sudo scontrol update NodeName=dhnoronha State=IDLE
+          hostname -s
+          sinfo
+          sinfo -V
+          srun test.sh
+          #sbatch test.sh --wait --output=my_output.txt
+          #sleep 5
+          #ls
+          #cat my_output.txt
