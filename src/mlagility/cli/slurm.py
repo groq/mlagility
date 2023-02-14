@@ -112,14 +112,11 @@ def run_benchit(
 
     shell_script = os.path.join(pathlib.Path(__file__).parent.resolve(), "run_slurm.sh")
 
-    required_memory = os.environ.get("SKIP", "128000")
-
     slurm_command = ["sbatch", "-c", "1"]
     if os.environ.get("MLAGILITY_SLURM_USE_DEFAULT_MEMORY") != "True":
         slurm_command.append("--mem=128000")
-    slurm_command.append(
+    slurm_command.extend(
         [
-            f"--mem={required_memory}",
             "--time=00-02:00:00",  # days-hh:mm:ss"
             f"--job-name={job_name}",
             shell_script,

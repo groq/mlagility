@@ -38,9 +38,9 @@ jobs:
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
+          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           
           # Submit a test job that requires low memory usage
-          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
 
           # Check results
