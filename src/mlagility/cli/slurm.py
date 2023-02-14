@@ -129,7 +129,4 @@ def run_benchit(
         slurm_command.append(ml_cache_dir)
 
     print(f"Submitting job {job_name} to Slurm")
-    try:
-        subprocess.check_call(slurm_command)
-    except subprocess.CalledProcessError as e:
-        print(e)
+    subprocess.check_call(slurm_command)
