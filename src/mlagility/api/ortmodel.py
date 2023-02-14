@@ -13,6 +13,7 @@ class ORTModel:
 
         self.tensor_type = tensor_type
         self.state = state
+        self.device = "x86"
         self.log_execute_path = os.path.join(
             build.output_dir(state.cache_dir, self.state.config.build_name),
             "log_cpu_execute.txt",
@@ -38,9 +39,7 @@ class ORTModel:
 
     @property
     def _cpu_performance_file(self):
-        return os.path.join(
-            self.state.cache_dir, self.state.config.build_name, "cpu_performance.json"
-        )
+        return devices.BenchmarkPaths(self.state, self.device, "local").outputs_file
 
     def _get_stat(self, stat):
         if os.path.exists(self._cpu_performance_file):
@@ -64,9 +63,7 @@ class ORTModel:
 
     @property
     def _cpu_error_file(self):
-        return os.path.join(
-            self.state.cache_dir, self.state.config.build_name, "cpu_error.npy"
-        )
+        return devices.BenchmarkPaths(self.state, self.device, "local").errors_file
 
     def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
 
@@ -81,9 +78,13 @@ class ORTModel:
             os.remove(self._cpu_error_file)
 
         if backend == "remote":
-            devices.execute_cpu_remotely(self.state, self.log_execute_path, repetitions)
+            devices.execute_cpu_remotely(
+                self.state, self.device, self.log_execute_path, repetitions
+            )
         elif backend == "local":
-            devices.execute_cpu_locally(self.state, self.log_execute_path, repetitions)
+            devices.execute_cpu_locally(
+                self.state, self.device, self.log_execute_path, repetitions
+            )
         else:
             raise ValueError(
                 f"Only 'remote' and 'local' are supported, but received {backend}"
@@ -93,7 +94,7 @@ class ORTModel:
             mean_latency=self._mean_latency,
             throughput=self._throughput,
             device=self._device,
-            device_type="x86",
+            device_type=self.device,
             build_name=self.state.config.build_name,
         )
 
