@@ -51,7 +51,7 @@ jobs:
               echo "Model has not been successfully built"
               exit 1
           fi
-          if ! grep -q "CommandNotFoundError" $SLURM_OUTPUT
+          if grep -q "CommandNotFoundError" $SLURM_OUTPUT
           then
               cat $SLURM_OUTPUT
               echo "CommandNotFoundError fount in slurm output. This is likely due to conda not being found."
