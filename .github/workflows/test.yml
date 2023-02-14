@@ -32,11 +32,5 @@ jobs:
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
-          hostname -s
-          sinfo
-          sinfo -V
-          srun test.sh
-          ##sbatch test.sh --wait --output=my_output.txt
-          ##sleep 5
-          ##ls
-          ##cat my_output.txt
+          sbatch test.sh --wait --output=my_output.txt
+          cat my_output.txt
