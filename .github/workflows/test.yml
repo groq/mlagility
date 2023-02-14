@@ -33,13 +33,14 @@ jobs:
           sudo apt install slurm-wlm -y
           cp test/helpers/slurm.conf test/helpers/slurm_modified.conf
           sed -i "s/YOUR_HOSTNAME_HERE/$HOSTNAME/" test/helpers/slurm_modified.conf
-          sudo mv slurm_modified.conf /etc/slurm/slurm.conf
+          sudo mv test/helpers/slurm_modified.conf /etc/slurm/slurm.conf
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
           
       - name: Test benchit on Slurm
         run: |
+          # Note: Please run setup_venv before attempting any slurm tests 
           export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
           bash tests/helpers/check_slurm_output.sh slurm-1.out
