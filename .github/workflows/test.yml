@@ -32,5 +32,6 @@ jobs:
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
-          sbatch test.sh --wait
+          sbatch test.sh
+          sleep 5
           cat slurm-1.out
