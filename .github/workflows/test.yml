@@ -45,3 +45,8 @@ jobs:
 
           # Check results
           cat slurm-1.out
+          if ! grep -q "Model successfully built!" slurm-1.out
+          then
+              echo "Model has not been successfully built"
+              exit 1
+          fi
