@@ -35,6 +35,10 @@ jobs:
       - name: Lint with PyLint
         run: |
           pylint src --rcfile .pylintrc
+      - name: Test with unittest
+        run: |
+          python test/cli.py
+          python test/analysis.py
       - name: Check installation of model requirements on isolated conda env
         run: |
           python test/check_install.py models/requirements.txt --expect_failure
@@ -42,9 +46,6 @@ jobs:
           bash src/mlagility/cli/setup_venv.sh $PWD test_env
           conda activate test_env
           python test/check_install.py models/requirements.txt
+          benchit benchmark electra.py -s models/transformers_pytorch --backend local --device x86
           conda deactivate
           python test/check_install.py models/requirements.txt --expect_failure
-      - name: Test with unittest
-        run: |
-          python test/cli.py
-          python test/analysis.py
