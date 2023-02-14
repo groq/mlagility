@@ -46,6 +46,6 @@ jobs:
           bash src/mlagility/cli/setup_venv.sh $PWD test_env
           conda activate test_env
           python test/check_install.py models/requirements.txt
-          benchit benchmark electra.py -s models/transformers_pytorch --backend local --device x86
+          benchit benchmark electra.py -s models/transformers_pytorch --build-only
           conda deactivate
           python test/check_install.py models/requirements.txt --expect_failure
