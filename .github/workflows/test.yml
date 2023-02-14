@@ -27,8 +27,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
           if [ -f setup.py ]; then pip install -e .; fi
-      - name: Install and start slurm
+      - name: Install slurm and test --use-slurm
         run: |
+          # Install and start Slurm
           sudo apt update -y
           sudo apt install slurm-wlm -y
           cp slurm.conf slurm_modified.conf
@@ -37,5 +38,10 @@ jobs:
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
+          
+          # Submit a test job that requires low memory usage
+          export MLAGILITY_SLURM_MEMORY=500
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
+
+          # Check results
           cat slurm-1.out
