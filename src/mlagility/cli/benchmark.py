@@ -83,11 +83,11 @@ def benchmark_script(
         devices = ["x86"]
 
     # Force the user to specify a legal cache dir in NFS if they are using slurm
-    if not os.path.expanduser(cache_dir).startswith("/net") and use_slurm:
-        raise ValueError(
-            "You must specify a --cache-dir in `/net` when using groqit-util with Slurm, "
-            f"however your current --cache-dir is set to {os.path.expanduser(cache_dir)}"
-        )
+    # if not os.path.expanduser(cache_dir).startswith("/net") and use_slurm:
+    #    raise ValueError(
+    #        "You must specify a --cache-dir in `/net` when using groqit-util with Slurm, "
+    #        f"however your current --cache-dir is set to {os.path.expanduser(cache_dir)}"
+    #    )
 
     # Get a specific list of models to process
     available_scripts = filesystem.get_available_scripts(search_dir)
