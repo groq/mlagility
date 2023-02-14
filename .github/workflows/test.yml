@@ -27,33 +27,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
           if [ -f setup.py ]; then pip install -e .; fi
-      - name: Install slurm and test --use-slurm
+      - name: Install and Start Slurm
         run: |
-          # Install and start Slurm
           sudo apt update -y
           sudo apt install slurm-wlm -y
-          cp slurm.conf slurm_modified.conf
-          sed -i "s/YOUR_HOSTNAME_HERE/$HOSTNAME/" slurm_modified.conf
+          cp test/helpers/slurm.conf test/helpers/slurm_modified.conf
+          sed -i "s/YOUR_HOSTNAME_HERE/$HOSTNAME/" test/helpers/slurm_modified.conf
           sudo mv slurm_modified.conf /etc/slurm/slurm.conf
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
-          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           
-          # Submit a test job that requires low memory usage
+      - name: Test benchit on Slurm
+        run: |
+          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
-
-          # Check results
-          SLURM_OUTPUT="slurm-1.out"
-          if ! grep -q "Model successfully built!" $SLURM_OUTPUT
-          then
-              cat $SLURM_OUTPUT
-              echo "Model has not been successfully built"
-              exit 1
-          fi
-          if grep -q "CommandNotFoundError" $SLURM_OUTPUT
-          then
-              cat $SLURM_OUTPUT
-              echo "CommandNotFoundError fount in slurm output. This is likely due to conda not being found."
-              exit 1
-          fi
+          bash tests/helpers/check_slurm_output.sh slurm-1.out
+          
