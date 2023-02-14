@@ -38,3 +38,4 @@ jobs:
           sudo service slurmctld start
           sudo service munge start
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
+          cat slurm-1.out
