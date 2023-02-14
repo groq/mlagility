@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt install slurm-wlm -y
-          mv slurm.conf /etc/slurm/slurm.conf
+          sudo mv slurm.conf /etc/slurm/slurm.conf
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
