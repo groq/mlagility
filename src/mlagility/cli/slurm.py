@@ -116,7 +116,7 @@ def run_benchit(
         "sbatch",
         "-c",
         "1",
-        "--mem=128000",
+        # "--mem=128000",
         "--time=00-02:00:00",  # days-hh:mm:ss"
         f"--job-name={job_name}",
         shell_script,
