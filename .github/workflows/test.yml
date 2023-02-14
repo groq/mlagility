@@ -26,17 +26,17 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt install slurm-wlm -y
+          cp slurm.conf slurm_modified.conf
+          sed -i "s/YOUR_HOSTNAME_HERE/$HOSTNAME/" slurm_modified.conf
           sudo mv slurm.conf /etc/slurm/slurm.conf
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
-          #scontrol update NodeName=dhnoronha state=RESUME
-          #sudo scontrol update NodeName=dhnoronha State=IDLE
           hostname -s
           sinfo
           sinfo -V
           srun test.sh
-          #sbatch test.sh --wait --output=my_output.txt
-          #sleep 5
-          #ls
-          #cat my_output.txt
+          ##sbatch test.sh --wait --output=my_output.txt
+          ##sleep 5
+          ##ls
+          ##cat my_output.txt
