@@ -26,7 +26,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint
-          if [ -f setup.py ]; then pip install -e .; fi
+          #if [ -f setup.py ]; then pip install -e .; fi
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
           bash Miniconda3-latest-Linux-x86_64.sh -b -u
           source ~/miniconda3/bin/activate
@@ -43,12 +43,12 @@ jobs:
           
       - name: Test benchit on Slurm
         run: |
-          # Create conda environment for Slurm using sbatch
+          # Create conda environment for Slurm using srun (sbatch + wait)
           export SKIP_REQUIREMENTS_INSTALL="True"
-          sbatch src/mlagility/cli/setup_venv.sh 
+          srun src/mlagility/cli/setup_venv.sh 
 
           # Run tests on Slurm
           export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
-          bash test/helpers/check_slurm_output.sh slurm-2.out
+          bash test/helpers/check_slurm_output.sh slurm-1.out
           
