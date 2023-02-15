@@ -15,37 +15,38 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MLAGILITY_DEBUG: True
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v3
+      - uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: "3.8"
+          miniconda-version: "latest"
+          activate-environment: mla
+          python-version: 3.8
       - name: Install dependencies
+        shell: bash -el {0}
         run: |
           python -m pip install --upgrade pip
-          pip install pylint
+          conda install pylint
           if [ -f setup.py ]; then pip install -e .; fi
           pip install transformers
-
-          #Install miniconda
-          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-          bash Miniconda3-latest-Linux-x86_64.sh -b -u
       - name: Lint with PyLint
+        shell: bash -el {0}
         run: |
           pylint src --rcfile .pylintrc
       - name: Test with unittest
+        shell: bash -el {0}
         run: |
+          python examples/api/hello_world.py
           python test/cli.py
           python test/analysis.py
+          python test/model_api.py
       - name: Check installation of model requirements on isolated conda env
+        shell: bash -el {0}
         run: |
-          python test/check_install.py models/requirements.txt --expect_failure
-          source ~/miniconda3/bin/activate
-          bash src/mlagility/cli/setup_venv.sh $PWD test_env
-          conda activate test_env
-          python test/check_install.py models/requirements.txt
-          benchit benchmark electra.py -s models/transformers_pytorch --build-only
+          bash src/mlagility/cli/setup_venv.sh
+          conda activate tracker_slurm
+          python -m pip check
           conda deactivate
-          python test/check_install.py models/requirements.txt --expect_failure

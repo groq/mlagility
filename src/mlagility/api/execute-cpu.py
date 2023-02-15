@@ -23,9 +23,7 @@ def run_ort_profile(source_onnx, num_iterations=100):
     per_iteration_latency = []
     exception = None
     sess_options = ort.SessionOptions()
-    sess_options.graph_optimization_level = (
-        ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-    )
+    sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
     onnx_session = ort.InferenceSession(source_onnx, sess_options)
     sess_input = onnx_session.get_inputs()
     input_feed = _dummy_inputs(sess_input)
@@ -36,7 +34,7 @@ def run_ort_profile(source_onnx, num_iterations=100):
         start = timer()
         try:
             onnx_session.run([output_name], input_feed)
-        except Exception as e: # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             exception = e
         end = timer()
         iteration_latency = end - start
@@ -86,17 +84,15 @@ def dtype_ort2str(dtype_str: str):
 
 
 def run(
-    output_dir: str,
+    onnx_file: str,
+    outputs_file: str,
+    errors_file: str,
     num_iterations: int,
 ):
 
     # TODO: Handle exception for failure
-    onnx_model = f"{output_dir}/onnxmodel/model.onnx"
-    perf_result, exception = run_ort_profile(onnx_model, num_iterations)
+    perf_result, exception = run_ort_profile(onnx_file, num_iterations)
     # assert perf_result is list of int or float
-    save_ort_results(perf_result, num_iterations, exception)
-
-def save_ort_results(perf_result, num_iterations, exception):
 
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
@@ -132,26 +128,42 @@ def save_ort_results(perf_result, num_iterations, exception):
     cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000 / num_iterations)
     cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000 / num_iterations)
 
-    with open(args["outputs_file"], "w", encoding="utf-8") as out_file:
+    with open(outputs_file, "w", encoding="utf-8") as out_file:
         json.dump(cpu_performance, out_file, ensure_ascii=False, indent=4)
 
-    with open(args["errors_file"], "w", encoding="utf-8") as e:
+    with open(errors_file, "w", encoding="utf-8") as e:
         e.writelines(str(exception))
+
 
 if __name__ == "__main__":
     # Parse Inputs
     parser = argparse.ArgumentParser(description="Execute models built by GroqFlow")
-    parser.add_argument("output_dir", help="Path where the build files are stored")
-    parser.add_argument("outputs_file", help="File in which the outputs will be saved")
-    parser.add_argument("errors_file", help="File in which the outputs will be saved")
+    parser.add_argument(
+        "output_dir",
+        help="Path where the build files are stored",
+    )
+    parser.add_argument(
+        "onnx_file",
+        help="Path where the ONNX file is located",
+    )
+    parser.add_argument(
+        "outputs_file",
+        help="File in which the outputs will be saved",
+    )
+    parser.add_argument(
+        "errors_file",
+        help="File in which the outputs will be saved",
+    )
     parser.add_argument(
         "iterations",
         type=int,
         help="Number of times to execute the received onnx model",
     )
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
     run(
-        args["output_dir"],
-        args["iterations"],
+        args.onnx_file,
+        args.outputs_file,
+        args.errors_file,
+        args.iterations,
     )

@@ -5,7 +5,7 @@ import groqflow.common.build as build
 import groqflow.common.printing as printing
 import mlagility.cli.report as report
 import mlagility.common.filesystem as filesystem
-import mlagility.cli.benchmark as benchmark_command
+from mlagility.api.script_api import benchmark_script, decode_script_name
 from mlagility.version import __version__ as mlagility_version
 
 
@@ -44,6 +44,33 @@ def print_state(args):
         )
 
 
+def benchmark_script_argparse(args):
+    """
+    Convert argparse args into benchmark_script keyword args
+    """
+
+    benchmark_script(
+        search_dir=args.search_dir,
+        input_script=args.input_script,
+        benchmark_all=args.benchmark_all,
+        use_slurm=args.use_slurm,
+        lean_cache=args.lean_cache,
+        cache_dir=args.cache_dir,
+        rebuild=args.rebuild,
+        devices=args.devices,
+        backend=args.backend,
+        analyze_only=args.analyze_only,
+        build_only=args.build_only,
+        script_args=args.script_args,
+        max_depth=args.max_depth,
+        sequence=args.sequence_file,
+        groq_compiler_flags=args.groq_compiler_flags,
+        groq_assembler_flags=args.groq_assembler_flags,
+        groq_num_chips=args.groq_num_chips,
+        groqview=args.groqview,
+    )
+
+
 def main():
     """
     Parses arguments passed by user and forwards them into a
@@ -73,7 +100,7 @@ def main():
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Benchmark the performance of one or more models"
     )
-    benchmark_parser.set_defaults(func=benchmark_command.main)
+    benchmark_parser.set_defaults(func=benchmark_script_argparse)
 
     benchmark_parser.add_argument(
         "-s",
@@ -115,28 +142,6 @@ def main():
         action="store_true",
     )
 
-    # TODO: Implement this feature
-    # slurm_ram_default = 64000
-    # benchmark_parser.add_argument(
-    #     "--slurm-ram",
-    #     dest="slurm_ram",
-    #     help="Amount of RAM, in MB, to allocate to each Slurm worker "
-    #     f"(defaults to {slurm_ram_default})",
-    #     required=False,
-    #     default=slurm_ram_default,
-    # )
-
-    # TODO: Implement this feature
-    # timeout_default = 60
-    # benchmark_parser.add_argument(
-    #     "--timeout",
-    #     dest="timeout",
-    #     help="Number of minutes to allow each build to run for, before it is canceled "
-    #     f"(defaults to {timeout_default})",
-    #     required=False,
-    #     default=timeout_default,
-    # )
-
     benchmark_parser.add_argument(
         "-d",
         "--cache-dir",
@@ -166,49 +171,18 @@ def main():
         default=build.DEFAULT_REBUILD_POLICY,
     )
 
+    benchmark_default_backend = "local"
     benchmark_parser.add_argument(
-        "--compiler-flags",
-        nargs="+",
-        dest="compiler_flags",
-        help="Sets the groqit(compiler_flags=...) arg (default behavior is to use groqit()'s "
-        "default compiler flags)",
+        "--backend",
+        choices=[
+            "local",
+            "remote",
+        ],
+        dest="backend",
+        help="Indicates whether the device is installed on the local machine or a remote machine "
+        f'(defaults to "{benchmark_default_backend}")',
         required=False,
-        default=None,
-    )
-
-    benchmark_parser.add_argument(
-        "--assembler-flags",
-        nargs="+",
-        dest="assembler_flags",
-        help="Sets the groqit(assembler_flags=...) arg (default behavior is to use groqit()'s "
-        "default assembler flags)",
-        required=False,
-        default=None,
-    )
-
-    benchmark_parser.add_argument(
-        "--num-chips",
-        dest="num_chips",
-        help="Sets the groqit(num_chips=...) arg (default behavior is to let groqit() "
-        "automatically select the number of chips)",
-        required=False,
-        default=None,
-        type=int,
-    )
-
-    benchmark_parser.add_argument(
-        "--groqview",
-        dest="groqview",
-        help="Enables GroqView for the build(s)",
-        action="store_true",
-    )
-
-    benchmark_parser.add_argument(
-        "--ip",
-        dest="ip",
-        help="IP address where the device is located (defaults to localhost)",
-        required=False,
-        default="localhost",
+        default=benchmark_default_backend,
     )
 
     benchmark_default_device = "x86"
@@ -257,15 +231,42 @@ def main():
         help="Maximum depth to analyze within the model structure of the target script(s)",
     )
 
-    # TODO: Implement this feature
-    # benchmark_parser.add_argument(
-    #     "--sweep-file",
-    #     dest="sweep_file",
-    #     help="Path to a .yaml file that implements the GroqFlow sweep.yaml template, "
-    #     "which defines the parameter sweeping behavior for this set of builds",
-    #     required=False,
-    #     default=None,
-    # )
+    benchmark_parser.add_argument(
+        "--groq-compiler-flags",
+        nargs="+",
+        dest="groq_compiler_flags",
+        help="Sets the groqit(compiler_flags=...) arg (default behavior is to use groqit()'s "
+        "default compiler flags)",
+        required=False,
+        default=None,
+    )
+
+    benchmark_parser.add_argument(
+        "--groq-assembler-flags",
+        nargs="+",
+        dest="groq_assembler_flags",
+        help="Sets the groqit(assembler_flags=...) arg (default behavior is to use groqit()'s "
+        "default assembler flags)",
+        required=False,
+        default=None,
+    )
+
+    benchmark_parser.add_argument(
+        "--groq-num-chips",
+        dest="groq_num_chips",
+        help="Sets the groqit(num_chips=...) arg (default behavior is to let groqit() "
+        "automatically select the number of chips)",
+        required=False,
+        default=None,
+        type=int,
+    )
+
+    benchmark_parser.add_argument(
+        "--groqview",
+        dest="groqview",
+        help="Enables GroqView for the build(s)",
+        action="store_true",
+    )
 
     #######################################
     # Subparser for the "cache" command
@@ -397,7 +398,7 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        script_name, _ = benchmark_command.decode_script_name(sys.argv[1])
+        script_name, _ = decode_script_name(sys.argv[1])
         if sys.argv[1] not in subparsers.choices.keys() and script_name.endswith(".py"):
             sys.argv.insert(1, "benchmark")
 
