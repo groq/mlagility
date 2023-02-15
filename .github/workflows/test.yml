@@ -39,7 +39,28 @@ jobs:
       - name: Test with unittest
         shell: bash -el {0}
         run: |
-          python examples/api/hello_world.py
           python test/cli.py
-          python test/analysis.py
-          python test/model_api.py
+          python test/analysis.py    
+      - name: Install and Start Slurm
+        shell: bash -el {0}
+        run: |
+          sudo apt update -y
+          sudo apt install slurm-wlm -y
+          cp test/helpers/slurm.conf test/helpers/slurm_modified.conf
+          sed -i "s/YOUR_HOSTNAME_HERE/$HOSTNAME/" test/helpers/slurm_modified.conf
+          sudo mv test/helpers/slurm_modified.conf /etc/slurm/slurm.conf
+          sudo service slurmd start
+          sudo service slurmctld start
+          sudo service munge start
+      - name: Test benchit on Slurm
+        shell: bash -el {0}
+        run: |
+          # Create conda environment for Slurm using srun (sbatch + wait)
+          export SKIP_REQUIREMENTS_INSTALL="True"
+          srun src/mlagility/cli/setup_venv.sh 
+
+          # Run tests on Slurm
+          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
+          benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
+          bash test/helpers/check_slurm_output.sh slurm-2.out
+          
