@@ -14,6 +14,7 @@ from contextlib import redirect_stdout
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
 from mlagility.common import filesystem
+import mlagility.api.ortmodel as ortmodel
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 
@@ -134,6 +135,7 @@ def strip_dot_py(test_script_file: str) -> str:
 def assert_success_of_builds(
     test_script_files: List[str],
     info_property: Tuple[str, Any] = None,
+    check_perf: bool = False,
 ):
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
@@ -156,6 +158,13 @@ def assert_success_of_builds(
                     assert (
                         build_state.info.__dict__[info_property[0]] == info_property[1]
                     ), f"{build_state.info.__dict__[info_property[0]]} == {info_property[1]}"
+
+                if check_perf:
+                    cpu_model = ortmodel.load(
+                        build_state.config.build_name, cache_dir=build_state.cache_dir
+                    )
+                    assert cpu_model._mean_latency > 0
+                    assert cpu_model._throughput > 0
 
         assert script_build_found
 
@@ -442,11 +451,11 @@ class Testing(unittest.TestCase):
             corpus_dir,
             "--rebuild",
             "always",
-            "--num-chips",
+            "--groq-num-chips",
             "1",
             "--groqview",
-            "--compiler-flags=--large-program",
-            "--assembler-flags=--no-metrics",
+            "--groq-compiler-flags=--large-program",
+            "--groq-assembler-flags=--no-metrics",
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -477,6 +486,23 @@ class Testing(unittest.TestCase):
         assert_success_of_builds(
             [test_script], ("all_build_stages", ["export_pytorch", "set_success"])
         )
+
+    def test_cli_benchmark(self):
+
+        # Test the first model in the corpus
+        test_script = list(test_scripts_dot_py.keys())[0]
+
+        testargs = [
+            "benchit",
+            "benchmark",
+            os.path.join(corpus_dir, test_script),
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert_success_of_builds([test_script], None, check_perf=True)
 
 
 if __name__ == "__main__":

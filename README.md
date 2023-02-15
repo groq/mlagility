@@ -18,7 +18,7 @@ This repository is home to both:
 - A diverse corpus of hundreds of models, in `models/`
   - See the [benchmark readme](https://github.com/groq/mlagility/blob/main/models/readme.md) to learn more
 - Automated benchmarking tools, the `benchit` CLI and API, for CPUs, GPUs, and GroqChip processors, in `src/`
-  - See the [benchit CLI/API user guide](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) to learn more
+  - See the [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md) to learn more
 
 ## Installation
 
@@ -28,7 +28,7 @@ Please refer to our [mlagility installation guide](https://github.com/groq/mlagi
 
 MLAgility is open source software under the MIT license and we are welcoming contributions. While MLAgility is funded by Groq, we aspire for the tools and benchmarks to be as vendor-neutral as possible.
 
-One of the easiest ways to contribute is to add a model to the benchmark. To do so, simply add a `.py` file to the `models/` directory that instantiates and calls a supported type of model (see [benchit CLI/API user guide](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) to learn more). The automated benchmarking infrastructure will do the rest!
+One of the easiest ways to contribute is to add a model to the benchmark. To do so, simply add a `.py` file to the `models/` directory that instantiates and calls a supported type of model (see [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md) to learn more). The automated benchmarking infrastructure will do the rest!
 
 Please read about our [repo and code organization](https://github.com/groq/mlagility/blob/main/docs/code.md) before getting started.
 

@@ -2,7 +2,6 @@ import os
 import json
 import numpy as np
 import torch
-import groqflow.common.printing as printing
 import groqflow.common.build as build
 import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
@@ -13,27 +12,11 @@ class GPUModel:
 
         self.tensor_type = tensor_type
         self.state = state
-        self.log_execute_path = os.path.join(
-            build.output_dir(state.cache_dir, self.state.config.build_name),
-            "log_gpu_execute.txt",
-        )
+        self.device = "nvidia"
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
     ) -> MeasuredPerformance:
-
-
-        printing.log_info(
-            (
-                "GPU is not used for accuracy comparisons it's only used for"
-                " performance comparison. So inputs provided during model"
-                " compilation is used.\n"
-                " User is responsible for ensuring the GPU is available and"
-                " the system has python>=3.8, docker>=20.10 installed."
-            )
-        )
-
-
         benchmark_results = self._execute(repetitions=repetitions, backend=backend)
         self.state.info.gpu_measured_latency = benchmark_results.mean_latency
         self.state.info.gpu_measured_throughput = benchmark_results.throughput
@@ -41,9 +24,7 @@ class GPUModel:
 
     @property
     def _gpu_performance_file(self):
-        return os.path.join(
-            self.state.cache_dir, self.state.config.build_name, "gpu_performance.json"
-        )
+        return devices.BenchmarkPaths(self.state, self.device, "local").outputs_file
 
     def _get_stat(self, stat):
         if os.path.exists(self._gpu_performance_file):
@@ -51,7 +32,10 @@ class GPUModel:
                 performance = json.load(f)
             return performance[stat]
         else:
-            return "-"
+            raise devices.BenchmarkException(
+                "No benchmarking outputs file found after benchmarking run."
+                "Sorry we don't have more information."
+            )
 
     @property
     def _mean_latency(self):
@@ -67,9 +51,7 @@ class GPUModel:
 
     @property
     def _gpu_error_file(self):
-        return os.path.join(
-            self.state.cache_dir, self.state.config.build_name, "gpu_error.npy"
-        )
+        return devices.BenchmarkPaths(self.state, self.device, "local").errors_file
 
     def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
         """
@@ -82,13 +64,13 @@ class GPUModel:
         if os.path.isfile(self._gpu_error_file):
             os.remove(self._gpu_error_file)
 
-        if backend == "cloud":
-            devices.execute_gpu_remotely(self.state, self.log_execute_path, repetitions)
+        if backend == "remote":
+            devices.execute_gpu_remotely(self.state, self.device, repetitions)
         elif backend == "local":
-            devices.execute_gpu_locally(self.state, self.log_execute_path, repetitions)
+            devices.execute_gpu_locally(self.state, self.device, repetitions)
         else:
             raise ValueError(
-                f"Only 'cloud' and 'local' are supported, but received {backend}"
+                f"Only 'remote' and 'local' are supported, but received {backend}"
             )
 
         return MeasuredPerformance(

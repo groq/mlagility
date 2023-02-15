@@ -9,13 +9,18 @@ import subprocess
 import json
 
 
-def run(output_dir: str, repetitions: int):
+def run(
+    output_dir: str,
+    onnx_model: str,
+    outputs_file: str,
+    errors_file: str,
+    repetitions: int,
+):
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
     # GroqFlow maintainers to keep this up to date with the latest version of release container
     latest_trt_docker = "nvcr.io/nvidia/tensorrt:22.12-py3"
     docker_name = "tensorrt22.12"
-    onnx_model = "/app/onnxmodel/model.onnx"
 
     # docker run args:
     # "--gpus all" - use all gpus available
@@ -48,9 +53,9 @@ def run(output_dir: str, repetitions: int):
     stop_docker = subprocess.Popen(stop_command.split(), stdout=subprocess.PIPE)
     stop_docker.communicate()
 
-    save_trt_results(str(trtexec_output), str(trtexec_error))
+    output = str(trtexec_output)
+    error = str(trtexec_error)
 
-def save_trt_results(output: str, error: str):
     decoded_output = bytes(output, "utf-8").decode("unicode_escape")
     decoded_error = bytes(error, "utf-8").decode("unicode_escape")
 
@@ -80,31 +85,43 @@ def save_trt_results(output: str, error: str):
                 gpu_performance[key] = format_field(line)
                 break
 
-    with open(args["outputs_file"], "w", encoding="utf-8") as out_file:
+    with open(outputs_file, "w", encoding="utf-8") as out_file:
         json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
 
-    with open(args["errors_file"], "w", encoding="utf-8") as e:
+    with open(errors_file, "w", encoding="utf-8") as e:
         e.writelines(decoded_error)
+
 
 if __name__ == "__main__":
     # Parse Inputs
     parser = argparse.ArgumentParser(description="Execute models built by GroqFlow")
-    parser.add_argument("output_dir", help="Path where the build files are stored")
-    parser.add_argument("outputs_file", help="File in which the outputs will be saved")
-    parser.add_argument("errors_file", help="File in which the outputs will be saved")
+    parser.add_argument(
+        "output_dir",
+        help="Path where the build files are stored",
+    )
+    parser.add_argument(
+        "onnx_file",
+        help="Path where the ONNX file is located",
+    )
+    parser.add_argument(
+        "outputs_file",
+        help="File in which the outputs will be saved",
+    )
+    parser.add_argument(
+        "errors_file",
+        help="File in which the outputs will be saved",
+    )
     parser.add_argument(
         "iterations",
         type=int,
         help="Number of times to execute the received onnx model",
     )
-    parser.add_argument(
-        "username",
-        type=str,
-        help="username to access GPU home directory",
-    )
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
     run(
-        args["output_dir"],
-        args["iterations"],
+        args.output_dir,
+        args.onnx_file,
+        args.outputs_file,
+        args.errors_file,
+        args.iterations,
     )

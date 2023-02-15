@@ -40,16 +40,17 @@ def benchmark_script(
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     rebuild: Optional[str] = None,
-    compiler_flags: Optional[List[str]] = None,
-    assembler_flags: Optional[List[str]] = None,
-    num_chips: Optional[int] = None,
-    groqview: bool = False,
     devices: List[str] = None,
+    backend: str = "local",
     analyze_only: bool = False,
     build_only: bool = False,
     script_args: str = "",
     max_depth: int = 0,
     sequence: Union[str, Sequence] = None,
+    groq_compiler_flags: Optional[List[str]] = None,
+    groq_assembler_flags: Optional[List[str]] = None,
+    groq_num_chips: Optional[int] = None,
+    groqview: bool = False,
 ):
 
     # Import the sequence file to get a custom sequence, if the user provided
@@ -130,6 +131,11 @@ def benchmark_script(
         ]
 
     if use_slurm:
+        if backend != "local":
+            raise ValueError(
+                "Slurm only works with local benchmarking, set the `backend` "
+                "argument to 'local'."
+            )
         jobs = slurm.jobs_in_queue()
         if len(jobs) > 0:
             printing.log_warning(f"There are already slurm jobs in your queue: {jobs}")
@@ -150,9 +156,9 @@ def benchmark_script(
                     search_dir=search_dir,
                     cache_dir=cache_dir,
                     rebuild=rebuild,
-                    compiler_flags=compiler_flags,
-                    assembler_flags=assembler_flags,
-                    num_chips=num_chips,
+                    groq_compiler_flags=groq_compiler_flags,
+                    groq_assembler_flags=groq_assembler_flags,
+                    groq_num_chips=groq_num_chips,
                     groqview=groqview,
                     devices=[device],
                     max_depth=max_depth,
@@ -175,11 +181,12 @@ def benchmark_script(
                     max_depth=max_depth,
                     cache_dir=cache_dir,
                     rebuild=rebuild,
-                    compiler_flags=compiler_flags,
-                    assembler_flags=assembler_flags,
-                    num_chips=num_chips,
+                    groq_compiler_flags=groq_compiler_flags,
+                    groq_assembler_flags=groq_assembler_flags,
+                    groq_num_chips=groq_num_chips,
                     groqview=groqview,
                     device=device,
+                    backend=backend,
                     actions=actions,
                     models_found=models_found,
                     sequence=custom_sequence,
@@ -201,27 +208,4 @@ def benchmark_script(
     printing.log_success(
         "The 'benchmark' command is complete. Use the 'report' command to get a .csv "
         "file that summarizes results across all builds in the cache."
-    )
-
-
-def main(args):
-
-    benchmark_script(
-        search_dir=args.search_dir,
-        input_script=args.input_script,
-        benchmark_all=args.benchmark_all,
-        use_slurm=args.use_slurm,
-        lean_cache=args.lean_cache,
-        cache_dir=args.cache_dir,
-        rebuild=args.rebuild,
-        compiler_flags=args.compiler_flags,
-        assembler_flags=args.assembler_flags,
-        num_chips=args.num_chips,
-        groqview=args.groqview,
-        devices=args.devices,
-        analyze_only=args.analyze_only,
-        build_only=args.build_only,
-        script_args=args.script_args,
-        max_depth=args.max_depth,
-        sequence=args.sequence_file,
     )
