@@ -30,10 +30,12 @@ class ModelInfo:
     old_forward: Union[Callable, None] = None
     status_message: str = ""
     status_message_color: printing.Colors = printing.Colors.ENDC
+    traceback_message_color: printing.Colors = printing.Colors.FAIL
     is_target: bool = False
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
     performance: MeasuredPerformance = None
+    traceback = None
 
     def __post_init__(self):
         self.params = count_parameters(self.model, self.model_type)

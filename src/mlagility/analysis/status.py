@@ -9,7 +9,7 @@ def update(models_found: Dict[str, ModelInfo]) -> None:
     """
     Prints all models and submodels found
     """
-    if os.environ.get("MLAGILITY_DEBUG")!="True":
+    if os.environ.get("MLAGILITY_DEBUG") != "True":
         os.system("clear")
 
     printing.logn(
@@ -100,7 +100,21 @@ def print_model(
         if model_info.is_target and model_info.build_model:
             printing.log(f"{ident}\tStatus:\t\t")
             printing.logn(
-                f"{model_info.status_message}\n", c=model_info.status_message_color
+                f"{model_info.status_message}", c=model_info.status_message_color
             )
+
+            if model_info.traceback is not None:
+                if os.environ.get("MLAGILITY_TRACEBACK") == "True":
+                    for line in model_info.traceback:
+                        for subline in line.split("\n")[:-1]:
+                            print(f"{ident}\t{subline}")
+
+                else:
+                    printing.logn(
+                        "To see the full stack trace, rerun with `export MLAGILITY_TRACEBACK=True`.\n",
+                        c=model_info.status_message_color,
+                    )
+            else:
+                print()
         else:
             print("")
