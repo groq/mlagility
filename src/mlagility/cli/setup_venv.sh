@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#SBATCH --mem=64000
 #SBATCH --cpus-per-task 1
 
 # Note: please install miniconda before running this script
@@ -29,5 +28,8 @@ python -m pip install --upgrade pip
 # Install mlagility and model requirements
 cd "$MLAGILITY_PATH" || exit
 pip install -e .
-cd models || exit
-pip install -r requirements.txt
+if [[ "$SKIP_REQUIREMENTS_INSTALL" != "True" ]]
+then
+    cd models || exit
+    pip install -r requirements.txt
+fi
