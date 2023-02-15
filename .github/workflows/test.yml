@@ -43,12 +43,12 @@ jobs:
           
       - name: Test benchit on Slurm
         run: |
-          # Create conda environment
+          # Create conda environment for Slurm using sbatch
           export SKIP_REQUIREMENTS_INSTALL="True"
-          sbatch src/mlagility/cli/setup_venv.sh 
+          sbatch -c 1 src/mlagility/cli/setup_venv.sh 
 
-          # Run tests on slurm
+          # Run tests on Slurm
           export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
-          bash test/helpers/check_slurm_output.sh slurm-1.out
+          bash test/helpers/check_slurm_output.sh slurm-2.out
           
