@@ -130,25 +130,40 @@ def call_benchit(
             model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
-    except exp.GroqitStageError:
+    except exp.GroqitStageError as e:
         load_state = build.load_state(build_name=build_name)
         if len(load_state.info.opt_onnx_unsupported_ops) > 0:
             model_info.status_message = "Unsupported op(s) " + ", ".join(
                 load_state.info.opt_onnx_unsupported_ops
             )
         else:
-            model_info.status_message = "Build Error: see log files for details."
+            model_info.status_message = """
+            Build Error: see log files for details.
+            To see the full stack trace, rerun with `export MLAGILITY_DEBUG=True`.
+            """
         model_info.status_message_color = printing.Colors.WARNING
 
-    except exp.GroqFlowError:
-        model_info.status_message = "GroqFlowError: see log files for details."
+        if os.environ.get("MLAGILITY_DEBUG"):
+            raise e
+
+    except exp.GroqFlowError as e:
+        model_info.status_message = """
+        GroqFlowError: see log files for details. "
+        To see the full stack trace, rerun with `export MLAGILITY_DEBUG=True`.
+        """
         model_info.status_message_color = printing.Colors.WARNING
+
+        if os.environ.get("MLAGILITY_DEBUG"):
+            raise e
 
     # This broad exception is ok since enumerating all exceptions is
     # not possible, as the tested software continuously evolves.
     except Exception as e:  # pylint: disable=broad-except
         util.stop_stdout_forward()
-        model_info.status_message = f"Unknown benchit error: {e}"
+        model_info.status_message = f"""
+        Unknown benchit error: {e}"
+        To see the full stack trace, rerun with `export MLAGILITY_DEBUG=True`.
+        """
         model_info.status_message_color = printing.Colors.WARNING
 
         if os.environ.get("MLAGILITY_DEBUG"):
