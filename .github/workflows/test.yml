@@ -32,6 +32,7 @@ jobs:
           conda install pylint
           if [ -f setup.py ]; then pip install -e .; fi
           pip install transformers
+          python -m pip check
       - name: Lint with PyLint
         shell: bash -el {0}
         run: |
@@ -66,4 +67,10 @@ jobs:
           export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
           benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
           bash test/helpers/check_slurm_output.sh slurm-2.out
-          
+      - name: Check installation of requirements.txt and their compatibility with mlagility
+        shell: bash -el {0}
+        run: |
+          bash src/mlagility/cli/setup_venv.sh
+          conda activate tracker_slurm
+          python -m pip check
+          conda deactivate
