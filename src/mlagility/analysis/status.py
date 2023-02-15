@@ -9,7 +9,7 @@ def update(models_found: Dict[str, ModelInfo]) -> None:
     """
     Prints all models and submodels found
     """
-    if not os.environ.get("MLAGILITY_DEBUG"):
+    if os.environ.get("MLAGILITY_DEBUG")!="True":
         os.system("clear")
 
     printing.logn(

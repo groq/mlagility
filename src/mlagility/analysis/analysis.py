@@ -143,7 +143,7 @@ def call_benchit(
             """
         model_info.status_message_color = printing.Colors.WARNING
 
-        if os.environ.get("MLAGILITY_DEBUG"):
+        if os.environ.get("MLAGILITY_DEBUG") == "True":
             raise e
 
     except exp.GroqFlowError as e:
@@ -153,7 +153,7 @@ def call_benchit(
         """
         model_info.status_message_color = printing.Colors.WARNING
 
-        if os.environ.get("MLAGILITY_DEBUG"):
+        if os.environ.get("MLAGILITY_DEBUG") == "True":
             raise e
 
     # This broad exception is ok since enumerating all exceptions is
@@ -166,7 +166,7 @@ def call_benchit(
         """
         model_info.status_message_color = printing.Colors.WARNING
 
-        if os.environ.get("MLAGILITY_DEBUG"):
+        if os.environ.get("MLAGILITY_DEBUG") == "True":
             raise e
 
 
