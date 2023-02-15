@@ -43,8 +43,11 @@ jobs:
       - name: Test benchit on Slurm
         run: |
           # Create conda environment for Slurm using srun (sbatch + wait)
-          alias conda=~/miniconda3/bin/conda
+          which conda
           source ~/miniconda3/bin/activate
+          which conda
+          alias conda=~/miniconda3/bin/conda
+          which conda
           export SKIP_REQUIREMENTS_INSTALL="True"
           srun src/mlagility/cli/setup_venv.sh 
 
