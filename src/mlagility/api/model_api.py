@@ -115,7 +115,6 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
-    printing.log_info(f"Benchmarking on {backend} {device}...")
     if device == "groq":
         gmodel = groqit(
             model=model,
@@ -131,7 +130,7 @@ def benchmark_model(
         )
 
         if not build_only:
-            printing.log_info("Starting benchmark...")
+            printing.log_info(f"Benchmarking on {backend} {device}...")
             groq_perf = gmodel.benchmark()
 
             # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
@@ -155,7 +154,7 @@ def benchmark_model(
         )
 
         if not build_only:
-            printing.log_info("Starting benchmark...")
+            printing.log_info(f"Benchmarking on {backend} {device}...")
             gpu_model = trtmodel.load(
                 gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
             )
@@ -172,7 +171,7 @@ def benchmark_model(
         )
 
         if not build_only:
-            printing.log_info("Starting benchmark...")
+            printing.log_info(f"Benchmarking on {backend} {device}...")
             cpu_model = ortmodel.load(
                 gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
             )

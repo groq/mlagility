@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 from typing import Tuple, Union, Dict, Any
 from stat import S_ISDIR
@@ -33,7 +32,10 @@ class BenchmarkPaths:
         elif self.backend == "docker":
             return "/app"
         else:
-            raise ValueError(f"Got backend {self.backend}, which is not allowed.")
+            raise ValueError(
+                f"Got backend {self.backend}, which is not allowed. "
+                "The allowed backends are: local, remote, docker"
+            )
 
     @property
     def onnx_dir(self):
@@ -50,6 +52,12 @@ class BenchmarkPaths:
     @property
     def errors_file(self):
         return os.path.join(self.output_dir, "errors.npy")
+
+
+class BenchmarkException(Exception):
+    """
+    Indicates a failure during benchmarking
+    """
 
 
 class MySFTPClient(paramiko.SFTPClient):
@@ -120,8 +128,6 @@ def save_remote_config(ip, username, device) -> None:
 
 
 def connect_to_host(ip, username) -> paramiko.SSHClient:
-    print(f"Connecting to {username}@{ip}")
-
     class AllowAllKeys(paramiko.MissingHostKeyPolicy):
         def missing_host_key(self, client, hostname, key):
             return
@@ -159,7 +165,7 @@ def exec_command(client, command, ignore_error=False) -> Tuple[str, str]:
     stdout = stdout.read().decode("ascii").strip("\n")
     stderr = str(stderr.read(), "utf-8")
     if not ignore_error:
-        print(stderr)
+        raise BenchmarkException(stderr)
 
     return stdout, exit_code
 
@@ -222,7 +228,6 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
         if num_chips_available < 1:
             raise exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
-        print(f"{num_chips_available} GroqChip Processor(s) found")
         files_to_transfer = ["execute.py"]
     else:
         raise ValueError(
@@ -259,7 +264,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
             encoding="utf-8",
             check=False,
         )
-        print(result)
+
         if "NVIDIA" not in result.stdout or result.returncode == 1:
             msg = "No NVIDIA GPUs available on the local machine"
             raise exp.GroqModelRuntimeError(msg)
@@ -292,7 +297,6 @@ def execute_groqchip_remotely(
     bringup_topology: bool,
     repetitions: int,
     state: build.State,
-    log_execute_path: str,
 ) -> None:
     """
     Execute Model on the remote machine
@@ -301,14 +305,10 @@ def execute_groqchip_remotely(
     # Ask the user for credentials if needed
     _, hostname = configure_remote("groqchip")
 
-    # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
-
     # Connect to remote machine and transfer common files
     client = setup_connection("groqchip")
 
     # Transfer iop and inputs file
-    print("Transferring model and inputs...")
     if not os.path.exists(state.execution_inputs_file):
         msg = "Model input file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -327,7 +327,6 @@ def execute_groqchip_remotely(
     output_dir = "groqflow_remote_cache"
     remote_outputs_file = "groqflow_remote_cache/outputs.npy"
     remote_latency_file = "groqflow_remote_cache/latency.npy"
-    print("Running benchmarking script...")
 
     bringup_topology_arg = "" if bringup_topology else "--bringup_topology"
     _, exit_code = exec_command(
@@ -340,9 +339,8 @@ def execute_groqchip_remotely(
         ),
     )
     if exit_code == 1:
-        msg = f"""
+        msg = """
         Failed to execute GroqChip Processor(s) remotely.
-        Look at **{log_execute_path}** for details.
         """
         raise exp.GroqModelRuntimeError(msg)
 
@@ -352,13 +350,9 @@ def execute_groqchip_remotely(
         s.get(remote_latency_file, state.latency_file)
         s.remove(remote_outputs_file)
         s.remove(remote_latency_file)
-    # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
 
 
-def execute_gpu_remotely(
-    state: build.State, device: str, log_execute_path: str, iterations: int
-) -> None:
+def execute_gpu_remotely(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the remote machine
     """
@@ -366,19 +360,15 @@ def execute_gpu_remotely(
     # Ask the user for credentials if needed
     _ip, username = configure_remote(device)
 
-    # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
-
     # Setup remote execution folders to save outputs/ errors
     remote_paths = BenchmarkPaths(state, device, "remote", username)
     local_paths = BenchmarkPaths(state, device, "local")
     docker_paths = BenchmarkPaths(state, device, "docker")
-    os.makedirs(local_paths.output_dir)
+    os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type=device, output_dir=remote_paths.output_dir)
 
-    print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -388,7 +378,6 @@ def execute_gpu_remotely(
         s.put(state.converted_onnx_file, remote_paths.onnx_file)
 
     # Run benchmarking script
-    print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
         f"/usr/bin/python3 {remote_paths.output_dir}/execute-gpu.py "
@@ -396,9 +385,8 @@ def execute_gpu_remotely(
         f"{remote_paths.errors_file} {iterations}",
     )
     if exit_code == 1:
-        msg = f"""
+        msg = """
         Failed to execute GPU(s) remotely.
-        Look at **{log_execute_path}** for details.
         """
         raise exp.GroqModelRuntimeError(msg)
 
@@ -421,19 +409,18 @@ def execute_gpu_remotely(
                 "turned ON and has all the required dependencies installed"
                 f"Full exception: {e}"
             )
-    # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
+
+    if not os.path.isfile(local_paths.outputs_file):
+        raise BenchmarkException(
+            "No benchmarking outputs file found after benchmarking run."
+            "Sorry we don't have more information."
+        )
 
 
-def execute_gpu_locally(
-    state: build.State, device: str, log_execute_path: str, iterations: int
-) -> None:
+def execute_gpu_locally(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the local GPU
     """
-
-    # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
 
     # Setup local execution folders to save outputs/ errors
     local_paths = BenchmarkPaths(state, device, "local")
@@ -460,8 +447,6 @@ def execute_gpu_locally(
     if not python_location:
         raise ValueError("'python' installation not found. Please install python>=3.8")
 
-    print("Running benchmarking script...")
-
     run_benchmark = subprocess.Popen(
         [
             python_location,
@@ -475,19 +460,20 @@ def execute_gpu_locally(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    stdout, stderr = run_benchmark.communicate()
-    if run_benchmark.returncode == 0:
-        print(f"Success: Running model using TensorRT - {stdout.decode().strip()}")
-    else:
-        print(f"Error: Failure to run model using TensorRT - {stderr.decode().strip()}")
+    _, stderr = run_benchmark.communicate()
+    if run_benchmark.returncode != 0:
+        raise BenchmarkException(
+            "Error: Failure to run model using TensorRT - " f"{stderr.decode().strip()}"
+        )
 
-    # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
+    if not os.path.isfile(local_paths.outputs_file):
+        raise BenchmarkException(
+            "No benchmarking outputs file found after benchmarking run."
+            "Sorry we don't have more information."
+        )
 
 
-def execute_cpu_remotely(
-    state: build.State, device: str, log_execute_path: str, iterations: int
-) -> None:
+def execute_cpu_remotely(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the remote machine
     """
@@ -495,18 +481,14 @@ def execute_cpu_remotely(
     # Ask the user for credentials if needed
     _ip, username = configure_remote(device)
 
-    # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
-
     # Setup remote execution folders to save outputs/ errors
     remote_paths = BenchmarkPaths(state, device, "remote", username)
     local_paths = BenchmarkPaths(state, device, "local")
-    os.makedirs(local_paths.output_dir)
+    os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type=device, output_dir=remote_paths.output_dir)
 
-    print("Transferring model file...")
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -532,7 +514,6 @@ def execute_cpu_remotely(
         ignore_error=True,
     )
 
-    print("Running benchmarking script...")
     _, exit_code = exec_command(
         client,
         f"/home/{username}/miniconda3/envs/{env_name}/bin/python "
@@ -541,9 +522,8 @@ def execute_cpu_remotely(
         f"{remote_paths.errors_file} {iterations}",
     )
     if exit_code == 1:
-        msg = f"""
+        msg = """
         Failed to execute CPU(s) remotely.
-        Look at **{log_execute_path}** for details.
         """
         raise exp.GroqModelRuntimeError(msg)
 
@@ -554,24 +534,24 @@ def execute_cpu_remotely(
             s.get(remote_paths.errors_file, local_paths.errors_file)
             s.remove(remote_paths.outputs_file)
             s.remove(remote_paths.errors_file)
-        except FileNotFoundError:
-            print(
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
                 "Output/ error files not found! Please make sure your remote CPU machine is"
                 "turned ON and has all the required dependencies installed"
+                f"Full exception: {e}"
             )
-    # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
+
+    if not os.path.isfile(local_paths.outputs_file):
+        raise BenchmarkException(
+            "No benchmarking outputs file found after benchmarking run."
+            "Sorry we don't have more information."
+        )
 
 
-def execute_cpu_locally(
-    state: build.State, device: str, log_execute_path: str, iterations: int
-) -> None:
+def execute_cpu_locally(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the local CPU
     """
-
-    # Redirect all stdout to log_file
-    sys.stdout = build.Logger(log_execute_path)
 
     # Setup local execution folders to save outputs/ errors
     local_paths = BenchmarkPaths(state, device, "local")
@@ -590,10 +570,9 @@ def execute_cpu_locally(
     conda_location = shutil.which("conda")
     if not conda_location:
         raise ValueError("conda installation not found.")
-    conda_src = conda_location.split("miniconda3")[0]
+    conda_src = conda_location.split("condabin")[0]
 
     # Create/ update local conda environment for CPU benchmarking
-    print("Creating environment...")
     env_name = "mlagility-onnxruntime-env"
 
     def available_conda_envs():
@@ -607,8 +586,7 @@ def execute_cpu_locally(
 
     if env_name not in available_conda_envs():
         print(
-            "Creating a new conda environment to benchmark with CPU. This takes a few seconds...",
-            file=sys.stdout.terminal,
+            "Creating a new conda environment to benchmark with CPU. This takes a few seconds..."
         )
 
         setup_env = subprocess.Popen(
@@ -621,21 +599,16 @@ def execute_cpu_locally(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        stdout, stderr = setup_env.communicate()
-        if setup_env.returncode == 0:
-            print(
-                f"Success: Setup/ updated conda environment - {stdout.decode().strip()}"
-            )
-        else:
+        _, stderr = setup_env.communicate()
+        if setup_env.returncode != 0:
             print(
                 f"Error: Failure to setup conda environment - {stderr.decode().strip()}"
             )
 
     # Run the benchmark
-    print("Running benchmarking script...")
     run_benchmark = subprocess.Popen(
         [
-            f"{conda_src}miniconda3/envs/{env_name}/bin/python",
+            f"{conda_src}envs/{env_name}/bin/python",
             os.path.join(local_paths.output_dir, "execute-cpu.py"),
             local_paths.output_dir,
             local_paths.onnx_file,
@@ -646,13 +619,14 @@ def execute_cpu_locally(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    stdout, stderr = run_benchmark.communicate()
-    if run_benchmark.returncode == 0:
-        print(f"Success: Running model using onnxruntime - {stdout.decode().strip()}")
-    else:
-        print(
+    _, stderr = run_benchmark.communicate()
+    if run_benchmark.returncode != 0:
+        raise BenchmarkException(
             f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}"
         )
 
-    # Stop redirecting stdout
-    sys.stdout = sys.stdout.terminal
+    if not os.path.isfile(local_paths.outputs_file):
+        raise BenchmarkException(
+            "No benchmarking outputs file found after benchmarking run."
+            "Sorry we don't have more information."
+        )

@@ -9,8 +9,9 @@ def update(models_found: Dict[str, ModelInfo]) -> None:
     """
     Prints all models and submodels found
     """
+    if not os.environ.get("MLAGILITY_DEBUG"):
+        os.system("clear")
 
-    os.system("clear")
     printing.logn(
         "\nModels discovered during profiling:\n",
         c=printing.Colors.BOLD,

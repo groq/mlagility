@@ -195,8 +195,8 @@ When you call `benchit` CLI or `benchmark_model()`, the following actions are pe
 The following arguments are used to configure `benchit` and the APIs to target a specific device and runtime:
 - `--devices TYPE` is a list of the types of devices to be used for benchmarking.
   - _Note_: MLAgility is flexible with respect to which specific devices can be used, as long as they meet the requirements in the [Devices and Runtimes table](#devices-runtimes-table).
-    - The `benchit()` API will simply use whatever device, of the given `TYPE`, is available on the machine specified by `--ip`.
-    - For example, if you specify `--device nvidia` and an `IP` that corresponds to a VM with an Nvidia A100 40GB installed, then MLAgility will use that Nvidia A100 40GB device.
+    - The `benchit()` API will simply use whatever device, of the given `TYPE`, is available on the machine.
+    - For example, if you specify `--device nvidia` on a machine with an Nvidia A100 40GB installed, then MLAgility will use that Nvidia A100 40GB device.
   - Valid values include:
     - `x86` (default): Intel and AMD x86 CPUs.
     - `nvidia`: Nvidia GPUs.
@@ -284,10 +284,10 @@ The following options can be used to customize the analysis process (see [Analys
 
 You may find yourself wanting to run a subset of the benchmarking command.
 - The `--analyze-only` option discovers models within the target script(s) and prints information about them, but does not perform any build or benchmarking. See [Analysis](#analysis).
-  - _Note_: any build- or benchmark-specific options will be ignored, such as `--ip`, `--device`, `--groqview`, etc.
+  - _Note_: any build- or benchmark-specific options will be ignored, such as `--backend`, `--device`, `--groqview`, etc.
   - Also available as an API argument: `benchmark_script(analyze_only=True/False)`.
 - The `--build-only` builds the models within the script(s) selected, however does not run any benchmark. See [Build](#build).
-  - _Note_: any benchmark-specific options will be ignored, such as `--ip`.
+  - _Note_: any benchmark-specific options will be ignored, such as `--backend`.
   - Available as an API arguments: `benchmark_script(build_only=True/False)`, `benchmark_model(build_only=True/False)`.
 
 The following options are specific to Groq builds and benchmarks, and are passed into the [GroqFlow build tool](https://github.com/groq/groqflow):
