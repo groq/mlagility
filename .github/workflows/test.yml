@@ -45,7 +45,7 @@ jobs:
         run: |
           # Create conda environment for Slurm using sbatch
           export SKIP_REQUIREMENTS_INSTALL="True"
-          sbatch -c 1 src/mlagility/cli/setup_venv.sh 
+          sbatch src/mlagility/cli/setup_venv.sh 
 
           # Run tests on Slurm
           export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"

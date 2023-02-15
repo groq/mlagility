@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#SBATCH --mem=64000
 #SBATCH --cpus-per-task 1
 
 # Note: please install miniconda before running this script
