@@ -39,8 +39,11 @@ jobs:
       - name: Test with unittest
         shell: bash -el {0}
         run: |
+          python examples/api/hello_world.py
           python test/cli.py
-          python test/analysis.py    
+          python test/analysis.py
+          python test/model_api.py
+          python test/analysis.py
       - name: Install and Start Slurm
         shell: bash -el {0}
         run: |
