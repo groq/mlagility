@@ -29,5 +29,8 @@ python -m pip install --upgrade pip
 # Install mlagility and model requirements
 cd "$MLAGILITY_PATH" || exit
 pip install -e .
-cd models || exit
-pip install -r requirements.txt
+if [[ "$SKIP_REQUIREMENTS_INSTALL" != "True" ]]
+then
+    cd models || exit
+    pip install -r requirements.txt
+fi
