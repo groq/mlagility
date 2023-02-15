@@ -111,7 +111,8 @@ def print_model(
 
                 else:
                     printing.logn(
-                        "To see the full stack trace, rerun with `export MLAGILITY_TRACEBACK=True`.\n",
+                        f"{ident}\t\t\tTo see the full stack trace, "
+                        "rerun with `export MLAGILITY_TRACEBACK=True`.\n",
                         c=model_info.status_message_color,
                     )
             else:
