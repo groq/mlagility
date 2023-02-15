@@ -25,7 +25,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-
+          pip install pylint
+          if [ -f setup.py ]; then pip install -e .; fi
+          pip install transformers
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
           bash Miniconda3-latest-Linux-x86_64.sh -b -u
           
@@ -43,11 +45,7 @@ jobs:
       - name: Test benchit on Slurm
         run: |
           # Create conda environment for Slurm using srun (sbatch + wait)
-          which conda
           source ~/miniconda3/bin/activate
-          which conda
-          alias conda=~/miniconda3/bin/conda
-          which conda
           export SKIP_REQUIREMENTS_INSTALL="True"
           srun src/mlagility/cli/setup_venv.sh 
 
