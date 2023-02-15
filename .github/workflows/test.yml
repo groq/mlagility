@@ -28,8 +28,7 @@ jobs:
 
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
           bash Miniconda3-latest-Linux-x86_64.sh -b -u
-          alias conda=~/miniconda3/bin/conda
-          source ~/miniconda3/bin/activate
+          
       - name: Install and Start Slurm
         run: |
           sudo apt update -y
@@ -44,6 +43,8 @@ jobs:
       - name: Test benchit on Slurm
         run: |
           # Create conda environment for Slurm using srun (sbatch + wait)
+          alias conda=~/miniconda3/bin/conda
+          source ~/miniconda3/bin/activate
           export SKIP_REQUIREMENTS_INSTALL="True"
           srun src/mlagility/cli/setup_venv.sh 
 
