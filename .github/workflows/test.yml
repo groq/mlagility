@@ -25,9 +25,30 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          which conda
-          #wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-          #bash Miniconda3-latest-Linux-x86_64.sh -b -u
-          #source ~/miniconda3/bin/activate
-          #which conda
-   
+
+          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+          bash Miniconda3-latest-Linux-x86_64.sh -b -u
+          alias conda=~/miniconda3/bin/conda
+          source ~/miniconda3/bin/activate
+      - name: Install and Start Slurm
+        run: |
+          sudo apt update -y
+          sudo apt install slurm-wlm -y
+          cp test/helpers/slurm.conf test/helpers/slurm_modified.conf
+          sed -i "s/YOUR_HOSTNAME_HERE/$HOSTNAME/" test/helpers/slurm_modified.conf
+          sudo mv test/helpers/slurm_modified.conf /etc/slurm/slurm.conf
+          sudo service slurmd start
+          sudo service slurmctld start
+          sudo service munge start
+          
+      - name: Test benchit on Slurm
+        run: |
+          # Create conda environment for Slurm using srun (sbatch + wait)
+          export SKIP_REQUIREMENTS_INSTALL="True"
+          srun src/mlagility/cli/setup_venv.sh 
+
+          # Run tests on Slurm
+          export MLAGILITY_SLURM_USE_DEFAULT_MEMORY="True"
+          benchit benchmark models/selftest/linear.py --build-only --use-slurm --cache-dir local_cache
+          bash test/helpers/check_slurm_output.sh slurm-2.out
+          
