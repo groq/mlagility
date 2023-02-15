@@ -43,6 +43,12 @@ jobs:
           
       - name: Test benchit on Slurm
         run: |
+          echo "WHICH CONDA"
+          which conda
+          echo "DIR1"
+          ls "$(dirname $(which conda))"
+          echo "DIR2"
+          ls "$(dirname $(dirname $(which conda)))"
           # Create conda environment for Slurm using srun (sbatch + wait)
           export SKIP_REQUIREMENTS_INSTALL="True"
           srun src/mlagility/cli/setup_venv.sh 
