@@ -151,6 +151,9 @@ def call_benchit(
         model_info.status_message = f"Unknown benchit error: {e}"
         model_info.status_message_color = printing.Colors.WARNING
 
+        if os.environ.get("MLAGILITY_DEBUG"):
+            raise e
+
 
 def get_model_hash(
     model: Union[torch.nn.Module, "tf.keras.Model"], model_type: build.ModelType

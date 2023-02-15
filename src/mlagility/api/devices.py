@@ -460,10 +460,12 @@ def execute_gpu_locally(state: build.State, device: str, iterations: int) -> Non
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    _, stderr = run_benchmark.communicate()
+    stdout, stderr = run_benchmark.communicate()
     if run_benchmark.returncode != 0:
         raise BenchmarkException(
-            "Error: Failure to run model using TensorRT - " f"{stderr.decode().strip()}"
+            "Error: Failure to run model using TensorRT - "
+            f"{stdout.decode().strip()}"
+            f"{stderr.decode().strip()}"
         )
 
     if not os.path.isfile(local_paths.outputs_file):
@@ -599,10 +601,12 @@ def execute_cpu_locally(state: build.State, device: str, iterations: int) -> Non
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        _, stderr = setup_env.communicate()
+        stdout, stderr = setup_env.communicate()
         if setup_env.returncode != 0:
-            print(
-                f"Error: Failure to setup conda environment - {stderr.decode().strip()}"
+            raise BenchmarkException(
+                "Error: Failure to setup conda environment - "
+                f"{stdout.decode().strip()}"
+                f"{stderr.decode().strip()}"
             )
 
     # Run the benchmark
@@ -619,10 +623,12 @@ def execute_cpu_locally(state: build.State, device: str, iterations: int) -> Non
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    _, stderr = run_benchmark.communicate()
+    stdout, stderr = run_benchmark.communicate()
     if run_benchmark.returncode != 0:
         raise BenchmarkException(
-            f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}"
+            "Error: Failure to run model using onnxruntime - "
+            f"{stdout.decode().strip()}"
+            f"{stderr.decode().strip()}"
         )
 
     if not os.path.isfile(local_paths.outputs_file):
