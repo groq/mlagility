@@ -30,7 +30,13 @@ jobs:
           pip install transformers
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
           bash Miniconda3-latest-Linux-x86_64.sh -b -u
-          
+      - name: Lint with PyLint
+        run: |
+          pylint src --rcfile .pylintrc
+      - name: Test with unittest
+        run: |
+          python test/cli.py
+          python test/analysis.py    
       - name: Install and Start Slurm
         run: |
           sudo apt update -y
@@ -41,7 +47,6 @@ jobs:
           sudo service slurmd start
           sudo service slurmctld start
           sudo service munge start
-          
       - name: Test benchit on Slurm
         run: |
           # Create conda environment for Slurm using srun (sbatch + wait)
