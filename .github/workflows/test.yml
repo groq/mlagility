@@ -18,14 +18,16 @@ jobs:
     env:
       MLAGILITY_DEBUG: True
       MLAGILITY_TRACEBACK: True
-
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.10"]
     steps:
       - uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
           activate-environment: mla
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         shell: bash -el {0}
         run: |
