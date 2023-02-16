@@ -118,7 +118,7 @@ A **runtime** is a piece of software that executes a model on a device.
 
 `benchmark_script()` performs analysis by running and profiling your script. When a model object (see [Model](#model) is encounteredit is inspected to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchmark_model()` API for benchmarking.
 
-_Note_: the `benchit` CLI and `benchmark_script()` API both run your entire script. Please ensure that your script is safe to run, especially if you got it from the internet.
+> _Note_: the `benchit` CLI and `benchmark_script()` API both run your entire script. Please ensure that your script is safe to run, especially if you got it from the internet.
 
 ## Model Hashes
 
@@ -153,13 +153,13 @@ The build functionality of `benchmark_model()` includes the following steps:
 1. [If the build's device type is `groq`] Pass the optimized float16 ONNX file to Groq Compiler and Assembler to produce a Groq executable.
 1. Save the successful build to the cache for later use.
 
-*_Note_: Each `build` corresponds to a set of static input shapes. `inputs` are passed into the `benchmark_model()` API to provide those shapes.
+> *_Note_: Each `build` corresponds to a set of static input shapes. `inputs` are passed into the `benchmark_model()` API to provide those shapes.
 
-**_Note_: A cached build can be stale because of any of the following changes since the last build:
-* The model changed
-* The shape of the inputs changed
-* The arguments to `benchmark_model()` changed
-* MLAgility was updated to a new, incompatible version
+> **_Note_: A cached build can be stale because of any of the following changes since the last build:
+> * The model changed
+> * The shape of the inputs changed
+> * The arguments to `benchmark_model()` changed
+> * MLAgility was updated to a new, incompatible version
 
 ## Benchmark
 
@@ -168,7 +168,7 @@ The build functionality of `benchmark_model()` includes the following steps:
 By default, `benchmark_model()` will run the model 100 times to collect the following statistics:
 1. Mean Latency, in milliseconds (ms): the average time it takes the runtime/device combination to execute the model/inputs combination once. This includes the time spent invoking the device and transferring the model's inputs and outputs between host memory and the device (when applicable).
 1. Throughput, in inferences per second (IPS):  the number of times the model/inputs combination can be executed on the runtime/device combination per second.
-    - __Note__: `benchmark_model()` is not aware of whether `inputs` is a single input or a batch of inputs. If your `inputs` is actually a batch of inputs, you should multiply `benchmark_model()`'s reported IPS by the batch size.
+    > - _Note_: `benchmark_model()` is not aware of whether `inputs` is a single input or a batch of inputs. If your `inputs` is actually a batch of inputs, you should multiply `benchmark_model()`'s reported IPS by the batch size.
 
 # Devices and Runtimes
 
