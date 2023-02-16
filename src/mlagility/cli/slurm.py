@@ -90,7 +90,7 @@ def run_benchit(
     max_depth_str = value_arg(max_depth, "--max-depth")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
     build_only_str = bool_arg(build_only, "--build-only")
-    lean_cache_str = bool_arg(lean_cache, "--lean_cache")
+    lean_cache_str = bool_arg(lean_cache, "--lean-cache")
 
     args = (
         f"{op} {script} {cache_dir_str}{search_dir_str}{rebuild_str}"
@@ -112,18 +112,19 @@ def run_benchit(
 
     shell_script = os.path.join(pathlib.Path(__file__).parent.resolve(), "run_slurm.sh")
 
-    slurm_command = [
-        "sbatch",
-        "-c",
-        "1",
-        "--mem=128000",
-        "--time=00-02:00:00",  # days-hh:mm:ss"
-        f"--job-name={job_name}",
-        shell_script,
-        "benchit",
-        args,
-        working_dir,
-    ]
+    slurm_command = ["sbatch", "-c", "1"]
+    if os.environ.get("MLAGILITY_SLURM_USE_DEFAULT_MEMORY") != "True":
+        slurm_command.append("--mem=128000")
+    slurm_command.extend(
+        [
+            "--time=00-02:00:00",  # days-hh:mm:ss"
+            f"--job-name={job_name}",
+            shell_script,
+            "benchit",
+            args,
+            working_dir,
+        ]
+    )
     if ml_cache_dir is not None:
         slurm_command.append(ml_cache_dir)
 
