@@ -235,7 +235,7 @@ Valid values:
 - Defaults to `local`, indicating the device is installed on the local machine.
 - This can also be set to `remote`, indicating the target device is installed on a remote machine.
 
->_Note_: while `--backend remote` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
+> _Note_: while `--backend remote` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
 >- Currently requires Okta SFT authentication, which not everyone will have.
 >- Not covered by our automatic testing yet.
 
@@ -252,7 +252,7 @@ Indicates which software runtime should be used for the benchmark (e.g., ONNX Ru
 Usage:
 - `benchit benchmark INPUT_SCRIPT --runtime SW`
 
->_Note_: We will add support for user-selected runtimes in the future, when `benchit` supports multiple runtimes per device. At the time of this writing, there is a 1:1 mapping between all supported runtimes and devices, so there is no need for the `--runtime` argument yet.
+> _Note_: We will add support for user-selected runtimes in the future, when `benchit` supports multiple runtimes per device. At the time of this writing, there is a 1:1 mapping between all supported runtimes and devices, so there is no need for the `--runtime` argument yet.
 
 Each device type has its own default runtime, as indicated below. Valid values include:
 - `ort`: ONNX Runtime (default for `x86` device type).
@@ -345,7 +345,7 @@ Available as an API argument:
 
 > _Note_: Requires setting up Slurm as shown [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 
->_Note_: while `--use-slurm` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
+> _Note_: while `--use-slurm` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
 >  - Currently requires Slurm to be configured the same way that it is configured at Groq, which not everyone will have.
 >  - Not covered by our automatic testing yet.
 
@@ -384,27 +384,74 @@ Also available as API arguments:
 
 ### Sequence File
 
-`--sequence-file` Replaces the default build sequence in `benchmark_model()` with a custom build sequence, defined in a Python script.
-  - This script must defined a function, `get_sequence()`, that returns an instance of `groqflow.common.stage.Sequence`. See [examples/extras/example_sequence.py](https://github.com/groq/mlagility/blob/main/examples/cli/extras/example_sequence.py) for an example.
-  - Also available as API arguments: `benchmark_script(sequence=...)`, `benchmark_model(sequence=...)`.
-    - _Note_: the `sequence` argument to `benchmark_script()` can be either a sequence file or a `Sequence` instance. The `sequence` argument to `benchmark_model()` must be a `Sequence` instance.
+Replaces the default build sequence in `benchmark_model()` with a custom build sequence, defined in a Python script.
+
+Usage:
+- `benchit benchmark INPUT_SCRIPT --sequence-file FILE`
+
+This script must define a function, `get_sequence()`, that returns an instance of `groqflow.common.stage.Sequence`. See [examples/extras/example_sequence.py](https://github.com/groq/mlagility/blob/main/examples/cli/extras/example_sequence.py) for an example of a sequence file.
+
+Also available as API arguments:
+- `benchmark_script(sequence=...)`
+- `benchmark_model(sequence=...)`
+
+> _Note_: the `sequence` argument to `benchmark_script()` can be either a sequence file or a `Sequence` instance. The `sequence` argument to `benchmark_model()` must be a `Sequence` instance.
 
 
-The following options can be used to customize the analysis process (see [Analysis](#analysis)):
-- _Note_: None of the following are available as API arguments.
-- `--script-args SCRIPT_ARGS` Sets command line arguments for the input script. Format these as a comma-delimited string.
-- `--max-depth DEPTH` Depth of sub-models to inspect within the script. Default value is 0, indicating to only analyze models at the top level of the script. Depth of 1 would indicate to analyze the first level of sub-models within the top-level models.
-  - _Note_: `--max-depth` values greater than 0 are only supported for PyTorch models.
+### Set Script Arguments
 
-You may find yourself wanting to run a subset of the benchmarking command.
-- The `--analyze-only` option discovers models within the target script(s) and prints information about them, but does not perform any build or benchmarking. See [Analysis](#analysis).
-  - _Note_: any build- or benchmark-specific options will be ignored, such as `--backend`, `--device`, `--groqview`, etc.
-  - Also available as an API argument: `benchmark_script(analyze_only=True/False)`.
-- The `--build-only` builds the models within the script(s) selected, however does not run any benchmark. See [Build](#build).
-  - _Note_: any benchmark-specific options will be ignored, such as `--backend`.
-  - Available as an API arguments: `benchmark_script(build_only=True/False)`, `benchmark_model(build_only=True/False)`.
+Sets command line arguments for the input script. Useful for customizing the behavior of the input script, for example sweeping parameters such as batch size. Format these as a comma-delimited string.
 
-The following options are specific to Groq builds and benchmarks, and are passed into the [GroqFlow build tool](https://github.com/groq/groqflow):
+Usage:
+- `benchit benchmark INPUT_SCRIPT --script-args="--batch_size=8,--max_seq_len=128"`
+  - This will evaluate the input script with the arguments `--batch_size=8` and `--max_seq_len=128` passed into the input script.
+
+Also available as an API argument:
+- `benchmark_script(script_args=...)`
+
+
+### Maximum Analysis Depth
+
+Depth of sub-models to inspect within the script. Default value is 0, indicating to only analyze models at the top level of the script. Depth of 1 would indicate to analyze the first level of sub-models within the top-level models.
+
+Usage:
+- `benchit benchmark INPUT_SCRIPT --max-depth DEPTH`
+
+Also available as an API argument:
+- `benchmark_script(max_depth=...)`
+
+> _Note_: `--max-depth` values greater than 0 are only supported for PyTorch models.
+
+### Analyze Only
+
+Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) phase of the `benchmark` command.
+
+Usage:
+- `benchit benchmark INPUT_SCRIPT --analyze-only`
+  - This discovers models within the input script and prints information about them, but does not perform any build or benchmarking.
+
+> _Note_: any build- or benchmark-specific options will be ignored, such as `--backend`, `--device`, `--groqview`, etc.
+
+Also available as an API argument: 
+- `benchmark_script(analyze_only=True/False)`
+
+### Build Only
+
+Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
+
+Usage:
+- `benchit benchmark INPUT_SCRIPT --build-only`
+  - This builds the models within the input script, however does not run any benchmark.
+
+> _Note_: any benchmark-specific options will be ignored, such as `--backend`.
+
+Also available as API arguments:
+- `benchmark_script(build_only=True/False)`
+- `benchmark_model(build_only=True/False)`
+
+### Groq-Specific Arguments
+
+The following options are specific to Groq builds and benchmarks, and are passed into the [GroqFlow build tool](https://github.com/groq/groqflow). Learn more about them in the [GroqFlow user guide](https://github.com/groq/groqflow/blob/main/docs/user_guide.md).
 - `--groq-compiler-flags COMPILER_FLAGS [COMPILER_FLAGS ...]` Sets the groqit(compiler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default compiler flags)
   - Also available as API arguments: `benchmark_script(groq_compiler_flags=...)`, `benchmark_model(groq_compiler_flags=...)`.
 - `--groq-assembler-flags ASSEMBLER_FLAGS [ASSEMBLER_FLAGS ...]` Sets the groqit(assembler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default assembler flags)
@@ -415,44 +462,49 @@ The following options are specific to Groq builds and benchmarks, and are passed
   - Also available as API arguments: `benchmark_script(groqview=True/False,)`, `benchmark_model(groqview=True/False,)`.
 
 
+## Cache Commands
+
+The `cache` commands help you manage the `mlagility cache` and get information about the builds and benchmarks within it.
 
 ### `cache list` Command
 
-`cache list` prints the names of all of the builds in a build cache. It presents the following options:
+`benchit cache list` prints the names of all of the builds in a build cache. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
-_Note_: `cache list` is not available as an API.
+> _Note_: `cache list` is not available as an API.
 
 ### `cache stats` Command
 
-`cache stats` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
+`benchit cache stats` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
 
 - `build_name` Name of the specific build whose stats are to be printed, within the cache directory
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
-_Note_: `cache stats` is not available as an API.
+> _Note_: `cache stats` is not available as an API.
 
 ### `cache delete` Command
 
-`cache delete` deletes one or builds from a build cache. It presents the following options:
+`benchit cache delete` deletes one or builds from a build cache. It presents the following options:
 
 - `build_name` Name of the specific build to be deleted, within the cache directory
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 - `--all` Delete all builds in the cache directory
 
-_Note_: `cache delete` is not available as an API.
+> _Note_: `cache delete` is not available as an API.
 
 ### `cache report` Command
 
-`cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
+`benchit cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
-_Note_: `cache report` is not available as an API.
+> _Note_: `cache report` is not available as an API.
 
-### `version` Command
+## `version` Command
+
+`benchit version` prints the version number of the installed `mlagility` package.
 
 `version` does not have any options.
 
-_Note_: `version` is not available as an API.
+> _Note_: `version` is not available as an API.
