@@ -70,13 +70,20 @@ def clean_output_dir(output_dir: str = filesystem.DEFAULT_CACHE_DIR) -> None:
     """
     output_dir = os.path.expanduser(output_dir)
     ext_list = [".txt", ".out", ".yaml", ".json"]
+    benchmarking_folders = [
+        os.path.join(output_dir, f"{device}_benchmark")
+        for device in ["groq", "x86", "nvidia"]
+    ]
     for filename in os.listdir(output_dir):
         file_path = os.path.join(output_dir, filename)
         if os.path.isfile(file_path) and not any(
             [ext in file_path for ext in ext_list]
         ):
             os.remove(file_path)
-        elif file_path == os.path.join(output_dir, "compile"):
+        elif (
+            file_path == os.path.join(output_dir, "compile")
+            or file_path in benchmarking_folders
+        ):
             clean_output_dir(file_path)
         elif os.path.isdir(file_path):
             shutil.rmtree(file_path)
