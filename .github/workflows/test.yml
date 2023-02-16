@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MLAGILITY_DEBUG: True
+      MLAGILITY_TRACEBACK: True
 
     steps:
       - uses: actions/checkout@v3
