@@ -116,9 +116,11 @@ A **runtime** is a piece of software that executes a model on a device.
 
 **Analysis** is the process by which `benchmark_script()` inspects a Python script and identifies the PyTorch/Keras models within.
 
-`benchmark_script()` performs analysis by running and profiling your script. When a model object (see [Model](#model) is encounteredit is inspected to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchmark_model()` API for benchmarking.
+`benchmark_script()` performs analysis by running and profiling your script. When a model object (see [Model](#model) is encountered, it is inspected to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchmark_model()` API for benchmarking.
 
 > _Note_: the `benchit` CLI and `benchmark_script()` API both run your entire script. Please ensure that your script is safe to run, especially if you got it from the internet.
+
+> See the [Multiple Models per Script tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-models-per-script) for a detailed example of how analysis can discover multiple models from a single script.
 
 ## Model Hashes
 
@@ -297,12 +299,14 @@ Usage:
 - `benchit INPUT_SCRIPT` 
 - `benchit benchmark INPUT_SCRIPT`
 
-You can leverage model hashes (see [Model Hashes](#model-hashes)) at build or benchmarking time in the following manner:
+You can leverage model hashes (see [Model Hashes](#model-hashes)) to filter which models in a script will be acted on, in the following manner:
   - `benchit benchmark example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
   - You can also supply multiple hashes, for example `benchit benchmark example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
 
 Available as an API argument:
 - `benchmark_script(input_script=...)`
+
+> See the [Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#model-hashes) for a detailed example of how to leverage model hash filtering.
 
 ### Search Directory
 
@@ -317,6 +321,8 @@ Usage:
 Available as an API argument:
 - `benchmark_script(search_dir=...)`
 
+> See the [Search Directory tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#search-directory) for a detailed example.
+
 ### Benchmark All Scripts
 
 Benchmark all models within all script (.py) files in the search directory.
@@ -329,6 +335,8 @@ Usage:
 
 Available as an API argument:
 - `benchmark_script(benchmark_all=True/False)`
+
+> See the [Benchmark All Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#benchmark-all-scripts) for a detailed example.
 
 ### Use Slurm
 
@@ -349,6 +357,16 @@ Available as an API argument:
 >  - Currently requires Slurm to be configured the same way that it is configured at Groq, which not everyone will have.
 >  - Not covered by our automatic testing yet.
 
+### Cache Directory
+
+`-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility).
+
+Also available as API arguments:
+- `benchmark_script(cache_dir=...)`
+- `benchmark_model(cache_dir=...)`
+
+> See the [Cache Directory tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#cache-directory) for a detailed example.
+
 ### Lean Cache
 
 `--lean-cache` Delete all build artifacts except for log files after the build.
@@ -359,13 +377,7 @@ Also available as API arguments:
 
 > _Note_: useful for benchmarking many models, since the `build` artifacts from the models can take up a significant amount of hard drive space.
 
-### Cache Directory
-
-`-d CACHE_DIR, --cache-dir CACHE_DIR` MLAgility build cache directory where the resulting build directories will be stored (defaults to ~/.cache/mlagility).
-
-Also available as API arguments:
-- `benchmark_script(cache_dir=...)`
-- `benchmark_model(cache_dir=...)`
+> See the [Lean Cache tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#lean-cache) for a detailed example.
 
 ### Rebuild Policy
 
@@ -397,6 +409,7 @@ Also available as API arguments:
 
 > _Note_: the `sequence` argument to `benchmark_script()` can be either a sequence file or a `Sequence` instance. The `sequence` argument to `benchmark_model()` must be a `Sequence` instance.
 
+> See the [Sequence File tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#sequence-file) for a detailed example.
 
 ### Set Script Arguments
 
@@ -409,6 +422,7 @@ Usage:
 Also available as an API argument:
 - `benchmark_script(script_args=...)`
 
+> See the [Parameters documentation](https://github.com/groq/mlagility/blob/main/models/readme.md#parameters) for a detailed example.
 
 ### Maximum Analysis Depth
 
@@ -421,6 +435,8 @@ Also available as an API argument:
 - `benchmark_script(max_depth=...)`
 
 > _Note_: `--max-depth` values greater than 0 are only supported for PyTorch models.
+
+> See the [Maximum Analysis Depth tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#maximum-analysis-depth) for a detailed example.
 
 ### Analyze Only
 
@@ -435,6 +451,8 @@ Usage:
 Also available as an API argument: 
 - `benchmark_script(analyze_only=True/False)`
 
+> See the [Analyze Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#analyze-only) for a detailed example.
+
 ### Build Only
 
 Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
@@ -448,6 +466,8 @@ Usage:
 Also available as API arguments:
 - `benchmark_script(build_only=True/False)`
 - `benchmark_model(build_only=True/False)`
+
+> See the [Build Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#build-only) for a detailed example.
 
 ### Groq-Specific Arguments
 
@@ -474,6 +494,8 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 
 > _Note_: `cache list` is not available as an API.
 
+> See the [Cache Commands tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#cache-commands) for a detailed example.
+
 ### `cache stats` Command
 
 `benchit cache stats` prints out the selected the build's [`state.yaml`](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) file, which contains useful information about that build. The `state` command presents the following options:
@@ -482,6 +504,8 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
 
 > _Note_: `cache stats` is not available as an API.
+
+> See the [Cache Commands tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#cache-commands) for a detailed example.
 
 ### `cache delete` Command
 
@@ -493,7 +517,11 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 
 > _Note_: `cache delete` is not available as an API.
 
+> See the [Cache Commands tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#cache-commands) for a detailed example.
+
 ### `cache report` Command
+
+_Not yet implemented_
 
 `benchit cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
 
