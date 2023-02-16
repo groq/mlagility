@@ -90,7 +90,7 @@ def run_benchit(
     max_depth_str = value_arg(max_depth, "--max-depth")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
     build_only_str = bool_arg(build_only, "--build-only")
-    lean_cache_str = bool_arg(lean_cache, "--lean_cache")
+    lean_cache_str = bool_arg(lean_cache, "--lean-cache")
 
     args = (
         f"{op} {script} {cache_dir_str}{search_dir_str}{rebuild_str}"
