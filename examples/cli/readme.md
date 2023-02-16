@@ -22,7 +22,7 @@ We can perform a basic invocation of `benchit` to benchmark a PyTorch model by s
 benchit scripts/hello_world.py
 ```
 
-That commands `benchit` to take the following actions:
+That commands `benchit` benchmark `hello_world.py` on your CPU. Specifically, `benchit` takes the following actions:
 1. Pass `scripts/hello_world.py` as the `input_script` to the `benchmark` command of `benchit`.
   - _Note_: `benchit <.py file>` is a shorthand for `benchit benchmark <.py file>`.
 1. Run `hello_world.py` against a profiler and look for machine learning models.
@@ -50,6 +50,10 @@ pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<
 
 Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
 ```
+
+<!--
+
+TODO: polish up and uncomment once #116 closes
 
 ### Keras
 
@@ -79,3 +83,23 @@ keras_outputs: [[0.         0.43556815 0.         0.         1.0099151 ]]
 
 Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
 ```
+
+-->
+
+### Nvidia Benchmarking
+
+By default, `benchit` uses x86 CPUs for benchmarking, however benchmarking on Nvidia GPUs is also supported using the `--device` argument.
+
+If you have an Nvidia GPU installed on your machine, you can benchmark `hello_world.py` by running the following command:
+
+```
+benchit scripts/hello_world.py --device nvidia
+```
+
+To get a result like this:
+
+```
+ADD ME
+```
+
+### 
