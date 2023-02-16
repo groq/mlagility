@@ -32,7 +32,7 @@ benchit scripts/hello_world.py
 That commands `benchit` benchmark `hello_world.py` on your CPU. Specifically, `benchit` takes the following actions:
 1. Pass `scripts/hello_world.py` as the `input_script` to the `benchmark` command of `benchit`.
   - _Note_: `benchit <.py file>` is a shorthand for `benchit benchmark <.py file>`.
-1. Run `hello_world.py` against a profiler and look for machine learning models.
+1. Run `hello_world.py` against a profiler and look for models from supported machine learning frameworks (e.g. Pytorch).
 1. Discover the `pytorch_model` instance of class `SmallModel`, which is a PyTorch model, and print some statistics about it.
 1. Export `pytorch_model` to an ONNX file, optimize that ONNX file, and convert it to the `float16` data type.
 1. Measure the performance of the ONNX file on your x86 CPU and report the `mean latency` and `throughput`.
