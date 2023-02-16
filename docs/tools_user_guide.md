@@ -2,6 +2,8 @@
 
 The MLAgility Benchmarking and Tools package provides a CLI, `benchit`, and Python API for benchmarking machine learning and deep learning models. This document reviews the functionality provided by MLAgility. If you are looking for repo and code organization, you can find that [here](https://github.com/groq/mlagility/blob/main/docs/code.md).
 
+For a hands-on learning approach, check out the [`benchit` CLI tutorials](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md).
+
 MLAgility's tools currently support the following combinations of runtimes and devices:
 
 <span id="devices-runtimes-table">
