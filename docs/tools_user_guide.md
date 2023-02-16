@@ -342,3 +342,27 @@ _Note_: `cache report` is not available as an API.
 `version` does not have any options.
 
 _Note_: `version` is not available as an API.
+
+## Environment Variables
+
+There are some environment variables that can control the behavior of the MLAgility tools.
+
+### Show Traceback
+
+By default, `benchit` and `benchmark_script()` catch any exceptions during model build and benchmark and display a simple error message like `Status: Unknown benchit error: {e}`. The intention behind this behavior is to allow the MLAgility tools to iterate over many scripts and models without stopping for exceptions. 
+
+However, you may want to see the full traceback for each exception encountered. To do so, set the `MLAGILITY_TRACEBACK` environment variable to `True`. For example:
+
+```
+export MLAGILITY_TRACEBACK=True
+```
+
+### Preserve Terminal Outputs
+
+By default, `benchit` and `benchmark_script()` will erase the contents of the terminal in order to present a clean status update for each script and model evaluated. 
+
+However, you may want to see everything that is being printed to the terminal. You can accomplish this by setting the `MLAGILITY_DEBUG` environment variable to `True`. For example:
+
+```
+export MLAGILITY_DEBUG=True
+```

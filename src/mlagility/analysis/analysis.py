@@ -60,6 +60,16 @@ class TracerArgs:
         act += tf_helpers.get_transformers_activations()
         return act
 
+def _store_traceback(model_info: util.ModelInfo):
+    """
+    Store the traceback from an exception into model_info so that
+    we can print it during the status update.
+    """
+    
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    model_info.traceback = traceback.format_exception(
+        exc_type, exc_value, exc_traceback
+    )
 
 def call_benchit(
     model_inputs: dict, model_info: util.ModelInfo, tracer_args: TracerArgs
@@ -140,18 +150,14 @@ def call_benchit(
         else:
             model_info.status_message = "Build Error: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        model_info.traceback = traceback.format_exception(
-            exc_type, exc_value, exc_traceback
-        )
+        
+        _store_traceback(model_info)
 
     except exp.GroqFlowError:
         model_info.status_message = "GroqFlowError: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        model_info.traceback = traceback.format_exception(
-            exc_type, exc_value, exc_traceback
-        )
+
+        _store_traceback(model_info)
 
     # This broad exception is ok since enumerating all exceptions is
     # not possible, as the tested software continuously evolves.
@@ -159,10 +165,8 @@ def call_benchit(
         util.stop_stdout_forward()
         model_info.status_message = f"Unknown benchit error: {e}"
         model_info.status_message_color = printing.Colors.WARNING
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        model_info.traceback = traceback.format_exception(
-            exc_type, exc_value, exc_traceback
-        )
+        
+        _store_traceback(model_info)
 
 
 def get_model_hash(

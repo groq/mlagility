@@ -35,7 +35,7 @@ class ModelInfo:
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
     performance: MeasuredPerformance = None
-    traceback = None
+    traceback: List[str] = None
 
     def __post_init__(self):
         self.params = count_parameters(self.model, self.model_type)
