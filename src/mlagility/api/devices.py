@@ -384,8 +384,9 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
     _, exit_code = exec_command(
         client,
         f"/usr/bin/python3 {remote_paths.output_dir}/{TRT_BENCHMARKING_SCRIPT} "
-        f"{remote_paths.output_dir} {docker_paths.onnx_file} {remote_paths.outputs_file} "
-        f"{remote_paths.errors_file} {iterations}",
+        f"--output-dir {remote_paths.output_dir} --onnx-file {docker_paths.onnx_file} "
+        f"--outputs-file {remote_paths.outputs_file} "
+        f"--errors-file {remote_paths.errors_file} --iterations {iterations}",
     )
     if exit_code == 1:
         msg = """
@@ -454,10 +455,15 @@ def execute_trt_locally(state: build.State, device: str, iterations: int) -> Non
         [
             python_location,
             os.path.join(local_paths.output_dir, TRT_BENCHMARKING_SCRIPT),
+            "--output-dir",
             local_paths.output_dir,
+            "--onnx-file",
             docker_paths.onnx_file,
+            "--outputs-file",
             local_paths.outputs_file,
+            "--errors-file",
             local_paths.errors_file,
+            "--iterations",
             str(iterations),
         ],
         stdout=subprocess.PIPE,
@@ -521,8 +527,8 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
         client,
         f"/home/{username}/miniconda3/envs/{env_name}/bin/python "
         f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
-        f"{remote_paths.output_dir} {remote_paths.onnx_file} {remote_paths.outputs_file} "
-        f"{remote_paths.errors_file} {iterations}",
+        f"--onnx-file {remote_paths.onnx_file} --outputs-file {remote_paths.outputs_file} "
+        f"--errors-file {remote_paths.errors_file} --iterations {iterations}",
     )
     if exit_code == 1:
         msg = """
@@ -613,10 +619,13 @@ def execute_ort_locally(state: build.State, device: str, iterations: int) -> Non
         [
             f"{conda_src}envs/{env_name}/bin/python",
             os.path.join(local_paths.output_dir, ORT_BENCHMARKING_SCRIPT),
-            local_paths.output_dir,
+            "--onnx-file",
             local_paths.onnx_file,
+            "--outputs-file",
             local_paths.outputs_file,
+            "--errors-file",
             local_paths.errors_file,
+            "--iterations",
             str(iterations),
         ],
         stdout=subprocess.PIPE,
