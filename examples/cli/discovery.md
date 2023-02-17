@@ -42,7 +42,7 @@ hello_world.py:
 
 pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that the model is discovered, and some stats are printed, but no build or benchmark took place.
@@ -120,7 +120,7 @@ max_depth.py:
 
 pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that `hello_world.py`, `two_models.py`, and `max_depth.py` are all evaluated.
@@ -228,7 +228,7 @@ pytorch_outputs: tensor([ 0.3628,  0.0489,  0.2952,  0.0021, -0.0161], grad_fn=<
 more_pytorch_outputs: tensor([-0.1198, -0.5344, -0.1920, -0.1565,  0.2279,  0.6915,  0.8540, -0.2481,
          0.0616, -0.4501], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that both models are discovered, but only `another_pytorch_model` was built and benchmarked.

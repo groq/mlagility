@@ -27,7 +27,6 @@ def run_ort_profile(source_onnx, num_iterations=100):
     onnx_session = ort.InferenceSession(source_onnx, sess_options)
     sess_input = onnx_session.get_inputs()
     input_feed = _dummy_inputs(sess_input)
-    # input_name = onnx_session.get_inputs()[0].name
     output_name = onnx_session.get_outputs()[0].name
 
     for _ in range(num_iterations):
@@ -90,9 +89,7 @@ def run(
     num_iterations: int,
 ):
 
-    # TODO: Handle exception for failure
     perf_result, exception = run_ort_profile(onnx_file, num_iterations)
-    # assert perf_result is list of int or float
 
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
@@ -139,31 +136,31 @@ if __name__ == "__main__":
     # Parse Inputs
     parser = argparse.ArgumentParser(description="Execute models built by GroqFlow")
     parser.add_argument(
-        "output_dir",
-        help="Path where the build files are stored",
-    )
-    parser.add_argument(
-        "onnx_file",
+        "--onnx-file",
+        required=True,
         help="Path where the ONNX file is located",
     )
     parser.add_argument(
-        "outputs_file",
+        "--outputs-file",
+        required=True,
         help="File in which the outputs will be saved",
     )
     parser.add_argument(
-        "errors_file",
+        "--errors-file",
+        required=True,
         help="File in which the outputs will be saved",
     )
     parser.add_argument(
-        "iterations",
+        "--iterations",
+        required=True,
         type=int,
         help="Number of times to execute the received onnx model",
     )
     args = parser.parse_args()
 
     run(
-        args.onnx_file,
-        args.outputs_file,
-        args.errors_file,
-        args.iterations,
+        onnx_file=args.onnx_file,
+        outputs_file=args.outputs_file,
+        errors_file=args.errors_file,
+        num_iterations=args.iterations,
     )

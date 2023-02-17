@@ -40,7 +40,7 @@ hello_world.py:
 
 pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that the model is discovered and built, but no benchmark took place.
