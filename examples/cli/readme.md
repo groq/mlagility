@@ -60,41 +60,6 @@ Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .
 
 You can see on the `Status:` line that the `pytorch_model` was benchmarked on a `Intel(R) Xeon(R) CPU @ 2.20GHz` x86 device and that the mean latency and throughput are both reported.
 
-<!--
-
-TODO: polish up and uncomment once #116 closes
-
-## Keras
-
-The script `scripts/keras.py` is similar to `hello_world.py`, except that it demonstrates that `benchit` can be used with TensorFlow Keras models. 
-
-Run this command:
-
-```
-benchit scripts/keras.py
-```
-
-To get a result like this:
-
-```
-Models discovered during profiling:
-
-keras.py:
-        trackable (executed 1x)
-                Model Type:     Keras (tf.keras.Model)
-                Class:          SmallKerasModel (<class 'keras.SmallKerasModel'>)
-                Location:       /net/home/jfowers/miniconda3/envs/mla/lib/python3.8/site-packages/tensorflow/python/trackable/data_structures.py, line 163
-                Parameters:     55 (<0.1 MB)
-                Hash:           5a591a29
-                Status:         Unknown benchit error: Error: Failure to run model using onnxruntime - 
-
-keras_outputs: [[0.         0.43556815 0.         0.         1.0099151 ]]
-
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
-```
-
--->
-
 ## Nvidia Benchmarking
 
 By default, `benchit` uses x86 CPUs for benchmarking, however benchmarking on Nvidia GPUs is also supported using the `--device` argument.
