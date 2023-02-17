@@ -16,9 +16,10 @@ MLAgility is on a mission to create and benchmark an enormous corpus of deep lea
 
 This repository is home to both:
 - A diverse corpus of hundreds of models, in `models/`
-  - See the [benchmark readme](https://github.com/groq/mlagility/blob/main/models/readme.md) to learn more
+  - See the [benchmark readme](https://github.com/groq/mlagility/blob/main/models/readme.md) to learn more.
 - Automated benchmarking tools, the `benchit` CLI and API, for CPUs, GPUs, and GroqChip processors, in `src/`
-  - See the [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md) to learn more
+  - See the [`benchit` CLI tutorials](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) to go hands on.
+  - See the [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md) to learn the details.
 
 ## Installation
 
