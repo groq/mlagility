@@ -150,7 +150,7 @@ The standardized set of arguments is:
 
 ### Example Script
 
-The following example, copied from `models/torch_hub/alexnet.py` is a good example of a well-formed `model.py` file. You can see that it has the following properties:
+The following example, copied from `models/transformers/bert.py` is a good example of a well-formed input script. You can see that it has the following properties:
 
 1. Labels in the top line of the file.
 1. Docstring indicating where the model was sourced from.
@@ -158,30 +158,27 @@ The following example, copied from `models/torch_hub/alexnet.py` is a good examp
 1. The model is instantiated and invoked against a set of inputs.
 
 ```
-# labels: test_group::mlagility name::alexnet author::torch_hub
+# labels: test_group::mlagility name::bert author::huggingface_pytorch
 """
-https://github.com/pytorch/hub/blob/master/pytorch_vision_alexnet.md
+https://huggingface.co/docs/transformers/v4.26.1/en/model_doc/bert#overview
 """
-
 from mlagility.parser import parse
+import transformers
 import torch
 
 torch.manual_seed(0)
 
 # Parsing command-line arguments
-batch_size, num_channels, width, height = parse(
-    ["batch_size", "num_channels", "width", "height"]
-)
+batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
 # Model and input configurations
-model = torch.hub.load(
-    "pytorch/vision:v0.13.1",
-    "alexnet",
-    weights=None,
-)
-model.eval()
-inputs = {"x": torch.ones([batch_size, num_channels, width, height])}
+config = transformers.BertConfig()
+model = transformers.BertModel(config)
+inputs = {
+    "input_ids": torch.ones(batch_size, max_seq_length, dtype=torch.long),
+    "attention_mask": torch.ones(batch_size, max_seq_length, dtype=torch.float),
+}
 
 
 # Call model
