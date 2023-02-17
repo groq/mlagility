@@ -347,6 +347,16 @@ _Note_: `version` is not available as an API.
 
 There are some environment variables that can control the behavior of the MLAgility tools.
 
+### Overwrite the Cache Location
+
+By default, the MLAgility tools will use `~/.cache/mlagility` as the MLAgility cache location. You can override this cache location with the `--cache-dir` and `cache_dir=` arguments for the CLI and APIs, respectively.
+
+However, you may want to override cache location for future runs without setting those arguments every time. This can be accomplished with the `MLAGILITY_CACHE_DIR` environment variable. For example:
+
+```
+export MLAGILITY_CACHE_DIR=~/a_different_cache_dir
+```
+
 ### Show Traceback
 
 By default, `benchit` and `benchmark_script()` catch any exceptions during model build and benchmark and display a simple error message like `Status: Unknown benchit error: {e}`. The intention behind this behavior is to allow the MLAgility tools to iterate over many scripts and models without stopping for exceptions. 
