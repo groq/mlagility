@@ -48,7 +48,7 @@ with st.sidebar:
     report = pd.read_csv(f"{REPORT_FOLDER}/{selected_report}")
 
     # Convert int parameters to int/float
-    for p in ["chips_used", "cycles", "params"]:
+    for p in ["chips_used", "params"]:
         report[p] = report[p].replace("-", 0).astype("int64")
 
     # Add parameter filter
