@@ -4,15 +4,36 @@ The following describes how to install MlAgility.
 
 ## Installing mlagility locally
 
-Install the `mlagility` package into your environment simply run
+If you want to install the `mlagility` package into your own Python environment, simply clone this repository and run
 
 ```
 pip install -e .
 ```
 
-inside the mlagility repository.
+inside the mlagility directory.
 
-> _Note_: If you are planning to use `mlagility` with Groq or Slurm please see the corresponding sections below.
+However, if you are just getting started, we recommend that you use a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment like this:
+
+```
+git clone https://github.com/groq/mlagility.git
+conda create -n mla python=3.8
+conda activate mla
+cd mlagility
+pip install -e .
+pip install -r models/requirements.txt
+```
+
+> _Note_: If you are planning to use the `mlagility` tools with the MLAgility benchmark, Groq, or Slurm please see the corresponding sections below.
+
+## MLAgility Benchmark Requirements
+
+The `mlagility` package only requires the packages to run the MLAgility benchmarking tools. If you want to run the MLAgility benchmark, you will also have to install the benchmark's requirements.
+
+In your Python environment:
+
+```
+pip install -r models/requirements.txt
+```
 
 ## Installing Groq support
 

@@ -26,7 +26,10 @@ The corpora in the MLAgility benchmark are:
 
 ### Prerequisites
 
-Before running the benchmark we suggest you familiarize yourself with the [`benchit` CLI tool](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) and some of the [`benchit` CLI examples](https://github.com/groq/mlagility/tree/main/examples/cli).
+Before running the benchmark we suggest you:
+1. Install the `mlagility` package by following the [install instructions](https://github.com/groq/mlagility/tree/main/docs/install.md).
+1. Go through the [`benchit` CLI tutorials](https://github.com/groq/mlagility/tree/main/examples/cli/readme.md).
+1. Familiarize yourself with the [`benchit` CLI tool](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) documentation.
 
 You must also run the following command to install all of the models' dependencies into your Python environment.
 
