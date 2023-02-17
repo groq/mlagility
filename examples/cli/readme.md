@@ -55,7 +55,7 @@ hello_world.py:
 
 pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see on the `Status:` line that the `pytorch_model` was benchmarked on a `Intel(R) Xeon(R) CPU @ 2.20GHz` x86 device and that the mean latency and throughput are both reported.
@@ -88,7 +88,7 @@ hello_world.py:
 
 pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that the device mentioned in the status is a `NVIDIA A100-SXM4-40GB`.
@@ -133,7 +133,7 @@ pytorch_outputs: tensor([ 0.3628,  0.0489,  0.2952,  0.0021, -0.0161], grad_fn=<
 more_pytorch_outputs: tensor([-0.1198, -0.5344, -0.1920, -0.1565,  0.2279,  0.6915,  0.8540, -0.2481,
          0.0616, -0.4501], grad_fn=<AddBackward0>)
 
-Woohoo! The 'benchmark' command is complete. Use the 'report' command to get a .csv file that summarizes results across all builds in the cache.
+Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that both model instances in `two_models.py`, `pytorch_model` and `another_pytorch_model`, are both discovered and benchmarked.
