@@ -1,4 +1,7 @@
 # labels: test_group::mlagility name::bert author::huggingface_pytorch
+"""
+https://huggingface.co/docs/transformers/v4.26.1/en/model_doc/bert#overview
+"""
 from mlagility.parser import parse
 import transformers
 import torch

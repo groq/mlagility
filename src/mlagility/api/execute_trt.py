@@ -11,10 +11,10 @@ import json
 
 def run(
     output_dir: str,
-    onnx_model: str,
+    onnx_file: str,
     outputs_file: str,
     errors_file: str,
-    repetitions: int,
+    num_iterations: int,
 ):
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
@@ -33,7 +33,7 @@ def run(
     # "--onnx=<path>" - path to the onnx model in the mounted file
     # "--fp16" - enable execution in fp16 mode on tensorrt
     # "--iterations=<int>" - number of iterations to run on tensorrt
-    docker_exec_args = f"trtexec --onnx={onnx_model} --fp16 --iterations={repetitions}"
+    docker_exec_args = f"trtexec --onnx={onnx_file} --fp16 --iterations={num_iterations}"
 
     run_command = (
         f"sudo docker run --name {docker_name} {docker_run_args} {latest_trt_docker}"
@@ -94,34 +94,38 @@ def run(
 
 if __name__ == "__main__":
     # Parse Inputs
-    parser = argparse.ArgumentParser(description="Execute models built by GroqFlow")
+    parser = argparse.ArgumentParser(description="Execute models built by benchit")
     parser.add_argument(
-        "output_dir",
+        "--output-dir",
         help="Path where the build files are stored",
     )
     parser.add_argument(
-        "onnx_file",
+        "--onnx-file",
+        required=True,
         help="Path where the ONNX file is located",
     )
     parser.add_argument(
-        "outputs_file",
+        "--outputs-file",
+        required=True,
         help="File in which the outputs will be saved",
     )
     parser.add_argument(
-        "errors_file",
+        "--errors-file",
+        required=True,
         help="File in which the outputs will be saved",
     )
     parser.add_argument(
-        "iterations",
+        "--iterations",
+        required=True,
         type=int,
         help="Number of times to execute the received onnx model",
     )
     args = parser.parse_args()
 
     run(
-        args.output_dir,
-        args.onnx_file,
-        args.outputs_file,
-        args.errors_file,
-        args.iterations,
+        output_dir=args.output_dir,
+        onnx_file=args.onnx_file,
+        outputs_file=args.outputs_file,
+        errors_file=args.errors_file,
+        num_iterations=args.iterations,
     )

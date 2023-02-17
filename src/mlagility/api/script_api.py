@@ -207,7 +207,4 @@ def benchmark_script(
             )
             time.sleep(5)
 
-    printing.log_success(
-        "The 'benchmark' command is complete. Use the 'report' command to get a .csv "
-        "file that summarizes results across all builds in the cache."
-    )
+    printing.log_success("The 'benchmark' command is complete.")

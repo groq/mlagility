@@ -9,6 +9,9 @@ import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
 
+ORT_BENCHMARKING_SCRIPT = "execute_ort.py"
+TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
+
 
 class BenchmarkPaths:
     def __init__(self, state, device, backend, username=None):
@@ -164,7 +167,7 @@ def exec_command(client, command, ignore_error=False) -> Tuple[str, str]:
     exit_code = stdout.channel.recv_exit_status()
     stdout = stdout.read().decode("ascii").strip("\n")
     stderr = str(stderr.read(), "utf-8")
-    if not ignore_error:
+    if exit_code != 0 and not ignore_error:
         raise BenchmarkException(stderr)
 
     return stdout, exit_code
@@ -211,14 +214,14 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         if stdout == "" or exit_code == 1:
             msg = "No NVIDIA GPUs available on the remote machine"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = ["execute-gpu.py"]
+        files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
     elif device_type == "x86":
         # Check if x86_64 CPU is available remotely
         stdout, exit_code = exec_command(client, "uname -i")
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
     elif device_type == "groqchip":
         # Check if at least one GroqChip Processor is available remotely
         stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
@@ -253,7 +256,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = ["execute-cpu.py", "setup_ort_env.sh"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -268,7 +271,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         if "NVIDIA" not in result.stdout or result.returncode == 1:
             msg = "No NVIDIA GPUs available on the local machine"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = ["execute-gpu.py"]
+        files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
 
     else:
         raise ValueError(f"Invalid device type: {device_type}")
@@ -352,7 +355,7 @@ def execute_groqchip_remotely(
         s.remove(remote_latency_file)
 
 
-def execute_gpu_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_remotely(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the remote machine
     """
@@ -380,9 +383,10 @@ def execute_gpu_remotely(state: build.State, device: str, iterations: int) -> No
     # Run benchmarking script
     _, exit_code = exec_command(
         client,
-        f"/usr/bin/python3 {remote_paths.output_dir}/execute-gpu.py "
-        f"{remote_paths.output_dir} {docker_paths.onnx_file} {remote_paths.outputs_file} "
-        f"{remote_paths.errors_file} {iterations}",
+        f"/usr/bin/python3 {remote_paths.output_dir}/{TRT_BENCHMARKING_SCRIPT} "
+        f"--output-dir {remote_paths.output_dir} --onnx-file {docker_paths.onnx_file} "
+        f"--outputs-file {remote_paths.outputs_file} "
+        f"--errors-file {remote_paths.errors_file} --iterations {iterations}",
     )
     if exit_code == 1:
         msg = """
@@ -417,7 +421,7 @@ def execute_gpu_remotely(state: build.State, device: str, iterations: int) -> No
         )
 
 
-def execute_gpu_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_locally(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the local GPU
     """
@@ -450,11 +454,16 @@ def execute_gpu_locally(state: build.State, device: str, iterations: int) -> Non
     run_benchmark = subprocess.Popen(
         [
             python_location,
-            os.path.join(local_paths.output_dir, "execute-gpu.py"),
+            os.path.join(local_paths.output_dir, TRT_BENCHMARKING_SCRIPT),
+            "--output-dir",
             local_paths.output_dir,
+            "--onnx-file",
             docker_paths.onnx_file,
+            "--outputs-file",
             local_paths.outputs_file,
+            "--errors-file",
             local_paths.errors_file,
+            "--iterations",
             str(iterations),
         ],
         stdout=subprocess.PIPE,
@@ -473,7 +482,7 @@ def execute_gpu_locally(state: build.State, device: str, iterations: int) -> Non
         )
 
 
-def execute_cpu_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_remotely(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the remote machine
     """
@@ -517,9 +526,9 @@ def execute_cpu_remotely(state: build.State, device: str, iterations: int) -> No
     _, exit_code = exec_command(
         client,
         f"/home/{username}/miniconda3/envs/{env_name}/bin/python "
-        f"{os.path.join(remote_paths.output_dir, 'execute-cpu.py')} "
-        f"{remote_paths.output_dir} {remote_paths.onnx_file} {remote_paths.outputs_file} "
-        f"{remote_paths.errors_file} {iterations}",
+        f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
+        f"--onnx-file {remote_paths.onnx_file} --outputs-file {remote_paths.outputs_file} "
+        f"--errors-file {remote_paths.errors_file} --iterations {iterations}",
     )
     if exit_code == 1:
         msg = """
@@ -548,9 +557,9 @@ def execute_cpu_remotely(state: build.State, device: str, iterations: int) -> No
         )
 
 
-def execute_cpu_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_locally(state: build.State, device: str, iterations: int) -> None:
     """
-    Execute Model on the local CPU
+    Execute Model on the local ORT
     """
 
     # Setup local execution folders to save outputs/ errors
@@ -609,11 +618,14 @@ def execute_cpu_locally(state: build.State, device: str, iterations: int) -> Non
     run_benchmark = subprocess.Popen(
         [
             f"{conda_src}envs/{env_name}/bin/python",
-            os.path.join(local_paths.output_dir, "execute-cpu.py"),
-            local_paths.output_dir,
+            os.path.join(local_paths.output_dir, ORT_BENCHMARKING_SCRIPT),
+            "--onnx-file",
             local_paths.onnx_file,
+            "--outputs-file",
             local_paths.outputs_file,
+            "--errors-file",
             local_paths.errors_file,
+            "--iterations",
             str(iterations),
         ],
         stdout=subprocess.PIPE,
