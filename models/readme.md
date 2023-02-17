@@ -20,8 +20,7 @@ The corpora in the MLAgility benchmark are:
 - `torch_hub`: a variety of models, including many image classification models, from the [Torch Hub repository](https://github.com/pytorch/hub).
 - `torchvision`: image recognition models from the [`torchvision` library](https://pytorch.org/vision/stable/index.html).
   - _Note_: the `torchvision` library also includes many image classification models, but we excluded them to avoid overlap between our `torch_hub` and `torchvision` corpora.
-- Huggingface transformers: Transformer models from the [Huggingface `transformers` library](https://huggingface.co/docs/transformers/index). We provide both PyTorch and Keras versions of the models, in the `transformers_pytorch` and `transformers_keras` directories, respectively. 
-  - _Note_: There is not a 1:1 match between the models in `transformers_pytorch` and `transformers_keras`, although overlaps do exist. We decided to provide both corpora to help us understand if there was any difference between performance or toolchain support for the two frameworks.
+- `transformers`: Transformer models from the [Huggingface `transformers` library](https://huggingface.co/docs/transformers/index).
 
 ## Running the Benchmark
 
@@ -151,7 +150,7 @@ The standardized set of arguments is:
 
 ### Example Script
 
-The following example, copied from `models/transformers_keras/ctrl.py` is a good example of a well-formed `model.py` file. You can see that it has the following properties:
+The following example, copied from `models/torch_hub/alexnet.py` is a good example of a well-formed `model.py` file. You can see that it has the following properties:
 
 1. Labels in the top line of the file.
 1. Docstring indicating where the model was sourced from.
@@ -159,26 +158,31 @@ The following example, copied from `models/transformers_keras/ctrl.py` is a good
 1. The model is instantiated and invoked against a set of inputs.
 
 ```
-# labels: test_group::mlagility name::ctrl author::huggingface_keras
+# labels: test_group::mlagility name::alexnet author::torch_hub
 """
-https://huggingface.co/ctrl
+https://github.com/pytorch/hub/blob/master/pytorch_vision_alexnet.md
 """
 
 from mlagility.parser import parse
-import transformers
-import tensorflow as tf
+import torch
 
-tf.random.set_seed(0)
+torch.manual_seed(0)
 
 # Parsing command-line arguments
-batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
+batch_size, num_channels, width, height = parse(
+    ["batch_size", "num_channels", "width", "height"]
+)
 
 
-config = transformers.AutoConfig.from_pretrained("ctrl")
-model = transformers.TFAutoModel.from_config(config)
-inputs = {
-    "input_ids": tf.ones(shape=(batch_size, max_seq_length), dtype=tf.int32),
-}
+# Model and input configurations
+model = torch.hub.load(
+    "pytorch/vision:v0.13.1",
+    "alexnet",
+    weights=None,
+)
+model.eval()
+inputs = {"x": torch.ones([batch_size, num_channels, width, height])}
+
 
 # Call model
 model(**inputs)
