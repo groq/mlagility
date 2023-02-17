@@ -579,6 +579,6 @@ def io_fraction(df: pd.DataFrame) -> None:
 def results_table(df: pd.DataFrame):
     model_name = st.text_input("", placeholder="Filter model by name")
     if model_name != "":
-        df = df[[model_name in x for x in df["model_name"]]]
+        df = df[[model_name in x for x in df["Model Name"]]]
 
     st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
