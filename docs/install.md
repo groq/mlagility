@@ -12,6 +12,16 @@ pip install -e .
 
 inside the mlagility repository.
 
+> _Note_: If you are planning to use `mlagility` with Groq or Slurm please see the corresponding sections below.
+
+## Installing Groq support
+
+When you install `pip install` `mlagility`, `pip` will also install the `groqflow` `pip` package for you. 
+
+However, if you want to use mlagility with your Groq SDK and GroqChip processor hardware you must also follow the steps in the [GroqFlow Install Guide](https://github.com/groq/groqflow/blob/release/0921/docs/install.md), particularly:
+1. [Prerequisites](https://github.com/groq/groqflow/blob/release/0921/docs/install.md#prerequisites): install the GroqWare™ Suite.
+1. [Add GroqWare Suite to Python Path](https://github.com/groq/groqflow/blob/release/0921/docs/install.md#step-3-add-groqware-suite-to-python-path)
+
 ## Installing Slurm support
 
 Slurm is an open source workload manager for clusters. If you would like to use slurm to build multiple models simultaneously, please follow the instructions below. 
