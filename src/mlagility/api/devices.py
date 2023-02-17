@@ -167,7 +167,7 @@ def exec_command(client, command, ignore_error=False) -> Tuple[str, str]:
     exit_code = stdout.channel.recv_exit_status()
     stdout = stdout.read().decode("ascii").strip("\n")
     stderr = str(stderr.read(), "utf-8")
-    if not ignore_error:
+    if exit_code != 0 and not ignore_error:
         raise BenchmarkException(stderr)
 
     return stdout, exit_code
