@@ -26,7 +26,7 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 # Just Benchmark It
 
-The simplest way to get started with MLAgility's tools is to use our `benchit` command line interface (CLI), which can take any python script that instantiates and calls PyTorch/Keras model(s) and benchmark them on any supported device and runtime.
+The simplest way to get started with MLAgility's tools is to use our `benchit` command line interface (CLI), which can take any python script that instantiates and calls PyTorch model(s) and benchmark them on any supported device and runtime.
 
 On your command line:
 
@@ -43,10 +43,10 @@ Example Output:
 > throughput: 21784.8 ips
 ```
 
-Where `your_script.py` is a Python script that instantiates and executes a PyTorch/Keras model named `YourModel`. The benchmarking results are also saved to a file, `*_state.yaml`, where `*` is the `build` name (see [Build](#build)).
+Where `your_script.py` is a Python script that instantiates and executes a PyTorch model named `YourModel`. The benchmarking results are also saved to a file, `*_state.yaml`, where `*` is the `build` name (see [Build](#build)).
 
 The `benchit` CLI performs the following steps:
-1. [Analysis](#analysis): profile the Python script to identify the PyTorch/Keras models within
+1. [Analysis](#analysis): profile the Python script to identify the PyTorch models within
 2. [Build](#build): call the `benchit()` [API](#the-benchit-api) to prepare each model for benchmarking
 3. [Benchmark](#benchmark): call the `benchit()` [API](#the-benchit-api) on each model to gather performance statistics
 
@@ -95,7 +95,7 @@ MLAgility uses the following definitions throughout.
 
 ## Model
 
-A **model** is a PyTorch (torch.nn.Module) or Keras (tf.keras.Model) object that has been instantiated in a Python script.
+A **model** is a PyTorch (torch.nn.Module) instance that has been instantiated in a Python script.
 
 - Examples: BERT-Base, ResNet-50, etc.
 
@@ -116,7 +116,7 @@ A **runtime** is a piece of software that executes a model on a device.
 
 ## Analysis
 
-**Analysis** is the process by which `benchmark_script()` inspects a Python script and identifies the PyTorch/Keras models within.
+**Analysis** is the process by which `benchmark_script()` inspects a Python script and identifies the PyTorch models within.
 
 `benchmark_script()` performs analysis by running and profiling your script. When a model object (see [Model](#model) is encountered, it is inspected to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchmark_model()` API for benchmarking.
 
