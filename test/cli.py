@@ -140,7 +140,7 @@ def assert_success_of_builds(
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
     # TODO: simplify this code when
-    # https://git.groq.io/code/Groq/-/issues/16110
+    # https://github.com/groq/mlagility/issues/16
     # is done
     builds = cache.get_all(cache_dir)
 
