@@ -2,34 +2,37 @@
 
 The following describes how to install MlAgility.
 
-## Installing mlagility locally
+## Installing mlagility
 
-If you want to install the `mlagility` package into your own Python environment, simply clone this repository and run
+We recommend that you install [miniconda](https://docs.conda.io/en/latest/miniconda.html) like this:
 
 ```
-pip install -e .
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
-inside the mlagility directory.
+Then create a virtual environment like this:
 
-However, if you are just getting started, we recommend that you use a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment like this:
+```
+conda create -n mla python=3.8
+conda activate mla
+```
+
+And then clone and install `mlagility`:
 
 ```
 git clone https://github.com/groq/mlagility.git
-conda create -n mla python=3.8
-conda activate mla
 cd mlagility
 pip install -e .
-pip install -r models/requirements.txt
 ```
 
 > _Note_: If you are planning to use the `mlagility` tools with the MLAgility benchmark, Groq, or Slurm please see the corresponding sections below.
 
 ## MLAgility Benchmark Requirements
 
-The `mlagility` package only requires the packages to run the MLAgility benchmarking tools. If you want to run the MLAgility benchmark, you will also have to install the benchmark's requirements.
+The `mlagility` package only requires the packages to run the MLAgility benchmarking tools. If you want to run the MLAgility benchmark, you will also have to install the benchmark's requirements. We 
 
-In your Python environment:
+In your `miniconda` environment:
 
 ```
 pip install -r models/requirements.txt
@@ -46,13 +49,6 @@ However, if you want to use mlagility with your Groq SDK and GroqChip processor 
 ## Installing Slurm support
 
 Slurm is an open source workload manager for clusters. If you would like to use slurm to build multiple models simultaneously, please follow the instructions below. 
-
-### Install miniconda
-
-```
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh
-```
 
 ### Setup your Slurm environment
 
