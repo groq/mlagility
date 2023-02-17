@@ -355,7 +355,7 @@ def execute_groqchip_remotely(
         s.remove(remote_latency_file)
 
 
-def execute_gpu_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_remotely(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the remote machine
     """
@@ -420,7 +420,7 @@ def execute_gpu_remotely(state: build.State, device: str, iterations: int) -> No
         )
 
 
-def execute_gpu_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_locally(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the local GPU
     """
@@ -476,7 +476,7 @@ def execute_gpu_locally(state: build.State, device: str, iterations: int) -> Non
         )
 
 
-def execute_cpu_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_remotely(state: build.State, device: str, iterations: int) -> None:
     """
     Execute Model on the remote machine
     """
@@ -551,9 +551,9 @@ def execute_cpu_remotely(state: build.State, device: str, iterations: int) -> No
         )
 
 
-def execute_cpu_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_locally(state: build.State, device: str, iterations: int) -> None:
     """
-    Execute Model on the local CPU
+    Execute Model on the local ORT
     """
 
     # Setup local execution folders to save outputs/ errors
