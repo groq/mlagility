@@ -1,0 +1,169 @@
+model_name,author,class,downloads,assembles,params,chips_used,hash,license,task,model_type,cycles,tsp_compute_latency,gpu_compute_latency,tsp_gpu_compute_ratio,tsp_estimated_e2e_latency,gpu_e2e_latency,tsp_gpu_e2e_ratio,x86_latency
+alexnet,torch hub,AlexNet,0,TRUE,61100840,2,2891f54c,Unknown,-,pytorch,,-,-,-,0.3941983654,-,-,- 
+bart,huggingface pytorch,BartModel,0,FALSE,404079238,16,cb0751ce,Unknown,-,pytorch,,-,-,-,0.2941326723,0.3594731854,-,0.9526702776
+beit,huggingface pytorch,BeitModel,0,FALSE,85530815,2,6b5d54c6,Unknown,-,pytorch,,-,-,-,0.2862456567,0.9212441442,-,0.8234458168
+bert,huggingface pytorch,BertModel,0,TRUE,109166782,4,d59172a2,Unknown,-,pytorch,,-,-,-,0.004992610316,0.530061979,-,0.7047938409
+bert for question answering,huggingface pytorch,BertForQuestionAnswering,0,FALSE,333701493,8,64bce7df,Unknown,-,pytorch,,-,-,-,0.2148241163,0.6683411346,-,0.348481092
+bert generation,huggingface pytorch,EncoderDecoderModel,0,FALSE,465654648,16,42b8fae4,Unknown,-,pytorch,,-,-,-,0.2749540123,0.1077982091,-,0.3473692903
+bert tiny for sequence classification,huggingface pytorch,BertForSequenceClassification,0,TRUE,4353194,1,ca662a9e,Unknown,-,pytorch,,-,-,-,0.3519674305,0.5748178435,-,0.2362540791
+blenderbot small,huggingface pytorch,BlenderbotSmallModel,0,FALSE,84607202,2,d65dd9e3,Unknown,-,pytorch,,-,-,-,0.2910070712,-,-,0.8786105288
+camembert,huggingface pytorch,CamembertModel,0,TRUE,109461696,4,a2ac5985,Unknown,-,pytorch,,-,-,-,0.2857953568,0.1664160905,-,0.8746881469
+clip text encoder,diffusers,CLIPTextModel,0,TRUE,123066839,4,d312ecd1,Unknown,-,pytorch,,-,-,-,0.3956508854,0.2097790728,-,0.9720412135
+convbert,huggingface pytorch,ConvBertModel,0,FALSE,105389032,4,b39013e9,Unknown,-,pytorch,,-,-,-,0.04943445658,0.3710670566,-,0.9451956605
+convnext,huggingface pytorch,ConvNextModel,0,FALSE,27766278,1,80414def,Unknown,-,pytorch,,-,-,-,0.3004464506,0.7483780632,-,-
+convnext base,torch hub,ConvNeXt,0,FALSE,88438765,2,c68282ce,Unknown,-,pytorch,,-,-,-,0.3233803337,0.8708838228,-,0.6443308707
+convnext large,torch hub,ConvNeXt,0,FALSE,197538285,4,af479213,Unknown,-,pytorch,,-,-,-,0.1586975279,0.06627834059,-,0.3834119618
+convnext small,torch hub,ConvNeXt,0,FALSE,50109165,2,32bd6900,Unknown,-,pytorch,,-,-,-,0.1511101164,0.1387087279,-,0.1858895092
+convnext tiny,torch hub,ConvNeXt,0,FALSE,28536813,1,4f884eed,Unknown,-,pytorch,,-,-,-,-,0.8040838302,-,0.7140804057
+deberta,huggingface pytorch,DebertaModel,0,TRUE,123641957,4,f4e4f0d1,Unknown,-,pytorch,,-,-,-,0.07118933782,0.07356748404,-,0.8320810276
+deit,huggingface pytorch,DeiTModel,0,FALSE,86272702,2,4519cd75,Unknown,-,pytorch,,-,-,-,0.2087376004,-,-,0.4257759263
+deit base for image classification,huggingface pytorch,ViTForImageClassification,0,FALSE,86567846,2,8fa842d1,Unknown,-,pytorch,,-,-,-,0.395834488,0.07511358418,-,0.1587937427
+deit tiny for image classification,huggingface pytorch,ViTForImageClassification,0,TRUE,5717606,1,4f7bba18,Unknown,-,pytorch,,-,-,-,-,0.5986953321,-,0.1589380348
+densenet121,torch hub,DenseNet,0,FALSE,7928960,1,d5f7254d,Unknown,-,pytorch,,-,-,-,0.3904604299,0.223103432,-,0.3582776808
+densenet161,torch hub,DenseNet,0,FALSE,28564768,1,6c360ce5,Unknown,-,pytorch,,-,-,-,0.3027742,0.5760521071,-,-
+densenet169,torch hub,DenseNet,0,FALSE,14079232,1,ccd997cb,Unknown,-,pytorch,,-,-,-,0.1876070367,0.925285356,-,0.2066641834
+densenet201,torch hub,DenseNet,0,FALSE,19901952,1,e355a66c,Unknown,-,pytorch,,-,-,-,0.1254464685,0.5952328131,-,0.7150526363
+detr,huggingface pytorch,DetrModel,0,FALSE,-,-,c328f5b8,Unknown,-,pytorch,,-,-,-,-,0.5943997277,-,0.3579429127
+detr for object detection,huggingface pytorch,DetrForObjectDetection,0,FALSE,-,-,a2481ba5,Unknown,-,pytorch,,-,-,-,0.2216898735,0.3708182675,-,0.8912486329
+distil wav2vec2 for audio classification,huggingface pytorch,Wav2Vec2ForSequenceClassification,0,FALSE,37866370,1,cd811c97,Unknown,-,pytorch,,-,-,-,0.3424995294,0.3044858549,-,0.4356521705
+distilbert,huggingface pytorch,DistilBertModel,0,FALSE,66068114,2,38518005,Unknown,-,pytorch,,-,-,-,-,0.753096493,-,0.5359567334
+distilbert for question answering,huggingface pytorch,DistilBertForQuestionAnswering,0,FALSE,66069655,2,65b3ff1b,Unknown,-,pytorch,,-,-,-,-,-,-,0.7001622561
+distilhubert for audio classification,huggingface pytorch,HubertForSequenceClassification,0,FALSE,23700597,1,4170140a,Unknown,-,pytorch,,-,-,-,-,0.5306673544,-,0.5248636079
+efficientnet b0,torch hub,EfficientNet,0,TRUE,5242196,1,94890704,Unknown,-,pytorch,,-,-,-,-,0.8726445517,-,0.9883209454
+efficientnet b1,torch hub,EfficientNet,0,TRUE,7724900,1,8e53a932,Unknown,-,pytorch,,-,-,-,-,-,-,0.2983805803
+efficientnet b2,torch hub,EfficientNet,0,TRUE,9034582,1,204800dc,Unknown,-,pytorch,,-,-,-,-,0.8041922217,-,0.5590392182
+efficientnet b3,torch hub,EfficientNet,0,FALSE,12134224,1,2950ca5b,Unknown,-,pytorch,,-,-,-,-,0.6351977538,-,0.7910649523
+efficientnet b4,torch hub,EfficientNet,0,FALSE,19197120,1,7d75dda2,Unknown,-,pytorch,,-,-,-,0.2686218357,0.6566002185,-,-
+efficientnet b5,torch hub,EfficientNet,0,FALSE,30187756,1,204c9208,Unknown,-,pytorch,,-,-,-,0.2595912952,-,-,0.7448938632
+efficientnet b6,torch hub,EfficientNet,0,FALSE,42776110,1,d5bd9458,Unknown,-,pytorch,,-,-,-,0.2500472072,0.08317055388,-,0.5736338115
+efficientnet b7,torch hub,EfficientNet,0,FALSE,65977888,2,6973429a,Unknown,-,pytorch,,-,-,-,0.2951370432,0.923207231,-,0.1441279948
+efficientnet v2 l,torch hub,EfficientNet,0,FALSE,117896136,4,f5ddf7f0,Unknown,-,pytorch,,-,-,-,0.1133293393,0.04204524828,-,0.4086286848
+efficientnet v2 m,torch hub,EfficientNet,0,FALSE,53790556,2,a041aef8,Unknown,-,pytorch,,-,-,-,-,0.6019568858,-,0.5245239163
+efficientnet v2 s,torch hub,EfficientNet,0,FALSE,21275536,1,ae743058,Unknown,-,pytorch,,-,-,-,-,0.5937655039,-,0.5348455458
+electra,huggingface pytorch,ElectraModel,0,TRUE,13411517,1,8da49ae6,Unknown,-,pytorch,,-,-,-,-,0.6692486205,-,0.4009829786
+electra for sequence classification,huggingface pytorch,ElectraForSequenceClassification,0,TRUE,109285824,4,5ccb19c4,Unknown,-,pytorch,,-,-,-,-,0.3971938312,-,0.5677821826
+encoder decoder,huggingface pytorch,EncoderDecoderModel,0,FALSE,269541724,8,051eeb05,Unknown,-,pytorch,,-,-,-,-,0.9346869012,-,0.9847387641
+fasterrcnn mobilenet v3 large 320 fpn,torchvision,FasterRCNN,0,FALSE,-,-,59bcc1a5,Unknown,-,pytorch,,-,-,-,-,-,-,0.6083279321
+fasterrcnn mobilenet v3 large fpn,torchvision,FasterRCNN,0,FALSE,-,-,e32c9090,Unknown,-,pytorch,,-,-,-,-,0.9809107221,-,0.8068068871
+fasterrcnn resnet50 fpn,torchvision,FasterRCNN,0,FALSE,-,-,d8b3f65a,Unknown,-,pytorch,,-,-,-,-,0.7137446244,-,0.3051665576
+fasterrcnn resnet50 fpn v2,torchvision,FasterRCNN,0,FALSE,-,-,7147702b,Unknown,-,pytorch,,-,-,-,-,0.2270062371,-,0.6995605109
+fcos resnet50 fpn,torchvision,FCOS,0,FALSE,-,-,78b52a80,Unknown,-,pytorch,,-,-,-,0.08562511607,0.3569217638,-,0.9152885619
+flaubert,huggingface pytorch,FlaubertModel,0,FALSE,665991453,16,6202b0cf,Unknown,-,pytorch,,-,-,-,0.1869701874,0.1632512774,-,-
+funnel,huggingface pytorch,FunnelModel,0,FALSE,126026366,4,ab8f5fd3,Unknown,-,pytorch,,-,-,-,0.2300211395,0.7044616903,-,-
+funnel base,huggingface pytorch,FunnelBaseModel,0,FALSE,111060055,4,37ecc84c,Unknown,-,pytorch,,-,-,-,0.1095043635,0.2091450516,-,-
+googlenet,torch hub,GoogLeNet,0,TRUE,6613040,1,6e59c54b,Unknown,-,pytorch,,-,-,-,0.3044240377,0.7150814403,-,-
+gpt1,huggingface pytorch,OpenAIGPTModel,0,TRUE,116160216,4,0342a9fe,Unknown,-,pytorch,,-,-,-,0.2428809996,0.5142592189,-,-
+gpt2,huggingface pytorch,GPT2Model,0,FALSE,123654106,4,af143a10,Unknown,-,pytorch,,-,-,-,0.3120201557,0.158932048,-,-
+gpt2 doublehead,huggingface pytorch,GPT2DoubleHeadsModel,0,FALSE,162253019,4,7befd733,Unknown,-,pytorch,,-,-,-,0.098478076,0.3122759696,-,0.02552053518
+hardnet39ds,torch hub,HarDNet,0,TRUE,3475386,1,47ba431c,Unknown,-,pytorch,,-,-,-,0.1358982679,0.7285997594,-,0.3964458821
+hardnet68,torch hub,HarDNet,0,TRUE,17557570,1,9d6d24cf,Unknown,-,pytorch,,-,-,-,-,0.6983739791,-,0.9057760945
+hardnet68ds,torch hub,HarDNet,0,TRUE,4162836,1,85f34cd3,Unknown,-,pytorch,,-,-,-,-,0.4661837048,-,0.5113252359
+hardnet85,torch hub,HarDNet,0,FALSE,36657020,1,acb062f3,Unknown,-,pytorch,,-,-,-,-,0.5940045827,-,0.8055358081
+imagegpt,huggingface pytorch,ImageGPTModel,0,FALSE,75872158,2,3b5850cc,Unknown,-,pytorch,,-,-,-,-,0.1787505865,-,0.3447673324
+inception v3,torch hub,Inception3,0,TRUE,23802160,1,46db3db5,Unknown,-,pytorch,,-,-,-,-,0.08009607107,-,0.6512160638
+keypointrcnn resnet50 fpn,torchvision,KeypointRCNN,0,FALSE,-,-,2f5908b4,Unknown,-,pytorch,,-,-,-,-,0.8088128085,-,0.4302517376
+layoutlm,huggingface pytorch,LayoutLMModel,0,TRUE,112312513,4,33ec397d,Unknown,-,pytorch,,-,-,-,-,0.7114299737,-,0.2745420037
+luke,huggingface pytorch,LukeModel,0,TRUE,124625858,4,431c265c,Unknown,-,pytorch,,-,-,-,-,0.2215668713,-,0.3966205355
+m2m 100,huggingface pytorch,M2M100Model,0,FALSE,484582485,16,533285d2,Unknown,-,pytorch,,-,-,-,0.005198945687,0.8410742278,-,0.5874390004
+marian,huggingface pytorch,MarianModel,0,FALSE,73968682,2,ea99ab2b,Unknown,-,pytorch,,-,-,-,0.1482575496,0.8877533581,-,0.6225305022
+marianmt,huggingface pytorch,MarianMTModel,0,FALSE,105222820,4,f4dcd1cc,Unknown,-,pytorch,,-,-,-,-,0.6196875754,-,0.3745179239
+maskrcnn resnet50 fpn,torchvision,MaskRCNN,0,FALSE,-,-,a5f78569,Unknown,-,pytorch,,-,-,-,0.1633113796,0.6920710863,-,0.3714439234
+maskrcnn resnet50 fpn v2,torchvision,MaskRCNN,0,FALSE,-,-,f4f1de9a,Unknown,-,pytorch,,-,-,-,0.1444492446,0.9412028203,-,0.06505430483
+megatron bert,huggingface pytorch,MegatronBertModel,0,FALSE,333060466,8,2fa53f3f,Unknown,-,pytorch,,-,-,-,0.2168781586,0.9346378407,-,0.3721718198
+minilmv2,huggingface pytorch,BertModel,0,TRUE,22565860,1,f969d36d,Unknown,-,pytorch,,-,-,-,-,0.7004551396,-,0.7460853493
+mnasnet0 5,torch hub,MNASNet,0,TRUE,2200880,1,9.13E+07,Unknown,-,pytorch,,-,-,-,0.1760413979,0.2601984045,-,0.5719197358
+mnasnet0 75,torch hub,MNASNet,0,TRUE,3144288,1,4a915154,Unknown,-,pytorch,,-,-,-,0.08087951686,0.8419733408,-,0.2381885875
+mnasnet1 0,torch hub,MNASNet,0,TRUE,4350160,1,041e693a,Unknown,-,pytorch,,-,-,-,-,0.1304315094,-,0.02978677531
+mnasnet1 3,torch hub,MNASNet,0,TRUE,6239320,1,87ea0deb,Unknown,-,pytorch,,-,-,-,0.1233175147,0.6102472479,-,0.323515366
+mobilebert,huggingface pytorch,MobileBertModel,0,TRUE,24552318,1,72442a94,Unknown,-,pytorch,,-,-,-,0.0609676813,0.8232095313,-,0.1631495713
+mobilebert for sequence classification,huggingface pytorch,MobileBertForSequenceClassification,0,TRUE,21063042,1,c6599ac3,Unknown,-,pytorch,,-,-,-,0.3142707765,0.4737991483,-,0.7552069153
+mobilenet v2,torch hub,MobileNetV2,0,TRUE,3475010,1,a81033ae,Unknown,-,pytorch,,-,-,-,0.1967872211,-,-,0.472360152
+mobilenet v3 large,torch hub,MobileNetV3,0,TRUE,5457176,1,777649,Unknown,-,pytorch,,-,-,-,0.2443332023,0.4776212777,-,0.8175223709
+mobilenet v3 small,torch hub,MobileNetV3,0,TRUE,2529712,1,e7fae853,Unknown,-,pytorch,,-,-,-,0.1049868977,0.1028122177,-,0.5063675839
+mobilevit,huggingface pytorch,MobileViTModel,0,FALSE,4913337,1,47b02614,Unknown,-,pytorch,,-,-,-,0.3115589313,0.3613737719,-,0.2915829332
+mobilevit small for semantic segmentation,huggingface pytorch,MobileViTForSemanticSegmentation,0,FALSE,6351130,1,5621d1d8,Unknown,-,pytorch,,-,-,-,0.244928029,0.211294006,-,0.8895246707
+mobilevit x small for semantic segmentation,huggingface pytorch,MobileViTForSemanticSegmentation,0,TRUE,2938906,1,f9f29c8e,Unknown,-,pytorch,,-,-,-,0.1756097092,0.5634407352,-,0.3229371116
+mobilevit xx small for semantic segmentation,huggingface pytorch,MobileViTForSemanticSegmentation,0,FALSE,1851794,1,535af098,Unknown,-,pytorch,,-,-,-,0.2549861633,0.7550517067,-,0.2948776764
+mpnet,huggingface pytorch,MPNetModel,0,TRUE,109563840,4,747bb620,Unknown,-,pytorch,,-,-,-,0.3851717444,0.8518452593,-,0.01015326091
+mt5 base,huggingface pytorch,MT5Model,0,FALSE,393067559,8,6a56180f,Unknown,-,pytorch,,-,-,-,0.0957352059,0.9836297157,-,0.04919817726
+mt5 encoder,huggingface pytorch,MT5EncoderModel,0,FALSE,147030657,4,760f744b,Unknown,-,pytorch,,-,-,-,0.284816181,0.4275603609,-,0.4299510572
+mt5 small,huggingface pytorch,MT5Model,0,FALSE,173102451,4,9625f18b,Unknown,-,pytorch,,-,-,-,0.1479626554,0.7055376793,-,0.7080656531
+openai doublehead,huggingface pytorch,OpenAIGPTDoubleHeadsModel,0,FALSE,147248857,4,a4df98ec,Unknown,-,pytorch,,-,-,-,0.2841921034,0.05237705151,-,0.1912185114
+pegasus,huggingface pytorch,PegasusModel,0,FALSE,403947598,16,b92cca23,Unknown,-,pytorch,,-,-,-,0.1644059265,0.6718773318,-,0.2042362347
+perceiver,huggingface pytorch,PerceiverModel,0,FALSE,259427480,8,a4732115,Unknown,-,pytorch,,-,-,-,0.03145133963,0.01378931341,-,0.6404767106
+poolformer,huggingface pytorch,PoolFormerModel,0,TRUE,11371373,1,a8cfe755,Unknown,-,pytorch,,-,-,-,0.03658915852,0.953904252,-,0.6987515128
+rag,huggingface pytorch,RagModel,0,FALSE,455992031,16,7e502070,Unknown,-,pytorch,,-,-,-,0.3668388498,0.02073222123,-,0.2134296424
+realm,huggingface pytorch,RealmEmbedder,0,TRUE,109265344,4,d9107239,Unknown,-,pytorch,,-,-,-,0.3406925116,0.8876490931,-,0.8417903689
+regnet x 16gf,torch hub,RegNet,0,FALSE,54171112,2,90fe350f,Unknown,-,pytorch,,-,-,-,0.3355825716,0.9060867619,-,0.5952690409
+regnet x 1 6gf,torch hub,RegNet,0,FALSE,9148224,1,9b6af29e,Unknown,-,pytorch,,-,-,-,0.1537681297,0.396030724,-,0.9598102533
+regnet x 32gf,torch hub,RegNet,0,FALSE,107654448,4,2.49E+08,Unknown,-,pytorch,,-,-,-,0.2119717449,0.4390239856,-,0.7861245276
+regnet x 3 2gf,torch hub,RegNet,0,FALSE,15235752,1,731da922,Unknown,-,pytorch,,-,-,-,0.3248433568,0.8759118734,-,0.5483516564
+regnet x 400mf,torch hub,RegNet,0,FALSE,5458776,1,08b8712e,Unknown,-,pytorch,,-,-,-,0.1354646449,0.3031631823,-,0.6028060577
+regnet x 800mf,torch hub,RegNet,0,FALSE,7223528,1,1e12c62e,Unknown,-,pytorch,,-,-,-,0.2417887603,-,-,0.07790472777
+regnet x 8gf,torch hub,RegNet,0,FALSE,39485176,1,26bfacd7,Unknown,-,pytorch,,-,-,-,0.2977051075,0.3240022857,-,0.8347574034
+regnet y 128gf,torch hub,RegNet,0,FALSE,644409734,16,a2a92eba,Unknown,-,pytorch,,-,-,-,0.2077917303,0.6964564787,-,0.3659986558
+regnet y 16gf,torch hub,RegNet,0,FALSE,83472284,2,a44f744c,Unknown,-,pytorch,,-,-,-,0.2655936073,-,-,0.2275266886
+regnet y 1 6gf,torch hub,RegNet,0,FALSE,11151182,1,993181bc,Unknown,-,pytorch,,-,-,-,0.04063056379,0.2067551592,-,0.8753373872
+regnet y 32gf,torch hub,RegNet,0,FALSE,144894546,4,16e3920e,Unknown,-,pytorch,,-,-,-,0.2054428987,0.2675957934,-,0.7232885837
+regnet y 3 2gf,torch hub,RegNet,0,FALSE,19372586,1,a06a50b4,Unknown,-,pytorch,,-,-,-,0.09970611874,0.5064092553,-,0.1491575794
+regnet y 400mf,torch hub,RegNet,0,FALSE,4317824,1,74d9ef17,Unknown,-,pytorch,,-,-,-,0.01839122071,0.5741097604,-,0.2428770285
+regnet y 800mf,torch hub,RegNet,0,FALSE,6403424,1,efe4b887,Unknown,-,pytorch,,-,-,-,0.05222251923,0.9147002002,-,0.9654421187
+regnet y 8gf,torch hub,RegNet,0,FALSE,39298560,1,0c98c39d,Unknown,-,pytorch,,-,-,-,0.2455389397,0.6723404719,-,0.560880337
+rembert,huggingface pytorch,RemBertModel,0,FALSE,575380202,16,1a69d8de,Unknown,-,pytorch,,-,-,-,0.3895315335,0.8297280138,-,0.5962212296
+resnet101,torch hub,ResNet,0,TRUE,44447848,1,285cd579,Unknown,-,pytorch,,-,-,-,0.09685668368,0.2129516123,-,0.08371641283
+resnet152,torch hub,ResNet,0,TRUE,60045416,2,c732f780,Unknown,-,pytorch,,-,-,-,0.2322325361,0.4378760167,-,0.1026012754
+resnet18,torch hub,ResNet,0,TRUE,11680872,1,11f0e9e3,Unknown,-,pytorch,,-,-,-,0.3511765784,0.791935827,-,0.1849698907
+resnet34,torch hub,ResNet,0,TRUE,21781608,1,85df0c4a,Unknown,-,pytorch,,-,-,-,0.2091668609,0.04500402699,-,0.8266632657
+resnet50,torch hub,ResNet,0,TRUE,25507944,1,3ba0a685,Unknown,-,pytorch,,-,-,-,0.1221626006,0.7112983347,-,0.04298736488
+resnext101 32x8d,torch hub,ResNet,0,FALSE,88592360,2,0b88b3d8,Unknown,-,pytorch,,-,-,-,0.008227539033,0.03848879881,-,0.994887442
+resnext50 32x4d,torch hub,ResNet,0,FALSE,24964712,1,ce6f3fb8,Unknown,-,pytorch,,-,-,-,0.149952498,0.5413600234,-,0.0387678123
+retinanet resnet50 fpn,torchvision,RetinaNet,0,FALSE,-,-,7cc11439,Unknown,-,pytorch,,-,-,-,0.07943886858,0.5087831001,-,0.6018223323
+retinanet resnet50 fpn v2,torchvision,RetinaNet,0,FALSE,-,-,20403119,Unknown,-,pytorch,,-,-,-,0.2293127744,0.3942354788,-,0.8491541692
+retribert,huggingface pytorch,RetriBertModel,0,FALSE,81150221,2,4c3ee101,Unknown,-,pytorch,,-,-,-,0.1828100474,0.9963637796,-,0.8654928427
+roberta,huggingface pytorch,RobertaModel,0,TRUE,109461696,4,f75bf095,Unknown,-,pytorch,,-,-,-,0.09804031847,0.9524146197,-,0.5684564905
+roformer,huggingface pytorch,RoFormerModel,0,FALSE,123454241,4,a48eefbd,Unknown,-,pytorch,,-,-,-,0.3310490466,0.9332141151,-,0.5463205479
+safety clipvision,diffusers,CLIPVisionModel,0,FALSE,303180456,8,bd5ab0a3,Unknown,-,pytorch,,-,-,-,0.1656202616,0.5250482893,-,0.9337669034
+segformer,huggingface pytorch,SegformerModel,0,TRUE,3301468,1,28a23805,Unknown,-,pytorch,,-,-,-,0.2526030833,0.7589393868,-,0.1985242188
+shufflenet v2 x0 5,torch hub,ShuffleNetV2,0,TRUE,1360182,1,15046a84,Unknown,-,pytorch,,-,-,-,0.2497000042,0.5956733578,-,0.9538399132
+shufflenet v2 x1 0,torch hub,ShuffleNetV2,0,TRUE,2264028,1,81185b92,Unknown,-,pytorch,,-,-,-,0.1221853568,0.06747308314,-,0.01711918436
+shufflenet v2 x1 5,torch hub,ShuffleNetV2,0,TRUE,3481998,1,51805568,Unknown,-,pytorch,,-,-,-,0.1009045895,0.9875014394,-,0.6526094216
+shufflenet v2 x2 0,torch hub,ShuffleNetV2,0,TRUE,7363356,1,670c36ac,Unknown,-,pytorch,,-,-,-,0.2587202392,0.4039454795,-,0.7854043332
+speech to text,huggingface pytorch,Speech2TextModel,0,TRUE,29738198,1,fc9ef5d8,Unknown,-,pytorch,,-,-,-,0.2352899144,-,-,0.9559223994
+splinter,huggingface pytorch,SplinterModel,0,TRUE,108576957,4,d8703a6e,Unknown,-,pytorch,,-,-,-,0.3155062641,0.3054487993,-,0.5885042017
+squeezebert,huggingface pytorch,SqueezeBertModel,0,FALSE,50775742,2,c54b2d76,Unknown,-,pytorch,,-,-,-,0.2649475168,0.921134318,-,0.9592404522
+squeezenet1 0,torch hub,SqueezeNet,0,TRUE,1246280,1,8b319b5b,Unknown,-,pytorch,,-,-,-,0.08162414382,0.2578457753,-,0.4000357773
+squeezenet1 1,torch hub,SqueezeNet,0,TRUE,1233288,1,db09563d,Unknown,-,pytorch,,-,-,-,0.1338286773,0.2250988563,-,0.4158708533
+ssd300 vgg16,torchvision,SSDFeatureExtractorVGG,0,FALSE,22941893,1,ba239042,Unknown,-,pytorch,,-,-,-,0.3307202229,0.7458929344,-,0.4738323319
+ssdlite320 mobilenet v3 large,torchvision,SSDLiteFeatureExtractorMobileNet,0,TRUE,3531146,1,0b96e723,Unknown,-,pytorch,,-,-,-,0.3468878685,0.6098419908,-,0.5463400678
+ssdlite320 mobilenet v3 large,torchvision,SSD,0,TRUE,3531146,-,cb077411,Unknown,-,pytorch,,-,-,-,0.3030414064,0.8067197133,-,0.1740465113
+swin b,torch hub,SwinTransformer,0,FALSE,88738859,2,f0e93177,Unknown,-,pytorch,,-,-,-,0.3515451102,0.9865009173,-,0.472041202
+swin s,torch hub,SwinTransformer,0,FALSE,50404109,2,cc85d49e,Unknown,-,pytorch,,-,-,-,0.3549994605,0.068262417,-,0.5886588024
+swin t,torch hub,SwinTransformer,0,FALSE,28766603,1,89de9245,Unknown,-,pytorch,,-,-,-,0.3228758078,0.1546109902,-,0.2681236252
+t5 base,huggingface pytorch,T5ForConditionalGeneration,0,FALSE,250330147,8,ba7c8360,Unknown,-,pytorch,,-,-,-,0.1798684605,0.9236510639,-,0.01785099731
+t5 encoder,huggingface pytorch,T5EncoderModel,0,TRUE,35455582,1,0559914f,Unknown,-,pytorch,,-,-,-,0.1557446228,-,-,0.8752267279
+t5 large,huggingface pytorch,T5ForConditionalGeneration,0,FALSE,777382975,16,47d226ef,Unknown,-,pytorch,,-,-,-,0.3719823459,0.4080238654,-,0.3749054603
+t5 small,huggingface pytorch,T5ForConditionalGeneration,0,FALSE,78004501,2,6f1dd5bb,Unknown,-,pytorch,,-,-,-,0.02244834583,0.1525429461,-,0.7361882706
+unet 2d condition,diffusers,UNet2DConditionModel,0,FALSE,2324093279,64,b6cc8b9c,Unknown,-,pytorch,,-,-,-,0.3097677145,0.5983132622,-,0.2389244031
+unet,torch hub,UNet,0,FALSE,7760097,1,a76ab7f4,Unknown,-,pytorch,,-,-,-,0.3637114157,0.8406553374,-,0.8770121489
+vae decoder,diffusers,Decoder,0,FALSE,66269573,2,d2afe38b,Unknown,-,pytorch,,-,-,-,0.3611344424,0.7418232932,-,0.9520182421
+vgg11,torch hub,VGG,0,FALSE,132857448,4,b38617af,Unknown,-,pytorch,,-,-,-,0.10072794,-,-,0.3415078108
+vgg11 bn,torch hub,VGG,0,FALSE,132857448,4,8550040,Unknown,-,pytorch,,-,-,-,0.2154195709,0.7010413771,-,0.8456017941
+vgg13,torch hub,VGG,0,FALSE,133041768,4,20ce33fd,Unknown,-,pytorch,,-,-,-,0.2492563273,0.6163820998,-,0.04209412966
+vgg13 bn,torch hub,VGG,0,FALSE,133041768,4,20dffe7e,Unknown,-,pytorch,,-,-,-,0.1227538907,0.9464643567,-,0.638601289
+vgg16,torch hub,VGG,0,FALSE,138350184,4,b628f277,Unknown,-,pytorch,,-,-,-,0.1526868671,-,-,0.5968935779
+vgg16 bn,torch hub,VGG,0,FALSE,138350184,4,8e2b426b,Unknown,-,pytorch,,-,-,-,0.3341611381,0.8792166923,-,0.8928780708
+vgg19 bn,torch hub,VGG,0,FALSE,143658600,4,bc2392e4,Unknown,-,pytorch,,-,-,-,0.004910818768,0.7572185912,-,0.9926552952
+vgg19,torch hub,VGG,0,FALSE,143658600,4,d889f054,Unknown,-,pytorch,,-,-,-,0.09992229048,0.3934931812,-,0.3968043966
+vit,huggingface pytorch,ViTModel,0,FALSE,86271166,2,993623dd,Unknown,-,pytorch,,-,-,-,0.08736076017,-,-,0.6170905797
+vit b 16,torch hub,VisionTransformer,0,FALSE,86497183,2,dd47dfd6,Unknown,-,pytorch,,-,-,-,0.1720082632,0.8292088496,-,0.6260986518
+vit b 32,torch hub,VisionTransformer,0,TRUE,88153759,2,48d88bc1,Unknown,-,pytorch,,-,-,-,0.08565818297,0.2875190457,-,0.5313556644
+vit h 14,torch hub,VisionTransformer,0,FALSE,631723703,16,c682724f,Unknown,-,pytorch,,-,-,-,0.2972181118,0.05994937867,-,0.2917794972
+vit l 16,torch hub,VisionTransformer,0,FALSE,304134471,8,44b6c5a5,Unknown,-,pytorch,,-,-,-,0.1740351667,0.913958232,-,0.7577796257
+vit l 32,torch hub,VisionTransformer,0,TRUE,306343239,8,f137eddc,Unknown,-,pytorch,,-,-,-,0.06582312325,0.86291783,-,0.1090945909
+wide resnet101 2,torch hub,ResNet,0,FALSE,126752872,4,0eb07645,Unknown,-,pytorch,,-,-,-,0.2604837632,0.2180280201,-,0.809231502
+wide resnet50 2,torch hub,ResNet,0,TRUE,68819048,2,fd743f94,Unknown,-,pytorch,,-,-,-,0.1370250815,0.01156058265,-,0.6298108722
+xglm,huggingface pytorch,XGLMModel,0,FALSE,566264670,16,41f01198,Unknown,-,pytorch,,-,-,-,0.1790696644,0.970793283,-,0.9201076994
+xlm,huggingface pytorch,XLMModel,0,FALSE,665991453,16,6918ed2c,Unknown,-,pytorch,,-,-,-,0.2946550926,0.0619859172,-,0.4852305783
+xlm roberta,huggingface pytorch,XLMRobertaModel,0,TRUE,109461696,4,a0532c05,Unknown,-,pytorch,,-,-,-,0.2109165167,0.04920299384,-,0.2057686784
+xlnet,huggingface pytorch,XLNetModel,0,FALSE,341121042,8,5cfcb429,Unknown,-,pytorch,,-,-,-,0.2477836723,0.937412215,-,0.04126296064
+yolos tiny for object detection,huggingface pytorch,YolosForObjectDetection,0,FALSE,6488935,1,8f6a6a55,Unknown,-,pytorch,,-,-,-,0.3311648236,0.136900365,-,0.7939705911

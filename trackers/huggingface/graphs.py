@@ -1,0 +1,584 @@
+from collections import Counter
+from streamlit_echarts import st_echarts  # pylint: disable=import-error
+import numpy as np
+import pandas as pd
+import streamlit as st  # pylint: disable=import-error
+import plotly.figure_factory as ff
+from plotly import graph_objs as go
+import plotly.express as px
+from statistics import median
+
+colors = {
+    "blue": "#5470c6",
+    "orange": "#FF7F0E",
+    "green": "#94cc74",
+    "saffron_mango": "#fac858",
+    "red": "#ee6666",
+    "light_blue": "#73c0de",
+    "ocean_green": "#3ba272",
+}
+
+
+class StageCount:
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.all_models = len(df)
+        self.base_onnx = int(np.sum(df["base_onnx"]))
+        self.optimized_onnx = int(np.sum(df["optimized_onnx"]))
+        self.all_ops_supported = int(np.sum(df["all_ops_supported"]))
+        self.fp16_onnx = int(np.sum(df["fp16_onnx"]))
+        self.compiles = int(np.sum(df["compiles"]))
+        self.assembles = int(np.sum(df["assembles"]))
+
+
+def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> None:
+    """
+    Show count of how many models compile, assemble, etc
+    """
+    current = StageCount(current_df)
+    prev = StageCount(prev_df)
+
+    kpi = st.columns(7)
+
+    kpi[0].metric(
+        label="All models",
+        value=current.all_models,
+        delta=current.all_models - prev.all_models,
+    )
+
+    kpi[1].metric(
+        label="Convert to ONNX",
+        value=current.base_onnx,
+        delta=current.base_onnx - prev.base_onnx,
+    )
+
+    kpi[2].metric(
+        label="Optimize ONNX file",
+        value=current.optimized_onnx,
+        delta=current.optimized_onnx - prev.optimized_onnx,
+    )
+
+    kpi[3].metric(
+        label="All ops supported",
+        value=current.all_ops_supported,
+        delta=current.all_ops_supported - prev.all_ops_supported,
+    )
+
+    kpi[4].metric(
+        label="Converts to FP16",
+        value=current.fp16_onnx,
+        delta=current.fp16_onnx - prev.fp16_onnx,
+    )
+
+    kpi[5].metric(
+        label="Compiles",
+        value=current.compiles,
+        delta=current.compiles - prev.compiles,
+    )
+
+    kpi[6].metric(
+        label="Assembles",
+        value=current.assembles,
+        delta=current.assembles - prev.assembles,
+    )
+
+    # Show Sankey graph with percentages
+    sk_val = {
+        "All models": "100%",
+        "Convert to ONNX": str(int(100 * current.base_onnx / current.all_models)) + "%",
+        "Optimize ONNX file": str(
+            int(100 * current.optimized_onnx / current.all_models)
+        )
+        + "%",
+        "All ops supported": str(
+            int(100 * current.all_ops_supported / current.all_models)
+        )
+        + "%",
+        "Converts to FP16": str(int(100 * current.fp16_onnx / current.all_models))
+        + "%",
+        "Compiles": str(int(100 * current.compiles / current.all_models)) + "%",
+        "Assembles": str(int(100 * current.assembles / current.all_models)) + "%",
+    }
+    option = {
+        "series": {
+            "type": "sankey",
+            "animationDuration": 1,
+            "top": "0%",
+            "bottom": "20%",
+            "left": "0%",
+            "right": "13.5%",
+            "darkMode": "true",
+            "nodeWidth": 2,
+            "textStyle": {"fontSize": 16},
+            "lineStyle": {"curveness": 0},
+            "layoutIterations": 0,
+            "layout": "none",
+            "emphasis": {"focus": "adjacency"},
+            "data": [
+                {
+                    "name": "All models",
+                    "value": sk_val["All models"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Convert to ONNX",
+                    "value": sk_val["Convert to ONNX"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Optimize ONNX file",
+                    "value": sk_val["Optimize ONNX file"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "All ops supported",
+                    "value": sk_val["All ops supported"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Converts to FP16",
+                    "value": sk_val["Converts to FP16"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Compiles",
+                    "value": sk_val["Compiles"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Assembles",
+                    "value": sk_val["Assembles"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+            ],
+            "label": {
+                "position": "insideTopLeft",
+                "borderWidth": 0,
+                "fontSize": 16,
+                "color": "white",
+                "textBorderWidth": 0,
+                "formatter": "{c}",
+            },
+            "links": [
+                {
+                    "source": "All models",
+                    "target": "Convert to ONNX",
+                    "value": current.base_onnx,
+                },
+                {
+                    "source": "Convert to ONNX",
+                    "target": "Optimize ONNX file",
+                    "value": current.optimized_onnx,
+                },
+                {
+                    "source": "Optimize ONNX file",
+                    "target": "All ops supported",
+                    "value": current.all_ops_supported,
+                },
+                {
+                    "source": "All ops supported",
+                    "target": "Converts to FP16",
+                    "value": current.fp16_onnx,
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Compiles",
+                    "value": current.compiles,
+                },
+                {
+                    "source": "Compiles",
+                    "target": "Assembles",
+                    "value": current.assembles,
+                },
+            ],
+        }
+    }
+    st_echarts(
+        options=option,
+        height="50px",
+    )
+
+
+def workload_origin(df: pd.DataFrame) -> None:
+    """
+    Show pie chart that groups models by author
+    """
+    all_authors = list(df.loc[:, "author"])
+    author_count = {i: all_authors.count(i) for i in all_authors}
+    all_models = len(df)
+
+    options = {
+        "darkMode": "true",
+        "textStyle": {"fontSize": 16},
+        "tooltip": {"trigger": "item"},
+        "series": [
+            {  # "Invisible" chart, used to show author labels
+                "name": "Name of corpus:",
+                "type": "pie",
+                "radius": ["70%", "70%"],
+                "data": [
+                    {"value": author_count[k], "name": k} for k in author_count.keys()
+                ],
+                "label": {
+                    "formatter": "{b}\n{d}%",
+                },
+            },
+            {
+                # Actual graph where data is shown
+                "name": "Name of corpus:",
+                "type": "pie",
+                "radius": ["50%", "70%"],
+                "data": [
+                    {"value": author_count[k], "name": k} for k in author_count.keys()
+                ],
+                "emphasis": {
+                    "itemStyle": {
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 0,
+                        "shadowColor": "rgba(0, 0, 0, 0.5)",
+                    }
+                },
+                "label": {
+                    "position": "inner",
+                    "formatter": "{c}",
+                    "color": "black",
+                    "textBorderWidth": 0,
+                },
+            },
+            {
+                # Show total number of models inside
+                "name": "Total number of models:",
+                "type": "pie",
+                "radius": ["0%", "0%"],
+                "data": [{"value": all_models, "name": "Total"}],
+                "silent": "true",
+                "label": {
+                    "position": "inner",
+                    "formatter": "{c}",
+                    "color": "white",
+                    "fontSize": 30,
+                    "textBorderWidth": 0,
+                },
+            },
+        ],
+    }
+    st_echarts(
+        options=options,
+        height="400px",
+    )
+
+
+def parameter_histogram(df: pd.DataFrame, show_assembled=True) -> None:
+    # Add parameters histogram
+    all_models = [float(x) / 1000000 for x in df["params"] if x != "-"]
+
+    hist_data = []
+    group_labels = []
+
+    if all_models != []:
+        hist_data.append(all_models)
+        if show_assembled:
+            group_labels.append("Models we tried compiling")
+        else:
+            group_labels.append("All models")
+
+    if show_assembled:
+        assembled_models = df[
+            df["assembles"] == True  # pylint: disable=singleton-comparison
+        ]
+        assembled_models = [
+            float(x) / 1000000 for x in assembled_models["params"] if x != "-"
+        ]
+        if assembled_models != []:
+            hist_data.append(assembled_models)
+            group_labels.append("Assembled models")
+
+    if hist_data:
+        fig = ff.create_distplot(
+            hist_data,
+            group_labels,
+            bin_size=25,
+            histnorm="",
+            colors=list(colors.values()),
+            curve_type="normal",
+        )
+        fig.layout.update(xaxis_title="Parameters in millions")
+        fig.layout.update(yaxis_title="count")
+        fig.update_xaxes(range=[1, 1000])
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    else:
+        st.markdown(
+            """At least one model needs to reach the compiler to show this graph 😅"""
+        )
+
+
+def speedup_bar_chart_legacy(df: pd.DataFrame) -> None:
+    """
+    This function will be removed when we start getting CPU numbers for the daily tests
+    """
+
+    # Prepare data
+    assembles = np.sum(df["assembles"])
+    df = df[["model_name", "tsp_gpu_compute_ratio", "tsp_gpu_e2e_ratio"]]
+    df = df.sort_values(by=["model_name"])
+    df = df[(df.tsp_gpu_compute_ratio != "-")]
+    df = df[(df.tsp_gpu_e2e_ratio != "-")]
+    df["tsp_gpu_compute_ratio"] = df["tsp_gpu_compute_ratio"].astype(float)
+    df["tsp_gpu_e2e_ratio"] = df["tsp_gpu_e2e_ratio"].astype(float)
+
+    if len(df) == 0 and assembles > 0:
+        st.markdown(
+            (
+                "We do not have GPU numbers for the model(s) mapped to the GroqChip."
+                " This is potentially due to lack of out-of-the-box TensorRT support."
+            )
+        )
+    elif assembles == 0:
+        st.markdown(
+            "Nothing to show here since no models have been successfully assembled."
+        )
+    else:
+        data = [
+            go.Bar(
+                x=df["model_name"],
+                y=df["tsp_gpu_compute_ratio"],
+                name="Compute only",
+            ),
+            go.Bar(
+                x=df["model_name"],
+                y=df["tsp_gpu_e2e_ratio"],
+                name="Compute + estimated I/O",
+            ),
+        ]
+
+        layout = go.Layout(
+            barmode="overlay",
+            yaxis_title="Speedup compared to A100 GPU",
+            colorway=list(colors.values()),
+        )
+
+        fig = dict(data=data, layout=layout)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown(
+            (
+                "<sup>*</sup>Estimated I/O does NOT include delays caused by Groq's runtime. "
+                "See FAQ for details."
+            ),
+            unsafe_allow_html=True,
+        )
+
+
+def speedup_text_summary_legacy(df: pd.DataFrame) -> None:
+    # pylint: disable=line-too-long
+    """
+    This function will be removed when we start getting CPU numbers for the daily tests
+    """
+
+    # Remove empty elements and convert to float
+    df = df[(df.tsp_gpu_compute_ratio != "-")]
+    df = df[(df.tsp_gpu_e2e_ratio != "-")]
+    df["tsp_gpu_compute_ratio"] = df["tsp_gpu_compute_ratio"].astype(float)
+    df["tsp_gpu_e2e_ratio"] = df["tsp_gpu_e2e_ratio"].astype(float)
+
+    # Show stats
+    st.markdown(
+        f"""<br><br><br><br><br><br>
+            <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Average speedup of GroqChip™ considering compute only:</p>
+            <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 26px;text-align: center;"> {round(df["tsp_gpu_compute_ratio"].mean(),2)}x</p>
+            <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 20px;text-align: center;"> min {round(df["tsp_gpu_compute_ratio"].min(),2)}x; median {round(median(df["tsp_gpu_compute_ratio"]),2)}x; max {round(df["tsp_gpu_compute_ratio"].max(),2)}x</p>
+            <br><br>
+            <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Average speedup of GroqChip™ considering compute + estimated I/O<sup>*</sup>:</p>
+            <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {round(df["tsp_gpu_e2e_ratio"].mean(),2)}x</p>
+            <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {round(df["tsp_gpu_e2e_ratio"].min(),2)}x; median {round(median(df["tsp_gpu_e2e_ratio"]),2)}x; max {round(df["tsp_gpu_e2e_ratio"].max(),2)}x</p>""",
+        unsafe_allow_html=True,
+    )
+
+
+def process_latency_data(df):
+    df = df[
+        ["model_name", "tsp_estimated_e2e_latency", "gpu_e2e_latency", "x86_latency"]
+    ]
+    df = df.sort_values(by=["model_name"])
+    df.tsp_estimated_e2e_latency.replace(["-"], [float("inf")], inplace=True)
+    df.gpu_e2e_latency.replace(["-"], [float("inf")], inplace=True)
+    df = df[(df.x86_latency != "-")]
+    df["tsp_estimated_e2e_latency"] = df["tsp_estimated_e2e_latency"].astype(float)
+    df["gpu_e2e_latency"] = df["gpu_e2e_latency"].astype(float)
+    df["x86_latency"] = df["x86_latency"].astype(float)
+    df["tsp_cpu_compute_ratio"] = df["x86_latency"] / df["tsp_estimated_e2e_latency"]
+    df["gpu_cpu_compute_ratio"] = df["x86_latency"] / df["gpu_e2e_latency"]
+
+    return df
+
+
+def speedup_bar_chart(df: pd.DataFrame) -> None:
+
+    if len(df) == 0:
+        st.markdown(
+            ("Nothing to show here since no models have been successfully benchmarked.")
+        )
+    else:
+        df = process_latency_data(df)
+        data = [
+            go.Bar(
+                x=df["model_name"],
+                y=df["gpu_cpu_compute_ratio"],
+                name="NVIDIA A100",
+            ),
+            go.Bar(
+                x=df["model_name"],
+                y=df["tsp_cpu_compute_ratio"],
+                name="GroqChip 1",
+            ),
+            go.Bar(
+                x=df["model_name"],
+                y=df["x86_latency"] * 0 + 1,
+                name="Intel(R) Xeon(R)",
+            ),
+        ]
+
+        layout = go.Layout(
+            barmode="overlay",  # group
+            legend={
+                "orientation": "h",
+                "xanchor": "center",
+                "x": 0.5,
+                "y": 1.2,
+            },
+            yaxis_title="Latency Speedup",
+            colorway=[colors["green"], colors["orange"], colors["blue"]],
+            height=500,
+        )
+
+        fig = dict(data=data, layout=layout)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown(
+            "<sup>*</sup>Estimated I/O does NOT include delays caused by Groq's runtime.",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "<sup>†</sup>Baseline corresponds to Intel(R) Xeon(R) X40 CPU @ 2.00GHz.",
+            unsafe_allow_html=True,
+        )
+
+
+def speedup_text_summary(df: pd.DataFrame) -> None:
+    # pylint: disable=line-too-long
+
+    df = process_latency_data(df)
+
+    # Some latencies are "infinite" because they could not be calculated
+    # As a result, some compute ratios are zero. Remove those from the calculations
+    print(df.tsp_cpu_compute_ratio)
+    gpu_cpu_compute_ratio = df["gpu_cpu_compute_ratio"].to_numpy()
+    tsp_cpu_compute_ratio = df["tsp_cpu_compute_ratio"].to_numpy()
+    gpu_cpu_compute_ratio = gpu_cpu_compute_ratio[gpu_cpu_compute_ratio != 0]
+    tsp_cpu_compute_ratio = tsp_cpu_compute_ratio[tsp_cpu_compute_ratio != 0]
+
+    if len(gpu_cpu_compute_ratio) > 0:
+        gpu_min, gpu_mean, gpu_avg, gpu_max = (
+            round(gpu_cpu_compute_ratio.min(), 2),
+            round(median(gpu_cpu_compute_ratio), 2),
+            round(gpu_cpu_compute_ratio.mean(), 2),
+            round(gpu_cpu_compute_ratio.max(), 2),
+        )
+    else:
+        gpu_min, gpu_mean, gpu_avg, gpu_max = 0, 0, 0, 0
+
+    if len(tsp_cpu_compute_ratio) > 0:
+        tsp_min, tsp_mean, tsp_avg, tsp_max = (
+            round(tsp_cpu_compute_ratio.min(), 2),
+            round(median(tsp_cpu_compute_ratio), 2),
+            round(tsp_cpu_compute_ratio.mean(), 2),
+            round(tsp_cpu_compute_ratio.max(), 2),
+        )
+    else:
+        tsp_min, tsp_mean, tsp_avg, tsp_max = 0, 0, 0, 0
+
+    # Show stats
+    st.markdown(
+        f"""<br><br><br><br>
+        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Intel(R) Xeon(R) X40 CPU @ 2.00GHz Acceleration ({len(df["x86_latency"])} models):</p>
+        <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>
+        <br><br>
+        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">NVIDIA A100-PCIE-40GB Acceleration ({len(gpu_cpu_compute_ratio)} models):</p>
+        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 26px;text-align: center;"> {gpu_avg}x</p>
+        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 20px;text-align: center;"> min {gpu_min}x; median {gpu_mean}x; max {gpu_max}x</p>
+        <br><br>
+        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">GroqChip 1 Acceleration<sup>*</sup> ({len(tsp_cpu_compute_ratio)} models):</p>
+        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {tsp_avg}x</p>
+        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {tsp_min}x; median {tsp_mean}x; max {tsp_max}x</p>""",
+        unsafe_allow_html=True,
+    )
+
+
+def compiler_errors(df: pd.DataFrame) -> None:
+    compiler_errors = df[df["compiler_error"] != "-"]["compiler_error"]
+    compiler_errors = Counter(compiler_errors)
+    if len(compiler_errors) > 0:
+        compiler_errors = pd.DataFrame.from_dict(
+            compiler_errors, orient="index"
+        ).reset_index()
+        compiler_errors = compiler_errors.set_axis(
+            ["error", "count"], axis=1, inplace=False
+        )
+        compiler_errors["error"] = [ce[:80] for ce in compiler_errors["error"]]
+        fig = px.bar(
+            compiler_errors,
+            x="count",
+            y="error",
+            orientation="h",
+            height=400,
+        )
+        fig.update_traces(marker_color=colors["blue"])
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.markdown("""No compiler errors found :tada:""")
+
+
+def io_fraction(df: pd.DataFrame) -> None:
+    fig = go.Figure()
+    for chips in ["1", "2", "4", "8"]:
+        tmp = df[[model_entry == chips for model_entry in df["chips_used"]]]
+        if len(tmp) == 0:
+            continue
+        tmp = tmp[[model_entry != "-" for model_entry in tmp["tsp_compute_latency"]]]
+        if len(tmp) == 0:
+            continue
+        tmp = tmp[
+            [model_entry != "-" for model_entry in tmp["tsp_estimated_e2e_latency"]]
+        ]
+        if len(tmp) == 0:
+            continue
+        print(len(tmp))
+        compute_latency = tmp["tsp_compute_latency"].astype("float")
+        e2e_latency = tmp["tsp_estimated_e2e_latency"].astype("float")
+
+        io_fraction = 1 - compute_latency / e2e_latency
+        if chips == "1":
+            name = f"{chips} GroqChip ({len(tmp)} models)"
+        else:
+            name = f"{chips} GroqChips \n({len(tmp)} models)"
+        fig.add_trace(
+            go.Box(
+                y=io_fraction,
+                name=name,
+            )
+        )
+
+    fig.layout.update(xaxis_title="Models compiled for X GroqChip Processors")
+    fig.layout.update(yaxis_title="Estimated fraction of time (in %) spent on I/O")
+    fig.layout.update(colorway=list(colors.values()))
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def results_table(df: pd.DataFrame):
+    model_name = st.text_input("", placeholder="Filter model by name")
+    if model_name != "":
+        df = df[[model_name in x for x in df["model_name"]]]
+
+    st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
