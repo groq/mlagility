@@ -159,7 +159,7 @@ class Testing(unittest.TestCase):
         state = get_build_state(cache_dir, build_name)
         assert state.build_status == build.Status.SUCCESSFUL_BUILD
         assert os.path.isfile(
-            os.path.join(cache_dir, build_name, "x86_benchmark/output.json")
+            os.path.join(cache_dir, build_name, "x86_benchmark/outputs.json")
         )
         assert perf.mean_latency > 0
         assert perf.throughput > 0
