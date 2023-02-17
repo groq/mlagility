@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 from dataclasses import dataclass
+import glob
 from typing import Callable, List, Union
 import inspect
 import torch
@@ -66,27 +67,22 @@ check_ops_keras = stage.Sequence(
 
 def clean_output_dir(output_dir: str = filesystem.DEFAULT_CACHE_DIR) -> None:
     """
-    Delete all elements of the output directory that are not text files
+    Delete all elements of the output directory that are not human readable
     """
     output_dir = os.path.expanduser(output_dir)
-    ext_list = [".txt", ".out", ".yaml", ".json"]
-    benchmarking_folders = [
-        os.path.join(output_dir, f"{device}_benchmark")
-        for device in ["groq", "x86", "nvidia"]
-    ]
-    for filename in os.listdir(output_dir):
-        file_path = os.path.join(output_dir, filename)
-        if os.path.isfile(file_path) and not any(
-            [ext in file_path for ext in ext_list]
-        ):
-            os.remove(file_path)
-        elif (
-            file_path == os.path.join(output_dir, "compile")
-            or file_path in benchmarking_folders
-        ):
-            clean_output_dir(file_path)
-        elif os.path.isdir(file_path):
-            shutil.rmtree(file_path)
+
+    # Remove files that do not have an allowed extension
+    allowed_extensions = (".txt", ".out", ".yaml", ".json")
+    all_paths = glob.glob(f"{output_dir}/**/*", recursive=True)
+    for path in all_paths:
+        if os.path.isfile(path) and not path.endswith(allowed_extensions):
+            os.remove(path)
+
+    # Remove all empty folders
+    for path in all_paths:
+        if os.path.isdir(path):
+            if len(os.listdir(path)) == 0:
+                shutil.rmtree(path)
 
 
 def count_parameters(model: torch.nn.Module, model_type: build.ModelType) -> int:
