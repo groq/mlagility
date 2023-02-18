@@ -139,7 +139,6 @@ def benchmark_script(
             )
 
     # Use this data structure to keep a running index of all models
-    # found across all scripts when running in --all mode
     models_found: Dict[str, ModelInfo] = {}
 
     for script in scripts:

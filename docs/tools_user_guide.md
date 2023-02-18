@@ -293,9 +293,9 @@ You can see the options available for any command by running `benchit COMMAND --
 
 The `benchmark` command supports the arguments from [Devices and Runtimes](#devices-and-runtimes), as well as:
 
-### Input Script
+### Input Scripts
 
-Name of the script (.py) file, within the search directory, to be benchmarked.
+Name of the script (.py) files to be benchmarked.
 
 Usage: 
 - `benchit INPUT_SCRIPTS` 
@@ -310,35 +310,17 @@ Available as an API argument:
 
 > See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 
-### Search Directory
-
-Path to a directory (defaults to the command line command line location), which serves as the search path for input scripts.
-
-Usage:
-- `benchit benchmark INPUT_SCRIPTS --search-dir SEARCH_DIR`
-  - Benchmark script INPUT_SCIPT which can be found in directory SEARCH_DIR.
-- `benchit benchmark --search-dir SEARCH_DIR --all`
-  - Benchmark all scripts which can be found in directory SEARCH_DIR.
-
-Available as an API argument:
-- `benchmark_script(search_dir=...)`
-
-> See the [Search Directory tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#search-directory) for a detailed example.
-
 ### Benchmark All Scripts
 
 Benchmark all models within all script (.py) files in the search directory.
 
 Usage:
-- `benchit benchmark --all`
+- `benchit benchmark *.py`
   - Benchmark all scripts which can be found at the command line location.
-- `benchit benchmark --search-dir SEARCH_DIR --all`
+- `benchit benchmark SEARCH_DIR/*.py`
   - Benchmark all scripts which can be found in directory SEARCH_DIR.
 
-Available as an API argument:
-- `benchmark_script(benchmark_all=True/False)`
-
-> See the [Benchmark All Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-all-scripts) for a detailed example.
+> See the [Benchmark Multiple Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-multiple-scripts) for a detailed example.
 
 ### Use Slurm
 
@@ -347,7 +329,7 @@ Execute the build(s) on Slurm instead of using local compute resources.
 Usage:
 - `benchit benchmark INPUT_SCRIPTS --use-slurm`
   - Use Slurm to run benchit on INPUT_SCRIPTS.
-- `benchit benchmark --all --search-dir SEARCH_DIR--use-slurm`
+- `benchit benchmark SEARCH_DIR/*.py --use-slurm`
   - Use Slurm to run benchit on all scripts in the search directory. Each script is evaluated as its on Slurm job (ie, all scripts can be evaluated in parallel on a sufficiently large Slurm cluster).
 
 Available as an API argument:

@@ -4,9 +4,17 @@ This directory contains the MLAgility benchmark, which is a large collection of 
 
 ## Table of Contents
 
-- [Benchmark Organization](#benchmark-organization)
-- [Running the Benchmark](#running-the-benchmark)
-- [Model Template](#model-template)
+- [MLAgility Benchmark](#mlagility-benchmark)
+  - [Table of Contents](#table-of-contents)
+  - [Benchmark Organization](#benchmark-organization)
+  - [Running the Benchmark](#running-the-benchmark)
+    - [Prerequisites](#prerequisites)
+    - [Benchmarking Commands](#benchmarking-commands)
+  - [Model Template](#model-template)
+    - [Input Scripts](#input-scripts)
+    - [Labels](#labels)
+    - [Parameters](#parameters)
+    - [Example Script](#example-script)
 
 ## Benchmark Organization
 
@@ -47,7 +55,7 @@ benchit benchmark linear.py --search-dir selftest
 You can also evaluate an entire corpus with a command like this:
 ```
 cd MLAGILITY_ROOT/models # MLAGILITY_ROOT is where you cloned mlagility
-benchit benchmark --all --search-dir selftest
+benchit models/selftest/*.py
 ```
 
 You can aggregate all of the benchmarking results from your `mlagility cache` into a CSV file with:

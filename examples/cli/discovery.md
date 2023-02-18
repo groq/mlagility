@@ -58,7 +58,7 @@ If you want to benchmark an entire corpus of models, but you don't want to call 
 For example, the command:
 
 ```
-benchit models/*/*.py
+benchit models/selftest/*.py
 ```
 
 Will iterate over every model in every script in the `scripts` directory, producing a result like this:
