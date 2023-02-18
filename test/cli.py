@@ -111,7 +111,7 @@ if dirpath.is_dir():
 os.makedirs(test_dir)
 os.chdir(test_dir)
 
-corpus_dir = "test_corpus"
+corpus_dir = os.path.join(os.getcwd(), "test_corpus")
 extras_dir = os.path.join(corpus_dir, "extras")
 os.makedirs(extras_dir, exist_ok=True)
 
@@ -201,8 +201,8 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            list(test_scripts_dot_py.keys())[0],
-            list(test_scripts_dot_py.keys())[1],
+            os.path.join(corpus_dir, test_scripts[0]),
+            os.path.join(corpus_dir, test_scripts[1]),
             "--build-only",
             "--cache-dir",
             cache_dir,
