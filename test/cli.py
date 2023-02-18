@@ -3,7 +3,8 @@ Tests focused on the command-level functionality of benchit CLI
 """
 
 import os
-from typing import List, Tuple, Any
+import glob
+from typing import List, Tuple, Any, Union
 import unittest
 from unittest.mock import patch
 import sys
@@ -132,6 +133,26 @@ def strip_dot_py(test_script_file: str) -> str:
     return test_script_file.split(".")[0]
 
 
+def bash(cmd: str) -> List[str]:
+    """
+    Emulate behavior of bash terminal when listing files
+    """
+    return glob.glob(cmd)
+
+
+def flatten(lst: List[Union[str, List[str]]]) -> List[str]:
+    """
+    Flatten List[Union[str, List[str]]] into a List[str]
+    """
+    flattened = []
+    for element in lst:
+        if isinstance(element, list):
+            flattened.extend(element)
+        else:
+            flattened.append(element)
+    return flattened
+
+
 def assert_success_of_builds(
     test_script_files: List[str],
     info_property: Tuple[str, Any] = None,
@@ -224,12 +245,12 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            f"{corpus_dir}/*.py",
+            bash(f"{corpus_dir}/*.py"),
             "--build-only",
             "--cache-dir",
             cache_dir,
         ]
-        with patch.object(sys, "argv", testargs):
+        with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
 
         assert_success_of_builds(test_scripts)
@@ -249,12 +270,12 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            f"{corpus_dir}/*.py",
+            bash(f"{corpus_dir}/*.py"),
             "--build-only",
             "--cache-dir",
             cache_dir,
         ]
-        with patch.object(sys, "argv", testargs):
+        with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
 
         testargs = [
@@ -287,12 +308,12 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            f"{corpus_dir}/*.py",
+            bash(f"{corpus_dir}/*.py"),
             "--build-only",
             "--cache-dir",
             cache_dir,
         ]
-        with patch.object(sys, "argv", testargs):
+        with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
 
         # Make sure we can list the builds in the cache
@@ -322,12 +343,12 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            f"{corpus_dir}/*.py",
+            bash(f"{corpus_dir}/*.py"),
             "--build-only",
             "--cache-dir",
             cache_dir,
         ]
-        with patch.object(sys, "argv", testargs):
+        with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
 
         # Make sure we can list the builds in the cache
@@ -384,12 +405,12 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            f"{corpus_dir}/*.py",
+            bash(f"{corpus_dir}/*.py"),
             "--build-only",
             "--cache-dir",
             cache_dir,
         ]
-        with patch.object(sys, "argv", testargs):
+        with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
 
         # Make sure we can print the builds in the cache
