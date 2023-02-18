@@ -96,7 +96,14 @@ def benchmark_script(
 
     # Validate that the script exists
     for script in clean_scripts:
-        if not (os.path.isfile(script) and script.endswith(".py")):
+        if os.path.isdir(script):
+            raise exceptions.GroqitArgError(
+                f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
+            )
+        if not os.path.isfile(script):
+            raise exceptions.GroqitArgError(f"Script {script} could not be found")
+        if not script.endswith(".py"):
+            raise exceptions.GroqitArgError(f"Script must end with .py (got {script})")
 
     # Get absolute path of scripts
     scripts = [os.path.abspath(s) for s in clean_scripts]

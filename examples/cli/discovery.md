@@ -1,11 +1,13 @@
 # Guiding Model Discovery
 
 This chapter of the `benchit` CLI tutorial is focused on how to guide the tool as it discovers models. You will learn things such as:
-- [How to run model discovery, without spending time on builds or benchmarking](#analyze-only)
-- [How to tell `benchit` where to look for the scripts that contain models](#search-directory)
-- [How to benchmark all the models in all the scripts in a directory](#benchmark-all-scripts)
-- [How to analyze the building blocks of a model](#maximum-analysis-depth)
-- [How to filter which models are passed to the build and benchmark operations](#filtering-model-hashes)
+- [Guiding Model Discovery](#guiding-model-discovery)
+- [Model Discovery Tutorials](#model-discovery-tutorials)
+  - [Analyze Only](#analyze-only)
+  - [Benchmark Multiple Scripts](#benchmark-multiple-scripts)
+    - [Maximum Analysis Depth](#maximum-analysis-depth)
+  - [Filtering Model Hashes](#filtering-model-hashes)
+- [Thanks!](#thanks)
 
 The tutorial chapters are:
 1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
@@ -49,34 +51,14 @@ You can see that the model is discovered, and some stats are printed, but no bui
 
 > See the [Analyze Only documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#analyze-only) for more details.
 
-## Search Directory
+## Benchmark Multiple Scripts
 
-The `--search-dir` argument to `benchit` (shorthand: `-s`) is useful for pointing `benchit` to look for the input script in a directory other than the current command line location.
-
-For example, the command:
-
-```
-benchit benchmark scripts/hello_world.py
-```
-
-is equivalent to the command:
-
-```
-benchit benchmark hello_world.py --search-dir scripts
-```
-
-The `--search-dir` argument is not very exciting on its own, however you can see the [Benchmark All](#benchmark-all) tutorial to see how it is powerful when combined with the `--all` argument.
-
-> See the [Search Directory documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#search-directory) for more details.
-
-## Benchmark All Scripts
-
-If you want to benchmark an entire corpus of models, but you don't want to call `benchit` individually on each model, then the `--all` argument is for you. `--all` will instruct `benchit` it iterate over every script in the search directory.
+If you want to benchmark an entire corpus of models, but you don't want to call `benchit` individually on each model you may provide more than one python file to benchit at a time.
 
 For example, the command:
 
 ```
-benchit benchmark --all --search-dir scripts
+benchit models/*/*.py
 ```
 
 Will iterate over every model in every script in the `scripts` directory, producing a result like this:
