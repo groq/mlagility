@@ -102,7 +102,7 @@ def main():
     benchmark_parser.add_argument(
         "input_scripts",
         nargs="+",
-        help="One or more script (.py) files." "to be benchmarked",
+        help="One or more script (.py) files to be benchmarked",
     )
 
     benchmark_parser.add_argument(
