@@ -1,6 +1,7 @@
 import time
 import os
 import types
+import glob
 import importlib.machinery
 from typing import Tuple, List, Dict, Optional, Union
 import groqflow.common.printing as printing
@@ -33,9 +34,7 @@ def decode_script_name(input: str) -> Tuple[str, List[str]]:
 
 
 def benchmark_script(
-    search_dir: str = os.getcwd(),
-    input_script: str = None,
-    benchmark_all: bool = False,
+    input_scripts: str = None,
     use_slurm: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
@@ -92,28 +91,15 @@ def benchmark_script(
             "node and your local machine."
         )
 
-    # Get a specific list of models to process
-    available_scripts = filesystem.get_available_scripts(search_dir)
+    # Ignore everything after the '::' symbol, if there is one
+    clean_scripts = [script.split("::")[0] for script in input_scripts]
 
-    # Filter based on the model names provided by the user
-    if benchmark_all:
-        scripts = [os.path.join(search_dir, script) for script in available_scripts]
-    else:
-        user_script_path = os.path.join(search_dir, input_script)
-
-        # Ignore everything after the ':' symbol, if there is one
-        clean_user_script_path = user_script_path.split(":")[0]
-
-        # Validate that the script exists
-        if os.path.exists(clean_user_script_path):
-            scripts = [user_script_path]
-        else:
-            raise exceptions.GroqitArgError(
-                f"Script could not be found: {user_script_path}"
-            )
+    # Validate that the script exists
+    for script in clean_scripts:
+        if not (os.path.isfile(script) and script.endswith(".py")):
 
     # Get absolute path of scripts
-    scripts = [os.path.abspath(s) for s in scripts]
+    scripts = [os.path.abspath(s) for s in clean_scripts]
 
     # Decode benchit args into TracerArgs flags
     if analyze_only:
@@ -155,7 +141,6 @@ def benchmark_script(
                 slurm.run_benchit(
                     op="benchmark",
                     script=script,
-                    search_dir=search_dir,
                     cache_dir=cache_dir,
                     rebuild=rebuild,
                     groq_compiler_flags=groq_compiler_flags,

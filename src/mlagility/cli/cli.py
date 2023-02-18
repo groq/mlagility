@@ -49,9 +49,7 @@ def benchmark_script_argparse(args):
     """
 
     benchmark_script(
-        search_dir=args.search_dir,
-        input_script=args.input_script,
-        benchmark_all=args.benchmark_all,
+        input_scripts=args.input_scripts,
         use_slurm=args.use_slurm,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
@@ -102,29 +100,9 @@ def main():
     benchmark_parser.set_defaults(func=benchmark_script_argparse)
 
     benchmark_parser.add_argument(
-        "-s",
-        "--search-dir",
-        dest="search_dir",
-        help="Path to a directory (defaults to the command line location), "
-        "which serves as the search path for input scripts",
-        required=False,
-        default=os.getcwd(),
-    )
-
-    benchmark_group = benchmark_parser.add_mutually_exclusive_group(required=True)
-
-    benchmark_group.add_argument(
-        "input_script",
-        nargs="?",
-        help="Name of the script (.py) file, within the search directory, "
-        "to be benchmarked",
-    )
-
-    benchmark_group.add_argument(
-        "--all",
-        dest="benchmark_all",
-        help="Benchmark all models within all scripts in the search directory",
-        action="store_true",
+        "input_scripts",
+        nargs="+",
+        help="One or more script (.py) files." "to be benchmarked",
     )
 
     benchmark_parser.add_argument(
@@ -398,8 +376,7 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        script_name, _ = decode_script_name(sys.argv[1])
-        if sys.argv[1] not in subparsers.choices.keys() and script_name.endswith(".py"):
+        if sys.argv[1] not in subparsers.choices.keys():
             sys.argv.insert(1, "benchmark")
 
     args = parser.parse_args()

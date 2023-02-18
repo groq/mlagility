@@ -193,17 +193,16 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds([test_script])
 
-    def test_002_cli_search_dir(self):
+    def test_002_search_multiple(self):
 
         # Test the first model in the corpus
-        test_script = list(test_scripts_dot_py.keys())[0]
+        test_scripts = list(test_scripts_dot_py.keys())
 
         testargs = [
             "benchit",
             "benchmark",
-            test_script,
-            "-s",
-            corpus_dir,
+            list(test_scripts_dot_py.keys())[0],
+            list(test_scripts_dot_py.keys())[1],
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -211,7 +210,8 @@ class Testing(unittest.TestCase):
         with patch.object(sys, "argv", testargs):
             benchitcli()
 
-        assert_success_of_builds([test_script])
+        assert_success_of_builds([test_scripts[0]])
+        assert_success_of_builds([test_scripts[1]])
 
     def test_003_cli_build_dir(self):
 
@@ -224,9 +224,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            "--all",
-            "-s",
-            corpus_dir,
+            f"{corpus_dir}/*.py",
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -251,9 +249,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            "--all",
-            "-s",
-            corpus_dir,
+            f"{corpus_dir}/*.py",
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -291,9 +287,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            "--all",
-            "-s",
-            corpus_dir,
+            f"{corpus_dir}/*.py",
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -328,9 +322,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            "--all",
-            "-s",
-            corpus_dir,
+            f"{corpus_dir}/*.py",
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -392,9 +384,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            "--all",
-            "-s",
-            corpus_dir,
+            f"{corpus_dir}/*.py",
             "--build-only",
             "--cache-dir",
             cache_dir,
@@ -449,9 +439,7 @@ class Testing(unittest.TestCase):
         testargs = [
             "benchit",
             "benchmark",
-            test_script,
-            "-s",
-            corpus_dir,
+            os.path.join(corpus_dir, test_script),
             "--rebuild",
             "always",
             "--groq-num-chips",
