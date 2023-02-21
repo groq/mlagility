@@ -14,7 +14,7 @@ setup(
     package_dir={"": "src"},
     packages=["mlagility"],
     install_requires=[
-        "groqflow @ https://test-files.pythonhosted.org/packages/a0/96/2eba6c53f93e9aa1b9de3f80f01ac23db7256b62d31d932d9814a0367ed4/groqflow-3.0.1.tar.gz",
+        "groqflow @ https://test-files.pythonhosted.org/packages/dd/7a/88995b701257dfaef0b5044cca1f82f18a3eda33367f72b60126f82c89ee/groqflow-3.0.2.tar.gz",
         "invoke>=2.0.0",
     ],
     classifiers=[],
