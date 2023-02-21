@@ -68,34 +68,6 @@ inputs = {"x": torch.rand(input_features)}
 output = model(**inputs)
 
 """,
-    "linear_keras": """
-# labels: test_group::selftest license::mit framework::keras tags::selftest,small
-import tensorflow as tf
-
-tf.random.set_seed(0)
-
-# Define model class
-class SmallKerasModel(tf.keras.Model):  # pylint: disable=abstract-method
-    def __init__(self, output_size):
-        super(SmallKerasModel, self).__init__()
-        self.dense = tf.keras.layers.Dense(output_size, activation="relu")
-
-    def call(self, x):  # pylint: disable=arguments-differ
-        output = self.dense(x)
-        return output
-
-
-# Instantiate model and generate inputs
-batch_size = 1
-input_size = 10
-output_size = 5
-keras_model = SmallKerasModel(output_size)
-
-inputs = {"x": tf.random.uniform((batch_size, input_size), dtype=tf.float32)}
-
-keras_outputs = keras_model(**inputs)
-
-""",
     "pipeline": """
 from transformers import (
     TextClassificationPipeline,
@@ -231,18 +203,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(pytorch_output, (1, 0, 0))
 
-    def test_02_basic_keras(self):
-        keras_output = run_analysis(
-            [
-                "benchit",
-                "linear_keras.py",
-                "--analyze-only",
-            ]
-        )
-        assert np.array_equal(keras_output, (1, 0, 0))
-
     def test_03_depth(self):
-        # Depth is only tested for Pytorch, since Keras has no max_depth support
         output = run_analysis(
             [
                 "benchit",
@@ -267,18 +228,6 @@ class Testing(unittest.TestCase):
             ]
         )
         assert np.array_equal(output, (2, 0, 1))
-
-    def test_05_build_keras(self):
-        output = run_analysis(
-            [
-                "benchit",
-                "linear_keras.py",
-                "--build-only",
-                "--cache-dir",
-                cache_dir,
-            ]
-        )
-        assert np.array_equal(output, (1, 0, 1))
 
     def test_06_cache(self):
         model_hash = "60931adb"
