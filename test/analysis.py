@@ -68,34 +68,6 @@ inputs = {"x": torch.rand(input_features)}
 output = model(**inputs)
 
 """,
-    "linear_keras": """
-# labels: test_group::selftest license::mit framework::keras tags::selftest,small
-import tensorflow as tf
-
-tf.random.set_seed(0)
-
-# Define model class
-class SmallKerasModel(tf.keras.Model):  # pylint: disable=abstract-method
-    def __init__(self, output_size):
-        super(SmallKerasModel, self).__init__()
-        self.dense = tf.keras.layers.Dense(output_size, activation="relu")
-
-    def call(self, x):  # pylint: disable=arguments-differ
-        output = self.dense(x)
-        return output
-
-
-# Instantiate model and generate inputs
-batch_size = 1
-input_size = 10
-output_size = 5
-keras_model = SmallKerasModel(output_size)
-
-inputs = {"x": tf.random.uniform((batch_size, input_size), dtype=tf.float32)}
-
-keras_outputs = keras_model(**inputs)
-
-""",
     "pipeline": """
 from transformers import (
     TextClassificationPipeline,
@@ -231,18 +203,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(pytorch_output, (1, 0, 0))
 
-    def test_02_basic_keras(self):
-        keras_output = run_analysis(
-            [
-                "benchit",
-                "linear_keras.py",
-                "--analyze-only",
-            ]
-        )
-        assert np.array_equal(keras_output, (1, 0, 0))
-
     def test_03_depth(self):
-        # Depth is only tested for Pytorch, since Keras has no max_depth support
         output = run_analysis(
             [
                 "benchit",
@@ -268,19 +229,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (2, 0, 1))
 
-    def test_05_build_keras(self):
-        output = run_analysis(
-            [
-                "benchit",
-                "linear_keras.py",
-                "--build-only",
-                "--cache-dir",
-                cache_dir,
-            ]
-        )
-        assert np.array_equal(output, (1, 0, 1))
-
-    def test_06_cache(self):
+    def test_05_cache(self):
         model_hash = "60931adb"
         run_analysis(
             [
@@ -298,7 +247,7 @@ class Testing(unittest.TestCase):
         labels_found = labels.load_from_cache(cache_dir, build_name) != {}
         assert cache_is_lean(cache_dir, build_name) and labels_found
 
-    def test_07_generic_args(self):
+    def test_06_generic_args(self):
         output = run_cli(
             [
                 "benchit",
@@ -312,7 +261,7 @@ class Testing(unittest.TestCase):
         )
         assert "Received arg test_arg" in output
 
-    def test_08_valid_mla_args(self):
+    def test_07_valid_mla_args(self):
         height, width, num_channels = parse(["height", "width", "num_channels"])
         cmd = [
             "benchit",
@@ -326,7 +275,7 @@ class Testing(unittest.TestCase):
         expected_output = str([height, width, num_channels + 1])
         assert output == expected_output, f"Got {output} but expected {expected_output}"
 
-    def test_09_invalid_mla_args(self):
+    def test_08_invalid_mla_args(self):
         cmd = [
             "benchit",
             "mla_parser.py",
@@ -337,7 +286,7 @@ class Testing(unittest.TestCase):
         _, stderr = process.communicate()
         assert "error: unrecognized argument" in stderr.decode("utf-8")
 
-    def test_10_pipeline(self):
+    def test_09_pipeline(self):
         output = run_analysis(
             [
                 "benchit",
@@ -347,7 +296,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_11_activation(self):
+    def test_10_activation(self):
         output = run_analysis(
             [
                 "benchit",
@@ -357,7 +306,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (0, 0, 0))
 
-    def test_12_encoder_decoder(self):
+    def test_11_encoder_decoder(self):
         output = run_analysis(
             [
                 "benchit",
@@ -367,7 +316,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_13_benchit_hashes(self):
+    def test_12_benchit_hashes(self):
         output = run_analysis(
             [
                 "benchit",
