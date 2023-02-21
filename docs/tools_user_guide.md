@@ -295,32 +295,33 @@ The `benchmark` command supports the arguments from [Devices and Runtimes](#devi
 
 ### Input Scripts
 
-Name of the script (.py) files to be benchmarked.
+Name of one or more script (.py) files to be benchmarked.
 
-Usage: 
-- `benchit INPUT_SCRIPTS` 
-- `benchit benchmark INPUT_SCRIPTS`
+Examples: 
+- `benchit models/selftest/linear.py` 
+- `benchit models/selftest/linear.py models/selftest/twolayer.py` 
 
-You can leverage model hashes (see [Model Hashes](#model-hashes)) to filter which models in a script will be acted on, in the following manner:
-  - `benchit benchmark example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
-  - You can also supply multiple hashes, for example `benchit benchmark example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
-
-Available as an API argument:
+The `INPUT_SCRIPTS` argument is also available as an API argument:
 - `benchmark_script(input_scripts=...)`
+
+You may also use [Bash regular expressions](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_01.html) to locate the scripts you want to benchmark.
+
+Examples:
+- `benchit *.py`
+  - Benchmark all scripts which can be found at the command line location.
+- `benchit models/*/*.py`
+  - Benchmark all mlagility scripts.
+
+> See the [Benchmark Multiple Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-multiple-scripts) for a detailed example.
+
+You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter which models in a script will be acted on, in the following manner:
+  - `benchit example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
+  - You can also supply multiple hashes, for example `benchit example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
+
+_Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, please provide the full path of the Python script rather than a regular expression. 
 
 > See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 
-### Benchmark All Scripts
-
-Benchmark all models within all script (.py) files in the search directory.
-
-Usage:
-- `benchit benchmark *.py`
-  - Benchmark all scripts which can be found at the command line location.
-- `benchit benchmark SEARCH_DIR/*.py`
-  - Benchmark all scripts which can be found in directory SEARCH_DIR.
-
-> See the [Benchmark Multiple Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-multiple-scripts) for a detailed example.
 
 ### Use Slurm
 
