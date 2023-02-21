@@ -1,4 +1,6 @@
 import os
+import shutil
+import glob
 import pathlib
 import groqflow.common.printing as printing
 import groqflow.common.cache as cache
@@ -9,6 +11,30 @@ if os.environ.get("MLAGILITY_CACHE_DIR"):
     DEFAULT_CACHE_DIR = os.environ.get("MLAGILITY_CACHE_DIR")
 else:
     DEFAULT_CACHE_DIR = os.path.expanduser("~/.cache/mlagility")
+
+
+def clean_output_dir(cache_dir: str, build_name: str) -> None:
+    """
+    Delete all elements of the output directory that are not human readable
+    """
+    output_dir = os.path.join(cache_dir, build_name)
+    if os.path.isdir(output_dir):
+        output_dir = os.path.expanduser(output_dir)
+    else:
+        raise ValueError(f"No build found at {output_dir}")
+
+    # Remove files that do not have an allowed extension
+    allowed_extensions = (".txt", ".out", ".yaml", ".json")
+    all_paths = glob.glob(f"{output_dir}/**/*", recursive=True)
+    for path in all_paths:
+        if os.path.isfile(path) and not path.endswith(allowed_extensions):
+            os.remove(path)
+
+    # Remove all empty folders
+    for path in all_paths:
+        if os.path.isdir(path):
+            if len(os.listdir(path)) == 0:
+                shutil.rmtree(path)
 
 
 def full_model_path(corpora_dir, model_name):
@@ -134,6 +160,18 @@ def delete_builds(args):
                 f"No build found with name: {build}. "
                 "Try running `benchit cache list` to see the builds in your build cache."
             )
+
+
+def clean_builds(args):
+
+    if args.clean_all:
+        builds = get_available_builds(args.cache_dir)
+    else:
+        builds = [args.build_name]
+
+    for build in builds:
+        clean_output_dir(args.cache_dir, build)
+        printing.log_info(f"Removed the build artifacts from: {build}")
 
 
 def get_builds_from_script(cache_dir, script_name):

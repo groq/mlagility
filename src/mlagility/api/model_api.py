@@ -7,6 +7,7 @@ from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
 import groqflow.justgroqit.hummingbird as hummingbird
 import groqflow.common.printing as printing
+from groqflow.groqmodel import GroqModel
 from mlagility.api import trtmodel, ortmodel
 import mlagility.common.filesystem as filesystem
 import mlagility.analysis.util as util
@@ -71,7 +72,7 @@ def exportit(
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
     sequence: Sequence = None,
-):
+) -> GroqModel:
     """
     Export a model to ONNX and save it to the cache
     """
@@ -115,81 +116,77 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
-    if device == "groq":
-        gmodel = groqit(
-            model=model,
-            inputs=inputs,
-            build_name=build_name,
-            cache_dir=cache_dir,
-            rebuild=rebuild,
-            compiler_flags=groq_compiler_flags,
-            assembler_flags=groq_assembler_flags,
-            num_chips=groq_num_chips,
-            groqview=groqview,
-            sequence=sequence,
-        )
-
-        if not build_only:
-            printing.log_info(f"Benchmarking on {backend} {device}...")
-            groq_perf = gmodel.benchmark()
-
-            # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
-            # class used by the MLAgility project
-            perf = MeasuredPerformance(
-                throughput=groq_perf.throughput,
-                mean_latency=groq_perf.latency,
-                device="GroqChip1",
-                device_type="groq",
-                build_name=gmodel.state.config.build_name,
+    try:
+        if device == "groq":
+            gmodel = groqit(
+                model=model,
+                inputs=inputs,
+                build_name=build_name,
+                cache_dir=cache_dir,
+                rebuild=rebuild,
+                compiler_flags=groq_compiler_flags,
+                assembler_flags=groq_assembler_flags,
+                num_chips=groq_num_chips,
+                groqview=groqview,
+                sequence=sequence,
             )
 
-    elif device == "nvidia":
-        gmodel = exportit(
-            model=model,
-            inputs=inputs,
-            build_name=build_name,
-            cache_dir=cache_dir,
-            rebuild=rebuild,
-            sequence=sequence,
-        )
+            if not build_only:
+                printing.log_info(f"Benchmarking on {backend} {device}...")
+                groq_perf = gmodel.benchmark()
 
-        if not build_only:
-            printing.log_info(f"Benchmarking on {backend} {device}...")
-            gpu_model = trtmodel.load(
-                gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                # Map GroqFlow's GroqMeasuredPerformance into the MeasuredPerformance
+                # class used by the MLAgility project
+                perf = MeasuredPerformance(
+                    throughput=groq_perf.throughput,
+                    mean_latency=groq_perf.latency,
+                    device="GroqChip1",
+                    device_type="groq",
+                    build_name=gmodel.state.config.build_name,
+                )
+
+        elif device == "nvidia":
+            gmodel = exportit(
+                model=model,
+                inputs=inputs,
+                build_name=build_name,
+                cache_dir=cache_dir,
+                rebuild=rebuild,
+                sequence=sequence,
             )
-            perf = gpu_model.benchmark(backend=backend)
 
-    elif device == "x86":
-        gmodel = exportit(
-            model=model,
-            inputs=inputs,
-            build_name=build_name,
-            cache_dir=cache_dir,
-            rebuild=rebuild,
-            sequence=sequence,
-        )
+            if not build_only:
+                printing.log_info(f"Benchmarking on {backend} {device}...")
+                gpu_model = trtmodel.load(
+                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                )
+                perf = gpu_model.benchmark(backend=backend)
 
-        if not build_only:
-            printing.log_info(f"Benchmarking on {backend} {device}...")
-            cpu_model = ortmodel.load(
-                gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+        elif device == "x86":
+            gmodel = exportit(
+                model=model,
+                inputs=inputs,
+                build_name=build_name,
+                cache_dir=cache_dir,
+                rebuild=rebuild,
+                sequence=sequence,
             )
-            perf = cpu_model.benchmark(backend=backend)
 
-    else:
-        raise ValueError(
-            f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
-        )
+            if not build_only:
+                printing.log_info(f"Benchmarking on {backend} {device}...")
+                cpu_model = ortmodel.load(
+                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                )
+                perf = cpu_model.benchmark(backend=backend)
 
-    # Clean cache if needed
-    output_dir = os.path.join(cache_dir, gmodel.state.config.build_name)
-    if os.path.isdir(output_dir):
-        # Delete all files except logs and other metadata
-        # FIXME: --lean-cache only works if the build/benchmark process succeeds
-        # https://github.com/groq/mlagility/issues/92
+        else:
+            raise ValueError(
+                f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
+            )
+    finally:
+        # Clean cache if needed
         if lean_cache:
-            util.clean_output_dir(output_dir)
+            filesystem.clean_output_dir(cache_dir, gmodel.state.config.build_name)
 
     if not build_only:
         perf.print()

@@ -1,8 +1,5 @@
-import os
 import sys
-import shutil
 from dataclasses import dataclass
-import glob
 from typing import Callable, List, Union
 import inspect
 import torch
@@ -63,26 +60,6 @@ check_ops_keras = stage.Sequence(
     ],
     enable_model_validation=True,
 )
-
-
-def clean_output_dir(output_dir: str = filesystem.DEFAULT_CACHE_DIR) -> None:
-    """
-    Delete all elements of the output directory that are not human readable
-    """
-    output_dir = os.path.expanduser(output_dir)
-
-    # Remove files that do not have an allowed extension
-    allowed_extensions = (".txt", ".out", ".yaml", ".json")
-    all_paths = glob.glob(f"{output_dir}/**/*", recursive=True)
-    for path in all_paths:
-        if os.path.isfile(path) and not path.endswith(allowed_extensions):
-            os.remove(path)
-
-    # Remove all empty folders
-    for path in all_paths:
-        if os.path.isdir(path):
-            if len(os.listdir(path)) == 0:
-                shutil.rmtree(path)
 
 
 def count_parameters(model: torch.nn.Module, model_type: build.ModelType) -> int:
