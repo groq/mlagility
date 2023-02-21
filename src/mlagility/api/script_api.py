@@ -102,7 +102,13 @@ def benchmark_script(
                 f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
             )
         if not os.path.isfile(script):
-            raise exceptions.GroqitArgError(f"Script {script} could not be found")
+            raise exceptions.GroqitArgError(
+                (
+                    f"{script} could not be found. If this corresponds to a "
+                    "regular expression, the regular expression did not match "
+                    "any file(s)."
+                )
+            )
         if not script.endswith(".py"):
             raise exceptions.GroqitArgError(f"Script must end with .py (got {script})")
 
