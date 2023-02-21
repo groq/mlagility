@@ -229,7 +229,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (2, 0, 1))
 
-    def test_06_cache(self):
+    def test_05_cache(self):
         model_hash = "60931adb"
         run_analysis(
             [
@@ -247,7 +247,7 @@ class Testing(unittest.TestCase):
         labels_found = labels.load_from_cache(cache_dir, build_name) != {}
         assert cache_is_lean(cache_dir, build_name) and labels_found
 
-    def test_07_generic_args(self):
+    def test_06_generic_args(self):
         output = run_cli(
             [
                 "benchit",
@@ -261,7 +261,7 @@ class Testing(unittest.TestCase):
         )
         assert "Received arg test_arg" in output
 
-    def test_08_valid_mla_args(self):
+    def test_07_valid_mla_args(self):
         height, width, num_channels = parse(["height", "width", "num_channels"])
         cmd = [
             "benchit",
@@ -275,7 +275,7 @@ class Testing(unittest.TestCase):
         expected_output = str([height, width, num_channels + 1])
         assert output == expected_output, f"Got {output} but expected {expected_output}"
 
-    def test_09_invalid_mla_args(self):
+    def test_08_invalid_mla_args(self):
         cmd = [
             "benchit",
             "mla_parser.py",
@@ -286,7 +286,7 @@ class Testing(unittest.TestCase):
         _, stderr = process.communicate()
         assert "error: unrecognized argument" in stderr.decode("utf-8")
 
-    def test_10_pipeline(self):
+    def test_09_pipeline(self):
         output = run_analysis(
             [
                 "benchit",
@@ -296,7 +296,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_11_activation(self):
+    def test_10_activation(self):
         output = run_analysis(
             [
                 "benchit",
@@ -306,7 +306,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (0, 0, 0))
 
-    def test_12_encoder_decoder(self):
+    def test_11_encoder_decoder(self):
         output = run_analysis(
             [
                 "benchit",
@@ -316,7 +316,7 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (1, 0, 0))
 
-    def test_13_benchit_hashes(self):
+    def test_12_benchit_hashes(self):
         output = run_analysis(
             [
                 "benchit",
