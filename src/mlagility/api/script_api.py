@@ -92,8 +92,8 @@ def benchmark_script(
             "node and your local machine."
         )
 
-    # Ignore everything after the '::' symbol, if there is one
-    clean_scripts = [script.split("::")[0] for script in input_scripts]
+    # Get list containing only script names
+    clean_scripts = [decode_input_script(script)[0] for script in input_scripts]
 
     # Validate that the script exists
     for script in clean_scripts:

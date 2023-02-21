@@ -308,7 +308,7 @@ You may also use [Bash regular expressions](https://tldp.org/LDP/Bash-Beginners-
 
 Examples:
 - `benchit *.py`
-  - Benchmark all scripts which can be found at the command line location.
+  - Benchmark all scripts which can be found at the current working directory.
 - `benchit models/*/*.py`
   - Benchmark all mlagility scripts.
 
@@ -318,7 +318,7 @@ You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter
   - `benchit example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
   - You can also supply multiple hashes, for example `benchit example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
 
-_Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, please provide the full path of the Python script rather than a regular expression. 
+> _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 
 > See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 

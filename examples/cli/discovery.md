@@ -2,16 +2,15 @@
 
 This chapter of the `benchit` CLI tutorial is focused on how to guide the tool as it discovers models. You will learn things such as:
 - [How to run model discovery, without spending time on builds or benchmarking](#analyze-only)
-- [How to tell `benchit` where to look for the scripts that contain models](#search-directory)
 - [How to benchmark all the models in all the scripts in a directory](#benchmark-multiple-scripts)
 - [How to analyze the building blocks of a model](#maximum-analysis-depth)
 - [How to filter which models are passed to the build and benchmark operations](#filtering-model-hashes)
 
 The tutorial chapters are:
 1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
-1. Guiding Model Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
-1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
-1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
+2. Guiding Model Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
+3. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
+4. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
 
 # Model Discovery Tutorials
 
@@ -105,7 +104,7 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that `hello_world.py`, `two_models.py`, and `max_depth.py` are all evaluated.
 
-> See the [Benchmark All Scripts documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#benchmark-all-scripts) for more details.
+> See the [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#benchmark-multiple-scripts) for more details.
 
 ### Maximum Analysis Depth
 
