@@ -161,6 +161,7 @@ with open(os.path.join(test_dir, "tokenizer.json"), "w", encoding="utf") as f:
 def cache_is_lean(cache_dir, build_name):
     files = list(glob.glob(f"{cache_dir}/{build_name}/**/*", recursive=True))
     is_lean = len([x for x in files if ".onnx" in x]) == 0
+    print([x for x in files if ".onnx" in x])
     metadata_found = len([x for x in files if ".txt" in x]) > 0
     return is_lean and metadata_found
 
@@ -329,6 +330,33 @@ class Testing(unittest.TestCase):
             ]
         )
         assert np.array_equal(output, (2, 0, 1))
+
+    def test_13_clean_cache(self):
+        model_hash = "60931adb"
+        run_analysis(
+            [
+                "benchit",
+                f"linear_pytorch.py::{model_hash}",
+                "--max-depth",
+                "1",
+                "--cache-dir",
+                cache_dir,
+                "--build-only",
+            ]
+        )
+        build_name = f"linear_pytorch_{model_hash}"
+
+        cmd = [
+            "benchit",
+            "cache",
+            "clean",
+            build_name,
+            "--cache-dir",
+            cache_dir,
+        ]
+        subprocess.run(cmd, check=True)
+
+        assert cache_is_lean(cache_dir, build_name)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 from typing import Any, Dict, Optional, List
-import os
 from groqflow import groqit
 import groqflow.common.build as build
 from groqflow.justgroqit.stage import Sequence
@@ -10,7 +9,6 @@ import groqflow.common.printing as printing
 from groqflow.groqmodel import GroqModel
 from mlagility.api import trtmodel, ortmodel
 import mlagility.common.filesystem as filesystem
-import mlagility.analysis.util as util
 from mlagility.api.performance import MeasuredPerformance
 from mlagility.common.groqflow_helpers import SuccessStage
 
