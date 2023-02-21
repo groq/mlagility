@@ -294,13 +294,22 @@ def main():
     report_parser.set_defaults(func=report.summary_spreadsheet)
 
     report_parser.add_argument(
-        "-d",
-        "--cache-dir",
-        dest="cache_dir",
-        help="The reports will be generated based on the builds in this GroqFlow "
-        f"build cache directory (defaults to {filesystem.DEFAULT_CACHE_DIR})",
+        dest="cache_dirs",
+        help=(
+            "One or more build cache directories to generate the report "
+            f"(defaults to {filesystem.DEFAULT_CACHE_DIR})"
+        ),
+        default=[filesystem.DEFAULT_CACHE_DIR],
+        nargs="*",
+    )
+
+    report_parser.add_argument(
+        "-r",
+        "--report-dir",
+        dest="report_dir",
+        help="Path to folder where report will be saved (defaults to current working directory)",
         required=False,
-        default=filesystem.DEFAULT_CACHE_DIR,
+        default=os.getcwd(),
     )
 
     #######################################
