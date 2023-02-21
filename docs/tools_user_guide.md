@@ -205,10 +205,10 @@ The following arguments are used to configure `benchit` and the APIs to target a
 Specify a list of device types that will be used for benchmarking.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --devices TYPE`
-  - Benchmark the model(s) in `INPUT_SCRIPT` on a locally installed device of type `TYPE` (eg, a locally installed Nvidia device).
-- `benchit benchmark INPUT_SCRIPT --devices [TYPE ...]`
-  - Benchmark the model(s) in `INPUT_SCRIPT` across all provided device types.
+- `benchit benchmark INPUT_SCRIPTS --devices TYPE`
+  - Benchmark the model(s) in `INPUT_SCRIPTS` on a locally installed device of type `TYPE` (eg, a locally installed Nvidia device).
+- `benchit benchmark INPUT_SCRIPTS --devices [TYPE ...]`
+  - Benchmark the model(s) in `INPUT_SCRIPTS` across all provided device types.
 
 Valid values of `TYPE` include:
 - `x86` (default): Intel and AMD x86 CPUs.
@@ -233,7 +233,7 @@ Also available as API arguments:
 Indicates whether the device is installed on the local machine or a remote machine. Device on a remote machine is accessed over SFT SSH.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --backend BACKEND` 
+- `benchit benchmark INPUT_SCRIPTS --backend BACKEND` 
 
 Valid values:
 - Defaults to `local`, indicating the device is installed on the local machine.
@@ -254,7 +254,7 @@ Also available as API arguments:
 Indicates which software runtime should be used for the benchmark (e.g., ONNX Runtime vs. TensorRT for a GPU benchmark).
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --runtime SW`
+- `benchit benchmark INPUT_SCRIPTS --runtime SW`
 
 > _Note_: We will add support for user-selected runtimes in the future, when `benchit` supports multiple runtimes per device. At the time of this writing, there is a 1:1 mapping between all supported runtimes and devices, so there is no need for the `--runtime` argument yet.
 
@@ -293,61 +293,44 @@ You can see the options available for any command by running `benchit COMMAND --
 
 The `benchmark` command supports the arguments from [Devices and Runtimes](#devices-and-runtimes), as well as:
 
-### Input Script
+### Input Scripts
 
-Name of the script (.py) file, within the search directory, to be benchmarked.
+Name of one or more script (.py) files to be benchmarked.
 
-Usage: 
-- `benchit INPUT_SCRIPT` 
-- `benchit benchmark INPUT_SCRIPT`
+Examples: 
+- `benchit models/selftest/linear.py` 
+- `benchit models/selftest/linear.py models/selftest/twolayer.py` 
 
-You can leverage model hashes (see [Model Hashes](#model-hashes)) to filter which models in a script will be acted on, in the following manner:
-  - `benchit benchmark example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
-  - You can also supply multiple hashes, for example `benchit benchmark example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
+The `INPUT_SCRIPTS` argument is also available as an API argument:
+- `benchmark_script(input_scripts=...)`
 
-Available as an API argument:
-- `benchmark_script(input_script=...)`
+You may also use [Bash regular expressions](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_01.html) to locate the scripts you want to benchmark.
+
+Examples:
+- `benchit *.py`
+  - Benchmark all scripts which can be found at the current working directory.
+- `benchit models/*/*.py`
+  - Benchmark the entire corpora of MLAgility models.
+
+> See the [Benchmark Multiple Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-multiple-scripts) for a detailed example.
+
+You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter which models in a script will be acted on, in the following manner:
+  - `benchit example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
+  - You can also supply multiple hashes, for example `benchit example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
+
+> _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 
 > See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 
-### Search Directory
-
-Path to a directory (defaults to the command line command line location), which serves as the search path for input scripts.
-
-Usage:
-- `benchit benchmark INPUT_SCRIPT --search-dir SEARCH_DIR`
-  - Benchmark script INPUT_SCIPT which can be found in directory SEARCH_DIR.
-- `benchit benchmark --search-dir SEARCH_DIR --all`
-  - Benchmark all scripts which can be found in directory SEARCH_DIR.
-
-Available as an API argument:
-- `benchmark_script(search_dir=...)`
-
-> See the [Search Directory tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#search-directory) for a detailed example.
-
-### Benchmark All Scripts
-
-Benchmark all models within all script (.py) files in the search directory.
-
-Usage:
-- `benchit benchmark --all`
-  - Benchmark all scripts which can be found at the command line location.
-- `benchit benchmark --search-dir SEARCH_DIR --all`
-  - Benchmark all scripts which can be found in directory SEARCH_DIR.
-
-Available as an API argument:
-- `benchmark_script(benchmark_all=True/False)`
-
-> See the [Benchmark All Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-all-scripts) for a detailed example.
 
 ### Use Slurm
 
 Execute the build(s) on Slurm instead of using local compute resources.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --use-slurm`
-  - Use Slurm to run benchit on INPUT_SCRIPT.
-- `benchit benchmark --all --search-dir SEARCH_DIR--use-slurm`
+- `benchit benchmark INPUT_SCRIPTS --use-slurm`
+  - Use Slurm to run benchit on INPUT_SCRIPTS.
+- `benchit benchmark SEARCH_DIR/*.py --use-slurm`
   - Use Slurm to run benchit on all scripts in the search directory. Each script is evaluated as its on Slurm job (ie, all scripts can be evaluated in parallel on a sufficiently large Slurm cluster).
 
 Available as an API argument:
@@ -401,7 +384,7 @@ Also available as API arguments:
 Replaces the default build sequence in `benchmark_model()` with a custom build sequence, defined in a Python script.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --sequence-file FILE`
+- `benchit benchmark INPUT_SCRIPTS --sequence-file FILE`
 
 This script must define a function, `get_sequence()`, that returns an instance of `groqflow.common.stage.Sequence`. See [examples/extras/example_sequence.py](https://github.com/groq/mlagility/blob/main/examples/cli/extras/example_sequence.py) for an example of a sequence file.
 
@@ -418,7 +401,7 @@ Also available as API arguments:
 Sets command line arguments for the input script. Useful for customizing the behavior of the input script, for example sweeping parameters such as batch size. Format these as a comma-delimited string.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --script-args="--batch_size=8,--max_seq_len=128"`
+- `benchit benchmark INPUT_SCRIPTS --script-args="--batch_size=8,--max_seq_len=128"`
   - This will evaluate the input script with the arguments `--batch_size=8` and `--max_seq_len=128` passed into the input script.
 
 Also available as an API argument:
@@ -431,7 +414,7 @@ Also available as an API argument:
 Depth of sub-models to inspect within the script. Default value is 0, indicating to only analyze models at the top level of the script. Depth of 1 would indicate to analyze the first level of sub-models within the top-level models.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --max-depth DEPTH`
+- `benchit benchmark INPUT_SCRIPTS --max-depth DEPTH`
 
 Also available as an API argument:
 - `benchmark_script(max_depth=...)`
@@ -445,7 +428,7 @@ Also available as an API argument:
 Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) phase of the `benchmark` command.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --analyze-only`
+- `benchit benchmark INPUT_SCRIPTS --analyze-only`
   - This discovers models within the input script and prints information about them, but does not perform any build or benchmarking.
 
 > _Note_: any build- or benchmark-specific options will be ignored, such as `--backend`, `--device`, `--groqview`, etc.
@@ -460,7 +443,7 @@ Also available as an API argument:
 Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
 
 Usage:
-- `benchit benchmark INPUT_SCRIPT --build-only`
+- `benchit benchmark INPUT_SCRIPTS --build-only`
   - This builds the models within the input script, however does not run any benchmark.
 
 > _Note_: any benchmark-specific options will be ignored, such as `--backend`.

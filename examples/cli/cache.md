@@ -38,7 +38,7 @@ See the [Cache Commands](#cache-commands) tutorial to see what you can do with t
 
 ## Cache List Command
 
-This tutorial assumes you have completed the [Cache Directory](#cache-directory) and [Benchmark All Scripts](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-all-scripts) tutorials, and that the `tmp_cache` directory exists at your command line location.
+This tutorial assumes you have completed the [Cache Directory](#cache-directory) and [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#benchmark-multiple-scripts) tutorials, and that the `tmp_cache` directory exists at your command line location.
 
 You can use the `cache list` command to see what builds are available in your cache:
 
