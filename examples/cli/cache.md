@@ -9,7 +9,7 @@ This chapter of the `benchit` CLI tutorials is focused on understanding, inspect
 - [How to keep your filesystem from filling up with build artifacts](#lean-cache)
 
 The tutorial chapters are:
-1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
+1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
 1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. Working with the Cache (this document): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
@@ -38,7 +38,7 @@ See the [Cache Commands](#cache-commands) tutorial to see what you can do with t
 
 ## Cache List Command
 
-This tutorial assumes you have completed the [Cache Directory](#cache-directory) and [Benchmark All Scripts](#benchmark-all-scripts) tutorials, and that the `tmp_cache` directory exists at your command line location.
+This tutorial assumes you have completed the [Cache Directory](#cache-directory) and [Benchmark All Scripts](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-all-scripts) tutorials, and that the `tmp_cache` directory exists at your command line location.
 
 You can use the `cache list` command to see what builds are available in your cache:
 
@@ -190,7 +190,7 @@ total 20K
 # Thanks!
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
-1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
+1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
 1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. Working with the Cache (this document): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.

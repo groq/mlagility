@@ -8,7 +8,7 @@ This chapter of the `benchit` CLI tutorial is focused on how to guide the tool a
 - [How to filter which models are passed to the build and benchmark operations](#filtering-model-hashes)
 
 The tutorial chapters are:
-1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
+1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
 1. Guiding Model Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
@@ -139,7 +139,7 @@ For example, if you run this command:
 benchit benchmark scripts/max_depth.py
 ```
 
-You will get a result that looks very similar to the [Hello World tutorial](#hello-world) tutorial. However, if you peek into `max_depth.py`, you can see that there are two `torch.nn.Linear` modules that make up the top-level model.
+You will get a result that looks very similar to the [Hello World tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#hello-world) tutorial. However, if you peek into `max_depth.py`, you can see that there are two `torch.nn.Linear` modules that make up the top-level model.
 
 You can analyze and benchmark those `torch.nn.Linear` modules with this command:
 
@@ -191,9 +191,9 @@ You can see that the two instances of `torch.nn.Linear`, `fc` and `fc2`, are ben
 
 ## Filtering Model Hashes
 
-When you ran the example from the [Multiple Models per Script](#multiple-models-per-script) tutorial, you saw that `benchit` discovered, built, and benchmarked two models. What if you only wanted to build and benchmark one of the models?
+When you ran the example from the [Multiple Models per Script](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-models-per-script) tutorial, you saw that `benchit` discovered, built, and benchmarked two models. What if you only wanted to build and benchmark one of the models?
 
-You can leverage the model hashes feature of `benchit` to filter which models are acted on. You can see in the result from [Multiple Models per Script](#multiple-models-per-script) that the two models, `pytorch_model` and `another_pytorch_model`, have hashes `479b1332` and `215ca1e3`, respectively.
+You can leverage the model hashes feature of `benchit` to filter which models are acted on. You can see in the result from [Multiple Models per Script](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-models-per-script) that the two models, `pytorch_model` and `another_pytorch_model`, have hashes `479b1332` and `215ca1e3`, respectively.
 
 If you wanted to only build and benchmark `another_pytorch_model`, you could use this command, which filters `two_models.py` with the hash `215ca1e3`:
 
@@ -238,7 +238,7 @@ You can see that both models are discovered, but only `another_pytorch_model` wa
 # Thanks!
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
-1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
+1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
 1. Guiding Model Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
