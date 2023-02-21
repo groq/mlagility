@@ -96,13 +96,30 @@ def benchmark_script(
     clean_scripts = [script.split("::")[0] for script in input_scripts]
 
     # Validate that the script exists
+    regular_expressions_metacharacters = ["?", "+", "{", "|", "(", ")"]
     for script in clean_scripts:
+        is_regular_expression = any(
+            [regex_char in script for regex_char in regular_expressions_metacharacters]
+        )
         if os.path.isdir(script):
             raise exceptions.GroqitArgError(
                 f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
             )
         if not os.path.isfile(script):
-            raise exceptions.GroqitArgError(f"Script {script} could not be found")
+            if is_regular_expression and "::" in script:
+                raise exceptions.GroqitArgError(
+                    (
+                        "Using bash regular expressions and filtering model by hashes are mutually exclusive. "
+                        "To filter models by hashes, please provide the full path of the Python script rather "
+                        "than a regular expression."
+                    )
+                )
+            elif is_regular_expression:
+                raise exceptions.GroqitArgError(
+                    f"The regular expression {script} did not match any file"
+                )
+            else:
+                raise exceptions.GroqitArgError(f"Script {script} could not be found")
         if not script.endswith(".py"):
             raise exceptions.GroqitArgError(f"Script must end with .py (got {script})")
 
