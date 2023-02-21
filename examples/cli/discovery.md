@@ -1,13 +1,11 @@
 # Guiding Model Discovery
 
 This chapter of the `benchit` CLI tutorial is focused on how to guide the tool as it discovers models. You will learn things such as:
-- [Guiding Model Discovery](#guiding-model-discovery)
-- [Model Discovery Tutorials](#model-discovery-tutorials)
-  - [Analyze Only](#analyze-only)
-  - [Benchmark Multiple Scripts](#benchmark-multiple-scripts)
-    - [Maximum Analysis Depth](#maximum-analysis-depth)
-  - [Filtering Model Hashes](#filtering-model-hashes)
-- [Thanks!](#thanks)
+- [How to run model discovery, without spending time on builds or benchmarking](#analyze-only)
+- [How to tell `benchit` where to look for the scripts that contain models](#search-directory)
+- [How to benchmark all the models in all the scripts in a directory](#benchmark-multiple-scripts)
+- [How to analyze the building blocks of a model](#maximum-analysis-depth)
+- [How to filter which models are passed to the build and benchmark operations](#filtering-model-hashes)
 
 The tutorial chapters are:
 1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)

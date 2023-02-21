@@ -49,29 +49,13 @@ Once you have fulfilled the prerequisites, you can evaluate one model from the b
 
 ```
 cd MLAGILITY_ROOT/models # MLAGILITY_ROOT is where you cloned mlagility
-benchit benchmark linear.py --search-dir selftest
+benchit selftest/linear.py
 ```
 
-You can also evaluate an entire corpus with a command like this:
+You can also run the entire MLAgility benchmark in one shot with:
 ```
 cd MLAGILITY_ROOT/models # MLAGILITY_ROOT is where you cloned mlagility
-benchit models/selftest/*.py
-```
-
-You can aggregate all of the benchmarking results from your `mlagility cache` into a CSV file with:
-
-```
-benchit report
-```
-
-If you want to only report on a subset of models, we recommend saving the benchmarking results into a specific cache directory:
-
-```
-# Save benchmark results into a specific cache directory
-benchit benchmark --all --search-dir selftest --cache-dir selftest_results
-
-# Report the results from the `selftest_results` cache
-benchit report --cache-dir selftest_results
+benchit */*.py
 ```
 
 ## Model Template
@@ -123,7 +107,7 @@ parse(["batch_size", "max_seq_length"])
 You can pass parameters into a benchmarking run with the `--script-args` argument to `benchit`. For example, the command:
 
 ```
-benchit bert.py --search-dir transformers_pytorch --script-args="--batch_size 8 --max_seq_length 128"
+benchit models/transformers_pytorch/bert.py --script-args="--batch_size 8 --max_seq_length 128"
 ```
 
 would set `batch_size=8` and `max_seq_length=128` for that benchmarking run.
