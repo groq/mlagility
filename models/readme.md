@@ -58,6 +58,9 @@ cd MLAGILITY_ROOT/models # MLAGILITY_ROOT is where you cloned mlagility
 benchit */*.py
 ```
 
+_Note_: Benchmarking the entire corpora of MLAgility models might take a very long time.
+
+
 ## Model Template
 
 Each model in the MLAgility benchmark follows a template to keep things consistent. This template is meant to be as simple as possible. The models themselves should also be instantiated and called in a completely vendor-neutral manner.

@@ -310,7 +310,7 @@ Examples:
 - `benchit *.py`
   - Benchmark all scripts which can be found at the current working directory.
 - `benchit models/*/*.py`
-  - Benchmark all mlagility scripts.
+  - Benchmark the entire corpora of MLAgility models.
 
 > See the [Benchmark Multiple Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-multiple-scripts) for a detailed example.
 
