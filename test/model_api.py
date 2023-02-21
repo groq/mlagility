@@ -3,7 +3,6 @@ import unittest
 import torch
 import shutil
 from pathlib import Path
-import tensorflow as tf
 import groqflow.justgroqit.stage as stage
 import groqflow.common.cache as cache
 import groqflow.justgroqit.export as export
@@ -31,27 +30,12 @@ class AnotherSimplePytorchModel(torch.nn.Module):
         return output
 
 
-class SmallKerasModel(tf.keras.Model):  # pylint: disable=abstract-method
-    def __init__(self):
-        super(SmallKerasModel, self).__init__()
-        self.dense = tf.keras.layers.Dense(10)
-
-    def call(self, x):  # pylint: disable=arguments-differ
-        return self.dense(x)
-
-
 # Define pytorch model and inputs
 pytorch_model = SmallPytorchModel()
 tiny_pytorch_model = AnotherSimplePytorchModel()
 inputs = {"x": torch.rand(10)}
 inputs_2 = {"x": torch.rand(5)}
 input_tensor = torch.rand(10)
-
-# Define keras models and inputs
-batch_keras_inputs = {"x": tf.random.uniform((1, 10), dtype=tf.float32)}
-keras_subclass_model = SmallKerasModel()
-keras_subclass_model.build(input_shape=(1, 10))
-
 
 # Create a test directory
 test_dir = "model_api_test_dir"
@@ -87,20 +71,7 @@ class Testing(unittest.TestCase):
         state = get_build_state(cache_dir, build_name)
         assert state.build_status == build.Status.SUCCESSFUL_BUILD
 
-    def test_002_build_keras_model(self):
-        build_name = "full_compilation_keras_subclass_model"
-        benchmark_model(
-            keras_subclass_model,
-            batch_keras_inputs,
-            build_name=build_name,
-            rebuild="always",
-            build_only=True,
-            cache_dir=cache_dir,
-        )
-        state = get_build_state(cache_dir, build_name)
-        assert state.build_status == build.Status.SUCCESSFUL_BUILD
-
-    def test_003_custom_stage(self):
+    def test_002_custom_stage(self):
         build_name = "custom_stage"
 
         class MyCustomStage(stage.GroqitStage):
@@ -144,7 +115,7 @@ class Testing(unittest.TestCase):
         state = get_build_state(cache_dir, build_name)
         return state.build_status == build.Status.SUCCESSFUL_BUILD
 
-    def test_004_local_benchmark(self):
+    def test_003_local_benchmark(self):
         build_name = "local_benchmark"
         perf = benchmark_model(
             pytorch_model,
@@ -154,10 +125,13 @@ class Testing(unittest.TestCase):
             build_name=build_name,
             rebuild="always",
             cache_dir=cache_dir,
+            lean_cache=True,
         )
         state = get_build_state(cache_dir, build_name)
         assert state.build_status == build.Status.SUCCESSFUL_BUILD
-
+        assert os.path.isfile(
+            os.path.join(cache_dir, build_name, "x86_benchmark/outputs.json")
+        )
         assert perf.mean_latency > 0
         assert perf.throughput > 0
 

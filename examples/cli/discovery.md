@@ -114,7 +114,7 @@ You can see that `hello_world.py`, `two_models.py`, and `max_depth.py` are all e
 
 ### Maximum Analysis Depth
 
-PyTorch and Keras models (eg, `torch.nn.Module`) are often built out of a collection of smaller instances. For example, a PyTorch multilayer perceptron (MLP) model may be built out of many `torch.nn.Linear` modules.
+PyTorch models (eg, `torch.nn.Module`) are often built out of a collection of smaller instances. For example, a PyTorch multilayer perceptron (MLP) model may be built out of many `torch.nn.Linear` modules.
 
 Sometimes you will be interested to analyze or benchmark those sub-modules, which is where the `--max-depth` argument comes in.
 
