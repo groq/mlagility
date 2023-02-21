@@ -140,7 +140,7 @@ def assert_success_of_builds(
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
     # TODO: simplify this code when
-    # https://git.groq.io/code/Groq/-/issues/16110
+    # https://github.com/groq/mlagility/issues/16
     # is done
     builds = cache.get_all(cache_dir)
 
@@ -175,7 +175,7 @@ class Testing(unittest.TestCase):
 
         return super().setUp()
 
-    def test_cli_single(self):
+    def test_001_cli_single(self):
 
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
@@ -193,7 +193,7 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds([test_script])
 
-    def test_cli_search_dir(self):
+    def test_002_cli_search_dir(self):
 
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
@@ -213,7 +213,7 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds([test_script])
 
-    def test_cli_build_dir(self):
+    def test_003_cli_build_dir(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -236,7 +236,10 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds(test_scripts)
 
-    def test_cli_report(self):
+    @unittest.skip(
+        "Will be implemented in https://github.com/groq/mlagility/issues/142"
+    )
+    def test_004_cli_report(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -278,7 +281,7 @@ class Testing(unittest.TestCase):
                 script_name = strip_dot_py(test_script)
                 assert script_name in summary_csv_contents
 
-    def test_cli_list(self):
+    def test_005_cli_list(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -314,7 +317,7 @@ class Testing(unittest.TestCase):
             script_name = strip_dot_py(test_script)
             assert script_name in f.getvalue()
 
-    def test_cli_delete(self):
+    def test_006_cli_delete(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -379,7 +382,7 @@ class Testing(unittest.TestCase):
             script_name = strip_dot_py(test_script)
             assert script_name not in f.getvalue()
 
-    def test_cli_stats(self):
+    def test_007_cli_stats(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -419,7 +422,7 @@ class Testing(unittest.TestCase):
 
                     assert script_name in f.getvalue()
 
-    def test_cli_version(self):
+    def test_008_cli_version(self):
 
         # Get the version number
         with redirect_stdout(io.StringIO()) as f:
@@ -433,7 +436,7 @@ class Testing(unittest.TestCase):
         # Make sure we get back a 3-digit number
         assert len(f.getvalue().split(".")) == 3
 
-    def test_cli_benchit_args(self):
+    def test_009_cli_benchit_args(self):
 
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
@@ -487,7 +490,7 @@ class Testing(unittest.TestCase):
             [test_script], ("all_build_stages", ["export_pytorch", "set_success"])
         )
 
-    def test_cli_benchmark(self):
+    def test_009_cli_benchmark(self):
 
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]

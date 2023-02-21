@@ -20,14 +20,16 @@ The corpora in the MLAgility benchmark are:
 - `torch_hub`: a variety of models, including many image classification models, from the [Torch Hub repository](https://github.com/pytorch/hub).
 - `torchvision`: image recognition models from the [`torchvision` library](https://pytorch.org/vision/stable/index.html).
   - _Note_: the `torchvision` library also includes many image classification models, but we excluded them to avoid overlap between our `torch_hub` and `torchvision` corpora.
-- Huggingface transformers: Transformer models from the [Huggingface `transformers` library](https://huggingface.co/docs/transformers/index). We provide both PyTorch and Keras versions of the models, in the `transformers_pytorch` and `transformers_keras` directories, respectively. 
-  - _Note_: There is not a 1:1 match between the models in `transformers_pytorch` and `transformers_keras`, although overlaps do exist. We decided to provide both corpora to help us understand if there was any difference between performance or toolchain support for the two frameworks.
+- `transformers`: Transformer models from the [Huggingface `transformers` library](https://huggingface.co/docs/transformers/index).
 
 ## Running the Benchmark
 
 ### Prerequisites
 
-Before running the benchmark we suggest you familiarize yourself with the [`benchit` CLI tool](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) and some of the [`benchit` CLI examples](https://github.com/groq/mlagility/tree/main/examples/cli).
+Before running the benchmark we suggest you:
+1. Install the `mlagility` package by following the [install instructions](https://github.com/groq/mlagility/tree/main/docs/install.md).
+1. Go through the [`benchit` CLI tutorials](https://github.com/groq/mlagility/tree/main/examples/cli/readme.md).
+1. Familiarize yourself with the [`benchit` CLI tool](https://github.com/groq/mlagility/blob/main/docs/benchit_user_guide.md) documentation.
 
 You must also run the following command to install all of the models' dependencies into your Python environment.
 
@@ -151,7 +153,7 @@ The standardized set of arguments is:
 
 ### Example Script
 
-The following example, copied from `models/transformers_keras/ctrl.py` is a good example of a well-formed `model.py` file. You can see that it has the following properties:
+The following example, copied from `models/transformers/bert.py` is a good example of a well-formed input script. You can see that it has the following properties:
 
 1. Labels in the top line of the file.
 1. Docstring indicating where the model was sourced from.
@@ -159,26 +161,28 @@ The following example, copied from `models/transformers_keras/ctrl.py` is a good
 1. The model is instantiated and invoked against a set of inputs.
 
 ```
-# labels: test_group::mlagility name::ctrl author::huggingface_keras
+# labels: test_group::mlagility name::bert author::huggingface_pytorch
 """
-https://huggingface.co/ctrl
+https://huggingface.co/docs/transformers/v4.26.1/en/model_doc/bert#overview
 """
-
 from mlagility.parser import parse
 import transformers
-import tensorflow as tf
+import torch
 
-tf.random.set_seed(0)
+torch.manual_seed(0)
 
 # Parsing command-line arguments
 batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
 
 
-config = transformers.AutoConfig.from_pretrained("ctrl")
-model = transformers.TFAutoModel.from_config(config)
+# Model and input configurations
+config = transformers.BertConfig()
+model = transformers.BertModel(config)
 inputs = {
-    "input_ids": tf.ones(shape=(batch_size, max_seq_length), dtype=tf.int32),
+    "input_ids": torch.ones(batch_size, max_seq_length, dtype=torch.long),
+    "attention_mask": torch.ones(batch_size, max_seq_length, dtype=torch.float),
 }
+
 
 # Call model
 model(**inputs)

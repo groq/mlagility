@@ -6,7 +6,8 @@ The MLAgility repository has a few major top-level directories:
 - `docs`: documentation for the entire project.
 - `examples`: example scripts for use with the MLAgility benchmarking tools.
   - `examples/api`: examples scripts that invoke the benchmarking API to get the performance of models.
-  - `examples/cli`: example scripts that can be fed as input into the `benchit` CLI. These scripts each have a docstring that recommends one or more `benchit` CLI commands to try out.
+  - `examples/cli`: tutorial series starting in `examples/cli/readme.md` to help learn the `benchit` CLI.
+    - `examples/cli/scripts`: example scripts that can be fed as input into the `benchit` CLI. These scripts each have a docstring that recommends one or more `benchit` CLI commands to try out.
 - `models`: the corpora of models that makes up the MLAgility benchmark (see [the models readme](https://github.com/groq/mlagility/blob/main/models/readme.md)).
   - Each subdirectory under `models` represents a corpus of models pulled from somewhere on the internet. For example, `models/torch_hub` is a corpus of models from [Torch Hub](https://github.com/pytorch/hub).
 - `src/mlagility`: source code for the MLAgility benchmarking tools (see [Benchmarking Tools](#benchmarking-tools) for a description of how the code is used).

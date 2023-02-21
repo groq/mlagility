@@ -44,6 +44,10 @@ jobs:
         shell: bash -el {0}
         run: |
           python examples/api/hello_world.py
+          benchit examples/cli/scripts/hello_world.py
+          benchit examples/cli/scripts/max_depth.py --max-depth 1
+          benchit examples/cli/scripts/two_models.py
+          benchit examples/cli/scripts/hello_world.py --sequence-file examples/cli/extras/example_sequence.py --build-only
           python test/cli.py
           python test/analysis.py
           python test/model_api.py
