@@ -95,16 +95,6 @@ def get_available_models(corpora_dir):
     return available_models
 
 
-def get_available_scripts(search_dir: str):
-    scripts = [
-        f
-        for f in os.listdir(search_dir)
-        if os.path.isfile(os.path.join(search_dir, f)) and ".py" in f
-    ]
-
-    return scripts
-
-
 def print_available_models(args):
     available_models = get_available_models(args.corpora_dir)
     corpora = available_models.keys()

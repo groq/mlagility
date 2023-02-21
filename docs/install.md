@@ -74,5 +74,5 @@ export HUGGINGFACE_API_KEY=<YOUR_API_KEY>
 Go to the mlagility folder and build multiple models simultaneously using Slurm.
 
 ```
-benchit benchmark --all -s models/selftest/ --use-slurm --build-only --cache-dir PATH_TO_A_CACHE_DIR
+benchit models/selftest/*.py --use-slurm --build-only --cache-dir PATH_TO_A_CACHE_DIR
 ```
