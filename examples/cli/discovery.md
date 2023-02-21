@@ -55,6 +55,12 @@ If you want to benchmark an entire corpus of models, but you don't want to call 
 For example, the command:
 
 ```
+benchit scripts/hello_world.py scripts/two_models.py scripts/max_depth.py
+```
+
+or the command
+
+```
 benchit scripts/*.py
 ```
 
