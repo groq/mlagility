@@ -4,9 +4,17 @@ This directory contains the MLAgility benchmark, which is a large collection of 
 
 ## Table of Contents
 
-- [Benchmark Organization](#benchmark-organization)
-- [Running the Benchmark](#running-the-benchmark)
-- [Model Template](#model-template)
+- [MLAgility Benchmark](#mlagility-benchmark)
+  - [Table of Contents](#table-of-contents)
+  - [Benchmark Organization](#benchmark-organization)
+  - [Running the Benchmark](#running-the-benchmark)
+    - [Prerequisites](#prerequisites)
+    - [Benchmarking Commands](#benchmarking-commands)
+  - [Model Template](#model-template)
+    - [Input Scripts](#input-scripts)
+    - [Labels](#labels)
+    - [Parameters](#parameters)
+    - [Example Script](#example-script)
 
 ## Benchmark Organization
 
@@ -60,7 +68,7 @@ If you want to only report on a subset of models, we recommend saving the benchm
 
 ```
 # Save benchmark results into a specific cache directory
-benchit benchmark --all --search-dir selftest --cache-dir selftest_results
+benchit models/selftest/*.py --cache-dir selftest_results
 
 # Report the results from the `selftest_results` cache
 benchit report --cache-dir selftest_results

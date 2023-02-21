@@ -236,9 +236,6 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds(test_scripts)
 
-    @unittest.skip(
-        "Will be implemented in https://github.com/groq/mlagility/issues/142"
-    )
     def test_004_cli_report(self):
 
         # NOTE: this is not a unit test, it relies on other command

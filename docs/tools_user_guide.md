@@ -523,8 +523,6 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 
 ### `cache report` Command
 
-_Not yet implemented_
-
 `benchit cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
