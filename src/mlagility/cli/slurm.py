@@ -62,7 +62,6 @@ def run_benchit(
     op: str,
     script: str,
     cache_dir: str,
-    search_dir: Optional[str] = None,
     rebuild: Optional[str] = None,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
@@ -80,7 +79,6 @@ def run_benchit(
 
     # Convert args to strings
     cache_dir_str = value_arg(cache_dir, "--cache-dir")
-    search_dir_str = value_arg(search_dir, "--search-dir")
     rebuild_str = value_arg(rebuild, "--rebuild")
     compiler_flags_str = list_arg(groq_compiler_flags, "--groq-compiler-flags")
     assembler_flags_str = list_arg(groq_assembler_flags, "--groq-assembler-flags")
@@ -93,7 +91,7 @@ def run_benchit(
     lean_cache_str = bool_arg(lean_cache, "--lean-cache")
 
     args = (
-        f"{op} {script} {cache_dir_str}{search_dir_str}{rebuild_str}"
+        f"{op} {script} {cache_dir_str}{rebuild_str}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
         f"{devices_str}{max_depth_str}{analyze_only_str}"
         f"{build_only_str}{lean_cache_str}"
