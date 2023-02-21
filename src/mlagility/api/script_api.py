@@ -92,12 +92,11 @@ def benchmark_script(
             "node and your local machine."
         )
 
-    # Ignore everything after the '::' symbol, if there is one
-    clean_scripts = [script.split("::")[0] for script in input_scripts]
-
     # Validate that the script exists
     regular_expressions_metacharacters = ["?", "+", "{", "|", "(", ")"]
-    for script in clean_scripts:
+    for input_script in input_scripts:
+        script = input_script.split("::")[0]
+        contains_hash = len(script.split("::")) == 2
         is_regular_expression = any(
             [regex_char in script for regex_char in regular_expressions_metacharacters]
         )
@@ -106,12 +105,12 @@ def benchmark_script(
                 f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
             )
         if not os.path.isfile(script):
-            if is_regular_expression and "::" in script:
+            if is_regular_expression and contains_hash:
                 raise exceptions.GroqitArgError(
                     (
-                        "Using bash regular expressions and filtering model by hashes are mutually exclusive. "
-                        "To filter models by hashes, please provide the full path of the Python script rather "
-                        "than a regular expression."
+                        "Using bash regular expressions and filtering model by hashes are "
+                        "mutually exclusive. To filter models by hashes, please provide the "
+                        "full path of the Python script rather than a regular expression."
                     )
                 )
             elif is_regular_expression:
