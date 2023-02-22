@@ -114,8 +114,6 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
-    filesystem.make_build_dir(cache_dir, build_name)
-
     try:
 
         if device == "groq":
@@ -185,6 +183,12 @@ def benchmark_model(
                 f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
             )
     finally:
+        # Make sure the build and cache dirs exist and have the proper marker files
+        # NOTE: We would do this at the top of the file, however
+        # there are conditions where groqit() will wipe the build dir,
+        # which would eliminate our marker file
+        filesystem.make_build_dir(cache_dir, build_name)
+
         # Clean cache if needed
         if lean_cache:
             printing.log_info("Removing build artifacts...")

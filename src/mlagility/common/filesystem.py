@@ -32,15 +32,11 @@ def make_build_dir(cache_dir: str, build_name: str):
 
     # File that indicates that the directory is an MLAgility cache directory
     cache_file_path = os.path.join(cache_dir, CACHE_MARKER)
+    open(cache_file_path, mode="w", encoding="utf").close()
 
     # File that indicates that the directory is an MLAgility build directory
     build_file_path = os.path.join(build_dir, BUILD_MARKER)
-
-    with open(cache_file_path, mode="w", encoding="utf"):
-        pass
-
-    with open(build_file_path, mode="w", encoding="utf"):
-        pass
+    open(build_file_path, mode="w", encoding="utf").close()
 
 
 def check_cache_dir(cache_dir: str):
