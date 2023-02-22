@@ -1,9 +1,11 @@
 import os
 import csv
 import json
+from typing import Dict
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
+from mlagility.common import labels
 import groqflow.common.printing as printing
 import groqflow.common.build as build
 import groqflow.common.cache as cache
@@ -15,14 +17,6 @@ def _numericCleanup(new_val, current_val, default="-"):
         return new_val if new_val is not None else default
     else:
         return current_val
-
-
-def parse_labels(key, label_list):
-    for label in label_list:
-        if key + "::" in label:
-            parsed_label = label[len(key) + 2 :].replace("_", " ")
-            return "-" if parsed_label == "unknown" else parsed_label
-    return "-"
 
 
 def get_estimated_e2e_latency(model_folder, cache_folder):
@@ -148,14 +142,19 @@ def summary_spreadsheet(args) -> str:
             )
 
             # Extract labels (if any)
-            build_name = model_state_yaml.split("/")[-2]
-            labels_file = f"{cache_dir}/labels/{build_name}.txt"
-            with open(labels_file, encoding="utf-8") as f:
-                labels = f.readline().split(" ")
-            report[build_name].model_name = parse_labels("name", labels)
-            report[build_name].author = parse_labels("author", labels)
-            report[build_name].model_class = parse_labels("class", labels)
-            report[build_name].task = parse_labels("task", labels)
+            parsed_labels = labels.load_from_cache(cache_dir, build_name)
+            expected_attr_from_label = {
+                "name": "model_name",
+                "author": "author",
+                "class": "model_class",
+                "task": "task",
+            }
+            for label in expected_attr_from_label.keys():
+                results_attr = expected_attr_from_label[label]
+                if label not in parsed_labels.keys():
+                    report[build_name].__dict__[results_attr] = "-"
+                else:
+                    report[build_name].__dict__[results_attr] = parsed_labels[label][0]
 
             # Get Groq latency and number of chips
             groq_estimated_latency = get_estimated_e2e_latency(build_name, cache_dir)
@@ -187,7 +186,7 @@ def summary_spreadsheet(args) -> str:
                     g.get("Total Latency", {}).get("mean ", "-").split()[0]
                 )
 
-    # Populate spreadsheet
+    # Populate results spreadsheet
     with open(report_path, "w", newline="", encoding="utf8") as spreadsheet:
         writer = csv.writer(spreadsheet)
         cols = BuildResults().__dict__.keys()
