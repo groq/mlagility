@@ -11,6 +11,7 @@ from mlagility.common import labels
 from mlagility.api.ortmodel import ORTModel
 from mlagility.api.trtmodel import TRTModel
 from mlagility.api.devices import BenchmarkException
+from mlagility.common.filesystem import check_cache_dir
 
 
 def _update_numeric_attribute(new_val, current_val, default="-"):
@@ -130,6 +131,9 @@ def summary_spreadsheet(args) -> None:
 
     # Add results from all cache folders
     for cache_dir in cache_dirs:
+
+        # Check cache directory
+        check_cache_dir(cache_dir)
 
         # List all yaml files available
         all_model_state_yamls = cache.get_all(path=cache_dir, file_type="state.yaml")
