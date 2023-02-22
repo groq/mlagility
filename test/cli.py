@@ -4,6 +4,7 @@ Tests focused on the command-level functionality of benchit CLI
 
 import os
 import glob
+import csv
 from typing import List, Tuple, Any, Union
 import unittest
 from unittest.mock import patch
@@ -267,7 +268,6 @@ class Testing(unittest.TestCase):
             "benchit",
             "benchmark",
             bash(f"{corpus_dir}/*.py"),
-            "--build-only",
             "--cache-dir",
             cache_dir,
         ]
@@ -284,17 +284,35 @@ class Testing(unittest.TestCase):
         with patch.object(sys, "argv", testargs):
             benchitcli()
 
-        # Make sure our test models are mentioned in
-        # the summary csv
-
+        # Read generated CSV file
         summary_csv_path = report.get_report_name()
         with open(summary_csv_path, "r", encoding="utf8") as summary_csv:
-            summary_csv_contents = summary_csv.read()
-            for test_script in test_scripts:
-                script_name = strip_dot_py(test_script)
-                assert (
-                    script_name in summary_csv_contents
-                ), f"{script_name} {str(summary_csv_contents)}"
+            summary = list(csv.DictReader(summary_csv))
+
+        # Check if csv file contains all expected rows and columns
+        expected_cols = [
+            "model_name",
+            "author",
+            "model_class",
+            "params",
+            "hash",
+            "license",
+            "task",
+            "groq_chips_used",
+            "groq_estimated_latency",
+            "nvidia_latency",
+            "x86_latency",
+        ]
+        linear_summary = summary[0]
+        assert len(summary) == len(test_scripts)
+        assert all(elem in expected_cols for elem in linear_summary)
+
+        # Check whether all rows we expect to be populated are actually populated
+        assert linear_summary["model_name"] == "linear2", "Wrong model name found"
+        assert linear_summary["author"] == "benchit", "Wrong author name found"
+        assert linear_summary["model_class"] == "TwoLayerModel", "Wrong class found"
+        assert linear_summary["hash"] == "80b93950", "Wrong hash found"
+        assert float(linear_summary["x86_latency"]) > 0, "x86 latency must be >0"
 
     def test_005_cli_list(self):
 
