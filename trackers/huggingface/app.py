@@ -113,12 +113,14 @@ report["groq_estimated_latency"] = [
 report["nvidia_latency"] = [
     "-" if x == "-" else "{:.3f}".format(float(x)) for x in report["nvidia_latency"]
 ]
+report["x86_latency"] = [
+    "-" if x == "-" else "{:.3f}".format(float(x)) for x in report["x86_latency"]
+]
 
 renamed_cols = {
     "model_name": "Model Name",
     "author": "Source",
     "params": "Parameters",
-    "model_type": "Framework",
     "groq_estimated_latency": "GroqChip 1: Latency (ms)",
     "nvidia_latency": "NVIDIA A100-PCIE-40GB: Latency (ms)",
     "x86_latency": "Intel(R) Xeon(R) x40 CPU: Latency (ms)",
