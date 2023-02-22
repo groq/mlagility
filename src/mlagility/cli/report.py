@@ -1,27 +1,29 @@
 import os
 import csv
 import json
-from typing import Dict
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
-from mlagility.common import labels
 import groqflow.common.printing as printing
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 from groqflow.groqmodel import groqmodel
+from mlagility.common import labels
 
 
-def _numericCleanup(new_val, current_val, default="-"):
+def _update_numeric_attribute(new_val, current_val, default="-"):
+    """
+    Updates a numeric attribute if needed
+    """
     if current_val == default:
         return new_val if new_val is not None else default
     else:
         return current_val
 
 
-def get_estimated_e2e_latency(model_folder, cache_folder):
+def get_estimated_groq_latency(model_folder, cache_folder):
     """
-    Returns estimated e2e latency (io + compute - not including runtime) in ms
+    Returns estimated Groq latency (io + compute - not including runtime) in ms
     """
     try:
         gmodel = groqmodel.load(model_folder, cache_folder)
@@ -32,11 +34,14 @@ def get_estimated_e2e_latency(model_folder, cache_folder):
             return 1000 * gmodel.estimate_performance().latency
         else:
             return "-"
-    except:  # pylint: disable=bare-except
+    except FileNotFoundError:
         return "-"
 
 
-def get_report_name():
+def get_report_name() -> str:
+    """
+    Returns the name of the .csv report
+    """
     day = datetime.now().day
     month = datetime.now().month
     year = datetime.now().year
@@ -100,7 +105,7 @@ class BuildResults:
     x86_latency: str = "-"
 
 
-def summary_spreadsheet(args) -> str:
+def summary_spreadsheet(args) -> None:
 
     # Input arguments from CLI
     cache_dirs = [os.path.expanduser(dir) for dir in args.cache_dirs]
@@ -137,7 +142,7 @@ def summary_spreadsheet(args) -> str:
             report[build_name].model_hash = state.config.build_name.split("_")[-1]
 
             # Get model hash from build name
-            report[build_name].params = _numericCleanup(
+            report[build_name].params = _update_numeric_attribute(
                 state.info.num_parameters, report[build_name].params
             )
 
@@ -157,11 +162,11 @@ def summary_spreadsheet(args) -> str:
                     report[build_name].__dict__[results_attr] = parsed_labels[label][0]
 
             # Get Groq latency and number of chips
-            groq_estimated_latency = get_estimated_e2e_latency(build_name, cache_dir)
-            report[build_name].groq_estimated_latency = _numericCleanup(
+            groq_estimated_latency = get_estimated_groq_latency(build_name, cache_dir)
+            report[build_name].groq_estimated_latency = _update_numeric_attribute(
                 groq_estimated_latency, report[build_name].groq_estimated_latency
             )
-            report[build_name].groq_chips_used = _numericCleanup(
+            report[build_name].groq_chips_used = _update_numeric_attribute(
                 state.num_chips_used, report[build_name].groq_chips_used
             )
 
@@ -197,4 +202,3 @@ def summary_spreadsheet(args) -> str:
     # Print message with the output file path
     printing.log("Summary spreadsheet saved at ")
     printing.logn(str(report_path), printing.Colors.OKGREEN)
-    return report_path
