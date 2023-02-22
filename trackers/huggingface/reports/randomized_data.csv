@@ -1,4 +1,4 @@
-model_name,author,class,downloads,assembles,params,chips_used,hash,license,task,model_type,cycles,tsp_compute_latency,gpu_compute_latency,tsp_gpu_compute_ratio,tsp_estimated_e2e_latency,gpu_e2e_latency,tsp_gpu_e2e_ratio,x86_latency
+model_name,author,class,downloads,assembles,params,groq_chips_used,hash,license,task,model_type,cycles,groq_compute_latency,nvidia_compute_latency,groq_nvidia_compute_ratio,groq_estimated_latency,nvidia_latency,groq_nvidia_ratio,x86_latency
 alexnet,torch hub,AlexNet,0,TRUE,61100840,2,2891f54c,Unknown,-,pytorch,,-,-,-,0.3941983654,-,-,-
 bart,huggingface pytorch,BartModel,0,FALSE,404079238,16,cb0751ce,Unknown,-,pytorch,,-,-,-,0.2941326723,0.3594731854,-,0.9526702776
 beit,huggingface pytorch,BeitModel,0,FALSE,85530815,2,6b5d54c6,Unknown,-,pytorch,,-,-,-,0.2862456567,0.9212441442,-,0.8234458168

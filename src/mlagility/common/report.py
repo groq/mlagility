@@ -3,14 +3,18 @@ import csv
 import json
 from datetime import datetime
 from pathlib import Path
+from dataclasses import dataclass
 import groqflow.common.printing as printing
 import groqflow.common.build as build
 import groqflow.common.cache as cache
 from groqflow.groqmodel import groqmodel
 
 
-def _numericCleanup(item, default="-"):
-    return item if item is not None else default
+def _numericCleanup(new_val, current_val, default="-"):
+    if current_val == default:
+        return new_val if new_val is not None else default
+    else:
+        return current_val
 
 
 def parse_labels(key, label_list):
@@ -38,21 +42,24 @@ def get_estimated_e2e_latency(model_folder, cache_folder):
         return "-"
 
 
-class ModelResults:
-    def __init__(self):
-        self.model_name = "-"
-        self.author = "-"
-        self.model_class = "-"
-        self.downloads = "-"
-        self.params = "-"
-        self.chips_used = "-"
-        self.hash = "-"
-        self.license = "-"
-        self.task = "-"
-        self.model_type = "-"
-        self.groq_estimated_latency = "-"
-        self.gpu_latency = "-"
-        self.x86_latency = "-"
+@dataclass
+class BuildResults:
+    """
+    Class for keeping track of  the results of a given build
+    """
+
+    model_name: str = "-"
+    author: str = "-"
+    model_class: str = "-"
+    params: str = "-"
+    hash: str = "-"
+    license: str = "-"
+    task: str = "-"
+    model_type: str = "-"
+    groq_chips_used: str = "-"
+    groq_estimated_latency: str = "-"
+    nvidia_latency: str = "-"
+    x86_latency: str = "-"
 
 
 def summary_spreadsheet(args) -> str:
@@ -83,65 +90,68 @@ def summary_spreadsheet(args) -> str:
         # Add each model to report
         for model_state_yaml in all_model_state_yamls:
 
-            # Models are identified my the state.yaml path
-            model_key = os.path.basename(model_state_yaml)
-
-            # Add model to report if it doesn't exist
-            if model_key not in report:
-                report[model_key] = ModelResults()
+            # Models are identified my the build name
+            build_name = model_state_yaml.split("/")[-2]
 
             # Load state
             state = build.load_state(state_path=model_state_yaml)
+
+            # Add model to report if it doesn't exist
+            if build_name not in report:
+                report[build_name] = BuildResults()
+
+            # Get model hash from build name
+            report[build_name].model_hash = state.config.build_name.split("_")[-1]
+
+            # Get model hash from build name
+            report[build_name].params = _numericCleanup(
+                state.info.num_parameters, report[build_name].params
+            )
 
             # Extract labels (if any)
             build_name = model_state_yaml.split("/")[-2]
             labels_file = f"{cache_dir}/labels/{build_name}.txt"
             with open(labels_file, encoding="utf-8") as f:
                 labels = f.readline().split(" ")
-            report[model_key].script_name = parse_labels("name", labels)
-            report[model_key].author = parse_labels("author", labels)
-            try:
-                report[model_key].downloads = int(
-                    parse_labels("downloads", labels).replace(",", "")
-                )
-            except ValueError:
-                report[model_key].downloads = 0
-            report[model_key].model_class = parse_labels("class", labels)
-            report[model_key].task = parse_labels("task", labels)
+            report[build_name].model_name = parse_labels("name", labels)
+            report[build_name].author = parse_labels("author", labels)
+            report[build_name].model_class = parse_labels("class", labels)
+            report[build_name].task = parse_labels("task", labels)
 
-            # Get Groq latency
-            report[model_key].groq_estimated_latency = get_estimated_e2e_latency(
-                build_name, cache_dir
+            # Get Groq latency and number of chips
+            groq_estimated_latency = get_estimated_e2e_latency(build_name, cache_dir)
+            report[build_name].groq_estimated_latency = _numericCleanup(
+                groq_estimated_latency, report[build_name].groq_estimated_latency
+            )
+            report[build_name].groq_chips_used = _numericCleanup(
+                state.num_chips_used, report[build_name].groq_chips_used
             )
 
             # Reloading state after estimating latency
             state = build.load_state(state_path=model_state_yaml)
 
             # Get CPU latency
-            cpu_output_dir = os.path.join(cache_dir, build_name, "x86_benchmark")
-            cpu_stats_file = os.path.join(cpu_output_dir, "outputs.json")
-            if os.path.isfile(cpu_stats_file):
-                with open(cpu_stats_file, encoding="utf-8") as f:
+            x86_output_dir = os.path.join(cache_dir, build_name, "x86_benchmark")
+            x86_stats_file = os.path.join(x86_output_dir, "outputs.json")
+            if os.path.isfile(x86_stats_file):
+                with open(x86_stats_file, encoding="utf-8") as f:
                     g = json.load(f)
-                report[model_key].x86_latency = g.get("Mean Latency(ms)", {})
+                report[build_name].x86_latency = g.get("Mean Latency(ms)", {})
 
             # Get GPU latency
-            gpu_output_dir = os.path.join(cache_dir, build_name, "nvidia_benchmark")
-            gpu_stats_file = os.path.join(gpu_output_dir, "outputs.json")
-            if os.path.isfile(gpu_stats_file):
-                with open(gpu_stats_file, encoding="utf-8") as f:
+            nvidia_output_dir = os.path.join(cache_dir, build_name, "nvidia_benchmark")
+            nvidia_stats_file = os.path.join(nvidia_output_dir, "outputs.json")
+            if os.path.isfile(nvidia_stats_file):
+                with open(nvidia_stats_file, encoding="utf-8") as f:
                     g = json.load(f)
-                report[model_key].gpu_latency = (
+                report[build_name].nvidia_latency = (
                     g.get("Total Latency", {}).get("mean ", "-").split()[0]
                 )
-
-            # Get model hash from build name
-            report[model_key].model_hash = state.config.build_name.split("_")[-1]
 
     # Populate spreadsheet
     with open(spreadsheet_file, "w", newline="", encoding="utf8") as spreadsheet:
         writer = csv.writer(spreadsheet)
-        cols = ModelResults().__dict__.keys()
+        cols = BuildResults().__dict__.keys()
         writer.writerow(cols)
         for model in report.keys():
             writer.writerow([report[model].__dict__[col] for col in cols])
