@@ -278,6 +278,7 @@ class Testing(unittest.TestCase):
             "benchit",
             "cache",
             "report",
+            "--cache-dir",
             cache_dir,
         ]
         with patch.object(sys, "argv", testargs):

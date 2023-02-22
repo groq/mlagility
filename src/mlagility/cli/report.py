@@ -21,7 +21,7 @@ def _update_numeric_attribute(new_val, current_val, default="-"):
         return current_val
 
 
-def get_estimated_groq_latency(model_folder, cache_folder):
+def _get_estimated_groq_latency(model_folder, cache_folder):
     """
     Returns estimated Groq latency (io + compute - not including runtime) in ms
     """
@@ -128,18 +128,20 @@ def summary_spreadsheet(args) -> None:
         # Add each model to report
         for model_state_yaml in all_model_state_yamls:
 
-            # Models are identified my the build name
-            build_name = model_state_yaml.split("/")[-2]
-
             # Load state
             state = build.load_state(state_path=model_state_yaml)
+
+            # Models are identified my the build name
+            build_name = state.config.build_name
 
             # Add model to report if it doesn't exist
             if build_name not in report:
                 report[build_name] = BuildResults()
 
             # Get model hash from build name
-            report[build_name].model_hash = state.config.build_name.split("_")[-1]
+            # TODO: Get hash_model from state once it is consistently reported
+            # https://github.com/groq/mlagility/issues/149
+            report[build_name].model_hash = build_name.split("_")[-1]
 
             # Get model hash from build name
             report[build_name].params = _update_numeric_attribute(
@@ -162,7 +164,7 @@ def summary_spreadsheet(args) -> None:
                     report[build_name].__dict__[results_attr] = parsed_labels[label][0]
 
             # Get Groq latency and number of chips
-            groq_estimated_latency = get_estimated_groq_latency(build_name, cache_dir)
+            groq_estimated_latency = _get_estimated_groq_latency(build_name, cache_dir)
             report[build_name].groq_estimated_latency = _update_numeric_attribute(
                 groq_estimated_latency, report[build_name].groq_estimated_latency
             )

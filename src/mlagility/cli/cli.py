@@ -272,6 +272,8 @@ def main():
     report_parser.set_defaults(func=report.summary_spreadsheet)
 
     report_parser.add_argument(
+        "-d",
+        "--cache-dir",
         dest="cache_dirs",
         help=(
             "One or more build cache directories to generate the report "
