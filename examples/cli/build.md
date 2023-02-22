@@ -45,11 +45,11 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that the model is discovered and built, but no benchmark took place.
 
-> See the [Build Only documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#build-only) for more details.
+> See the [Build Only documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build-only) for more details.
 
 ## Sequence File
 
-You can customize the behavior of the [Build](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#build) stage of `benchit` by creating a custom `Sequence`.
+You can customize the behavior of the [Build](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build) stage of `benchit` by creating a custom `Sequence`.
 
 A `Sequence` tells the `benchmark_model()` API within `benchit` how to `build` a model to prepare it for benchmarking.
 
