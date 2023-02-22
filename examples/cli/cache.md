@@ -185,6 +185,8 @@ total 20K
 
 > See the [Lean Cache documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#lean-cache) for more details.
 
+> _Note_: If you want to get rid of build artifacts after the build is done, you can run `benchit cache clean build_name`.
+
 # Thanks!
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
