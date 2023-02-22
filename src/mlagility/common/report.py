@@ -38,6 +38,23 @@ def get_estimated_e2e_latency(model_folder, cache_folder):
         return "-"
 
 
+class ModelResults:
+    def __init__(self):
+        self.model_name = "-"
+        self.author = "-"
+        self.model_class = "-"
+        self.downloads = "-"
+        self.params = "-"
+        self.chips_used = "-"
+        self.hash = "-"
+        self.license = "-"
+        self.task = "-"
+        self.model_type = "-"
+        self.groq_estimated_latency = "-"
+        self.gpu_latency = "-"
+        self.x86_latency = "-"
+
+
 def summary_spreadsheet(args) -> str:
 
     # Input arguments from CLI
@@ -52,111 +69,82 @@ def summary_spreadsheet(args) -> str:
     summary_filename = f"{date_key}.csv"
     spreadsheet_file = os.path.join(report_dir, summary_filename)
 
-    # Add first row to report
+    # Create report dict
     Path(report_dir).mkdir(parents=True, exist_ok=True)
-    with open(spreadsheet_file, "w", newline="", encoding="utf8") as spreadsheet:
-        writer = csv.writer(spreadsheet)
-        writer.writerow(
-            [
-                "model_name",
-                "author",
-                "class",
-                "downloads",
-                "params",
-                "chips_used",
-                "hash",
-                "license",
-                "task",
-                "model_type",
-                "groq_estimated_latency",
-                "gpu_latency",
-                "x86_latency",
-            ]
-        )
+    report = {}
 
     # Add results from all cache folders
     for cache_dir in cache_dirs:
-        cache_dir = os.path.expanduser(cache_dir)
 
-        with open(spreadsheet_file, "w", newline="", encoding="utf8") as spreadsheet:
-            writer = csv.writer(spreadsheet)
+        # List all yaml files available
+        all_model_state_yamls = cache.get_all(path=cache_dir, file_type="state.yaml")
+        all_model_state_yamls = sorted(all_model_state_yamls)
 
-            all_model_state_yamls = cache.get_all(
-                path=cache_dir, file_type="state.yaml"
+        # Add each model to report
+        for model_state_yaml in all_model_state_yamls:
+
+            # Models are identified my the state.yaml path
+            model_key = os.path.basename(model_state_yaml)
+
+            # Add model to report if it doesn't exist
+            if model_key not in report:
+                report[model_key] = ModelResults()
+
+            # Load state
+            state = build.load_state(state_path=model_state_yaml)
+
+            # Extract labels (if any)
+            build_name = model_state_yaml.split("/")[-2]
+            labels_file = f"{cache_dir}/labels/{build_name}.txt"
+            with open(labels_file, encoding="utf-8") as f:
+                labels = f.readline().split(" ")
+            report[model_key].script_name = parse_labels("name", labels)
+            report[model_key].author = parse_labels("author", labels)
+            try:
+                report[model_key].downloads = int(
+                    parse_labels("downloads", labels).replace(",", "")
+                )
+            except ValueError:
+                report[model_key].downloads = 0
+            report[model_key].model_class = parse_labels("class", labels)
+            report[model_key].task = parse_labels("task", labels)
+
+            # Get Groq latency
+            report[model_key].groq_estimated_latency = get_estimated_e2e_latency(
+                build_name, cache_dir
             )
-            all_model_state_yamls = sorted(all_model_state_yamls)
 
-            # Print stats for each model
-            print(len(all_model_state_yamls), "yaml files found")
-            for model_state_yaml in all_model_state_yamls:
+            # Reloading state after estimating latency
+            state = build.load_state(state_path=model_state_yaml)
 
-                state = build.load_state(state_path=model_state_yaml)
+            # Get CPU latency
+            cpu_output_dir = os.path.join(cache_dir, build_name, "x86_benchmark")
+            cpu_stats_file = os.path.join(cpu_output_dir, "outputs.json")
+            if os.path.isfile(cpu_stats_file):
+                with open(cpu_stats_file, encoding="utf-8") as f:
+                    g = json.load(f)
+                report[model_key].x86_latency = g.get("Mean Latency(ms)", {})
 
-                # Extract labels (if any)
-                build_name = model_state_yaml.split("/")[-2]
-                labels_file = f"{cache_dir}/labels/{build_name}.txt"
-                with open(labels_file, encoding="utf-8") as f:
-                    labels = f.readline().split(" ")
-                script_name = parse_labels("name", labels)
-                author = parse_labels("author", labels)
-                try:
-                    downloads = int(parse_labels("downloads", labels).replace(",", ""))
-                except ValueError:
-                    downloads = 0
-                model_class = parse_labels("class", labels)
-                task = parse_labels("task", labels)
-
-                # GroqChip estimated e2e latency
-                groq_estimated_latency = get_estimated_e2e_latency(
-                    build_name, cache_dir
+            # Get GPU latency
+            gpu_output_dir = os.path.join(cache_dir, build_name, "nvidia_benchmark")
+            gpu_stats_file = os.path.join(gpu_output_dir, "outputs.json")
+            if os.path.isfile(gpu_stats_file):
+                with open(gpu_stats_file, encoding="utf-8") as f:
+                    g = json.load(f)
+                report[model_key].gpu_latency = (
+                    g.get("Total Latency", {}).get("mean ", "-").split()[0]
                 )
 
-                # Reloading state after estimating latency
-                state = build.load_state(state_path=model_state_yaml)
+            # Get model hash from build name
+            report[model_key].model_hash = state.config.build_name.split("_")[-1]
 
-                # Get CPU latency
-                cpu_output_dir = os.path.join(cache_dir, build_name, "x86_benchmark")
-                cpu_stats_file = os.path.join(cpu_output_dir, "outputs.json")
-                if os.path.isfile(cpu_stats_file):
-                    with open(cpu_stats_file, encoding="utf-8") as f:
-                        g = json.load(f)
-                    x86_latency = g.get("Mean Latency(ms)", {})
-                else:
-                    x86_latency = "-"
-
-                # Get GPU latency
-                gpu_output_dir = os.path.join(cache_dir, build_name, "nvidia_benchmark")
-                gpu_stats_file = os.path.join(gpu_output_dir, "outputs.json")
-                if os.path.isfile(gpu_stats_file):
-                    with open(gpu_stats_file, encoding="utf-8") as f:
-                        g = json.load(f)
-                    print(gpu_stats_file)
-                    gpu_latency = (
-                        g.get("Total Latency", {}).get("mean ", "-").split()[0]
-                    )
-                else:
-                    gpu_latency = "-"
-
-                name = state.config.build_name
-                name = name.split("_")
-                model_hash = name[-1]
-
-                writer.writerow(
-                    [
-                        script_name,
-                        author,
-                        model_class,
-                        downloads,
-                        _numericCleanup(state.info.num_parameters),
-                        _numericCleanup(state.num_chips_used),
-                        model_hash,
-                        license,
-                        task,
-                        groq_estimated_latency,
-                        gpu_latency,
-                        x86_latency,
-                    ]
-                )
+    # Populate spreadsheet
+    with open(spreadsheet_file, "w", newline="", encoding="utf8") as spreadsheet:
+        writer = csv.writer(spreadsheet)
+        cols = ModelResults().__dict__.keys()
+        writer.writerow(cols)
+        for model in report.keys():
+            writer.writerow([report[model].__dict__[col] for col in cols])
 
     # Print message with the output file path
     printing.log("Summary spreadsheet saved at ")
