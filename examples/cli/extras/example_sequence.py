@@ -9,7 +9,7 @@ exports to ONNX, optimizes, and converts to float16.
 
 You can pass this file into benchit with a command like:
 
-    benchit benchmark INPUT_SCRIPT --sequence-file example_sequence.py --build-only
+    benchit benchmark INPUT_SCRIPTS --sequence-file example_sequence.py --build-only
 """
 
 from groqflow.justgroqit.stage import Sequence

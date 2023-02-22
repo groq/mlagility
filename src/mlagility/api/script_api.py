@@ -12,30 +12,30 @@ from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 from mlagility.analysis.util import ModelInfo
 
 
-def decode_script_name(input: str) -> Tuple[str, List[str]]:
+def decode_input_script(input: str) -> Tuple[str, List[str], str]:
     # Parse the targets out of the script name
     # Targets use the format:
-    #   script_name.py::target0,target1,...,targetN
-    decoded_name = input.split("::")
-    script_name = decoded_name[0]
+    #   script_path.py::target0,target1,...,targetN
+    decoded_input = input.split("::")
+    script_path = os.path.abspath(decoded_input[0])
 
-    if len(decoded_name) == 2:
-        targets = decoded_name[1].split(",")
-    elif len(decoded_name) == 1:
+    if len(decoded_input) == 2:
+        targets = decoded_input[1].split(",")
+        encoded_input = script_path + "::" + decoded_input[1]
+    elif len(decoded_input) == 1:
         targets = []
+        encoded_input = script_path
     else:
         raise ValueError(
             "Each script input to benchit should have either 0 or 1 '::' in it."
-            f"However, {script_name} was received."
+            f"However, {script_path} was received."
         )
 
-    return script_name, targets
+    return script_path, targets, encoded_input
 
 
 def benchmark_script(
-    search_dir: str = os.getcwd(),
-    input_script: str = None,
-    benchmark_all: bool = False,
+    input_scripts: str = None,
     use_slurm: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
@@ -92,28 +92,25 @@ def benchmark_script(
             "node and your local machine."
         )
 
-    # Get a specific list of models to process
-    available_scripts = filesystem.get_available_scripts(search_dir)
+    # Get list containing only script names
+    clean_scripts = [decode_input_script(script)[0] for script in input_scripts]
 
-    # Filter based on the model names provided by the user
-    if benchmark_all:
-        scripts = [os.path.join(search_dir, script) for script in available_scripts]
-    else:
-        user_script_path = os.path.join(search_dir, input_script)
-
-        # Ignore everything after the ':' symbol, if there is one
-        clean_user_script_path = user_script_path.split(":")[0]
-
-        # Validate that the script exists
-        if os.path.exists(clean_user_script_path):
-            scripts = [user_script_path]
-        else:
+    # Validate that the script exists
+    for script in clean_scripts:
+        if os.path.isdir(script):
             raise exceptions.GroqitArgError(
-                f"Script could not be found: {user_script_path}"
+                f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
             )
-
-    # Get absolute path of scripts
-    scripts = [os.path.abspath(s) for s in scripts]
+        if not os.path.isfile(script):
+            raise exceptions.GroqitArgError(
+                (
+                    f"{script} could not be found. If this corresponds to a "
+                    "regular expression, the regular expression did not match "
+                    "any file(s)."
+                )
+            )
+        if not script.endswith(".py"):
+            raise exceptions.GroqitArgError(f"Script must end with .py (got {script})")
 
     # Decode benchit args into TracerArgs flags
     if analyze_only:
@@ -146,16 +143,15 @@ def benchmark_script(
             )
 
     # Use this data structure to keep a running index of all models
-    # found across all scripts when running in --all mode
     models_found: Dict[str, ModelInfo] = {}
 
-    for script in scripts:
+    for script in input_scripts:
         for device in devices:
+            script_path, targets, encoded_input = decode_input_script(script)
             if use_slurm:
                 slurm.run_benchit(
                     op="benchmark",
-                    script=script,
-                    search_dir=search_dir,
+                    script=encoded_input,
                     cache_dir=cache_dir,
                     rebuild=rebuild,
                     groq_compiler_flags=groq_compiler_flags,
@@ -171,13 +167,10 @@ def benchmark_script(
 
             else:
 
-                # Parse the targets out of the script name
-                script_name, targets = decode_script_name(script)
-
                 # Instantiate an object that holds all of the arguments
                 # for analysis, build, and benchmarking
                 tracer_args = TracerArgs(
-                    input=script_name,
+                    input=script_path,
                     lean_cache=lean_cache,
                     targets=targets,
                     max_depth=max_depth,
