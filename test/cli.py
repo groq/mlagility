@@ -184,8 +184,8 @@ def assert_success_of_builds(
                     cpu_model = ortmodel.load(
                         build_state.config.build_name, cache_dir=build_state.cache_dir
                     )
-                    assert cpu_model._mean_latency > 0
-                    assert cpu_model._throughput > 0
+                    assert cpu_model.mean_latency > 0
+                    assert cpu_model.throughput > 0
 
         assert script_build_found
 
