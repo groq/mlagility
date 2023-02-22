@@ -33,7 +33,9 @@ def _get_estimated_groq_latency(model_folder, cache_folder):
             gmodel.state.info.assembler_success  # pylint: disable=singleton-comparison
             == True
         ):
-            return 1000 * gmodel.estimate_performance().latency
+            perf = gmodel.estimate_performance()
+            assert perf.latency_units == "seconds"
+            return 1000 * perf.latency
         else:
             return "-"
     except FileNotFoundError:
