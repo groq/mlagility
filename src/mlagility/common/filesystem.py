@@ -5,6 +5,7 @@ import pathlib
 import groqflow.common.printing as printing
 import groqflow.common.cache as cache
 import groqflow.common.build as build
+import groqflow.common.exceptions as exc
 
 # Allow an environment variable to override the default
 # location for the build cache
@@ -15,6 +16,12 @@ else:
 
 CACHE_MARKER = ".mlacache"
 BUILD_MARKER = ".mlabuild"
+
+
+class CacheError(exc.GroqFlowError):
+    """
+    Raise this exception when the cache is being accessed incorrectly
+    """
 
 
 def make_build_dir(cache_dir: str, build_name: str):
@@ -38,12 +45,13 @@ def make_build_dir(cache_dir: str, build_name: str):
 
 def check_cache_dir(cache_dir: str):
     cache_file_path = os.path.join(cache_dir, CACHE_MARKER)
-    return os.path.isfile(cache_file_path)
+    if not os.path.isfile(cache_file_path):
+        raise CacheError(f"{cache_dir} is not a valid MLAgility cache")
 
 
-def check_build_dir(cache_dir: str, build_name: str):
+def is_build_dir(cache_dir: str, build_name: str):
     build_dir = build.output_dir(cache_dir, build_name)
-    build_file_path = os.path.join(build_dir, CACHE_MARKER)
+    build_file_path = os.path.join(build_dir, BUILD_MARKER)
     return os.path.isfile(build_file_path)
 
 
@@ -52,10 +60,10 @@ def clean_output_dir(cache_dir: str, build_name: str) -> None:
     Delete all elements of the output directory that are not human readable
     """
     output_dir = os.path.join(cache_dir, build_name)
-    if os.path.isdir(output_dir) and check_build_dir(cache_dir, build_name):
+    if os.path.isdir(output_dir) and is_build_dir(cache_dir, build_name):
         output_dir = os.path.expanduser(output_dir)
     else:
-        raise ValueError(f"No build found at {output_dir}")
+        raise CacheError(f"No build found at {output_dir}")
 
     # Remove files that do not have an allowed extension
     allowed_extensions = (".txt", ".out", ".yaml", ".json")
@@ -87,11 +95,13 @@ def get_available_builds(cache_dir):
     located at `cache_dir`
     """
 
+    check_cache_dir(cache_dir)
+
     builds = [
         pathlib.PurePath(build).name
         for build in os.listdir(os.path.abspath(cache_dir))
         if os.path.isdir(os.path.join(cache_dir, build))
-        and check_build_dir(cache_dir, build)
+        and is_build_dir(cache_dir, build)
     ]
     builds.sort()
 
@@ -107,6 +117,8 @@ def print_available_builds(args):
 
 def delete_builds(args):
 
+    check_cache_dir(args.cache_dir)
+
     if args.delete_all:
         builds = get_available_builds(args.cache_dir)
     else:
@@ -114,10 +126,11 @@ def delete_builds(args):
 
     for build in builds:
         build_path = os.path.join(args.cache_dir, build)
-        if cache.rmdir(build_path):
+        if is_build_dir(args.cache_dir, build):
+            cache.rmdir(build_path)
             printing.log_info(f"Deleted build: {build}")
         else:
-            printing.log_error(
+            raise CacheError(
                 f"No build found with name: {build}. "
                 "Try running `benchit cache list` to see the builds in your build cache."
             )
@@ -125,14 +138,22 @@ def delete_builds(args):
 
 def clean_builds(args):
 
+    check_cache_dir(args.cache_dir)
+
     if args.clean_all:
         builds = get_available_builds(args.cache_dir)
     else:
         builds = [args.build_name]
 
     for build in builds:
-        clean_output_dir(args.cache_dir, build)
-        printing.log_info(f"Removed the build artifacts from: {build}")
+        if is_build_dir(args.cache_dir, build):
+            clean_output_dir(args.cache_dir, build)
+            printing.log_info(f"Removed the build artifacts from: {build}")
+        else:
+            raise CacheError(
+                f"No build found with name: {build}. "
+                "Try running `benchit cache list` to see the builds in your build cache."
+            )
 
 
 def get_builds_from_script(cache_dir, script_name):

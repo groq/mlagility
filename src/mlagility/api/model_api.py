@@ -114,7 +114,7 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
-    filesystem.make_cache_dir(cache_dir, build_name)
+    filesystem.make_build_dir(cache_dir, build_name)
 
     try:
 
