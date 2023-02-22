@@ -143,7 +143,7 @@ def summary_spreadsheet(args) -> None:
             # Get model hash from build name
             # TODO: Get hash_model from state once it is consistently reported
             # https://github.com/groq/mlagility/issues/149
-            report[build_name].model_hash = build_name.split("_")[-1]
+            report[build_name].hash = build_name.split("_")[-1]
 
             # Get model hash from build name
             report[build_name].params = _update_numeric_attribute(
