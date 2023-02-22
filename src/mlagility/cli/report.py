@@ -42,6 +42,14 @@ def get_estimated_e2e_latency(model_folder, cache_folder):
         return "-"
 
 
+def get_report_name():
+    day = datetime.now().day
+    month = datetime.now().month
+    year = datetime.now().year
+    date_key = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
+    return f"{date_key}.csv"
+
+
 @dataclass
 class BuildResults:
     """
@@ -105,12 +113,7 @@ def summary_spreadsheet(args) -> str:
     report_dir = os.path.expanduser(args.report_dir)
 
     # Name report file
-    day = datetime.now().day
-    month = datetime.now().month
-    year = datetime.now().year
-    date_key = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
-    summary_filename = f"{date_key}.csv"
-    spreadsheet_file = os.path.join(report_dir, summary_filename)
+    report_path = os.path.join(report_dir, get_report_name())
 
     # Create report dict
     Path(report_dir).mkdir(parents=True, exist_ok=True)
@@ -185,7 +188,7 @@ def summary_spreadsheet(args) -> str:
                 )
 
     # Populate spreadsheet
-    with open(spreadsheet_file, "w", newline="", encoding="utf8") as spreadsheet:
+    with open(report_path, "w", newline="", encoding="utf8") as spreadsheet:
         writer = csv.writer(spreadsheet)
         cols = BuildResults().__dict__.keys()
         writer.writerow(cols)
@@ -194,5 +197,5 @@ def summary_spreadsheet(args) -> str:
 
     # Print message with the output file path
     printing.log("Summary spreadsheet saved at ")
-    printing.logn(str(spreadsheet_file), printing.Colors.OKGREEN)
-    return spreadsheet_file
+    printing.logn(str(report_path), printing.Colors.OKGREEN)
+    return report_path

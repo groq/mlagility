@@ -25,7 +25,7 @@ import groqflow.common.cache as cache
 # filesystem access
 
 test_scripts_dot_py = {
-    "linear.py": """
+    "linear.py": """# labels: name::linear author::benchit license::mit
 import torch
 
 torch.manual_seed(0)
@@ -51,7 +51,7 @@ inputs = {"x": torch.rand(input_features)}
 output = model(**inputs)
 
 """,
-    "linear2.py": """
+    "linear2.py": """# labels: name::linear2 author::benchit license::mit
 import torch
 
 torch.manual_seed(0)
@@ -286,12 +286,14 @@ class Testing(unittest.TestCase):
         # Make sure our test models are mentioned in
         # the summary csv
 
-        summary_csv_path = os.path.join(cache_dir, report.summary_filename)
+        summary_csv_path = report.get_report_name()
         with open(summary_csv_path, "r", encoding="utf8") as summary_csv:
             summary_csv_contents = summary_csv.read()
             for test_script in test_scripts:
                 script_name = strip_dot_py(test_script)
-                assert script_name in summary_csv_contents
+                assert (
+                    script_name in summary_csv_contents
+                ), f"{script_name} {str(summary_csv_contents)}"
 
     def test_005_cli_list(self):
 
