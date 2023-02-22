@@ -330,6 +330,33 @@ class Testing(unittest.TestCase):
         )
         assert np.array_equal(output, (2, 0, 1))
 
+    def test_13_clean_cache(self):
+        model_hash = "60931adb"
+        run_analysis(
+            [
+                "benchit",
+                f"linear_pytorch.py::{model_hash}",
+                "--max-depth",
+                "1",
+                "--cache-dir",
+                cache_dir,
+                "--build-only",
+            ]
+        )
+        build_name = f"linear_pytorch_{model_hash}"
+
+        cmd = [
+            "benchit",
+            "cache",
+            "clean",
+            build_name,
+            "--cache-dir",
+            cache_dir,
+        ]
+        subprocess.run(cmd, check=True)
+
+        assert cache_is_lean(cache_dir, build_name)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -51,10 +51,8 @@ Which produces a result like:
 ```
 Info: Builds available in cache ~/.cache/mlagility:
 hello_world_479b1332     max_depth_80b93950       two_models_479b1332      
-        labels                   two_models_215ca1e3 
+two_models_215ca1e3 
 ```
-
-> _Note_: `labels` is not a build, it is a helper directory to store labeling data.
 
 ## Cache Stats Command
 
@@ -106,7 +104,7 @@ And you would see that the cache no longer includes the build for `max_depth`:
 
 ```
 Info: Builds available in cache ~/.cache/mlagility:
-hello_world_479b1332     labels                   two_models_215ca1e3      two_models_479b1332 
+hello_world_479b1332     two_models_215ca1e3      two_models_479b1332 
 ```
 
 ## Cache Commands with --cache-dir
@@ -125,7 +123,7 @@ Which will produce this result, if you did the [Cache Directory tutorial](#cache
 
 ```
 Info: Builds available in cache tmp_cache:
-hello_world_479b1332     labels  
+hello_world_479b1332  
 ```
 
 > See the [Cache Commands documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#cache-commands) for more details.
@@ -186,6 +184,8 @@ total 20K
 ```
 
 > See the [Lean Cache documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#lean-cache) for more details.
+
+> _Note_: If you want to get rid of build artifacts after the build is done, you can run `benchit cache clean build_name`.
 
 # Thanks!
 

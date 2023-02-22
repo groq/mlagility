@@ -493,7 +493,7 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds([test_script])
 
-    def test_cli_sequence(self):
+    def test_010_cli_sequence(self):
 
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
@@ -515,7 +515,7 @@ class Testing(unittest.TestCase):
             [test_script], ("all_build_stages", ["export_pytorch", "set_success"])
         )
 
-    def test_009_cli_benchmark(self):
+    def test_011_cli_benchmark(self):
 
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
