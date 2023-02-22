@@ -91,7 +91,7 @@ If we then repeat the `benchit cache stats hello_world_479b1332` we will see tha
   - set_success
 ```
 
-> See the [Sequence File documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#sequence-file) for more details.
+> See the [Sequence File documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#sequence-file) for more details.
 
 # Thanks!
 

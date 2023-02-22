@@ -46,7 +46,7 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that the model is discovered, and some stats are printed, but no build or benchmark took place.
 
-> See the [Analyze Only documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#analyze-only) for more details.
+> See the [Analyze Only documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#analyze-only) for more details.
 
 ## Benchmark Multiple Scripts
 
@@ -110,7 +110,7 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that `hello_world.py`, `two_models.py`, and `max_depth.py` are all evaluated.
 
-> See the [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#benchmark-multiple-scripts) for more details.
+> See the [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#benchmark-multiple-scripts) for more details.
 
 ### Maximum Analysis Depth
 
@@ -170,7 +170,7 @@ max_depth.py:
 
 You can see that the two instances of `torch.nn.Linear`, `fc` and `fc2`, are benchmarked in addition to the top-level model, `pytorch_model`.
 
-> See the [Max Depth documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#maximum-analysis-depth) for more details.
+> See the [Max Depth documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#maximum-analysis-depth) for more details.
 
 
 
@@ -218,7 +218,7 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that both models are discovered, but only `another_pytorch_model` was built and benchmarked.
 
-> See the [Input Script documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#input-script) for more details.
+> See the [Input Script documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#input-script) for more details.
 
 # Thanks!
 

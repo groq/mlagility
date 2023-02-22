@@ -20,7 +20,7 @@ All of the tutorials assume that your current working directory is in the same l
 
 ## Cache Directory
 
-By default, MLAgility tools use `~/.cache/mlagility/` as the location for the MLAgility Cache (see the [Build documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#build) for more details).
+By default, MLAgility tools use `~/.cache/mlagility/` as the location for the MLAgility Cache (see the [Build documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build) for more details).
 
 However, you might want to set the cache location for any number of reasons. For example, you might want to keep the results from benchmarking one corpus of models separate from the results from another corpus.
 
@@ -32,13 +32,13 @@ benchit benchmark scripts/hello_world.py --cache-dir tmp_cache
 
 When that command completes, you can use the `ls` command to see that `tmp_cache` has been created at your command line location. 
 
-See the [Cache Commands](#cache-commands) tutorial to see what you can do with the cache.
+See the Cache Commands tutorials below to see what you can do with the cache.
 
-> See the [Cache Directory documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#cache-directory) for more details.
+> See the [Cache Directory documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#cache-directory) for more details.
 
 ## Cache List Command
 
-This tutorial assumes you have completed the [Cache Directory](#cache-directory) and [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#benchmark-multiple-scripts) tutorials, and that the `tmp_cache` directory exists at your command line location.
+This tutorial assumes you have completed the [Cache Directory](#cache-directory) and [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#benchmark-multiple-scripts) tutorials, and that the `tmp_cache` directory exists at your command line location.
 
 You can use the `cache list` command to see what builds are available in your cache:
 
@@ -128,7 +128,7 @@ Info: Builds available in cache tmp_cache:
 hello_world_479b1332     labels  
 ```
 
-> See the [Cache Commands documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#cache-commands) for more details.
+> See the [Cache Commands documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#cache-commands) for more details.
 
 ## Lean Cache
 
@@ -185,7 +185,7 @@ total 20K
    0 -rw-r--r-- 1 jfowers groq    0 Feb 16 08:14 log_set_success.txt
 ```
 
-> See the [Lean Cache documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#lean-cache) for more details.
+> See the [Lean Cache documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#lean-cache) for more details.
 
 # Thanks!
 
