@@ -494,7 +494,7 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 
 ### `cache delete` Command
 
-`benchit cache delete` deletes one or builds from a build cache. It presents the following options:
+`benchit cache delete` deletes one or more builds from a build cache. It presents the following options:
 
 - `build_name` Name of the specific build to be deleted, within the cache directory
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
@@ -503,6 +503,16 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 > _Note_: `cache delete` is not available as an API.
 
 > See the [Cache Commands tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md#cache-commands) for a detailed example.
+
+### `cache clean` Command
+
+`benchit cache clean` removes the build artifacts from one or more builds from a build cache. It presents the following options:
+
+- `build_name` Name of the specific build to be cleaned, within the cache directory
+- `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
+- `--all` Clean all builds in the cache directory
+
+> _Note_: `cache clean` is not available as an API.
 
 ### `cache report` Command
 
