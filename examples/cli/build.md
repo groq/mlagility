@@ -5,7 +5,7 @@ This chapter of the `benchit` CLI tutorial focuses on techniques to customize th
 - [How to customize the build process with Sequences](#sequence-file)
 
 The tutorial chapters are:
-1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
+1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
 1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. Customizing Builds (this document): `benchit` arguments that customize build behavior to unlock new workflows.
@@ -45,11 +45,11 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that the model is discovered and built, but no benchmark took place.
 
-> See the [Build Only documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#build-only) for more details.
+> See the [Build Only documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build-only) for more details.
 
 ## Sequence File
 
-You can customize the behavior of the [Build](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#build) stage of `benchit` by creating a custom `Sequence`.
+You can customize the behavior of the [Build](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build) stage of `benchit` by creating a custom `Sequence`.
 
 A `Sequence` tells the `benchmark_model()` API within `benchit` how to `build` a model to prepare it for benchmarking.
 
@@ -59,7 +59,7 @@ The default `Sequence` for CPU and GPU benchmarking performs the following build
 1. Use ONNX ML Tools to the convert the optimized ONNX file to float16
 1. Set the `build_status=successful_build` property
 
-You can see this if you already did the [Hello World tutorial](#hello-world) by running the command:
+You can see this if you already did the [Hello World tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#hello-world) by running the command:
 
 ```
 benchit cache stats hello_world_479b1332
@@ -91,12 +91,12 @@ If we then repeat the `benchit cache stats hello_world_479b1332` we will see tha
   - set_success
 ```
 
-> See the [Sequence File documentation](https://github.com/groq/mlagility/blob/main/tools_user_guide.md#sequence-file) for more details.
+> See the [Sequence File documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#sequence-file) for more details.
 
 # Thanks!
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
-1. [Getting Started](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
+1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
 1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. Customizing Builds (this document): `benchit` arguments that customize build behavior to unlock new workflows.
