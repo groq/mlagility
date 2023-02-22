@@ -358,6 +358,40 @@ def main():
     )
 
     #######################################
+    # Parser for the "cache clean" command
+    #######################################
+
+    clean_parser = cache_subparsers.add_parser(
+        "clean",
+        help="Remove the build artifacts from one or more builds in a build cache",
+    )
+    clean_parser.set_defaults(func=filesystem.clean_builds)
+
+    clean_parser.add_argument(
+        "-d",
+        "--cache-dir",
+        dest="cache_dir",
+        help="Search path for builds " f"(defaults to {filesystem.DEFAULT_CACHE_DIR})",
+        required=False,
+        default=filesystem.DEFAULT_CACHE_DIR,
+    )
+
+    clean_group = clean_parser.add_mutually_exclusive_group(required=True)
+
+    clean_group.add_argument(
+        "build_name",
+        nargs="?",
+        help="Name of the specific build to be cleaned, within the cache directory",
+    )
+
+    clean_group.add_argument(
+        "--all",
+        dest="clean_all",
+        help="Clean all builds in the cache directory",
+        action="store_true",
+    )
+
+    #######################################
     # Parser for the "version" command
     #######################################
 
