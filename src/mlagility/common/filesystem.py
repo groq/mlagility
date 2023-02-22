@@ -4,6 +4,7 @@ import glob
 import pathlib
 import groqflow.common.printing as printing
 import groqflow.common.cache as cache
+import groqflow.common.build as build
 
 # Allow an environment variable to override the default
 # location for the build cache
@@ -12,13 +13,46 @@ if os.environ.get("MLAGILITY_CACHE_DIR"):
 else:
     DEFAULT_CACHE_DIR = os.path.expanduser("~/.cache/mlagility")
 
+CACHE_MARKER = ".mlacache"
+BUILD_MARKER = ".mlabuild"
+
+
+def make_build_dir(cache_dir: str, build_name: str):
+    # Create the build and cache directories, and put hidden files in them
+    # to mark them as such.
+    build_dir = build.output_dir(cache_dir, build_name)
+    os.makedirs(build_dir, exist_ok=True)
+
+    # File that indicates that the directory is an MLAgility cache directory
+    cache_file_path = os.path.join(cache_dir, CACHE_MARKER)
+
+    # File that indicates that the directory is an MLAgility build directory
+    build_file_path = os.path.join(build_dir, BUILD_MARKER)
+
+    with open(cache_file_path, mode="w", encoding="utf"):
+        pass
+
+    with open(build_file_path, mode="w", encoding="utf"):
+        pass
+
+
+def check_cache_dir(cache_dir: str):
+    cache_file_path = os.path.join(cache_dir, CACHE_MARKER)
+    return os.path.isfile(cache_file_path)
+
+
+def check_build_dir(cache_dir: str, build_name: str):
+    build_dir = build.output_dir(cache_dir, build_name)
+    build_file_path = os.path.join(build_dir, CACHE_MARKER)
+    return os.path.isfile(build_file_path)
+
 
 def clean_output_dir(cache_dir: str, build_name: str) -> None:
     """
     Delete all elements of the output directory that are not human readable
     """
     output_dir = os.path.join(cache_dir, build_name)
-    if os.path.isdir(output_dir):
+    if os.path.isdir(output_dir) and check_build_dir(cache_dir, build_name):
         output_dir = os.path.expanduser(output_dir)
     else:
         raise ValueError(f"No build found at {output_dir}")
@@ -37,64 +71,6 @@ def clean_output_dir(cache_dir: str, build_name: str) -> None:
                 shutil.rmtree(path)
 
 
-def full_model_path(corpora_dir, model_name):
-    """
-    Returns the absolute path of a model within a corpora
-    """
-    # FIXME: seems redundant with most of get_available_models()
-
-    file_name = f"{model_name}.py"
-    corpora = [
-        f
-        for f in os.listdir(corpora_dir)
-        if os.path.isdir(os.path.join(corpora_dir, f))
-    ]
-    for corpus in corpora:
-        full_path = f"{corpora_dir}/{corpus}/{file_name}"
-        if os.path.isfile(full_path):
-            return full_path
-    raise ValueError(f"Model {model_name} not found in tree {corpora_dir}")
-
-
-def get_available_models(corpora_dir):
-    """
-    Get all of the model.py files within the corpora located at `corpora_dir`
-
-    def Corpus (noun): a collection of models
-    def Corpora (noun): plural of "corpus"
-
-    corpora_dir/
-      corpus_1/
-        model_1.py
-        model_2.py
-      corpus_2/
-        model_3.py
-        model_4.py
-    """
-
-    available_models = {}
-    corpora = [
-        pathlib.PurePath(corpus).name
-        for corpus in os.listdir(os.path.abspath(corpora_dir))
-        if os.path.isdir(os.path.join(corpora_dir, corpus))
-    ]
-    corpora.sort()
-
-    # Loop over all corpora
-    for corpus in corpora:
-        # Get model names
-        corpus_path = os.path.join(corpora_dir, corpus)
-        model_names = [
-            f.replace(".py", "")
-            for f in os.listdir(corpus_path)
-            if os.path.isfile(os.path.join(corpus_path, f)) and ".py" in f
-        ]
-        model_names.sort()
-        available_models[corpus] = model_names
-
-    return available_models
-
-
 def get_available_scripts(search_dir: str):
     scripts = [
         f
@@ -103,22 +79,6 @@ def get_available_scripts(search_dir: str):
     ]
 
     return scripts
-
-
-def print_available_models(args):
-    available_models = get_available_models(args.corpora_dir)
-    corpora = available_models.keys()
-
-    # Loop over all corpora
-    for corpus in corpora:
-        if corpus in args.corpus_names:
-            # Print in a nice table
-            printing.log(
-                f"{corpus} ({len(available_models[corpus])} models)\n\t",
-                c=printing.Colors.BOLD,
-            )
-            printing.list_table(available_models[corpus])
-            print()
 
 
 def get_available_builds(cache_dir):
@@ -131,6 +91,7 @@ def get_available_builds(cache_dir):
         pathlib.PurePath(build).name
         for build in os.listdir(os.path.abspath(cache_dir))
         if os.path.isdir(os.path.join(cache_dir, build))
+        and check_build_dir(cache_dir, build)
     ]
     builds.sort()
 

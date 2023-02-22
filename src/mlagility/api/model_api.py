@@ -97,7 +97,7 @@ def exportit(
 def benchmark_model(
     model: Any,
     inputs: Dict[str, Any],
-    build_name: Optional[str] = None,
+    build_name: str,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     device: str = "x86",
     backend: str = "local",
@@ -114,7 +114,10 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
+    filesystem.make_cache_dir(cache_dir, build_name)
+
     try:
+
         if device == "groq":
             gmodel = groqit(
                 model=model,
@@ -185,18 +188,7 @@ def benchmark_model(
         # Clean cache if needed
         if lean_cache:
             printing.log_info("Removing build artifacts...")
-            if build_name is not None:
-                # User (or benchit/benchmark_script) supplied build name,
-                # so we know where to clean
-                filesystem.clean_output_dir(cache_dir, build_name)
-            elif gmodel is not None:
-                # groqit() chose its own build name, which we can only access
-                # if the build was successful
-                filesystem.clean_output_dir(cache_dir, gmodel.state.config.build_name)
-            else:
-                # We have no way to know the build name, so our attempt to
-                # clean has failed
-                printing.log_error("Unable to remove build artifacts.")
+            filesystem.clean_output_dir(cache_dir, build_name)
 
     if not build_only:
         perf.print()
