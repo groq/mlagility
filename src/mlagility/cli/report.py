@@ -34,7 +34,13 @@ def _get_estimated_groq_latency(model_folder, cache_folder):
             == True
         ):
             perf = gmodel.estimate_performance()
-            assert perf.latency_units == "seconds"
+            if perf.latency_units != "seconds":
+                raise BenchmarkException(
+                    (
+                        "Expected Groq latency_units to be in seconds, "
+                        f"but got {perf.latency_units}"
+                    )
+                )
             return 1000 * perf.latency
         else:
             return "-"
