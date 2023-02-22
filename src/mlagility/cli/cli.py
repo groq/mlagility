@@ -4,7 +4,7 @@ import sys
 import groqflow.common.build as build
 import groqflow.common.printing as printing
 import mlagility.common.filesystem as filesystem
-import mlagility.common.report as report
+import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_script
 from mlagility.version import __version__ as mlagility_version
 
