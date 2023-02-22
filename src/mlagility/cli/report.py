@@ -199,7 +199,7 @@ def summary_spreadsheet(args) -> None:
         cols = BuildResults().__dict__.keys()
         writer.writerow(cols)
         for model in report.keys():
-            writer.writerow([report[model].__dict__[col] for col in cols])
+            writer.writerow([vars(report[model])[col] for col in cols])
 
     # Print message with the output file path
     printing.log("Summary spreadsheet saved at ")
