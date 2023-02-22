@@ -161,7 +161,6 @@ with open(os.path.join(test_dir, "tokenizer.json"), "w", encoding="utf") as f:
 def cache_is_lean(cache_dir, build_name):
     files = list(glob.glob(f"{cache_dir}/{build_name}/**/*", recursive=True))
     is_lean = len([x for x in files if ".onnx" in x]) == 0
-    print([x for x in files if ".onnx" in x])
     metadata_found = len([x for x in files if ".txt" in x]) > 0
     return is_lean and metadata_found
 
