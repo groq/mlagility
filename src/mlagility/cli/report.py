@@ -1,6 +1,5 @@
 import os
 import csv
-import json
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
@@ -181,14 +180,14 @@ def summary_spreadsheet(args) -> None:
             # Get CPU latency
             try:
                 omodel = ORTModel(cache_dir, build_name)
-                report[build_name].x86_latency = omodel._mean_latency
+                report[build_name].x86_latency = omodel.mean_latency
             except BenchmarkException:
                 pass
 
             # Get GPU latency
             try:
                 tmodel = TRTModel(cache_dir, build_name)
-                report[build_name].nvidia_latency = tmodel._mean_latency
+                report[build_name].nvidia_latency = tmodel.mean_latency
             except (BenchmarkException, KeyError):
                 pass
 

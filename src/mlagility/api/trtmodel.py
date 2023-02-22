@@ -12,7 +12,7 @@ class TRTModel:
         self.tensor_type = tensor_type
         self.cache_dir = cache_dir
         self.build_name = build_name
-        self.device = "nvidia"
+        self.device_type = "nvidia"
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
@@ -23,7 +23,7 @@ class TRTModel:
     @property
     def _trt_performance_file(self):
         return devices.BenchmarkPaths(
-            self.cache_dir, self.build_name, self.device, "local"
+            self.cache_dir, self.build_name, self.device_type, "local"
         ).outputs_file
 
     def _get_stat(self, stat):
@@ -38,21 +38,21 @@ class TRTModel:
             )
 
     @property
-    def _mean_latency(self):
+    def mean_latency(self):
         return float(self._get_stat("Total Latency")["mean "].split(" ")[1])
 
     @property
-    def _throughput(self):
+    def throughput(self):
         return float(self._get_stat("Throughput").split(" ")[0])
 
     @property
-    def _device(self):
+    def device_name(self):
         return self._get_stat("Selected Device")
 
     @property
     def _trt_error_file(self):
         return devices.BenchmarkPaths(
-            self.cache_dir, self.build_name, self.device, "local"
+            self.cache_dir, self.build_name, self.device_type, "local"
         ).errors_file
 
     def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
@@ -67,20 +67,24 @@ class TRTModel:
             os.remove(self._trt_error_file)
 
         if backend == "remote":
-            devices.execute_trt_remotely(self.state, self.device, repetitions)
+            devices.execute_trt_remotely(
+                self.cache_dir, self.build_name, self.device_type, repetitions
+            )
         elif backend == "local":
-            devices.execute_trt_locally(self.state, self.device, repetitions)
+            devices.execute_trt_locally(
+                self.cache_dir, self.build_name, self.device_type, repetitions
+            )
         else:
             raise ValueError(
                 f"Only 'remote' and 'local' are supported, but received {backend}"
             )
 
         return MeasuredPerformance(
-            mean_latency=self._mean_latency,
-            throughput=self._throughput,
-            device=self._device,
-            device_type="nvidia",
-            build_name=self.state.config.build_name,
+            mean_latency=self.mean_latency,
+            throughput=self.throughput,
+            device=self.device_name,
+            device_type=self.device_type,
+            build_name=self.build_name,
         )
 
 

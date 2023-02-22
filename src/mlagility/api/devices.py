@@ -356,7 +356,9 @@ def execute_groqchip_remotely(
         s.remove(remote_latency_file)
 
 
-def execute_trt_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_remotely(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the remote machine
     """
@@ -365,7 +367,6 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    cache_dir, build_name = state.cache_dir, state.config.build_name
     remote_paths = BenchmarkPaths(cache_dir, build_name, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
@@ -374,6 +375,7 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type=device, output_dir=remote_paths.output_dir)
 
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -423,18 +425,20 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
         )
 
 
-def execute_trt_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_locally(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the local GPU
     """
 
     # Setup local execution folders to save outputs/ errors
-    cache_dir, build_name = state.cache_dir, state.config.build_name
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
     setup_local_host(device_type="nvidia", output_dir=local_paths.output_dir)
 
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -485,7 +489,9 @@ def execute_trt_locally(state: build.State, device: str, iterations: int) -> Non
         )
 
 
-def execute_ort_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_remotely(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the remote machine
     """
@@ -494,7 +500,6 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    cache_dir, build_name = state.cache_dir, state.config.build_name
     remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     os.makedirs(local_paths.output_dir, exist_ok=True)
@@ -502,6 +507,7 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type=device, output_dir=remote_paths.output_dir)
 
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -561,18 +567,20 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
         )
 
 
-def execute_ort_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_locally(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the local ORT
     """
 
     # Setup local execution folders to save outputs/ errors
-    cache_dir, build_name = state.cache_dir, state.config.build_name
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
 
     setup_local_host(device_type=device, output_dir=local_paths.output_dir)
 
     # Check if ONNX file has been generated
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
