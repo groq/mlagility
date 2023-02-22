@@ -14,8 +14,9 @@ TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 
 
 class BenchmarkPaths:
-    def __init__(self, state, device, backend, username=None):
-        self.state = state
+    def __init__(self, cache_dir, build_name, device, backend, username=None):
+        self.cache_dir = cache_dir
+        self.build_name = build_name
         self.device = device
         self.backend = backend
         self.username = username
@@ -27,7 +28,7 @@ class BenchmarkPaths:
     def output_dir(self):
         if self.backend == "local":
             return os.path.join(
-                build.output_dir(self.state.cache_dir, self.state.config.build_name),
+                build.output_dir(self.cache_dir, self.build_name),
                 f"{self.device}_benchmark",
             )
         elif self.backend == "remote":
@@ -364,9 +365,10 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    remote_paths = BenchmarkPaths(state, device, "remote", username)
-    local_paths = BenchmarkPaths(state, device, "local")
-    docker_paths = BenchmarkPaths(state, device, "docker")
+    cache_dir, build_name = state.cache_dir, state.config.build_name
+    remote_paths = BenchmarkPaths(cache_dir, build_name, "remote", username)
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
     os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
@@ -416,7 +418,7 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )
 
@@ -427,8 +429,9 @@ def execute_trt_locally(state: build.State, device: str, iterations: int) -> Non
     """
 
     # Setup local execution folders to save outputs/ errors
-    local_paths = BenchmarkPaths(state, device, "local")
-    docker_paths = BenchmarkPaths(state, device, "docker")
+    cache_dir, build_name = state.cache_dir, state.config.build_name
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
     setup_local_host(device_type="nvidia", output_dir=local_paths.output_dir)
 
@@ -477,7 +480,7 @@ def execute_trt_locally(state: build.State, device: str, iterations: int) -> Non
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )
 
@@ -491,8 +494,9 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    remote_paths = BenchmarkPaths(state, device, "remote", username)
-    local_paths = BenchmarkPaths(state, device, "local")
+    cache_dir, build_name = state.cache_dir, state.config.build_name
+    remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
@@ -552,7 +556,7 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )
 
@@ -563,7 +567,8 @@ def execute_ort_locally(state: build.State, device: str, iterations: int) -> Non
     """
 
     # Setup local execution folders to save outputs/ errors
-    local_paths = BenchmarkPaths(state, device, "local")
+    cache_dir, build_name = state.cache_dir, state.config.build_name
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
 
     setup_local_host(device_type=device, output_dir=local_paths.output_dir)
 
@@ -639,6 +644,6 @@ def execute_ort_locally(state: build.State, device: str, iterations: int) -> Non
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )

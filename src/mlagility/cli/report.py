@@ -9,6 +9,9 @@ import groqflow.common.build as build
 import groqflow.common.cache as cache
 from groqflow.groqmodel import groqmodel
 from mlagility.common import labels
+from mlagility.api.ortmodel import ORTModel
+from mlagility.api.trtmodel import TRTModel
+from mlagility.api.devices import BenchmarkException
 
 
 def _update_numeric_attribute(new_val, current_val, default="-"):
@@ -176,22 +179,18 @@ def summary_spreadsheet(args) -> None:
             state = build.load_state(state_path=model_state_yaml)
 
             # Get CPU latency
-            x86_output_dir = os.path.join(cache_dir, build_name, "x86_benchmark")
-            x86_stats_file = os.path.join(x86_output_dir, "outputs.json")
-            if os.path.isfile(x86_stats_file):
-                with open(x86_stats_file, encoding="utf-8") as f:
-                    g = json.load(f)
-                report[build_name].x86_latency = g.get("Mean Latency(ms)", {})
+            try:
+                omodel = ORTModel(cache_dir, build_name)
+                report[build_name].x86_latency = omodel._mean_latency
+            except BenchmarkException:
+                pass
 
             # Get GPU latency
-            nvidia_output_dir = os.path.join(cache_dir, build_name, "nvidia_benchmark")
-            nvidia_stats_file = os.path.join(nvidia_output_dir, "outputs.json")
-            if os.path.isfile(nvidia_stats_file):
-                with open(nvidia_stats_file, encoding="utf-8") as f:
-                    g = json.load(f)
-                report[build_name].nvidia_latency = (
-                    g.get("Total Latency", {}).get("mean ", "-").split()[0]
-                )
+            try:
+                tmodel = TRTModel(cache_dir, build_name)
+                report[build_name].nvidia_latency = tmodel._mean_latency
+            except (BenchmarkException, KeyError):
+                pass
 
     # Populate results spreadsheet
     with open(report_path, "w", newline="", encoding="utf8") as spreadsheet:

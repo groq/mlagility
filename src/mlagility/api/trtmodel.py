@@ -7,10 +7,11 @@ from mlagility.api.performance import MeasuredPerformance
 
 
 class TRTModel:
-    def __init__(self, state: build.State, tensor_type=np.array):
+    def __init__(self, cache_dir: str, build_name: str, tensor_type=np.array):
 
         self.tensor_type = tensor_type
-        self.state = state
+        self.cache_dir = cache_dir
+        self.build_name = build_name
         self.device = "nvidia"
 
     def benchmark(
@@ -21,7 +22,9 @@ class TRTModel:
 
     @property
     def _trt_performance_file(self):
-        return devices.BenchmarkPaths(self.state, self.device, "local").outputs_file
+        return devices.BenchmarkPaths(
+            self.cache_dir, self.build_name, self.device, "local"
+        ).outputs_file
 
     def _get_stat(self, stat):
         if os.path.exists(self._trt_performance_file):
@@ -48,7 +51,9 @@ class TRTModel:
 
     @property
     def _trt_error_file(self):
-        return devices.BenchmarkPaths(self.state, self.device, "local").errors_file
+        return devices.BenchmarkPaths(
+            self.cache_dir, self.build_name, self.device, "local"
+        ).errors_file
 
     def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
         """
@@ -80,5 +85,4 @@ class TRTModel:
 
 
 def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> TRTModel:
-    state = build.load_state(cache_dir=cache_dir, build_name=build_name)
-    return TRTModel(state)
+    return TRTModel(cache_dir=cache_dir, build_name=build_name)
