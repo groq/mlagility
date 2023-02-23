@@ -53,6 +53,9 @@ def benchmark_script(
     groqview: bool = False,
 ):
 
+    # Make sure the cache directory exists
+    filesystem.make_cache_dir(cache_dir)
+
     # Import the sequence file to get a custom sequence, if the user provided
     # one
     if sequence is not None:

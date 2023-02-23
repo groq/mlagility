@@ -1,3 +1,4 @@
+import sys
 from typing import Any, Dict, Optional, List
 from groqflow import groqit
 import groqflow.common.build as build
@@ -98,6 +99,7 @@ def benchmark_model(
     model: Any,
     inputs: Dict[str, Any],
     build_name: str,
+    script_name: str = None,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     device: str = "x86",
     backend: str = "local",
@@ -113,6 +115,16 @@ def benchmark_model(
     """
     Benchmark a model against some inputs on target hardware
     """
+
+    db = filesystem.Database(cache_dir)
+
+    if script_name is None:
+        db_script_name = sys.argv[0].split("/")[-1].split(".")[0]
+        db.add_script(db_script_name)
+    else:
+        db_script_name = script_name
+
+    db.add_build(db_script_name, build_name)
 
     try:
 

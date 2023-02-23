@@ -2,6 +2,9 @@ import os
 import shutil
 import glob
 import pathlib
+import yaml
+import datetime
+from typing import Dict, List
 import groqflow.common.printing as printing
 import groqflow.common.cache as cache
 import groqflow.common.build as build
@@ -24,15 +27,100 @@ class CacheError(exc.GroqFlowError):
     """
 
 
-def make_build_dir(cache_dir: str, build_name: str):
-    # Create the build and cache directories, and put hidden files in them
-    # to mark them as such.
-    build_dir = build.output_dir(cache_dir, build_name)
-    os.makedirs(build_dir, exist_ok=True)
+class Database:
+    def __init__(self, cache_dir):
+        self.cache_dir = cache_dir
+
+    @property
+    def _database_file(self) -> str:
+        return os.path.join(self.cache_dir, "cache_contents.yaml")
+
+    @property
+    def _database(self) -> Dict[str, Dict[str, str]]:
+        if os.path.isfile(self._database_file):
+            with open(self._database_file, "r", encoding="utf8") as stream:
+                database = yaml.load(stream, Loader=yaml.FullLoader)
+        else:
+            database = {}
+
+        return database
+
+    def _save_database(self, database_dict: Dict):
+        with open(self._database_file, "w", encoding="utf8") as outfile:
+            yaml.dump(database_dict, outfile)
+
+    def _check_script_in_database(self, script_name: str, func_name: str):
+        if script_name not in self._database.keys():
+            raise CacheError(
+                f"This is a bug. {func_name}() was called with a script_name "
+                "that has not been added to the database yet."
+            )
+
+    def add_script(self, script_name: str):
+        database_dict = self._database
+
+        if script_name not in database_dict.keys():
+            database_dict[script_name] = {}
+
+        self._save_database(database_dict)
+
+    def add_build(self, script_name, build_name):
+        self._check_script_in_database(script_name, "track_new_build")
+
+        database_dict = self._database
+
+        database_dict[script_name][build_name] = datetime.datetime.now()
+
+        self._save_database(database_dict)
+
+    def remove_script(self, script_name: str) -> Dict[str, Dict[str, str]]:
+        self._check_script_in_database(script_name, "remove_script")
+
+        database_dict = self._database
+
+        database_dict.pop(script_name)
+
+        self._save_database(database_dict)
+
+        return database_dict
+
+    def remove_build(self, build_name: str):
+        database_dict = self._database
+        print(database_dict)
+
+        for script_name, script_builds in database_dict.items():
+            if build_name in script_builds:
+
+                script_builds.pop(build_name)
+
+                if len(script_builds) == 0:
+                    database_dict = self.remove_script(script_name)
+
+        self._save_database(database_dict)
+
+
+def make_cache_dir(cache_dir: str):
+    """
+    Create the build and cache directories, and put hidden files in them
+    to mark them as such.
+    """
+
+    os.makedirs(cache_dir, exist_ok=True)
 
     # File that indicates that the directory is an MLAgility cache directory
     cache_file_path = os.path.join(cache_dir, CACHE_MARKER)
     open(cache_file_path, mode="w", encoding="utf").close()
+
+
+def make_build_dir(cache_dir: str, build_name: str):
+    """
+    Create the build and cache directories, and put hidden files in them
+    to mark them as such.
+    """
+    make_cache_dir(cache_dir)
+
+    build_dir = build.output_dir(cache_dir, build_name)
+    os.makedirs(build_dir, exist_ok=True)
 
     # File that indicates that the directory is an MLAgility build directory
     build_file_path = os.path.join(build_dir, BUILD_MARKER)
@@ -125,6 +213,9 @@ def delete_builds(args):
         builds = [args.build_name]
 
     for build in builds:
+        db = Database(args.cache_dir)
+        db.remove_build(build)
+
         build_path = os.path.join(args.cache_dir, build)
         if is_build_dir(args.cache_dir, build):
             cache.rmdir(build_path)
