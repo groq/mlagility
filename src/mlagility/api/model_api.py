@@ -182,7 +182,8 @@ def benchmark_model(
 
             else:
                 raise ValueError(
-                    f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
+                    "Only groq, x86, or nvidia are allowed values for device type, "
+                    f"but got {device}"
                 )
 
             # Perform some extra analysis to capture the ONNX model's parameter count and IO size
