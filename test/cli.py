@@ -26,7 +26,7 @@ import groqflow.common.cache as cache
 # filesystem access
 
 test_scripts_dot_py = {
-    "linear.py": """# labels: name::linear author::benchit license::mit
+    "linear.py": """# labels: name::linear author::benchit license::mit test_group::a
 import torch
 
 torch.manual_seed(0)
@@ -52,7 +52,7 @@ inputs = {"x": torch.rand(input_features)}
 output = model(**inputs)
 
 """,
-    "linear2.py": """# labels: name::linear2 author::benchit license::mit
+    "linear2.py": """# labels: name::linear2 author::benchit license::mit test_group::b
 import torch
 
 torch.manual_seed(0)
@@ -532,6 +532,54 @@ class Testing(unittest.TestCase):
             benchitcli()
 
         assert_success_of_builds([test_script], None, check_perf=True)
+
+    def test_012_cli_labels(self):
+
+        # Only build models labels with test_group::a
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/*.py"),
+            "--label",
+            "test_group::a",
+            "--build-only",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        assert len(cache.get_all(cache_dir)) == 1
+
+        # Delete the builds
+        testargs = [
+            "benchit",
+            "cache",
+            "delete",
+            "--all",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert len(cache.get_all(cache_dir)) == 0
+
+        # Only build models labels with test_group::a and test_group::b
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/*.py"),
+            "--label",
+            "test_group::a,b",
+            "--build-only",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        assert len(cache.get_all(cache_dir)) == 2
 
 
 if __name__ == "__main__":
