@@ -86,7 +86,3 @@ class TRTModel:
             device_type=self.device_type,
             build_name=self.build_name,
         )
-
-
-def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> TRTModel:
-    return TRTModel(cache_dir=cache_dir, build_name=build_name)

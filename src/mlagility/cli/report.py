@@ -14,13 +14,26 @@ from mlagility.api.devices import BenchmarkException
 from mlagility.common.filesystem import check_cache_dir
 
 
-def _update_numeric_attribute(new_val, current_val, default="-"):
+def _update_numeric_attribute(
+    new_val, current_val, default="-", build_name=None, parameter_name=None
+):
     """
     Updates a numeric attribute if needed
     """
     if current_val == default:
         return new_val if new_val is not None else default
     else:
+        if (
+            build_name is not None
+            and parameter_name is not None
+            and new_val != current_val
+        ):
+            printing.log_warning(
+                (
+                    f"Got multiple values for {parameter_name} on build {build_name} "
+                    f"(keeping {current_val}, discarding {new_val})"
+                )
+            )
         return current_val
 
 
@@ -129,10 +142,10 @@ def summary_spreadsheet(args) -> None:
     Path(report_dir).mkdir(parents=True, exist_ok=True)
     report = {}
 
-    # Add results from all cache folders
+    # Add results from all user-provided cache folders
     for cache_dir in cache_dirs:
 
-        # Check cache directory
+        # Check if this is a valid cache directory
         check_cache_dir(cache_dir)
 
         # List all yaml files available
@@ -159,7 +172,10 @@ def summary_spreadsheet(args) -> None:
 
             # Get model hash from build name
             report[build_name].params = _update_numeric_attribute(
-                state.info.num_parameters, report[build_name].params
+                state.info.num_parameters,
+                report[build_name].params,
+                build_name,
+                "params",
             )
 
             # Extract labels (if any)
@@ -180,10 +196,16 @@ def summary_spreadsheet(args) -> None:
             # Get Groq latency and number of chips
             groq_estimated_latency = _get_estimated_groq_latency(build_name, cache_dir)
             report[build_name].groq_estimated_latency = _update_numeric_attribute(
-                groq_estimated_latency, report[build_name].groq_estimated_latency
+                groq_estimated_latency,
+                report[build_name].groq_estimated_latency,
+                build_name,
+                "groq_estimated_latency",
             )
             report[build_name].groq_chips_used = _update_numeric_attribute(
-                state.num_chips_used, report[build_name].groq_chips_used
+                state.num_chips_used,
+                report[build_name].groq_chips_used,
+                build_name,
+                "groq_chips_used",
             )
 
             # Reloading state after estimating latency

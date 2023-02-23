@@ -87,7 +87,3 @@ class ORTModel:
             device_type=self.device_type,
             build_name=self.build_name,
         )
-
-
-def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> ORTModel:
-    return ORTModel(build_name=build_name, cache_dir=cache_dir)

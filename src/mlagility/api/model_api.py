@@ -156,8 +156,9 @@ def benchmark_model(
 
             if not build_only:
                 printing.log_info(f"Benchmarking on {backend} {device}...")
-                gpu_model = trtmodel.load(
-                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                gpu_model = trtmodel.TRTModel(
+                    cache_dir=gmodel.state.cache_dir,
+                    build_name=gmodel.state.config.build_name,
                 )
                 perf = gpu_model.benchmark(backend=backend)
 
@@ -173,8 +174,9 @@ def benchmark_model(
 
             if not build_only:
                 printing.log_info(f"Benchmarking on {backend} {device}...")
-                cpu_model = ortmodel.load(
-                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                cpu_model = ortmodel.ORTModel(
+                    build_name=gmodel.state.config.build_name,
+                    cache_dir=gmodel.state.cache_dir,
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
