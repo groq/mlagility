@@ -182,7 +182,7 @@ def call_benchit(
 
         if perf is not None:
             groqflow_helpers.add_mlagility_stat(
-                build_state, f"{tracer_args.device}_performance", vars(perf)
+                build_state, f"{perf.device} performance", vars(perf)
             )
 
 
