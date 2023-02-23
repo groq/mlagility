@@ -8,6 +8,7 @@ import groqflow.common.exceptions as exceptions
 from groqflow.justgroqit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
+import mlagility.common.labels as lab
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 from mlagility.analysis.util import ModelInfo
 
@@ -39,6 +40,7 @@ def benchmark_script(
     use_slurm: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
+    labels: List[str] = None,
     rebuild: Optional[str] = None,
     devices: List[str] = None,
     backend: str = "local",
@@ -146,8 +148,27 @@ def benchmark_script(
     models_found: Dict[str, ModelInfo] = {}
 
     for script in input_scripts:
+        script_path, targets, encoded_input = decode_input_script(script)
+
+        # Filter scripts by label
+        if labels != []:
+            skip_script = False
+            user_labels = lab.to_dict(labels)
+            file_labels = lab.load_from_file(encoded_input)
+            for key in user_labels:
+                # Skip benchmarking if user_label is not in file_labels
+                if key not in file_labels:
+                    skip_script = True
+                    break
+                # A label key may point to multiple label values
+                # Skip if not all values of user_labels[key] are in file_labels[key]
+                elif not all(elem in user_labels[key] for elem in file_labels[key]):
+                    skip_script = True
+                    break
+            if skip_script:
+                continue
+
         for device in devices:
-            script_path, targets, encoded_input = decode_input_script(script)
             if use_slurm:
                 slurm.run_benchit(
                     op="benchmark",

@@ -54,6 +54,7 @@ def benchmark_script_argparse(args):
         use_slurm=args.use_slurm,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
+        labels=args.labels,
         rebuild=args.rebuild,
         devices=args.devices,
         backend=args.backend,
