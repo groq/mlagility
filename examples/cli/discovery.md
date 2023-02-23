@@ -220,6 +220,49 @@ You can see that both models are discovered, but only `another_pytorch_model` wa
 
 > See the [Input Script documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#input-script) for more details.
 
+## Filtering Model Labels
+
+You can also leverage the labels feature of `benchit` to filter which models are acted on. Labels are pragmas added by the user to the first line of a `.py` file to list some of the attributes of that given script. `two_models.py`, for example has the label `test_group::b`, while `hello_world.py` and `max_depth.py` have the label `test_group::b`.
+
+If you wanted to only build and benchmark models that have the label `test_group::b`, you could use the command:
+
+```
+benchit scripts/*.py --label test_group::b
+```
+
+That would produce a result like:
+
+```
+
+Models discovered during profiling:
+
+two_models.py:
+        another_pytorch_model (executed 1x)
+                Model Type:     Pytorch (torch.nn.Module)
+                Class:          SmallModel (<class 'two_models.SmallModel'>)
+                Location:       /home/jfowers/mlagility/examples/cli/scripts/two_models.py, line 40
+                Parameters:     510 (<0.1 MB)
+                Hash:           215ca1e3
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                                Mean Latency:   0.000   milliseconds (ms)
+                                Throughput:     509528.6        inferences per second (IPS)
+
+max_depth.py:
+        pytorch_model (executed 1x)
+                Model Type:     Pytorch (torch.nn.Module)
+                Class:          TwoLayerModel (<class 'max_depth.TwoLayerModel'>)
+                Location:       /home/jfowers/mlagility/examples/cli/scripts/max_depth.py, line 41
+                Parameters:     85 (<0.1 MB)
+                Hash:           80b93950
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                                Mean Latency:   0.000   milliseconds (ms)
+                                Throughput:     693955.3        inferences per second (IPS)
+
+pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<AddBackward0>)
+
+Woohoo! The 'benchmark' command is complete.
+```
+
 # Thanks!
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:

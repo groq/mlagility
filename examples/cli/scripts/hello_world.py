@@ -1,3 +1,4 @@
+# labels: name::hello_world author::mlagility test_group::a
 """
 Hello, world! This is the most basic benchit cli example.
 To try it out, run the following command:

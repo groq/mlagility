@@ -1,3 +1,4 @@
+# labels: name::twolayer author::mlagility test_group::b
 """
 This example demonstrates what happens when your script contains
 two models. In this case, pytorch_model (of class SmallModel), and
