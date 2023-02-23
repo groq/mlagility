@@ -397,18 +397,16 @@ def speedup_text_summary_legacy(df: pd.DataFrame) -> None:
 
 
 def process_latency_data(df):
-    df = df[
-        ["model_name", "tsp_estimated_e2e_latency", "gpu_e2e_latency", "x86_latency"]
-    ]
+    df = df[["model_name", "groq_estimated_latency", "nvidia_latency", "x86_latency"]]
     df = df.sort_values(by=["model_name"])
-    df.tsp_estimated_e2e_latency.replace(["-"], [float("inf")], inplace=True)
-    df.gpu_e2e_latency.replace(["-"], [float("inf")], inplace=True)
+    df.groq_estimated_latency.replace(["-"], [float("inf")], inplace=True)
+    df.nvidia_latency.replace(["-"], [float("inf")], inplace=True)
     df = df[(df.x86_latency != "-")]
-    df["tsp_estimated_e2e_latency"] = df["tsp_estimated_e2e_latency"].astype(float)
-    df["gpu_e2e_latency"] = df["gpu_e2e_latency"].astype(float)
+    df["groq_estimated_latency"] = df["groq_estimated_latency"].astype(float)
+    df["nvidia_latency"] = df["nvidia_latency"].astype(float)
     df["x86_latency"] = df["x86_latency"].astype(float)
-    df["tsp_cpu_compute_ratio"] = df["x86_latency"] / df["tsp_estimated_e2e_latency"]
-    df["gpu_cpu_compute_ratio"] = df["x86_latency"] / df["gpu_e2e_latency"]
+    df["tsp_cpu_compute_ratio"] = df["x86_latency"] / df["groq_estimated_latency"]
+    df["gpu_cpu_compute_ratio"] = df["x86_latency"] / df["nvidia_latency"]
 
     return df
 
@@ -543,20 +541,18 @@ def compiler_errors(df: pd.DataFrame) -> None:
 def io_fraction(df: pd.DataFrame) -> None:
     fig = go.Figure()
     for chips in ["1", "2", "4", "8"]:
-        tmp = df[[model_entry == chips for model_entry in df["chips_used"]]]
+        tmp = df[[model_entry == chips for model_entry in df["groq_chips_used"]]]
         if len(tmp) == 0:
             continue
         tmp = tmp[[model_entry != "-" for model_entry in tmp["tsp_compute_latency"]]]
         if len(tmp) == 0:
             continue
-        tmp = tmp[
-            [model_entry != "-" for model_entry in tmp["tsp_estimated_e2e_latency"]]
-        ]
+        tmp = tmp[[model_entry != "-" for model_entry in tmp["groq_estimated_latency"]]]
         if len(tmp) == 0:
             continue
         print(len(tmp))
         compute_latency = tmp["tsp_compute_latency"].astype("float")
-        e2e_latency = tmp["tsp_estimated_e2e_latency"].astype("float")
+        e2e_latency = tmp["groq_estimated_latency"].astype("float")
 
         io_fraction = 1 - compute_latency / e2e_latency
         if chips == "1":

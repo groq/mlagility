@@ -14,8 +14,9 @@ TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 
 
 class BenchmarkPaths:
-    def __init__(self, state, device, backend, username=None):
-        self.state = state
+    def __init__(self, cache_dir, build_name, device, backend, username=None):
+        self.cache_dir = cache_dir
+        self.build_name = build_name
         self.device = device
         self.backend = backend
         self.username = username
@@ -27,7 +28,7 @@ class BenchmarkPaths:
     def output_dir(self):
         if self.backend == "local":
             return os.path.join(
-                build.output_dir(self.state.cache_dir, self.state.config.build_name),
+                build.output_dir(self.cache_dir, self.build_name),
                 f"{self.device}_benchmark",
             )
         elif self.backend == "remote":
@@ -355,7 +356,9 @@ def execute_groqchip_remotely(
         s.remove(remote_latency_file)
 
 
-def execute_trt_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_remotely(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the remote machine
     """
@@ -364,14 +367,15 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    remote_paths = BenchmarkPaths(state, device, "remote", username)
-    local_paths = BenchmarkPaths(state, device, "local")
-    docker_paths = BenchmarkPaths(state, device, "docker")
+    remote_paths = BenchmarkPaths(cache_dir, build_name, "remote", username)
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
     os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type=device, output_dir=remote_paths.output_dir)
 
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -416,22 +420,25 @@ def execute_trt_remotely(state: build.State, device: str, iterations: int) -> No
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )
 
 
-def execute_trt_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_trt_locally(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the local GPU
     """
 
     # Setup local execution folders to save outputs/ errors
-    local_paths = BenchmarkPaths(state, device, "local")
-    docker_paths = BenchmarkPaths(state, device, "docker")
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
     setup_local_host(device_type="nvidia", output_dir=local_paths.output_dir)
 
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -477,12 +484,14 @@ def execute_trt_locally(state: build.State, device: str, iterations: int) -> Non
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )
 
 
-def execute_ort_remotely(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_remotely(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the remote machine
     """
@@ -491,13 +500,14 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    remote_paths = BenchmarkPaths(state, device, "remote", username)
-    local_paths = BenchmarkPaths(state, device, "local")
+    remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
     client = setup_connection(device_type=device, output_dir=remote_paths.output_dir)
 
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -552,22 +562,25 @@ def execute_ort_remotely(state: build.State, device: str, iterations: int) -> No
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )
 
 
-def execute_ort_locally(state: build.State, device: str, iterations: int) -> None:
+def execute_ort_locally(
+    cache_dir: str, build_name: str, device: str, iterations: int
+) -> None:
     """
     Execute Model on the local ORT
     """
 
     # Setup local execution folders to save outputs/ errors
-    local_paths = BenchmarkPaths(state, device, "local")
+    local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
 
     setup_local_host(device_type=device, output_dir=local_paths.output_dir)
 
     # Check if ONNX file has been generated
+    state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
         raise exp.GroqModelRuntimeError(msg)
@@ -639,6 +652,6 @@ def execute_ort_locally(state: build.State, device: str, iterations: int) -> Non
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
-            "No benchmarking outputs file found after benchmarking run."
+            "No benchmarking outputs file found after benchmarking run. "
             "Sorry we don't have more information."
         )

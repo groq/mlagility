@@ -176,9 +176,9 @@ def call_benchit(
         # so that they can be easily accessed by the report command later
         build_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
         groqflow_helpers.add_mlagility_stat(build_state, "hash", model_info.hash)
-        groqflow_helpers.add_mlagility_stat(
-            build_state, "parameters", model_info.params
-        )
+        # groqflow_helpers.add_mlagility_stat(
+        #    build_state, "parameters", model_info.params
+        # )
 
         if perf is not None:
             groqflow_helpers.add_mlagility_stat(

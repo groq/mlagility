@@ -4,6 +4,7 @@ import sys
 import groqflow.common.build as build
 import groqflow.common.printing as printing
 import mlagility.common.filesystem as filesystem
+import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_script
 from mlagility.version import __version__ as mlagility_version
 
@@ -265,21 +266,31 @@ def main():
     # Parser for the "cache report" command
     #######################################
 
-    # TODO: https://github.com/groq/mlagility/issues/142
-    # report_parser = cache_subparsers.add_parser(
-    #     "report", help="Generate reports in CSV format"
-    # )
-    # report_parser.set_defaults(func=report.summary_spreadsheet)
+    report_parser = cache_subparsers.add_parser(
+        "report", help="Generate reports in CSV format"
+    )
+    report_parser.set_defaults(func=report.summary_spreadsheet)
 
-    # report_parser.add_argument(
-    #     "-d",
-    #     "--cache-dir",
-    #     dest="cache_dir",
-    #     help="The reports will be generated based on the builds in this GroqFlow "
-    #     f"build cache directory (defaults to {filesystem.DEFAULT_CACHE_DIR})",
-    #     required=False,
-    #     default=filesystem.DEFAULT_CACHE_DIR,
-    # )
+    report_parser.add_argument(
+        "-d",
+        "--cache-dir",
+        dest="cache_dirs",
+        help=(
+            "One or more build cache directories to generate the report "
+            f"(defaults to {filesystem.DEFAULT_CACHE_DIR})"
+        ),
+        default=[filesystem.DEFAULT_CACHE_DIR],
+        nargs="*",
+    )
+
+    report_parser.add_argument(
+        "-r",
+        "--report-dir",
+        dest="report_dir",
+        help="Path to folder where report will be saved (defaults to current working directory)",
+        required=False,
+        default=os.getcwd(),
+    )
 
     #######################################
     # Parser for the "cache list" command

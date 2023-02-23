@@ -1,17 +1,17 @@
 import os
 import json
 import numpy as np
-import groqflow.common.build as build
 import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
 
 
 class ORTModel:
-    def __init__(self, state: build.State, tensor_type=np.array):
+    def __init__(self, cache_dir: str, build_name: str, tensor_type=np.array):
 
         self.tensor_type = tensor_type
-        self.state = state
-        self.device = "x86"
+        self.cache_dir = cache_dir
+        self.build_name = build_name
+        self.device_type = "x86"
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
@@ -21,7 +21,9 @@ class ORTModel:
 
     @property
     def _ort_performance_file(self):
-        return devices.BenchmarkPaths(self.state, self.device, "local").outputs_file
+        return devices.BenchmarkPaths(
+            self.cache_dir, self.build_name, self.device_type, "local"
+        ).outputs_file
 
     def _get_stat(self, stat):
         if os.path.exists(self._ort_performance_file):
@@ -35,20 +37,22 @@ class ORTModel:
             )
 
     @property
-    def _mean_latency(self):
+    def mean_latency(self):
         return float(self._get_stat("Mean Latency(ms)"))
 
     @property
-    def _throughput(self):
+    def throughput(self):
         return float(self._get_stat("Throughput"))
 
     @property
-    def _device(self):
+    def device_name(self):
         return self._get_stat("CPU Name")
 
     @property
     def _ort_error_file(self):
-        return devices.BenchmarkPaths(self.state, self.device, "local").errors_file
+        return devices.BenchmarkPaths(
+            self.cache_dir, self.build_name, self.device_type, "local"
+        ).errors_file
 
     def _execute(self, repetitions: int, backend: str = "local") -> MeasuredPerformance:
 
@@ -63,23 +67,22 @@ class ORTModel:
             os.remove(self._ort_error_file)
 
         if backend == "remote":
-            devices.execute_ort_remotely(self.state, self.device, repetitions)
+            devices.execute_ort_remotely(
+                self.cache_dir, self.build_name, self.device_type, repetitions
+            )
         elif backend == "local":
-            devices.execute_ort_locally(self.state, self.device, repetitions)
+            devices.execute_ort_locally(
+                self.cache_dir, self.build_name, self.device_type, repetitions
+            )
         else:
             raise ValueError(
                 f"Only 'remote' and 'local' are supported, but received {backend}"
             )
 
         return MeasuredPerformance(
-            mean_latency=self._mean_latency,
-            throughput=self._throughput,
-            device=self._device,
-            device_type=self.device,
-            build_name=self.state.config.build_name,
+            mean_latency=self.mean_latency,
+            throughput=self.throughput,
+            device=self.device_name,
+            device_type=self.device_type,
+            build_name=self.build_name,
         )
-
-
-def load(build_name: str, cache_dir=build.DEFAULT_CACHE_DIR) -> ORTModel:
-    state = build.load_state(cache_dir=cache_dir, build_name=build_name)
-    return ORTModel(state)
