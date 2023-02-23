@@ -130,6 +130,14 @@ def main():
     )
 
     benchmark_parser.add_argument(
+        "--label",
+        dest="labels",
+        help="Only benchmark the models that have the provided labels",
+        nargs="*",
+        default=[],
+    )
+
+    benchmark_parser.add_argument(
         "--sequence-file",
         dest="sequence_file",
         help="Path to a python script that implements the GroqFlow sequence.py template, "
