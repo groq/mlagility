@@ -182,8 +182,9 @@ def assert_success_of_builds(
                     ), f"{build_state.info.__dict__[info_property[0]]} == {info_property[1]}"
 
                 if check_perf:
-                    cpu_model = ortmodel.load(
-                        build_state.config.build_name, cache_dir=build_state.cache_dir
+                    cpu_model = ortmodel.ORTModel(
+                        build_name=build_state.config.build_name,
+                        cache_dir=build_state.cache_dir,
                     )
                     assert cpu_model.mean_latency > 0
                     assert cpu_model.throughput > 0
