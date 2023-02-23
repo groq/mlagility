@@ -20,8 +20,6 @@ def _update_numeric_attribute(
     """
     Updates a numeric attribute if needed
     """
-    if parameter_name == "groq_estimated_latency":
-        print(new_val, current_val)
     if current_val == default:
         return new_val if new_val is not None else default
     else:
