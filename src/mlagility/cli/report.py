@@ -20,6 +20,8 @@ def _update_numeric_attribute(
     """
     Updates a numeric attribute if needed
     """
+    if parameter_name == "groq_estimated_latency":
+        print(new_val, current_val)
     if current_val == default:
         return new_val if new_val is not None else default
     else:
@@ -174,8 +176,8 @@ def summary_spreadsheet(args) -> None:
             report[build_name].params = _update_numeric_attribute(
                 state.info.num_parameters,
                 report[build_name].params,
-                build_name,
-                "params",
+                build_name=build_name,
+                parameter_name="params",
             )
 
             # Extract labels (if any)
@@ -198,14 +200,14 @@ def summary_spreadsheet(args) -> None:
             report[build_name].groq_estimated_latency = _update_numeric_attribute(
                 groq_estimated_latency,
                 report[build_name].groq_estimated_latency,
-                build_name,
-                "groq_estimated_latency",
+                build_name=build_name,
+                parameter_name="groq_estimated_latency",
             )
             report[build_name].groq_chips_used = _update_numeric_attribute(
                 state.num_chips_used,
                 report[build_name].groq_chips_used,
-                build_name,
-                "groq_chips_used",
+                build_name=build_name,
+                parameter_name="groq_chips_used",
             )
 
             # Reloading state after estimating latency
