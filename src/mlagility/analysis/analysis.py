@@ -23,6 +23,7 @@ import mlagility.analysis.tf_helpers as tf_helpers
 import mlagility.common.labels as labels
 from mlagility.api.model_api import benchmark_model
 import mlagility.common.filesystem as filesystem
+import mlagility.common.groqflow_helpers as groqflow_helpers
 
 
 class Action(Enum):
@@ -144,10 +145,10 @@ def call_benchit(
         model_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.GroqitStageError:
-        load_state = build.load_state(build_name=build_name)
-        if len(load_state.info.opt_onnx_unsupported_ops) > 0:
+        build_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
+        if len(build_state.info.opt_onnx_unsupported_ops) > 0:
             model_info.status_message = "Unsupported op(s) " + ", ".join(
-                load_state.info.opt_onnx_unsupported_ops
+                build_state.info.opt_onnx_unsupported_ops
             )
         else:
             model_info.status_message = "Build Error: see log files for details."
@@ -169,6 +170,20 @@ def call_benchit(
         model_info.status_message_color = printing.Colors.WARNING
 
         _store_traceback(model_info)
+
+    else:
+        # Stats that we want to save into the model's state.yaml file
+        # so that they can be easily accessed by the report command later
+        build_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
+        groqflow_helpers.add_mlagility_stat(build_state, "hash", model_info.hash)
+        groqflow_helpers.add_mlagility_stat(
+            build_state, "parameters", model_info.params
+        )
+
+        if perf is not None:
+            groqflow_helpers.add_mlagility_stat(
+                build_state, f"{perf.device} performance", vars(perf)
+            )
 
 
 def get_model_hash(

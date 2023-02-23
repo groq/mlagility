@@ -23,3 +23,11 @@ class SuccessStage(GroqitStage):
         state.build_status = build.Status.SUCCESSFUL_BUILD
 
         return state
+
+
+def add_mlagility_stat(state: build.State, key, value):
+    if not hasattr(state.info, "mlagility"):
+        state.info.mlagility = {}
+
+    state.info.mlagility[key] = value
+    state.save()
