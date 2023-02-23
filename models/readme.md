@@ -60,6 +60,27 @@ benchit */*.py
 
 _Note_: Benchmarking the entire corpora of MLAgility models might take a very long time.
 
+You can aggregate all of the benchmarking results from your `mlagility cache` into a CSV file with:
+
+```
+benchit report
+```
+
+If you want to only report on a subset of models, we recommend saving the benchmarking results into a specific cache directory:
+
+```
+# Save benchmark results into a specific cache directory
+benchit models/selftest/*.py -d selftest_results
+
+# Report the results from the `selftest_results` cache
+benchit report -d selftest_results
+```
+
+If you have multiple cache directories, you may also aggregate all information into a single report:
+
+```
+benchit report -d x86_results_cache_dir nvidia_results_cache_dir
+```
 
 ## Model Template
 

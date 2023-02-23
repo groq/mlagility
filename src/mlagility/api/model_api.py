@@ -10,7 +10,7 @@ from groqflow.groqmodel import GroqModel
 from mlagility.api import trtmodel, ortmodel
 import mlagility.common.filesystem as filesystem
 from mlagility.api.performance import MeasuredPerformance
-from mlagility.common.groqflow_helpers import SuccessStage
+import mlagility.common.groqflow_helpers as groqflow_helpers
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
@@ -23,7 +23,7 @@ model_type_to_export_sequence = {
             export.ExportPytorchModel(),
             export.OptimizeOnnxModel(),
             export.ConvertOnnxToFp16(),
-            SuccessStage(),
+            groqflow_helpers.SuccessStage(),
         ],
         enable_model_validation=True,
     ),
@@ -34,7 +34,7 @@ model_type_to_export_sequence = {
             export.ExportKerasModel(),
             export.OptimizeOnnxModel(),
             export.ConvertOnnxToFp16(),
-            SuccessStage(),
+            groqflow_helpers.SuccessStage(),
         ],
         enable_model_validation=True,
     ),
@@ -45,7 +45,7 @@ model_type_to_export_sequence = {
             export.ReceiveOnnxModel(),
             export.OptimizeOnnxModel(),
             export.ConvertOnnxToFp16(),
-            SuccessStage(),
+            groqflow_helpers.SuccessStage(),
         ],
         enable_model_validation=True,
     ),
@@ -56,7 +56,7 @@ model_type_to_export_sequence = {
             hummingbird.ConvertHummingbirdModel(),
             export.OptimizeOnnxModel(),
             export.ConvertOnnxToFp16(),
-            SuccessStage(),
+            groqflow_helpers.SuccessStage(),
         ],
         enable_model_validation=True,
     ),
@@ -156,8 +156,9 @@ def benchmark_model(
 
             if not build_only:
                 printing.log_info(f"Benchmarking on {backend} {device}...")
-                gpu_model = trtmodel.load(
-                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                gpu_model = trtmodel.TRTModel(
+                    cache_dir=gmodel.state.cache_dir,
+                    build_name=gmodel.state.config.build_name,
                 )
                 perf = gpu_model.benchmark(backend=backend)
 
@@ -173,15 +174,18 @@ def benchmark_model(
 
             if not build_only:
                 printing.log_info(f"Benchmarking on {backend} {device}...")
-                cpu_model = ortmodel.load(
-                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                cpu_model = ortmodel.ORTModel(
+                    build_name=gmodel.state.config.build_name,
+                    cache_dir=gmodel.state.cache_dir,
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
         else:
             raise ValueError(
-                f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
+                "Only groq, x86, or nvidia are allowed values for device type, "
+                f"but got {device}"
             )
+
     finally:
         # Make sure the build and cache dirs exist and have the proper marker files
         # NOTE: We would do this at the top of the file, however
