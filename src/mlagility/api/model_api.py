@@ -4,6 +4,7 @@ import groqflow.common.build as build
 from groqflow.justgroqit.stage import Sequence
 from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
+import groqflow.justgroqit.compile as compile
 import groqflow.justgroqit.hummingbird as hummingbird
 import groqflow.common.printing as printing
 from groqflow.groqmodel import GroqModel
@@ -144,44 +145,52 @@ def benchmark_model(
                     build_name=gmodel.state.config.build_name,
                 )
 
-        elif device == "nvidia":
-            gmodel = exportit(
-                model=model,
-                inputs=inputs,
-                build_name=build_name,
-                cache_dir=cache_dir,
-                rebuild=rebuild,
-                sequence=sequence,
-            )
-
-            if not build_only:
-                printing.log_info(f"Benchmarking on {backend} {device}...")
-                gpu_model = trtmodel.load(
-                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
-                )
-                perf = gpu_model.benchmark(backend=backend)
-
-        elif device == "x86":
-            gmodel = exportit(
-                model=model,
-                inputs=inputs,
-                build_name=build_name,
-                cache_dir=cache_dir,
-                rebuild=rebuild,
-                sequence=sequence,
-            )
-
-            if not build_only:
-                printing.log_info(f"Benchmarking on {backend} {device}...")
-                cpu_model = ortmodel.load(
-                    gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
-                )
-                perf = cpu_model.benchmark(backend=backend)
-
         else:
-            raise ValueError(
-                f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
-            )
+            if device == "nvidia":
+                gmodel = exportit(
+                    model=model,
+                    inputs=inputs,
+                    build_name=build_name,
+                    cache_dir=cache_dir,
+                    rebuild=rebuild,
+                    sequence=sequence,
+                )
+
+                if not build_only:
+                    printing.log_info(f"Benchmarking on {backend} {device}...")
+                    gpu_model = trtmodel.load(
+                        gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                    )
+                    perf = gpu_model.benchmark(backend=backend)
+
+            elif device == "x86":
+                gmodel = exportit(
+                    model=model,
+                    inputs=inputs,
+                    build_name=build_name,
+                    cache_dir=cache_dir,
+                    rebuild=rebuild,
+                    sequence=sequence,
+                )
+
+                if not build_only:
+                    printing.log_info(f"Benchmarking on {backend} {device}...")
+                    cpu_model = ortmodel.load(
+                        gmodel.state.config.build_name, cache_dir=gmodel.state.cache_dir
+                    )
+                    perf = cpu_model.benchmark(backend=backend)
+
+            else:
+                raise ValueError(
+                    f"Only groq, x86, or nvidia are allowed values for device type, but got {device}"
+                )
+
+            # Perform some extra analysis to capture the ONNX model's parameter count and IO size
+            compile.get_and_analyze_onnx(gmodel.state)
+
+            # Save any changes made to the State instance to disk
+            gmodel.state.save()
+
     finally:
         # Make sure the build and cache dirs exist and have the proper marker files
         # NOTE: We would do this at the top of the file, however
