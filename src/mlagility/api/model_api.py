@@ -4,7 +4,6 @@ import groqflow.common.build as build
 from groqflow.justgroqit.stage import Sequence
 from groqflow.justgroqit.ignition import identify_model_type
 import groqflow.justgroqit.export as export
-import groqflow.justgroqit.compile as compile
 import groqflow.justgroqit.hummingbird as hummingbird
 import groqflow.common.printing as printing
 from groqflow.groqmodel import GroqModel
