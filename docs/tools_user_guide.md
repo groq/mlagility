@@ -141,6 +141,19 @@ benchit example.py --analyze-only
 >        Hash:           479b1332
 ```
 
+## Labels
+
+Each `script` may have one or more labels which correspond to a set of key-value pairs that can be used as attributes of that given script. Labels must be in the first line of a `.py` file and are identified by the pragma `#labels`. Keys are separated from values by `::` and each label key may have one or more label values as shown in the example below:
+
+For example:
+
+```
+#labels domain::nlp author::google task::question_answering,translation
+```
+
+Once a script has been benchmarked, all labels that correspond to that script will also be stored as part of the cache folder.
+
+
 ## Build
 
 **Build** is the process by which the `benchmark_model()` API consumes a [model](#model) and produces ONNX files, Groq executables, and other artifacts needed for benchmarking.
@@ -322,6 +335,11 @@ You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter
 
 > See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 
+Additionally, you can leverage labels (see [Labels](#labels)) to filter which models in a script will be acted on, in the following manner:
+  - `benchit *.py --label test_group::a` will only benchmark the scripts lavels with `test_group::a`.
+  - You can also supply multiple labels, for example `benchit *.py --label test_group::a domain::nlp` only benchmark models that have both `test_group::a`, and `domain::nlp` labels.
+
+> _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 
 ### Use Slurm
 
@@ -519,6 +537,7 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 `benchit cache report` analyzes the state of all builds in a build cache and saves the result to a CSV file. It presents the following options:
 
 - `-d CACHE_DIR, --cache-dir CACHE_DIR` Search path for builds (defaults to ~/.cache/mlagility)
+- `-r REPORT_DIR, --report-dir REPORT_DIR` Path to folder where report will be saved (defaults to current working directory)
 
 > _Note_: `cache report` is not available as an API.
 
