@@ -465,53 +465,70 @@ def speedup_bar_chart(df: pd.DataFrame) -> None:
         )
 
 
-def speedup_text_summary(df: pd.DataFrame) -> None:
+def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
+
+    title = f"""<br><br>
+    <p style="font-family:sans-serif; font-size: 20px;text-align: center;">{device} Acceleration ({len(compute_ratio)} models):</p>"""
+    if is_baseline:
+        return (
+            title
+            + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>"""
+        )
+
+    if len(compute_ratio) > 0:
+        kpi_min, kpi_mean, kpi_avg, kpi_max = (
+            round(compute_ratio.min(), 2),
+            round(median(compute_ratio), 2),
+            round(compute_ratio.mean(), 2),
+            round(compute_ratio.max(), 2),
+        )
+    else:
+        kpi_min, kpi_mean, kpi_avg, kpi_max = 0, 0, 0, 0
+
+    return (
+        title
+        + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {kpi_avg}x</p>
+    <p style="font-family:sans-serif; color:{colors[color]}; font-size: 20px;text-align: center;"> min {kpi_min}x; median {kpi_mean}x; max {kpi_max}x</p>
+    """
+    )
+
+
+def speedup_text_summary(df: pd.DataFrame, baseline="x86") -> None:
     # pylint: disable=line-too-long
 
     df = process_latency_data(df)
 
     # Some latencies are "infinite" because they could not be calculated
     # As a result, some compute ratios are zero. Remove those from the calculations
-    print(df.groq_compute_ratio)
+    x86_compute_ratio = df["x86_compute_ratio"].to_numpy()
     nvidia_compute_ratio = df["nvidia_compute_ratio"].to_numpy()
     groq_compute_ratio = df["groq_compute_ratio"].to_numpy()
+    x86_compute_ratio = x86_compute_ratio[x86_compute_ratio != 0]
     nvidia_compute_ratio = nvidia_compute_ratio[nvidia_compute_ratio != 0]
     groq_compute_ratio = groq_compute_ratio[groq_compute_ratio != 0]
 
-    if len(nvidia_compute_ratio) > 0:
-        nvidia_min, nvidia_mean, nvidia_avg, nvidia_max = (
-            round(nvidia_compute_ratio.min(), 2),
-            round(median(nvidia_compute_ratio), 2),
-            round(nvidia_compute_ratio.mean(), 2),
-            round(nvidia_compute_ratio.max(), 2),
-        )
-    else:
-        nvidia_min, nvidia_mean, nvidia_avg, nvidia_max = 0, 0, 0, 0
-
-    if len(groq_compute_ratio) > 0:
-        groq_min, groq_mean, groq_avg, groq_max = (
-            round(groq_compute_ratio.min(), 2),
-            round(median(groq_compute_ratio), 2),
-            round(groq_compute_ratio.mean(), 2),
-            round(groq_compute_ratio.max(), 2),
-        )
-    else:
-        groq_min, groq_mean, groq_avg, groq_max = 0, 0, 0, 0
+    x86_text = kpi_to_markdown(
+        x86_compute_ratio,
+        device="Intel(R) Xeon(R) X40 CPU @ 2.00GHz",
+        color="blue",
+        is_baseline=baseline == "x86",
+    )
+    groq_text = kpi_to_markdown(
+        groq_compute_ratio,
+        device="GroqChip 1",
+        color="orange",
+        is_baseline=baseline == "groq",
+    )
+    nvidia_text = kpi_to_markdown(
+        nvidia_compute_ratio,
+        device="NVIDIA A100-PCIE-40GB",
+        color="green",
+        is_baseline=baseline == "nvidia",
+    )
 
     # Show stats
     st.markdown(
-        f"""<br><br><br><br>
-        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Intel(R) Xeon(R) X40 CPU @ 2.00GHz Acceleration ({len(df["x86_latency"])} models):</p>
-        <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>
-        <br><br>
-        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">NVIDIA A100-PCIE-40GB Acceleration ({len(nvidia_compute_ratio)} models):</p>
-        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 26px;text-align: center;"> {nvidia_avg}x</p>
-        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 20px;text-align: center;"> min {nvidia_min}x; median {nvidia_mean}x; max {nvidia_max}x</p>
-        <br><br>
-        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">GroqChip 1 Acceleration<sup>*</sup> ({len(groq_compute_ratio)} models):</p>
-        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {groq_avg}x</p>
-        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {groq_min}x; median {groq_mean}x; max {groq_max}x</p>""",
-        unsafe_allow_html=True,
+        f"""<br><br>{x86_text}{nvidia_text}{groq_text}""", unsafe_allow_html=True
     )
 
 
