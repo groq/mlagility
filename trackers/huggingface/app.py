@@ -48,7 +48,7 @@ with st.sidebar:
     report = pd.read_csv(f"{REPORT_FOLDER}/{selected_report}")
 
     # Convert int parameters to int/float
-    for p in ["chips_used", "params"]:
+    for p in ["groq_chips_used", "params"]:
         report[p] = report[p].replace("-", 0).astype("int64")
 
     # Add parameter filter
@@ -101,30 +101,32 @@ with cols[0]:
 st.markdown("## Detailed Data View")
 
 # Add columns that do not exist yet
-report["chips_used_gpu"] = 1
-report["chips_used_cpu"] = 1
+report["gpu_chips_used"] = 1
+report["cpu_chips_used"] = 1
 
 
 # Using 3 significant digits
-report["tsp_estimated_e2e_latency"] = [
+report["groq_estimated_latency"] = [
     "-" if x == "-" else "{:.3f}".format(float(x))
-    for x in report["tsp_estimated_e2e_latency"]
+    for x in report["groq_estimated_latency"]
 ]
-report["gpu_e2e_latency"] = [
-    "-" if x == "-" else "{:.3f}".format(float(x)) for x in report["gpu_e2e_latency"]
+report["nvidia_latency"] = [
+    "-" if x == "-" else "{:.3f}".format(float(x)) for x in report["nvidia_latency"]
+]
+report["x86_latency"] = [
+    "-" if x == "-" else "{:.3f}".format(float(x)) for x in report["x86_latency"]
 ]
 
 renamed_cols = {
     "model_name": "Model Name",
     "author": "Source",
     "params": "Parameters",
-    "model_type": "Framework",
-    "tsp_estimated_e2e_latency": "GroqChip 1: Latency (ms)",
-    "gpu_e2e_latency": "NVIDIA A100-PCIE-40GB: Latency (ms)",
+    "groq_estimated_latency": "GroqChip 1: Latency (ms)",
+    "nvidia_latency": "NVIDIA A100-PCIE-40GB: Latency (ms)",
     "x86_latency": "Intel(R) Xeon(R) x40 CPU: Latency (ms)",
-    "chips_used": "GroqChip 1: Chips Used",
-    "chips_used_gpu": "NVIDIA A100-PCIE-40GB: Chips Used",
-    "chips_used_cpu": "Intel(R) Xeon(R) x40 CPU: Chips Used",
+    "groq_chips_used": "GroqChip 1: Chips Used",
+    "gpu_chips_used": "NVIDIA A100-PCIE-40GB: Chips Used",
+    "cpu_chips_used": "Intel(R) Xeon(R) x40 CPU: Chips Used",
 }
 
 report.rename(columns=renamed_cols, inplace=True)
