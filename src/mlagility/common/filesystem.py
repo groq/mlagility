@@ -33,7 +33,7 @@ class CacheDatabase:
 
     @property
     def _database_file(self) -> str:
-        return os.path.join(self.cache_dir, "cache_database.yaml")
+        return os.path.join(self.cache_dir, ".cache_database.yaml")
 
     @property
     def _database(self) -> Dict[str, Dict[str, str]]:
