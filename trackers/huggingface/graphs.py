@@ -401,20 +401,9 @@ def process_latency_data(df, baseline):
     df = df.rename(columns={"groq_estimated_latency": "groq_latency"})
     df = df.sort_values(by=["model_name"])
 
-    if baseline == "x86":
-        df = df[(df.x86_latency != "-")]
-    else:
-        df.x86_latency.replace(["-"], [float("inf")], inplace=True)
-
-    if baseline == "nvidia":
-        df = df[(df.nvidia_latency != "-")]
-    else:
-        df.nvidia_latency.replace(["-"], [float("inf")], inplace=True)
-
-    if baseline == "groq":
-        df = df[(df.groq_latency != "-")]
-    else:
-        df.groq_latency.replace(["-"], [float("inf")], inplace=True)
+    df.x86_latency.replace(["-"], [float("inf")], inplace=True)
+    df.nvidia_latency.replace(["-"], [float("inf")], inplace=True)
+    df.groq_latency.replace(["-"], [float("inf")], inplace=True)
 
     df["groq_latency"] = df["groq_latency"].astype(float)
     df["nvidia_latency"] = df["nvidia_latency"].astype(float)
@@ -506,6 +495,14 @@ def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
 def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
 
     df = process_latency_data(df, baseline)
+
+    # Remove all elements of df where the baseline latency is inf
+    if baseline == "x86":
+        df = df[(df.x86_latency != float("inf"))]
+    elif baseline == "nvidia":
+        df = df[(df.nvidia_latency != float("inf"))]
+    elif baseline == "groq":
+        df = df[(df.groq_latency != float("inf"))]
 
     # Some latencies are "infinite" because they could not be calculated
     # As a result, some compute ratios are zero. Remove those from the calculations
