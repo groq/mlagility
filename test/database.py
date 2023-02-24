@@ -257,10 +257,11 @@ class Testing(unittest.TestCase):
     def test_011_database_exists(self):
         script_name = "test_script"
 
-        # Database should not exist before we put any contents in it
+        db = fs.CacheDatabase(cache_dir)
+
+        # Database should not exist on disk before we put any contents in it
         assert not db.exists()
 
-        db = fs.CacheDatabase(cache_dir)
         db.add_script(script_name)
 
         # Now the database should exist
