@@ -49,12 +49,18 @@ class CacheDatabase:
         with open(self._database_file, "w", encoding="utf8") as outfile:
             yaml.dump(database_dict, outfile)
 
-    def _check_script_in_database(self, script_name: str, func_name: str):
-        if script_name not in self._database.keys():
+    def script_in_database(self, script_name) -> bool:
+        return script_name in self._database.keys()
+
+    def _validate_script_in_database(self, script_name: str, func_name: str):
+        if not self.script_in_database(script_name):
             raise CacheError(
                 f"This is a bug. {func_name}() was called with a script_name "
                 "that has not been added to the database yet."
             )
+
+    def exists(self) -> bool:
+        return len(self._database) > 0
 
     def add_script(self, script_name: str):
         database_dict = self._database
@@ -74,7 +80,7 @@ class CacheDatabase:
         self._save_database(database_dict)
 
     def remove_script(self, script_name: str) -> Dict[str, Dict[str, str]]:
-        self._check_script_in_database(script_name, "remove_script")
+        self._validate_script_in_database(script_name, "remove_script")
 
         database_dict = self._database
 

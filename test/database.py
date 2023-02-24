@@ -210,7 +210,7 @@ class Testing(unittest.TestCase):
                 for build_name in build_names[script_name]:
                     assert build_name in database[script_name].keys()
 
-    def test_09_add_build_after_remove(self):
+    def test_009_add_build_after_remove(self):
         script_name = "test_script"
         first_build_name = "test_build"
         second_build_name = "test_build_2"
@@ -245,6 +245,26 @@ class Testing(unittest.TestCase):
 
         assert script_name in database.keys()
         assert second_build_name in database[script_name].keys()
+
+    def test_010_script_in_database(self):
+        script_name = "test_script"
+
+        db = fs.CacheDatabase(cache_dir)
+        db.add_script(script_name)
+
+        assert db.script_in_database(script_name)
+
+    def test_011_database_exists(self):
+        script_name = "test_script"
+
+        # Database should not exist before we put any contents in it
+        assert not db.exists()
+
+        db = fs.CacheDatabase(cache_dir)
+        db.add_script(script_name)
+
+        # Now the database should exist
+        assert db.exists()
 
 
 if __name__ == "__main__":

@@ -461,11 +461,15 @@ def recursive_search(
                 )
 
 
+def clean_script_name(script_path: str) -> str:
+    # Trim the ".py"
+    return pathlib.Path(script_path).stem
+
+
 def evaluate_script(
     tracer_args: TracerArgs, input_args: str = None
 ) -> Dict[str, util.ModelInfo]:
-    # Trim the ".py"
-    tracer_args.script_name = pathlib.Path(tracer_args.input).stem
+    tracer_args.script_name = clean_script_name(tracer_args.input)
 
     # Add the script to the database
     db = filesystem.CacheDatabase(tracer_args.cache_dir)

@@ -116,6 +116,9 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
+    # Make sure the cache exists, and populate the cache database
+    # with this script and build.
+    filesystem.make_cache_dir(cache_dir)
     db = filesystem.CacheDatabase(cache_dir)
 
     if script_name is None:
@@ -125,6 +128,7 @@ def benchmark_model(
 
     db.add_build(db_script_name, build_name)
 
+    # Build and benchmark the model
     try:
 
         if device == "groq":
