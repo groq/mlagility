@@ -479,7 +479,7 @@ def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
 def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
 
     title = f"""<br><br>
-    <p style="font-family:sans-serif; font-size: 20px;text-align: center;">{device} Acceleration ({len(compute_ratio)} models):</p>"""
+    <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Median {device} Acceleration ({len(compute_ratio)} models):</p>"""
     if is_baseline:
         return (
             title
@@ -487,19 +487,18 @@ def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
         )
 
     if len(compute_ratio) > 0:
-        kpi_min, kpi_mean, kpi_avg, kpi_max = (
+        kpi_min, kpi_median, kpi_max = (
             round(compute_ratio.min(), 2),
             round(median(compute_ratio), 2),
-            round(compute_ratio.mean(), 2),
             round(compute_ratio.max(), 2),
         )
     else:
-        kpi_min, kpi_mean, kpi_avg, kpi_max = 0, 0, 0, 0
+        kpi_min, kpi_median, kpi_max = 0, 0, 0
 
     return (
         title
-        + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {kpi_avg}x</p>
-    <p style="font-family:sans-serif; color:{colors[color]}; font-size: 20px;text-align: center;"> min {kpi_min}x; median {kpi_mean}x; max {kpi_max}x</p>
+        + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {kpi_median}x</p>
+    <p style="font-family:sans-serif; color:{colors[color]}; font-size: 20px;text-align: center;"> min {kpi_min}x; max {kpi_max}x</p>
     """
     )
 
@@ -508,16 +507,12 @@ def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
 
     df = process_latency_data(df, baseline)
 
-    # Remove all elements of df where the baseline latency is inf
-    if baseline == "x86":
-        df = df[(df.x86_latency != float("inf"))]
-    elif baseline == "nvidia":
-        df = df[(df.nvidia_latency != float("inf"))]
-    elif baseline == "groq":
-        df = df[(df.groq_latency != float("inf"))]
-
     # Some latencies are "infinite" because they could not be calculated
-    # As a result, some compute ratios are zero. Remove those from the calculations
+    # To calculate statistics, we remove all elements of df where the baseline latency is inf
+    df = df[(df[baseline + "_latency"] != float("inf"))]
+
+    # Setting latencies that could not be calculated to infinity also causes some compute ratios to be zero
+    # We remove those to avoid doing any calculations with infinite latencies
     x86_compute_ratio = df["x86_compute_ratio"].to_numpy()
     nvidia_compute_ratio = df["nvidia_compute_ratio"].to_numpy()
     groq_compute_ratio = df["groq_compute_ratio"].to_numpy()
