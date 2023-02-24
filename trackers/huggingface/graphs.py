@@ -320,12 +320,12 @@ def speedup_bar_chart_legacy(df: pd.DataFrame) -> None:
 
     # Prepare data
     assembles = np.sum(df["assembles"])
-    df = df[["model_name", "tsp_gpu_compute_ratio", "tsp_gpu_e2e_ratio"]]
+    df = df[["model_name", "groq_nvidia_compute_ratio", "groq_nvidia_e2e_ratio"]]
     df = df.sort_values(by=["model_name"])
-    df = df[(df.tsp_gpu_compute_ratio != "-")]
-    df = df[(df.tsp_gpu_e2e_ratio != "-")]
-    df["tsp_gpu_compute_ratio"] = df["tsp_gpu_compute_ratio"].astype(float)
-    df["tsp_gpu_e2e_ratio"] = df["tsp_gpu_e2e_ratio"].astype(float)
+    df = df[(df.groq_nvidia_compute_ratio != "-")]
+    df = df[(df.groq_nvidia_e2e_ratio != "-")]
+    df["groq_nvidia_compute_ratio"] = df["groq_nvidia_compute_ratio"].astype(float)
+    df["groq_nvidia_e2e_ratio"] = df["groq_nvidia_e2e_ratio"].astype(float)
 
     if len(df) == 0 and assembles > 0:
         st.markdown(
@@ -342,12 +342,12 @@ def speedup_bar_chart_legacy(df: pd.DataFrame) -> None:
         data = [
             go.Bar(
                 x=df["model_name"],
-                y=df["tsp_gpu_compute_ratio"],
+                y=df["groq_nvidia_compute_ratio"],
                 name="Compute only",
             ),
             go.Bar(
                 x=df["model_name"],
-                y=df["tsp_gpu_e2e_ratio"],
+                y=df["groq_nvidia_e2e_ratio"],
                 name="Compute + estimated I/O",
             ),
         ]
@@ -377,26 +377,26 @@ def speedup_text_summary_legacy(df: pd.DataFrame) -> None:
     """
 
     # Remove empty elements and convert to float
-    df = df[(df.tsp_gpu_compute_ratio != "-")]
-    df = df[(df.tsp_gpu_e2e_ratio != "-")]
-    df["tsp_gpu_compute_ratio"] = df["tsp_gpu_compute_ratio"].astype(float)
-    df["tsp_gpu_e2e_ratio"] = df["tsp_gpu_e2e_ratio"].astype(float)
+    df = df[(df.groq_nvidia_compute_ratio != "-")]
+    df = df[(df.groq_nvidia_e2e_ratio != "-")]
+    df["groq_nvidia_compute_ratio"] = df["groq_nvidia_compute_ratio"].astype(float)
+    df["groq_nvidia_e2e_ratio"] = df["groq_nvidia_e2e_ratio"].astype(float)
 
     # Show stats
     st.markdown(
         f"""<br><br><br><br><br><br>
             <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Average speedup of GroqChip™ considering compute only:</p>
-            <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 26px;text-align: center;"> {round(df["tsp_gpu_compute_ratio"].mean(),2)}x</p>
-            <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 20px;text-align: center;"> min {round(df["tsp_gpu_compute_ratio"].min(),2)}x; median {round(median(df["tsp_gpu_compute_ratio"]),2)}x; max {round(df["tsp_gpu_compute_ratio"].max(),2)}x</p>
+            <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 26px;text-align: center;"> {round(df["groq_nvidia_compute_ratio"].mean(),2)}x</p>
+            <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 20px;text-align: center;"> min {round(df["groq_nvidia_compute_ratio"].min(),2)}x; median {round(median(df["groq_nvidia_compute_ratio"]),2)}x; max {round(df["groq_nvidia_compute_ratio"].max(),2)}x</p>
             <br><br>
             <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Average speedup of GroqChip™ considering compute + estimated I/O<sup>*</sup>:</p>
-            <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {round(df["tsp_gpu_e2e_ratio"].mean(),2)}x</p>
-            <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {round(df["tsp_gpu_e2e_ratio"].min(),2)}x; median {round(median(df["tsp_gpu_e2e_ratio"]),2)}x; max {round(df["tsp_gpu_e2e_ratio"].max(),2)}x</p>""",
+            <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {round(df["groq_nvidia_e2e_ratio"].mean(),2)}x</p>
+            <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {round(df["groq_nvidia_e2e_ratio"].min(),2)}x; median {round(median(df["groq_nvidia_e2e_ratio"]),2)}x; max {round(df["groq_nvidia_e2e_ratio"].max(),2)}x</p>""",
         unsafe_allow_html=True,
     )
 
 
-def process_latency_data(df):
+def process_latency_data(df, baseline="x86"):
     df = df[["model_name", "groq_estimated_latency", "nvidia_latency", "x86_latency"]]
     df = df.sort_values(by=["model_name"])
     df.groq_estimated_latency.replace(["-"], [float("inf")], inplace=True)
@@ -405,8 +405,10 @@ def process_latency_data(df):
     df["groq_estimated_latency"] = df["groq_estimated_latency"].astype(float)
     df["nvidia_latency"] = df["nvidia_latency"].astype(float)
     df["x86_latency"] = df["x86_latency"].astype(float)
-    df["tsp_cpu_compute_ratio"] = df["x86_latency"] / df["groq_estimated_latency"]
-    df["gpu_cpu_compute_ratio"] = df["x86_latency"] / df["nvidia_latency"]
+
+    df["groq_compute_ratio"] = df[f"{baseline}_latency"] / df["groq_estimated_latency"]
+    df["nvidia_compute_ratio"] = df[f"{baseline}_latency"] / df["nvidia_latency"]
+    df["x86_compute_ratio"] = df[f"{baseline}_latency"] / df["x86_latency"]
 
     return df
 
@@ -422,12 +424,12 @@ def speedup_bar_chart(df: pd.DataFrame) -> None:
         data = [
             go.Bar(
                 x=df["model_name"],
-                y=df["gpu_cpu_compute_ratio"],
+                y=df["nvidia_compute_ratio"],
                 name="NVIDIA A100",
             ),
             go.Bar(
                 x=df["model_name"],
-                y=df["tsp_cpu_compute_ratio"],
+                y=df["groq_compute_ratio"],
                 name="GroqChip 1",
             ),
             go.Bar(
@@ -470,31 +472,31 @@ def speedup_text_summary(df: pd.DataFrame) -> None:
 
     # Some latencies are "infinite" because they could not be calculated
     # As a result, some compute ratios are zero. Remove those from the calculations
-    print(df.tsp_cpu_compute_ratio)
-    gpu_cpu_compute_ratio = df["gpu_cpu_compute_ratio"].to_numpy()
-    tsp_cpu_compute_ratio = df["tsp_cpu_compute_ratio"].to_numpy()
-    gpu_cpu_compute_ratio = gpu_cpu_compute_ratio[gpu_cpu_compute_ratio != 0]
-    tsp_cpu_compute_ratio = tsp_cpu_compute_ratio[tsp_cpu_compute_ratio != 0]
+    print(df.groq_compute_ratio)
+    nvidia_compute_ratio = df["nvidia_compute_ratio"].to_numpy()
+    groq_compute_ratio = df["groq_compute_ratio"].to_numpy()
+    nvidia_compute_ratio = nvidia_compute_ratio[nvidia_compute_ratio != 0]
+    groq_compute_ratio = groq_compute_ratio[groq_compute_ratio != 0]
 
-    if len(gpu_cpu_compute_ratio) > 0:
-        gpu_min, gpu_mean, gpu_avg, gpu_max = (
-            round(gpu_cpu_compute_ratio.min(), 2),
-            round(median(gpu_cpu_compute_ratio), 2),
-            round(gpu_cpu_compute_ratio.mean(), 2),
-            round(gpu_cpu_compute_ratio.max(), 2),
+    if len(nvidia_compute_ratio) > 0:
+        nvidia_min, nvidia_mean, nvidia_avg, nvidia_max = (
+            round(nvidia_compute_ratio.min(), 2),
+            round(median(nvidia_compute_ratio), 2),
+            round(nvidia_compute_ratio.mean(), 2),
+            round(nvidia_compute_ratio.max(), 2),
         )
     else:
-        gpu_min, gpu_mean, gpu_avg, gpu_max = 0, 0, 0, 0
+        nvidia_min, nvidia_mean, nvidia_avg, nvidia_max = 0, 0, 0, 0
 
-    if len(tsp_cpu_compute_ratio) > 0:
-        tsp_min, tsp_mean, tsp_avg, tsp_max = (
-            round(tsp_cpu_compute_ratio.min(), 2),
-            round(median(tsp_cpu_compute_ratio), 2),
-            round(tsp_cpu_compute_ratio.mean(), 2),
-            round(tsp_cpu_compute_ratio.max(), 2),
+    if len(groq_compute_ratio) > 0:
+        groq_min, groq_mean, groq_avg, groq_max = (
+            round(groq_compute_ratio.min(), 2),
+            round(median(groq_compute_ratio), 2),
+            round(groq_compute_ratio.mean(), 2),
+            round(groq_compute_ratio.max(), 2),
         )
     else:
-        tsp_min, tsp_mean, tsp_avg, tsp_max = 0, 0, 0, 0
+        groq_min, groq_mean, groq_avg, groq_max = 0, 0, 0, 0
 
     # Show stats
     st.markdown(
@@ -502,13 +504,13 @@ def speedup_text_summary(df: pd.DataFrame) -> None:
         <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Intel(R) Xeon(R) X40 CPU @ 2.00GHz Acceleration ({len(df["x86_latency"])} models):</p>
         <p style="font-family:sans-serif; color:{colors["blue"]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>
         <br><br>
-        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">NVIDIA A100-PCIE-40GB Acceleration ({len(gpu_cpu_compute_ratio)} models):</p>
-        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 26px;text-align: center;"> {gpu_avg}x</p>
-        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 20px;text-align: center;"> min {gpu_min}x; median {gpu_mean}x; max {gpu_max}x</p>
+        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">NVIDIA A100-PCIE-40GB Acceleration ({len(nvidia_compute_ratio)} models):</p>
+        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 26px;text-align: center;"> {nvidia_avg}x</p>
+        <p style="font-family:sans-serif; color:{colors["green"]}; font-size: 20px;text-align: center;"> min {nvidia_min}x; median {nvidia_mean}x; max {nvidia_max}x</p>
         <br><br>
-        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">GroqChip 1 Acceleration<sup>*</sup> ({len(tsp_cpu_compute_ratio)} models):</p>
-        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {tsp_avg}x</p>
-        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {tsp_min}x; median {tsp_mean}x; max {tsp_max}x</p>""",
+        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">GroqChip 1 Acceleration<sup>*</sup> ({len(groq_compute_ratio)} models):</p>
+        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 26px;text-align: center;"> {groq_avg}x</p>
+        <p style="font-family:sans-serif; color:{colors["orange"]}; font-size: 20px;text-align: center;"> min {groq_min}x; median {groq_mean}x; max {groq_max}x</p>""",
         unsafe_allow_html=True,
     )
 
@@ -544,14 +546,14 @@ def io_fraction(df: pd.DataFrame) -> None:
         tmp = df[[model_entry == chips for model_entry in df["groq_chips_used"]]]
         if len(tmp) == 0:
             continue
-        tmp = tmp[[model_entry != "-" for model_entry in tmp["tsp_compute_latency"]]]
+        tmp = tmp[[model_entry != "-" for model_entry in tmp["groq_compute_latency"]]]
         if len(tmp) == 0:
             continue
         tmp = tmp[[model_entry != "-" for model_entry in tmp["groq_estimated_latency"]]]
         if len(tmp) == 0:
             continue
         print(len(tmp))
-        compute_latency = tmp["tsp_compute_latency"].astype("float")
+        compute_latency = tmp["groq_compute_latency"].astype("float")
         e2e_latency = tmp["groq_estimated_latency"].astype("float")
 
         io_fraction = 1 - compute_latency / e2e_latency
