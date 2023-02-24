@@ -19,6 +19,8 @@ corpus_dir = os.path.join(os.getcwd(), "test_corpus")
 extras_dir = os.path.join(corpus_dir, "extras")
 os.makedirs(extras_dir, exist_ok=True)
 
+database_file = ".cache_database.yaml"
+
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
@@ -32,7 +34,7 @@ class Testing(unittest.TestCase):
         db = fs.CacheDatabase(cache_dir)
         db.add_script(script_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         with open(database_path, "r", encoding="utf8") as stream:
             database = yaml.load(stream, Loader=yaml.FullLoader)
@@ -46,7 +48,7 @@ class Testing(unittest.TestCase):
         db = fs.CacheDatabase(cache_dir)
         db.add_build(script_name, build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         with open(database_path, "r", encoding="utf8") as stream:
             database = yaml.load(stream, Loader=yaml.FullLoader)
@@ -62,7 +64,7 @@ class Testing(unittest.TestCase):
         for script_name in script_names:
             db.add_script(script_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         with open(database_path, "r", encoding="utf8") as stream:
             database = yaml.load(stream, Loader=yaml.FullLoader)
@@ -79,7 +81,7 @@ class Testing(unittest.TestCase):
         for build_name in build_names:
             db.add_build(script_name, build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         with open(database_path, "r", encoding="utf8") as stream:
             database = yaml.load(stream, Loader=yaml.FullLoader)
@@ -102,7 +104,7 @@ class Testing(unittest.TestCase):
             for build_name in build_names[script_name]:
                 db.add_build(script_name, build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         with open(database_path, "r", encoding="utf8") as stream:
             database = yaml.load(stream, Loader=yaml.FullLoader)
@@ -119,7 +121,7 @@ class Testing(unittest.TestCase):
         db = fs.CacheDatabase(cache_dir)
         db.add_build(script_name, build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         # Make sure the build is there in the first place
         with open(database_path, "r", encoding="utf8") as stream:
@@ -147,7 +149,7 @@ class Testing(unittest.TestCase):
         for build_name in build_names:
             db.add_build(script_name, build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         # Make sure all builds are there in the first place
         with open(database_path, "r", encoding="utf8") as stream:
@@ -184,7 +186,7 @@ class Testing(unittest.TestCase):
             for build_name in build_names[script_name]:
                 db.add_build(script_name, build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         # Make sure the builds and scripts are all there
         with open(database_path, "r", encoding="utf8") as stream:
@@ -218,7 +220,7 @@ class Testing(unittest.TestCase):
         db = fs.CacheDatabase(cache_dir)
         db.add_build(script_name, first_build_name)
 
-        database_path = os.path.join(cache_dir, "cache_database.yaml")
+        database_path = os.path.join(cache_dir, database_file)
 
         # Make sure the first build is there in the first place
         with open(database_path, "r", encoding="utf8") as stream:
