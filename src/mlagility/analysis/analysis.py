@@ -468,7 +468,7 @@ def evaluate_script(
     tracer_args.script_name = pathlib.Path(tracer_args.input).stem
 
     # Add the script to the database
-    db = filesystem.Database(tracer_args.cache_dir)
+    db = filesystem.CacheDatabase(tracer_args.cache_dir)
     db.add_script(tracer_args.script_name)
 
     # Get a pointer to the script's python module

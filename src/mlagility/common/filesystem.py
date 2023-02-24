@@ -2,9 +2,9 @@ import os
 import shutil
 import glob
 import pathlib
-import yaml
 import datetime
-from typing import Dict, List
+from typing import Dict
+import yaml
 import groqflow.common.printing as printing
 import groqflow.common.cache as cache
 import groqflow.common.build as build
@@ -27,13 +27,13 @@ class CacheError(exc.GroqFlowError):
     """
 
 
-class Database:
+class CacheDatabase:
     def __init__(self, cache_dir):
         self.cache_dir = cache_dir
 
     @property
     def _database_file(self) -> str:
-        return os.path.join(self.cache_dir, "cache_contents.yaml")
+        return os.path.join(self.cache_dir, "cache_database.yaml")
 
     @property
     def _database(self) -> Dict[str, Dict[str, str]]:
@@ -65,7 +65,7 @@ class Database:
         self._save_database(database_dict)
 
     def add_build(self, script_name, build_name):
-        self._check_script_in_database(script_name, "track_new_build")
+        self.add_script(script_name)
 
         database_dict = self._database
 
@@ -86,7 +86,6 @@ class Database:
 
     def remove_build(self, build_name: str):
         database_dict = self._database
-        print(database_dict)
 
         for script_name, script_builds in database_dict.items():
             if build_name in script_builds:
@@ -213,7 +212,7 @@ def delete_builds(args):
         builds = [args.build_name]
 
     for build in builds:
-        db = Database(args.cache_dir)
+        db = CacheDatabase(args.cache_dir)
         db.remove_build(build)
 
         build_path = os.path.join(args.cache_dir, build)

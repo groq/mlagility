@@ -116,11 +116,10 @@ def benchmark_model(
     Benchmark a model against some inputs on target hardware
     """
 
-    db = filesystem.Database(cache_dir)
+    db = filesystem.CacheDatabase(cache_dir)
 
     if script_name is None:
         db_script_name = sys.argv[0].split("/")[-1].split(".")[0]
-        db.add_script(db_script_name)
     else:
         db_script_name = script_name
 

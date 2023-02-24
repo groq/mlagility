@@ -43,11 +43,17 @@ jobs:
       - name: Test with unittest
         shell: bash -el {0}
         run: |
+          # Unit tests
+          python test/database.py
+
+          # Examples
           python examples/api/hello_world.py
           benchit examples/cli/scripts/hello_world.py
           benchit examples/cli/scripts/max_depth.py --max-depth 1
           benchit examples/cli/scripts/two_models.py
           benchit examples/cli/scripts/hello_world.py --sequence-file examples/cli/extras/example_sequence.py --build-only
+
+          # E2E tests
           python test/cli.py
           python test/analysis.py
           python test/model_api.py
