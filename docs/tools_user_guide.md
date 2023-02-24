@@ -334,7 +334,7 @@ Usage:
   - Use Slurm to run benchit on all scripts in the search directory. Each script is evaluated as its on Slurm job (ie, all scripts can be evaluated in parallel on a sufficiently large Slurm cluster).
 
 Available as an API argument:
-- `benchmark_script(use_slurm=...)`
+- `benchmark_script(use_slurm=True/False)` (default False)
 
 > _Note_: Requires setting up Slurm as shown [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 
@@ -357,8 +357,8 @@ Also available as API arguments:
 `--lean-cache` Delete all build artifacts except for log files after the build.
 
 Also available as API arguments: 
-- `benchmark_script(lean_cache=True/False, ...)`
-- `benchmark_model(lean_cache=True/False, ...)`
+- `benchmark_script(lean_cache=True/False, ...)` (default False)
+- `benchmark_model(lean_cache=True/False, ...)` (default False)
 
 > _Note_: useful for benchmarking many models, since the `build` artifacts from the models can take up a significant amount of hard drive space.
 
@@ -417,7 +417,7 @@ Usage:
 - `benchit benchmark INPUT_SCRIPTS --max-depth DEPTH`
 
 Also available as an API argument:
-- `benchmark_script(max_depth=...)`
+- `benchmark_script(max_depth=...)` (default 0)
 
 > _Note_: `--max-depth` values greater than 0 are only supported for PyTorch models.
 
@@ -434,7 +434,7 @@ Usage:
 > _Note_: any build- or benchmark-specific options will be ignored, such as `--backend`, `--device`, `--groqview`, etc.
 
 Also available as an API argument: 
-- `benchmark_script(analyze_only=True/False)`
+- `benchmark_script(analyze_only=True/False)` (default False)
 
 > See the [Analyze Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#analyze-only) for a detailed example.
 
@@ -449,8 +449,8 @@ Usage:
 > _Note_: any benchmark-specific options will be ignored, such as `--backend`.
 
 Also available as API arguments:
-- `benchmark_script(build_only=True/False)`
-- `benchmark_model(build_only=True/False)`
+- `benchmark_script(build_only=True/False)` (default False)
+- `benchmark_model(build_only=True/False)` (default False)
 
 > See the [Build Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/build.md#build-only) for a detailed example.
 
@@ -469,7 +469,7 @@ The `--resume` behavior is useful for when you are benchmarking a large corpus o
 > - Start a new cache directory with `--cache-dir NEW_CACHE_DIR` or `export MLAGILITY_CACHE_DIR=NEW_CACHE_DIR`
 
 Also available as an API argument:
-- `benchmark_script(resume=True/False)`
+- `benchmark_script(resume=True/False)` (default False)
 
 ### Groq-Specific Arguments
 
