@@ -83,12 +83,13 @@ with cols[1]:
 
 
 cols = st.columns(2)
+baseline = "nvidia"
 with cols[0]:
     st.markdown("""#### Benchmark results (latency)""")
-    graphs.speedup_bar_chart(report)
+    graphs.speedup_bar_chart(report, baseline)
 
 with cols[1]:
-    graphs.speedup_text_summary(report)
+    graphs.speedup_text_summary(report, baseline)
 
 # FAQ Block
 cols = st.columns(2)

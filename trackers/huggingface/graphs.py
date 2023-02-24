@@ -396,31 +396,45 @@ def speedup_text_summary_legacy(df: pd.DataFrame) -> None:
     )
 
 
-def process_latency_data(df, baseline="x86"):
+def process_latency_data(df, baseline):
     df = df[["model_name", "groq_estimated_latency", "nvidia_latency", "x86_latency"]]
+    df = df.rename(columns={"groq_estimated_latency": "groq_latency"})
     df = df.sort_values(by=["model_name"])
-    df.groq_estimated_latency.replace(["-"], [float("inf")], inplace=True)
-    df.nvidia_latency.replace(["-"], [float("inf")], inplace=True)
-    df = df[(df.x86_latency != "-")]
-    df["groq_estimated_latency"] = df["groq_estimated_latency"].astype(float)
+
+    if baseline == "x86":
+        df = df[(df.x86_latency != "-")]
+    else:
+        df.x86_latency.replace(["-"], [float("inf")], inplace=True)
+
+    if baseline == "nvidia":
+        df = df[(df.nvidia_latency != "-")]
+    else:
+        df.nvidia_latency.replace(["-"], [float("inf")], inplace=True)
+
+    if baseline == "groq":
+        df = df[(df.groq_latency != "-")]
+    else:
+        df.groq_latency.replace(["-"], [float("inf")], inplace=True)
+
+    df["groq_latency"] = df["groq_latency"].astype(float)
     df["nvidia_latency"] = df["nvidia_latency"].astype(float)
     df["x86_latency"] = df["x86_latency"].astype(float)
 
-    df["groq_compute_ratio"] = df[f"{baseline}_latency"] / df["groq_estimated_latency"]
+    df["groq_compute_ratio"] = df[f"{baseline}_latency"] / df["groq_latency"]
     df["nvidia_compute_ratio"] = df[f"{baseline}_latency"] / df["nvidia_latency"]
     df["x86_compute_ratio"] = df[f"{baseline}_latency"] / df["x86_latency"]
 
     return df
 
 
-def speedup_bar_chart(df: pd.DataFrame) -> None:
+def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
 
     if len(df) == 0:
         st.markdown(
             ("Nothing to show here since no models have been successfully benchmarked.")
         )
     else:
-        df = process_latency_data(df)
+        df = process_latency_data(df, baseline)
         data = [
             go.Bar(
                 x=df["model_name"],
@@ -434,7 +448,7 @@ def speedup_bar_chart(df: pd.DataFrame) -> None:
             ),
             go.Bar(
                 x=df["model_name"],
-                y=df["x86_latency"] * 0 + 1,
+                y=df["x86_compute_ratio"],
                 name="Intel(R) Xeon(R)",
             ),
         ]
@@ -457,10 +471,6 @@ def speedup_bar_chart(df: pd.DataFrame) -> None:
 
         st.markdown(
             "<sup>*</sup>Estimated I/O does NOT include delays caused by Groq's runtime.",
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            "<sup>†</sup>Baseline corresponds to Intel(R) Xeon(R) X40 CPU @ 2.00GHz.",
             unsafe_allow_html=True,
         )
 
@@ -493,10 +503,9 @@ def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
     )
 
 
-def speedup_text_summary(df: pd.DataFrame, baseline="x86") -> None:
-    # pylint: disable=line-too-long
+def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
 
-    df = process_latency_data(df)
+    df = process_latency_data(df, baseline)
 
     # Some latencies are "infinite" because they could not be calculated
     # As a result, some compute ratios are zero. Remove those from the calculations
@@ -566,12 +575,12 @@ def io_fraction(df: pd.DataFrame) -> None:
         tmp = tmp[[model_entry != "-" for model_entry in tmp["groq_compute_latency"]]]
         if len(tmp) == 0:
             continue
-        tmp = tmp[[model_entry != "-" for model_entry in tmp["groq_estimated_latency"]]]
+        tmp = tmp[[model_entry != "-" for model_entry in tmp["groq_latency"]]]
         if len(tmp) == 0:
             continue
         print(len(tmp))
         compute_latency = tmp["groq_compute_latency"].astype("float")
-        e2e_latency = tmp["groq_estimated_latency"].astype("float")
+        e2e_latency = tmp["groq_latency"].astype("float")
 
         io_fraction = 1 - compute_latency / e2e_latency
         if chips == "1":
