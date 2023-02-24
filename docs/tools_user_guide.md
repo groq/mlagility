@@ -440,7 +440,7 @@ Also available as an API argument:
 
 ### Build Only
 
-Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
+Instruct `benchit`, `benchmark_script()`, or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
 
 Usage:
 - `benchit benchmark INPUT_SCRIPTS --build-only`
@@ -453,6 +453,22 @@ Also available as API arguments:
 - `benchmark_model(build_only=True/False)`
 
 > See the [Build Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/build.md#build-only) for a detailed example.
+
+### Resume
+
+Instruct `benchit` or `benchmark_script()` to skip over any input scripts that have been previously attempted. 
+
+This is useful for when you are benchmarking a large corpus of models, and one of the models crashes your run. If you repeat the same command, but with the `--resume` argument, then the new run will pick up where the last run left off, including skipping over any input scripts that crashed previously.
+
+Usage:
+- `benchit benchmark INPUT_SCRIPTS --resume`
+
+> _Note_: if `--resume` is skipping over any input scripts that you *do* want to evaluate, you have two options:
+> - Manually build the input script with `benchit benchmark INPUT_SCRIPT` without setting `--resume`
+> - Start a new cache directory with `--cache-dir NEW_CACHE_DIR`, or by removing your existing cache dir with `rm -rf YOUR_CACHE_DIR`
+
+Also available as an API argument:
+- `benchmark_script(resume=True/False)`
 
 ### Groq-Specific Arguments
 
