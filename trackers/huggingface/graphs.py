@@ -17,6 +17,11 @@ colors = {
     "light_blue": "#73c0de",
     "ocean_green": "#3ba272",
 }
+device_colors = {
+    "x86": colors["blue"],
+    "nvidia": colors["green"],
+    "groq": colors["orange"],
+}
 
 
 class StageCount:
@@ -424,23 +429,30 @@ def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
         )
     else:
         df = process_latency_data(df, baseline)
-        data = [
-            go.Bar(
-                x=df["model_name"],
-                y=df["nvidia_compute_ratio"],
-                name="NVIDIA A100",
-            ),
-            go.Bar(
-                x=df["model_name"],
-                y=df["groq_compute_ratio"],
-                name="GroqChip 1",
-            ),
-            go.Bar(
-                x=df["model_name"],
-                y=df["x86_compute_ratio"],
-                name="Intel(R) Xeon(R)",
-            ),
-        ]
+        bar_chart = {}
+        bar_chart["nvidia"] = go.Bar(
+            x=df["model_name"],
+            y=df["nvidia_compute_ratio"],
+            name="NVIDIA A100",
+        )
+        bar_chart["groq"] = go.Bar(
+            x=df["model_name"],
+            y=df["groq_compute_ratio"],
+            name="GroqChip 1",
+        )
+        bar_chart["x86"] = go.Bar(
+            x=df["model_name"],
+            y=df["x86_compute_ratio"],
+            name="Intel(R) Xeon(R)",
+        )
+
+        # Move baseline to the back of the plot
+        plot_sequence = list(bar_chart.keys())
+        plot_sequence.insert(0, plot_sequence.pop(plot_sequence.index(baseline)))
+
+        # Ensure that the baseline is the last bar
+        data = [bar_chart[device_type] for device_type in plot_sequence]
+        color_sequence = [device_colors[device_type] for device_type in plot_sequence]
 
         layout = go.Layout(
             barmode="overlay",  # group
@@ -451,7 +463,7 @@ def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
                 "y": 1.2,
             },
             yaxis_title="Latency Speedup",
-            colorway=[colors["green"], colors["orange"], colors["blue"]],
+            colorway=color_sequence,
             height=500,
         )
 
