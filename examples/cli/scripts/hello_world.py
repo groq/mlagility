@@ -24,7 +24,7 @@ class SmallModel(torch.nn.Module):
 
 
 # Instantiate model and generate inputs
-input_size = 10
+input_size = 11
 output_size = 5
 pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}

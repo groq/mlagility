@@ -109,16 +109,11 @@ def call_benchit(
                 inputs[all_args[i]] = args[i]
     model_info.inputs = inputs
 
-    cache_dir = (
-        filesystem.DEFAULT_CACHE_DIR
-        if tracer_args.cache_dir is None
-        else tracer_args.cache_dir
-    )
     build_name = f"{tracer_args.script_name}_{model_info.hash}"
 
     # Save model labels
     tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
-    labels.save_to_cache(cache_dir, build_name, tracer_args.labels)
+    labels.save_to_cache(tracer_args.cache_dir, build_name, tracer_args.labels)
 
     try:
         perf = benchmark_model(
@@ -127,7 +122,7 @@ def call_benchit(
             device=tracer_args.device,
             backend=tracer_args.backend,
             build_name=build_name,
-            cache_dir=cache_dir,
+            cache_dir=tracer_args.cache_dir,
             build_only=Action.BENCHMARK not in tracer_args.actions,
             lean_cache=tracer_args.lean_cache,
             groq_num_chips=tracer_args.groq_num_chips,
@@ -145,7 +140,9 @@ def call_benchit(
         model_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.GroqitStageError:
-        build_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
+        build_state = build.load_state(
+            cache_dir=tracer_args.cache_dir, build_name=build_name
+        )
         if len(build_state.info.opt_onnx_unsupported_ops) > 0:
             model_info.status_message = "Unsupported op(s) " + ", ".join(
                 build_state.info.opt_onnx_unsupported_ops
@@ -174,7 +171,9 @@ def call_benchit(
     else:
         # Stats that we want to save into the model's state.yaml file
         # so that they can be easily accessed by the report command later
-        build_state = build.load_state(cache_dir=cache_dir, build_name=build_name)
+        build_state = build.load_state(
+            cache_dir=tracer_args.cache_dir, build_name=build_name
+        )
         groqflow_helpers.add_mlagility_stat(build_state, "hash", model_info.hash)
         # groqflow_helpers.add_mlagility_stat(
         #    build_state, "parameters", model_info.params
@@ -462,11 +461,19 @@ def recursive_search(
                 )
 
 
+def clean_script_name(script_path: str) -> str:
+    # Trim the ".py"
+    return pathlib.Path(script_path).stem
+
+
 def evaluate_script(
     tracer_args: TracerArgs, input_args: str = None
 ) -> Dict[str, util.ModelInfo]:
-    # Trim the ".py"
-    tracer_args.script_name = pathlib.Path(tracer_args.input).stem
+    tracer_args.script_name = clean_script_name(tracer_args.input)
+
+    # Add the script to the database
+    db = filesystem.CacheDatabase(tracer_args.cache_dir)
+    db.add_script(tracer_args.script_name)
 
     # Get a pointer to the script's python module
     spec = importlib.util.spec_from_file_location(
