@@ -82,13 +82,10 @@ with cols[1]:
     graphs.parameter_histogram(report, show_assembled=False)
 
 
-cols = st.columns(2)
-with cols[0]:
-    st.markdown("""#### Benchmark results (latency)""")
-    graphs.speedup_bar_chart(report)
-
-with cols[1]:
-    graphs.speedup_text_summary(report)
+st.markdown("""#### Benchmark results""")
+baseline = st.selectbox("Baseline", ("x86", "nvidia", "groq"))
+graphs.speedup_text_summary(report, baseline)
+graphs.speedup_bar_chart(report, baseline)
 
 # FAQ Block
 cols = st.columns(2)
