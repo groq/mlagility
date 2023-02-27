@@ -8,7 +8,7 @@ import groqflow.common.exceptions as exceptions
 from groqflow.justgroqit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
-import mlagility.common.labels as lab
+import mlagility.common.labels as labels_library
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
 from mlagility.analysis.util import ModelInfo
 
@@ -151,18 +151,20 @@ def benchmark_script(
         script_path, targets, encoded_input = decode_input_script(script)
 
         # Filter scripts by label
-        if labels != []:
+        if labels:
             skip_script = False
-            user_labels = lab.to_dict(labels)
-            file_labels = lab.load_from_file(encoded_input)
-            for key in user_labels:
-                # Skip benchmarking if user_label is not in file_labels
-                if key not in file_labels:
+            required_labels = labels_library.to_dict(labels)
+            script_labels = labels_library.load_from_file(encoded_input)
+            for key in required_labels:
+                # Skip benchmarking if user_label is not in script_labels
+                if key not in script_labels:
                     skip_script = True
                     break
                 # A label key may point to multiple label values
-                # Skip if not all values of user_labels[key] are in file_labels[key]
-                elif not all(elem in user_labels[key] for elem in file_labels[key]):
+                # Skip if not all values of required_labels[key] are in script_labels[key]
+                elif not all(
+                    elem in required_labels[key] for elem in script_labels[key]
+                ):
                     skip_script = True
                     break
             if skip_script:
