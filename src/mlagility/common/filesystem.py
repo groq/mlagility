@@ -283,17 +283,26 @@ def stats_file_exists():
     return os.path.isfile(stats_file)
 
 
+def get_stats(cache_dir: str, build_name: str):
+    stats_path = stats_file(cache_dir, build_name)
+    return _load_yaml(stats_path)
+
+
+def _save_stats(cache_dir: str, build_name: str, stats_dict: Dict):
+    stats_path = stats_file(cache_dir, build_name)
+    _save_yaml(stats_dict, stats_path)
+
+
 def save_stat(cache_dir: str, build_name: str, key: str, value):
     """
     Save statistics to an yaml file in the build directory
     """
 
-    stats_path = stats_file(cache_dir, build_name)
-    stats_dict = _load_yaml(stats_path)
+    stats_dict = get_stats(cache_dir, build_name)
 
     stats_dict[key] = value
 
-    _save_yaml(stats_dict, stats_path)
+    _save_stats(cache_dir, build_name, stats_dict)
 
 
 def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, value):
@@ -301,8 +310,7 @@ def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, val
     Save statistics to an yaml file in the build directory
     """
 
-    stats_path = stats_file(cache_dir, build_name)
-    stats_dict = _load_yaml(stats_path)
+    stats_dict = get_stats(cache_dir, build_name)
 
     if parent_key in stats_dict.keys():
         dict_to_update = stats_dict[parent_key]
@@ -312,4 +320,4 @@ def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, val
     dict_to_update[key] = value
     stats_dict[parent_key] = dict_to_update
 
-    _save_yaml(stats_dict, stats_path)
+    _save_stats(cache_dir, build_name, stats_dict)

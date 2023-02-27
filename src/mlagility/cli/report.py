@@ -11,7 +11,7 @@ from mlagility.common import labels
 from mlagility.api.ortmodel import ORTModel
 from mlagility.api.trtmodel import TRTModel
 from mlagility.api.devices import BenchmarkException
-from mlagility.common.filesystem import check_cache_dir
+import mlagility.common.filesystem as filesystem
 
 
 def _update_numeric_attribute(
@@ -146,7 +146,7 @@ def summary_spreadsheet(args) -> None:
     for cache_dir in cache_dirs:
 
         # Check if this is a valid cache directory
-        check_cache_dir(cache_dir)
+        filesystem.check_cache_dir(cache_dir)
 
         # List all yaml files available
         all_model_state_yamls = cache.get_all(path=cache_dir, file_type="state.yaml")
@@ -161,18 +161,18 @@ def summary_spreadsheet(args) -> None:
             # Models are identified my the build name
             build_name = state.config.build_name
 
+            # Load MLAgility stats from the YAML file
+            mlagility_stats = filesystem.get_stats(cache_dir, build_name)
+
             # Add model to report if it doesn't exist
             if build_name not in report:
                 report[build_name] = BuildResults()
 
-            # Get model hash from build name
-            # TODO: Get hash_model from state once it is consistently reported
-            # https://github.com/groq/mlagility/issues/149
-            report[build_name].hash = build_name.split("_")[-1]
+            # Model hash from the Analysis stage
+            report[build_name].hash = mlagility_stats["hash"]
 
-            # Get model hash from build name
             report[build_name].params = _update_numeric_attribute(
-                state.info.num_parameters,
+                mlagility_stats["parameters"],
                 report[build_name].params,
                 build_name=build_name,
                 parameter_name="params",
