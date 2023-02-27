@@ -222,7 +222,7 @@ You can see that both models are discovered, but only `another_pytorch_model` wa
 
 ## Filtering Model Labels
 
-You can also leverage the labels feature of `benchit` to filter which models are acted on. Labels are pragmas added by the user to the first line of a `.py` file to list some of the attributes of that given script. `two_models.py`, for example has the label `test_group::b`, while `hello_world.py` and `max_depth.py` have the label `test_group::b`.
+You can also leverage the labels feature of `benchit` to filter which models are acted on. Labels are pragmas added by the user to the first line of a `.py` file to list some of the attributes of that given script. `two_models.py`, for example has the label `test_group::b`, while `hello_world.py` and `max_depth.py` have the label `test_group::a`.
 
 If you wanted to only build and benchmark models that have the label `test_group::b`, you could use the command:
 
