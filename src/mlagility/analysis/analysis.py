@@ -23,7 +23,6 @@ import mlagility.analysis.tf_helpers as tf_helpers
 import mlagility.common.labels as labels
 from mlagility.api.model_api import benchmark_model
 import mlagility.common.filesystem as filesystem
-import mlagility.common.groqflow_helpers as groqflow_helpers
 
 
 class Action(Enum):
@@ -169,19 +168,20 @@ def call_benchit(
         _store_traceback(model_info)
 
     else:
-        # Stats that we want to save into the model's state.yaml file
+        # Stats that we want to save into the build's mlagility_stats.yaml file
         # so that they can be easily accessed by the report command later
-        build_state = build.load_state(
-            cache_dir=tracer_args.cache_dir, build_name=build_name
+        filesystem.save_stat(tracer_args.cache_dir, build_name, "hash", model_info.hash)
+        filesystem.save_stat(
+            tracer_args.cache_dir, build_name, "parameters", model_info.params
         )
-        groqflow_helpers.add_mlagility_stat(build_state, "hash", model_info.hash)
-        # groqflow_helpers.add_mlagility_stat(
-        #    build_state, "parameters", model_info.params
-        # )
 
         if perf is not None:
-            groqflow_helpers.add_mlagility_stat(
-                build_state, f"{perf.device} performance", vars(perf)
+            filesystem.add_sub_stat(
+                cache_dir=tracer_args.cache_dir,
+                build_name=build_name,
+                parent_key="performance",
+                key=perf.device,
+                value=vars(perf),
             )
 
 

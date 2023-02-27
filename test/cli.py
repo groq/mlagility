@@ -13,6 +13,7 @@ import io
 from pathlib import Path
 import shutil
 from contextlib import redirect_stdout
+import yaml
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
 from mlagility.common import filesystem
@@ -479,6 +480,7 @@ class Testing(unittest.TestCase):
             builds = filesystem.get_builds_from_script(cache_dir, script_name)
 
             for build_name in builds:
+                # Make sure each build can be accessed with `benchit cache stats`
                 with redirect_stdout(io.StringIO()) as f:
                     testargs = [
                         "benchit",
@@ -492,6 +494,19 @@ class Testing(unittest.TestCase):
                         benchitcli()
 
                     assert script_name in f.getvalue()
+
+                # Make sure the MLAgility YAML file contains the fields
+                # required for producing a report
+                stats_file = os.path.join(
+                    build.output_dir(cache_dir, build_name), "mlagility_stats.yaml"
+                )
+                with open(stats_file, "r", encoding="utf8") as stream:
+                    stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
+
+                assert isinstance(stats_dict["hash"], str), stats_dict["hash"]
+                assert isinstance(stats_dict["parameters"], int), stats_dict[
+                    "parameters"
+                ]
 
     def test_008_cli_version(self):
 

@@ -28,20 +28,13 @@ def print_version(_):
     print(mlagility_version)
 
 
-def print_state(args):
-    printing.log_info(
-        f"The state of build {args.build_name} in cache {args.cache_dir} is:"
-    )
-
+def print_stats(args):
     state_path = build.state_file(args.cache_dir, args.build_name)
-    if os.path.exists(state_path):
-        with open(state_path, "r", encoding="utf-8") as file:
-            print(file.read())
-    else:
-        printing.log_error(
-            f"No build found with name: {build}. "
-            "Try running `benchit cache list` to see the builds in your build cache."
-        )
+    filesystem.print_yaml_file(state_path, "GroqFlow build state")
+
+    filesystem.print_yaml_file(
+        filesystem.stats_file(args.cache_dir, args.build_name), "MLAgility stats"
+    )
 
 
 def benchmark_script_argparse(args):
@@ -326,7 +319,7 @@ def main():
     stats_parser = cache_subparsers.add_parser(
         "stats", help="Print stats about a build in a target cache"
     )
-    stats_parser.set_defaults(func=print_state)
+    stats_parser.set_defaults(func=print_stats)
 
     stats_parser.add_argument(
         "-d",
