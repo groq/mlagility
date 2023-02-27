@@ -337,7 +337,7 @@ You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter
 
 Additionally, you can leverage labels (see [Labels](#labels)) to filter which models in a script will be acted on, in the following manner:
   - `benchit *.py --label test_group::a` will only benchmark the scripts labels with `test_group::a`.
-  - You can also supply multiple labels, for example `benchit *.py --label test_group::a domain::nlp` only benchmark models that have both `test_group::a`, and `domain::nlp` labels.
+  - You can also supply multiple labels, for example `benchit *.py --label test_group::a domain::nlp` only benchmark scripts that have both `test_group::a`, and `domain::nlp` labels.
 
 > _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 
