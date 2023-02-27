@@ -43,14 +43,30 @@ jobs:
       - name: Test with unittest
         shell: bash -el {0}
         run: |
+          # Unit tests
+          rm -rf ~/.cache/mlagility
+          python test/database.py
+
+          # Examples
+          rm -rf ~/.cache/mlagility
           python examples/api/hello_world.py
+          rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py
+          rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/max_depth.py --max-depth 1
+          rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/two_models.py
+          rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py --sequence-file examples/cli/extras/example_sequence.py --build-only
+
+          # E2E tests
+          rm -rf ~/.cache/mlagility
           python test/cli.py
+          rm -rf ~/.cache/mlagility
           python test/analysis.py
+          rm -rf ~/.cache/mlagility
           python test/model_api.py
+          rm -rf ~/.cache/mlagility
           python test/analysis.py
       - name: Install and Start Slurm
         shell: bash -el {0}

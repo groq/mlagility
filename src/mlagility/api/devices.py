@@ -8,6 +8,7 @@ import paramiko
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
+from groqflow.groqmodel import groqmodel
 
 ORT_BENCHMARKING_SCRIPT = "execute_ort.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
@@ -241,7 +242,10 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
 
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    if device_type == "groqchip":
+        dir_path = os.path.dirname(os.path.realpath(groqmodel.__file__))
+    else:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
     with MySFTPClient.from_transport(client.get_transport()) as s:
         for file in files_to_transfer:
             s.put(f"{dir_path}/{file}", f"{output_dir}/{file}")

@@ -8,8 +8,17 @@ import groqflow.common.exceptions as exceptions
 from groqflow.justgroqit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
+<<<<<<< HEAD
 import mlagility.common.labels as labels_library
 from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
+=======
+from mlagility.analysis.analysis import (
+    evaluate_script,
+    TracerArgs,
+    Action,
+    clean_script_name,
+)
+>>>>>>> main
 from mlagility.analysis.util import ModelInfo
 
 
@@ -46,6 +55,7 @@ def benchmark_script(
     backend: str = "local",
     analyze_only: bool = False,
     build_only: bool = False,
+    resume: bool = False,
     script_args: str = "",
     max_depth: int = 0,
     sequence: Union[str, Sequence] = None,
@@ -54,6 +64,9 @@ def benchmark_script(
     groq_num_chips: Optional[int] = None,
     groqview: bool = False,
 ):
+
+    # Make sure the cache directory exists
+    filesystem.make_cache_dir(cache_dir)
 
     # Import the sequence file to get a custom sequence, if the user provided
     # one
@@ -168,6 +181,13 @@ def benchmark_script(
                     skip_script = True
                     break
             if skip_script:
+                continue
+            
+        # Resume mode will skip any scripts that have already been evaluated.
+        # We keep track of that using the cache database
+        db = filesystem.CacheDatabase(cache_dir)
+        if db.exists():
+            if resume and db.script_in_database(clean_script_name(script)):
                 continue
 
         for device in devices:

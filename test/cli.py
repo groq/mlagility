@@ -81,6 +81,39 @@ pytorch_outputs = pytorch_model(**inputs)
 # Print results
 print(f"Pytorch_outputs: {pytorch_outputs}")
 """,
+    "crash.py": """# labels: name::crash author::benchit license::mit
+import torch
+import sys
+
+torch.manual_seed(0)
+
+# The purpose of this script is to intentionally crash
+# so that we can test --resume
+# Any test that doesn't supply the crash signal will treat this
+# as a normal input script that runs a small model
+if len(sys.argv) > 1:
+    if sys.argv[1] == "crash!":
+        assert False
+
+class LinearTestModel(torch.nn.Module):
+    def __init__(self, input_features, output_features):
+        super(LinearTestModel, self).__init__()
+        self.fc = torch.nn.Linear(input_features, output_features)
+
+    def forward(self, x):
+        output = self.fc(x)
+        return output
+
+
+input_features = 5
+output_features = 5
+
+# Model and input configurations
+model = LinearTestModel(input_features, output_features)
+inputs = {"x": torch.rand(input_features)}
+
+output = model(**inputs)
+""",
 }
 
 example_sequence_file = "example_sequence.py"
@@ -304,16 +337,26 @@ class Testing(unittest.TestCase):
             "nvidia_latency",
             "x86_latency",
         ]
-        linear_summary = summary[0]
+        linear_summary = summary[1]
         assert len(summary) == len(test_scripts)
         assert all(elem in expected_cols for elem in linear_summary)
 
         # Check whether all rows we expect to be populated are actually populated
-        assert linear_summary["model_name"] == "linear2", "Wrong model name found"
-        assert linear_summary["author"] == "benchit", "Wrong author name found"
-        assert linear_summary["model_class"] == "TwoLayerModel", "Wrong class found"
-        assert linear_summary["hash"] == "80b93950", "Wrong hash found"
-        assert float(linear_summary["x86_latency"]) > 0, "x86 latency must be >0"
+        assert (
+            linear_summary["model_name"] == "linear2"
+        ), f"Wrong model name found {linear_summary['model_name']}"
+        assert (
+            linear_summary["author"] == "benchit"
+        ), f"Wrong author name found {linear_summary['author']}"
+        assert (
+            linear_summary["model_class"] == "TwoLayerModel"
+        ), f"Wrong class found {linear_summary['model_class']}"
+        assert (
+            linear_summary["hash"] == "80b93950"
+        ), f"Wrong hash found {linear_summary['hash']}"
+        assert (
+            float(linear_summary["x86_latency"]) > 0
+        ), f"x86 latency must be >0, got {linear_summary['x86_latency']}"
 
     def test_005_cli_list(self):
 
@@ -533,7 +576,49 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds([test_script], None, check_perf=True)
 
-    def test_012_cli_labels(self):
+    def test_012_cli_resume(self):
+
+        # NOTE: this is not a unit test, it relies on other command
+        # If this test is failing, make sure the following tests are passing:
+        # - test_cli_single
+        # - test_cli_build_dir
+
+        test_scripts = test_scripts_dot_py.keys()
+
+        # Build all the scripts, sending a crash signal to crash.py
+        with self.assertRaises(AssertionError):
+            testargs = [
+                "benchit",
+                "benchmark",
+                bash(f"{corpus_dir}/*.py"),
+                "--build-only",
+                "--cache-dir",
+                cache_dir,
+                "--script-args",
+                "crash!",
+            ]
+            with patch.object(sys, "argv", flatten(testargs)):
+                benchitcli()
+
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/*.py"),
+            "--build-only",
+            "--cache-dir",
+            cache_dir,
+            "--script-args",
+            "crash!",
+            "--resume",
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        # All builds except for crash.py should have succeeded
+        test_scripts = [x for x in test_scripts if x != "crash.py"]
+        assert_success_of_builds(test_scripts)
+
+    def test_013_cli_labels(self):
 
         # Only build models labels with test_group::a
         testargs = [
