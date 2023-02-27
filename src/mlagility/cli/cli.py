@@ -2,7 +2,6 @@ import argparse
 import os
 import sys
 import groqflow.common.build as build
-import groqflow.common.printing as printing
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_script
