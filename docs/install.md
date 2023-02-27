@@ -55,7 +55,7 @@ Slurm is an open source workload manager for clusters. If you would like to use 
 Go to the mlagility folder, run the following command and wait for the Slurm job to finish:
 
 ```
-sbatch src/mlagility/cli/setup_venv.sh --mem=128000
+sbatch --mem=128000 src/mlagility/cli/setup_venv.sh
 ```
 
 ### Get an API token from Huggingface.co (optional)
