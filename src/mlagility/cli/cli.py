@@ -134,7 +134,7 @@ def main():
     benchmark_parser.add_argument(
         "--label",
         dest="labels",
-        help="Only benchmark the models that have the provided labels",
+        help="Only benchmark the scripts that have the provided labels",
         nargs="*",
         default=[],
     )
