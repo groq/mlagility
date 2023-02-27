@@ -8,17 +8,13 @@ import groqflow.common.exceptions as exceptions
 from groqflow.justgroqit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
-<<<<<<< HEAD
 import mlagility.common.labels as labels_library
-from mlagility.analysis.analysis import evaluate_script, TracerArgs, Action
-=======
 from mlagility.analysis.analysis import (
     evaluate_script,
     TracerArgs,
     Action,
     clean_script_name,
 )
->>>>>>> main
 from mlagility.analysis.util import ModelInfo
 
 
@@ -163,26 +159,13 @@ def benchmark_script(
     for script in input_scripts:
         script_path, targets, encoded_input = decode_input_script(script)
 
-        # Filter scripts by label
+        # Skip a script if the required_labels are not a subset of the script_labels.
         if labels:
-            skip_script = False
             required_labels = labels_library.to_dict(labels)
             script_labels = labels_library.load_from_file(encoded_input)
-            for key in required_labels:
-                # Skip benchmarking if the required_labels key is not a key of script_labels
-                if key not in script_labels:
-                    skip_script = True
-                    break
-                # A label key may point to multiple label values
-                # Skip if not all values of required_labels[key] are in script_labels[key]
-                elif not all(
-                    elem in required_labels[key] for elem in script_labels[key]
-                ):
-                    skip_script = True
-                    break
-            if skip_script:
+            if not labels_library.is_subset(required_labels, script_labels):
                 continue
-            
+
         # Resume mode will skip any scripts that have already been evaluated.
         # We keep track of that using the cache database
         db = filesystem.CacheDatabase(cache_dir)

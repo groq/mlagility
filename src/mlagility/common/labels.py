@@ -78,3 +78,21 @@ def save_to_cache(cache_dir: str, build_name: str, label_dict: Dict[str, List[st
     file_path = os.path.join(labels_dir, f"{build_name}.txt")
     with open(file_path, "w", encoding="utf8") as fp:
         fp.write(" ".join(labels_list))
+
+
+def is_subset(label_dict_a: Dict[str, List[str]], label_dict_b: Dict[str, List[str]]):
+    """
+    This function returns True if label_dict_a is a subset of label_dict_b.
+    More specifically, we return True if:
+        * All keys of label_dict_a are also keys of label_dict_b AND,
+        * All values of label_dict_a[key] are values of label_dict_b[key]
+    """
+    for key in label_dict_a:
+        # Skip benchmarking if the label_dict_a key is not a key of label_dict_b
+        if key not in label_dict_b:
+            return False
+        # A label key may point to multiple label values
+        # Skip if not all values of label_dict_a[key] are in label_dict_b[key]
+        elif not all(elem in label_dict_a[key] for elem in label_dict_b[key]):
+            return False
+    return True
