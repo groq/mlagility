@@ -156,7 +156,7 @@ def benchmark_script(
             required_labels = labels_library.to_dict(labels)
             script_labels = labels_library.load_from_file(encoded_input)
             for key in required_labels:
-                # Skip benchmarking if user_label is not in script_labels
+                # Skip benchmarking if the required_labels key is not a key of script_labels
                 if key not in script_labels:
                     skip_script = True
                     break
