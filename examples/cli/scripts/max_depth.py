@@ -1,4 +1,4 @@
-# labels: name::max_depth author::mlagility test_group::a
+# labels: name::max_depth author::mlagility test_group::b
 """
 This model script contains a model, pytorch_model, which has
 two sub-modules, fc and fc2. You can use it to experiment with
