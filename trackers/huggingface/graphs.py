@@ -539,10 +539,13 @@ def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
         is_baseline=baseline == "nvidia",
     )
 
-    # Show stats
-    st.markdown(
-        f"""<br><br>{x86_text}{nvidia_text}{groq_text}""", unsafe_allow_html=True
-    )
+    cols = st.columns(3)
+    with cols[0]:
+        st.markdown(f"""{x86_text}""", unsafe_allow_html=True)
+    with cols[1]:
+        st.markdown(f"""{nvidia_text}""", unsafe_allow_html=True)
+    with cols[2]:
+        st.markdown(f"""{groq_text}""", unsafe_allow_html=True)
 
 
 def compiler_errors(df: pd.DataFrame) -> None:
