@@ -26,7 +26,7 @@ import groqflow.common.cache as cache
 # filesystem access
 
 test_scripts_dot_py = {
-    "linear.py": """# labels: name::linear author::benchit license::mit
+    "linear.py": """# labels: name::linear author::benchit license::mit test_group::a
 import torch
 
 torch.manual_seed(0)
@@ -52,7 +52,7 @@ inputs = {"x": torch.rand(input_features)}
 output = model(**inputs)
 
 """,
-    "linear2.py": """# labels: name::linear2 author::benchit license::mit
+    "linear2.py": """# labels: name::linear2 author::benchit license::mit test_group::b
 import torch
 
 torch.manual_seed(0)
@@ -231,6 +231,7 @@ class Testing(unittest.TestCase):
 
         return super().setUp()
 
+    """
     def test_001_cli_single(self):
 
         # Test the first model in the corpus
@@ -617,6 +618,57 @@ class Testing(unittest.TestCase):
         # All builds except for crash.py should have succeeded
         test_scripts = [x for x in test_scripts if x != "crash.py"]
         assert_success_of_builds(test_scripts)
+    """
+
+    def test_013_cli_labels(self):
+
+        # Only build models labels with test_group::a
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/*.py"),
+            "--labels",
+            "test_group::a",
+            "--build-only",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        state_files = [Path(p).stem for p in cache.get_all(cache_dir)]
+        assert state_files == ["linear_d5b1df11_state"]
+
+        # Delete the builds
+        testargs = [
+            "benchit",
+            "cache",
+            "delete",
+            "--all",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert cache.get_all(cache_dir) == []
+
+        # Only build models labels with test_group::a and test_group::b
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/*.py"),
+            "--labels",
+            "test_group::a,b",
+            "--build-only",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        state_files = [Path(p).stem for p in cache.get_all(cache_dir)]
+        assert state_files == ["linear_d5b1df11_state", "linear2_80b93950_state"]
 
 
 if __name__ == "__main__":

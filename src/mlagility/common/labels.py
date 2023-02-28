@@ -1,8 +1,9 @@
 import os
 from typing import Dict, List
+import groqflow.common.printing as printing
 
 
-def _convert_to_dict(label_list: List[str]) -> Dict[str, List[str]]:
+def to_dict(label_list: List[str]) -> Dict[str, List[str]]:
     """
     Convert label list into a dictionary of labels
     """
@@ -10,16 +11,18 @@ def _convert_to_dict(label_list: List[str]) -> Dict[str, List[str]]:
     for item in label_list:
         try:
             label_key, label_value = item.split("::")
+            label_value = label_value.split(",")
+            label_dict[label_key] = label_value
         except ValueError:
             # FIXME: Create a proper warning for this once we have the right
             # infrastructure for doing so.
             # https://github.com/groq/mlagility/issues/55
-            print(
-                f"Warning: Malformed label {item} found. ",
-                "Each label must have the format key::value1,value2,... ",
+            printing.log_warning(
+                (
+                    f"Malformed label {item} found. "
+                    "Each label must have the format key::value1,value2,... "
+                )
             )
-        label_value = label_value.split(",")
-        label_dict[label_key] = label_value
     return label_dict
 
 
@@ -39,7 +42,7 @@ def load_from_file(file_path: str) -> Dict[str, List[str]]:
     # Return label dict
     if "# labels:" in first_line:
         label_list = first_line.replace("\n", "").split(" ")[2:]
-        return _convert_to_dict(label_list)
+        return to_dict(label_list)
     else:
         return {}
 
@@ -55,7 +58,7 @@ def load_from_cache(cache_dir: str, build_name: str) -> Dict[str, List[str]]:
 
     # Return label dict
     label_list = first_line.replace("\n", "").split(" ")
-    return _convert_to_dict(label_list)
+    return to_dict(label_list)
 
 
 def save_to_cache(cache_dir: str, build_name: str, label_dict: Dict[str, List[str]]):
@@ -75,3 +78,21 @@ def save_to_cache(cache_dir: str, build_name: str, label_dict: Dict[str, List[st
     file_path = os.path.join(labels_dir, f"{build_name}.txt")
     with open(file_path, "w", encoding="utf8") as fp:
         fp.write(" ".join(labels_list))
+
+
+def is_subset(label_dict_a: Dict[str, List[str]], label_dict_b: Dict[str, List[str]]):
+    """
+    This function returns True if label_dict_a is a subset of label_dict_b.
+    More specifically, we return True if:
+        * All keys of label_dict_a are also keys of label_dict_b AND,
+        * All values of label_dict_a[key] are values of label_dict_b[key]
+    """
+    for key in label_dict_a:
+        # Skip benchmarking if the label_dict_a key is not a key of label_dict_b
+        if key not in label_dict_b:
+            return False
+        # A label key may point to multiple label values
+        # Skip if not all values of label_dict_a[key] are in label_dict_b[key]
+        elif not all(elem in label_dict_a[key] for elem in label_dict_b[key]):
+            return False
+    return True
