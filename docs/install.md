@@ -48,14 +48,14 @@ However, if you want to use mlagility with your Groq SDK and GroqChip processor 
 
 ## Installing Slurm support
 
-Slurm is an open source workload manager for clusters. If you would like to use slurm to build multiple models simultaneously, please follow the instructions below. 
+Slurm is an open source workload manager for clusters. If you would like to use Slurm to build multiple models simultaneously, please follow the instructions below. Please note that MLAgility requires the Slurm nodes to have access to at least 128GB of RAM.
 
 ### Setup your Slurm environment
 
 Go to the mlagility folder, run the following command and wait for the Slurm job to finish:
 
 ```
-sbatch src/mlagility/cli/setup_venv.sh
+sbatch --mem=128000 src/mlagility/cli/setup_venv.sh
 ```
 
 ### Get an API token from Huggingface.co (optional)
