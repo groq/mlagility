@@ -27,6 +27,31 @@ class CacheError(exc.GroqFlowError):
     """
 
 
+def _load_yaml(file) -> Dict:
+    if os.path.isfile(file):
+        with open(file, "r", encoding="utf8") as stream:
+            return yaml.load(stream, Loader=yaml.FullLoader)
+    else:
+        return {}
+
+
+def _save_yaml(dict: Dict, file):
+    with open(file, "w", encoding="utf8") as outfile:
+        yaml.dump(dict, outfile)
+
+
+def print_yaml_file(file_path, description):
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as file:
+            printing.log_info(f"The {description} for {file_path} are:")
+            print(file.read())
+    else:
+        raise CacheError(
+            f"No {description} found at {file_path}. "
+            "Try running `benchit cache list` to see the builds in your build cache."
+        )
+
+
 class CacheDatabase:
     def __init__(self, cache_dir):
         self.cache_dir = cache_dir
@@ -37,17 +62,7 @@ class CacheDatabase:
 
     @property
     def _database(self) -> Dict[str, Dict[str, str]]:
-        if os.path.isfile(self._database_file):
-            with open(self._database_file, "r", encoding="utf8") as stream:
-                database = yaml.load(stream, Loader=yaml.FullLoader)
-        else:
-            database = {}
-
-        return database
-
-    def _save_database(self, database_dict: Dict):
-        with open(self._database_file, "w", encoding="utf8") as outfile:
-            yaml.dump(database_dict, outfile)
+        return _load_yaml(self._database_file)
 
     def script_in_database(self, script_name) -> bool:
         return script_name in self._database.keys()
@@ -68,7 +83,7 @@ class CacheDatabase:
         if script_name not in database_dict.keys():
             database_dict[script_name] = {}
 
-        self._save_database(database_dict)
+        _save_yaml(database_dict, self._database_file)
 
     def add_build(self, script_name, build_name):
         self.add_script(script_name)
@@ -77,7 +92,7 @@ class CacheDatabase:
 
         database_dict[script_name][build_name] = datetime.datetime.now()
 
-        self._save_database(database_dict)
+        _save_yaml(database_dict, self._database_file)
 
     def remove_script(self, script_name: str) -> Dict[str, Dict[str, str]]:
         self._validate_script_in_database(script_name, "remove_script")
@@ -86,7 +101,7 @@ class CacheDatabase:
 
         database_dict.pop(script_name)
 
-        self._save_database(database_dict)
+        _save_yaml(database_dict, self._database_file)
 
         return database_dict
 
@@ -101,7 +116,7 @@ class CacheDatabase:
                 if len(script_builds) == 0:
                     database_dict = self.remove_script(script_name)
 
-        self._save_database(database_dict)
+        _save_yaml(database_dict, self._database_file)
 
 
 def make_cache_dir(cache_dir: str):
@@ -258,3 +273,51 @@ def get_builds_from_script(cache_dir, script_name):
     script_builds = [x for x in all_builds_in_cache if script_name in x]
 
     return script_builds
+
+
+def stats_file(cache_dir: str, build_name: str):
+    return os.path.join(build.output_dir(cache_dir, build_name), "mlagility_stats.yaml")
+
+
+def stats_file_exists():
+    return os.path.isfile(stats_file)
+
+
+def get_stats(cache_dir: str, build_name: str):
+    stats_path = stats_file(cache_dir, build_name)
+    return _load_yaml(stats_path)
+
+
+def _save_stats(cache_dir: str, build_name: str, stats_dict: Dict):
+    stats_path = stats_file(cache_dir, build_name)
+    _save_yaml(stats_dict, stats_path)
+
+
+def save_stat(cache_dir: str, build_name: str, key: str, value):
+    """
+    Save statistics to an yaml file in the build directory
+    """
+
+    stats_dict = get_stats(cache_dir, build_name)
+
+    stats_dict[key] = value
+
+    _save_stats(cache_dir, build_name, stats_dict)
+
+
+def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, value):
+    """
+    Save statistics to an yaml file in the build directory
+    """
+
+    stats_dict = get_stats(cache_dir, build_name)
+
+    if parent_key in stats_dict.keys():
+        dict_to_update = stats_dict[parent_key]
+    else:
+        dict_to_update = {}
+
+    dict_to_update[key] = value
+    stats_dict[parent_key] = dict_to_update
+
+    _save_stats(cache_dir, build_name, stats_dict)
