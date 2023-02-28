@@ -336,8 +336,8 @@ You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter
 > See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 
 Additionally, you can leverage labels (see [Labels](#labels)) to filter which models in a script will be acted on, in the following manner:
-  - `benchit *.py --label test_group::a` will only benchmark the scripts labels with `test_group::a`.
-  - You can also supply multiple labels, for example `benchit *.py --label test_group::a domain::nlp` only benchmark scripts that have both `test_group::a`, and `domain::nlp` labels.
+  - `benchit *.py --labels test_group::a` will only benchmark the scripts labels with `test_group::a`.
+  - You can also supply multiple labels, for example `benchit *.py --labels test_group::a domain::nlp` only benchmark scripts that have both `test_group::a`, and `domain::nlp` labels.
 
 > _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 

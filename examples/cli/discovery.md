@@ -227,7 +227,7 @@ You can also leverage the labels feature of `benchit` to filter which models are
 If you wanted to only build and benchmark models that have the label `test_group::a`, you could use the command:
 
 ```
-benchit scripts/*.py --label test_group::a
+benchit scripts/*.py --labels test_group::a
 ```
 
 That would produce a result like:

@@ -133,7 +133,7 @@ def main():
     )
 
     benchmark_parser.add_argument(
-        "--label",
+        "--labels",
         dest="labels",
         help="Only benchmark the scripts that have the provided labels",
         nargs="*",
