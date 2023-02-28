@@ -46,6 +46,7 @@ def benchmark_script_argparse(args):
         use_slurm=args.use_slurm,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
+        labels=args.labels,
         rebuild=args.rebuild,
         devices=args.devices,
         backend=args.backend,
@@ -121,6 +122,14 @@ def main():
         f"be stored (defaults to {filesystem.DEFAULT_CACHE_DIR})",
         required=False,
         default=filesystem.DEFAULT_CACHE_DIR,
+    )
+
+    benchmark_parser.add_argument(
+        "--labels",
+        dest="labels",
+        help="Only benchmark the scripts that have the provided labels",
+        nargs="*",
+        default=[],
     )
 
     benchmark_parser.add_argument(

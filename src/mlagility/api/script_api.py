@@ -8,6 +8,7 @@ import groqflow.common.exceptions as exceptions
 from groqflow.justgroqit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
+import mlagility.common.labels as labels_library
 from mlagility.analysis.analysis import (
     evaluate_script,
     TracerArgs,
@@ -44,6 +45,7 @@ def benchmark_script(
     use_slurm: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
+    labels: List[str] = None,
     rebuild: Optional[str] = None,
     devices: List[str] = None,
     backend: str = "local",
@@ -155,6 +157,15 @@ def benchmark_script(
     models_found: Dict[str, ModelInfo] = {}
 
     for script in input_scripts:
+        script_path, targets, encoded_input = decode_input_script(script)
+
+        # Skip a script if the required_labels are not a subset of the script_labels.
+        if labels:
+            required_labels = labels_library.to_dict(labels)
+            script_labels = labels_library.load_from_file(encoded_input)
+            if not labels_library.is_subset(required_labels, script_labels):
+                continue
+
         # Resume mode will skip any scripts that have already been evaluated.
         # We keep track of that using the cache database
         db = filesystem.CacheDatabase(cache_dir)
@@ -163,7 +174,6 @@ def benchmark_script(
                 continue
 
         for device in devices:
-            script_path, targets, encoded_input = decode_input_script(script)
             if use_slurm:
                 slurm.run_benchit(
                     op="benchmark",
