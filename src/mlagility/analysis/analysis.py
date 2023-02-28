@@ -175,7 +175,7 @@ def call_benchit(
             tracer_args.cache_dir, build_name, "parameters", model_info.params
         )
 
-        if perf is not None:
+        if perf:
             filesystem.add_sub_stat(
                 cache_dir=tracer_args.cache_dir,
                 build_name=build_name,
