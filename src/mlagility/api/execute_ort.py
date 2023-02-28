@@ -118,12 +118,12 @@ def run(
                 break
 
     cpu_performance["OnnxRuntime Version"] = str(ort.__version__)
-    cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000 / num_iterations)
+    cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
     cpu_performance["Throughput"] = str(
-        BATCHSIZE / mean(perf_result) * 1000 / num_iterations
+        BATCHSIZE / mean(perf_result)
     )
-    cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000 / num_iterations)
-    cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000 / num_iterations)
+    cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000)
+    cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000)
 
     with open(outputs_file, "w", encoding="utf-8") as out_file:
         json.dump(cpu_performance, out_file, ensure_ascii=False, indent=4)
