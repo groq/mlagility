@@ -74,7 +74,7 @@ def run_benchit(
     build_only: Optional[bool] = None,
     lean_cache: Optional[bool] = None,
     working_dir: str = os.getcwd(),
-    ml_cache_dir: Optional[str] = None,
+    ml_cache_dir: Optional[str] = os.environ.get("ML_CACHE"),
     max_jobs: int = 50,
 ):
 
