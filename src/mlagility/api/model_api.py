@@ -120,7 +120,7 @@ def benchmark_model(
     # Make sure the cache exists, and populate the cache database
     # with this script and build.
     # Skip this if we are in Slurm mode; it will be done in the main process
-    if os.environ.get("USING_SLURM") != "True":
+    if os.environ.get("USING_SLURM") != "TRUE":
         filesystem.make_cache_dir(cache_dir)
         db = filesystem.CacheDatabase(cache_dir)
 
