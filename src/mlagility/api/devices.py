@@ -5,6 +5,7 @@ from stat import S_ISDIR
 import shutil
 import yaml
 import paramiko
+import logging
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
@@ -261,7 +262,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile"]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -593,66 +594,88 @@ def execute_ort_locally(
     shutil.copy(state.converted_onnx_file, local_paths.onnx_file)
 
     # Check if conda is installed
-    conda_location = shutil.which("conda")
-    if not conda_location:
-        raise ValueError("conda installation not found.")
-    conda_src = conda_location.split("condabin")[0]
+    docker_location = shutil.which("docker")
+    if not docker_location:
+        raise ValueError("docker installation not found. Please install docker")
 
-    # Create/ update local conda environment for CPU benchmarking
-    env_name = "mlagility-onnxruntime-env"
+    def build_docker_image(local_paths, docker_image):
+        """Build a docker image with the given name."""
+        cmd = ["docker", "build", "--no-cache", "-t", docker_image, local_paths.output_dir]
+        logging.info(f"Building docker image with command: {' '.join(cmd)}")
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logging.info(f"Built docker image with name: {docker_image}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to build docker image: {e.stderr}")
+            raise
+    
+    def run_docker_container(local_paths, docker_name, docker_image):
+        """Run a docker container with the given name and image."""
+        cmd = [
+            "docker", "run", "-d", "--rm", "-v", f"{local_paths.output_dir}:/app",
+            "--name", docker_name, docker_image
+        ]
+        logging.info(f"Starting docker container with command: {' '.join(cmd)}")
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logging.info(f"Started docker container with name: {docker_name}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to start docker container: {e.stderr}")
+            raise
 
-    def available_conda_envs():
-        result = subprocess.run(
-            ["conda", "env", "list"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-        return result.stdout.decode()
 
-    if env_name not in available_conda_envs():
-        print(
-            "Creating a new conda environment to benchmark with CPU. This takes a few seconds..."
-        )
+    def execute_benchmark(local_paths, docker_name, iterations):
+        """Execute the benchmark script in a docker container and retrieve the output."""
+        cmd = [
+            "docker", "exec", docker_name, "/usr/bin/python3",
+            f"/app/{ORT_BENCHMARKING_SCRIPT}",
+            "--onnx-file", "/app/onnxmodel/model.onnx",
+            "--outputs-file", "/app/out.txt",
+            "--errors-file", "/app/errors.txt",
+            "--iterations", str(iterations),
+        ]
+        logging.info(f"Executing benchmark script in docker container with command: {' '.join(cmd)}")
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logging.info(f"Executed benchmark script in docker container with name: {docker_name}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to execute benchmark script in docker container: {e.stderr}")
+            raise
 
-        setup_env = subprocess.Popen(
-            [
-                "bash",
-                os.path.join(local_paths.output_dir, "setup_ort_env.sh"),
-                env_name,
-                conda_src,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        _, stderr = setup_env.communicate()
-        if setup_env.returncode != 0:
-            print(
-                f"Error: Failure to setup conda environment - {stderr.decode().strip()}"
-            )
+        cmd = ["docker", "cp", f"{docker_name}:/app/out.txt", local_paths.outputs_file]
+        logging.info(f"Retrieving output file from docker container with command: {' '.join(cmd)}")
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logging.info(f"Retrieved output file from docker container with name: {docker_name}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to retrieve output file from docker container: {e.stderr}")
+            raise
+        
+    def stop_docker_container(docker_name):
+        """Stop and remove the docker container with the given name."""
+        cmd = ["docker", "stop", docker_name]
+        logging.info(f"Stopping docker container with command: {' '.join(cmd)}")
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logging.info(f"Stopped docker container with name: {docker_name}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to stop docker container: {e.stderr}")
+            raise
+    
+    docker_image = "mlagility-onnxruntime-image"
+    docker_name = "mlagility-onnxruntime-mlas-ep"
 
-    # Run the benchmark
-    run_benchmark = subprocess.Popen(
-        [
-            f"{conda_src}envs/{env_name}/bin/python",
-            os.path.join(local_paths.output_dir, ORT_BENCHMARKING_SCRIPT),
-            "--onnx-file",
-            local_paths.onnx_file,
-            "--outputs-file",
-            local_paths.outputs_file,
-            "--errors-file",
-            local_paths.errors_file,
-            "--iterations",
-            str(iterations),
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    _, stderr = run_benchmark.communicate()
-    if run_benchmark.returncode != 0:
-        raise BenchmarkException(
-            f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}"
-        )
+    # Build the docker image
+    build_docker_image(local_paths, docker_image)
+
+    # Run the docker container
+    run_docker_container(local_paths, docker_name, docker_image)
+
+    # Execute the benchmark script
+    execute_benchmark(local_paths, docker_name, iterations)
+
+    # Stop and remove the docker container
+    stop_docker_container(docker_name)
 
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
