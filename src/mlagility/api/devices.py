@@ -262,7 +262,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", "run_ort_model.py"]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -598,68 +598,34 @@ def execute_ort_locally(
     if not docker_location:
         raise ValueError("docker installation not found. Please install docker")
 
-    def run_subprocess(cmd):
-        """Run a subprocess with the given command and log the output."""
-        logging.info(f"Running subprocess with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Subprocess finished with command: {' '.join(cmd)}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Subprocess failed with command: {' '.join(cmd)} and error message: {e.stderr}")
-            raise
+    python_location = shutil.which("python")
+    if not python_location:
+        raise ValueError("'python' installation not found. Please install python>=3.8")
 
-    def build_docker_image(local_paths, docker_image):
-        """Build a docker image with the given name."""
-        cmd = ["docker", "build", "--no-cache", "-t", docker_image, local_paths.output_dir]
-        run_subprocess(cmd)
-
-    def run_docker_container(local_paths, docker_name, docker_image):
-        """Run a docker container with the given name and image."""
-        # docker run args:
-        # "-v <path>" -  mount the home dir to access the model inside the docker
-        # "-d" - start the docker in detached mode in the background
-        # "--rm" - remove the container automatically upon stopping
-        cmd = [
-            "docker", "run", "-d", "--rm", "-v", f"{local_paths.output_dir}:/app",
-            "--name", docker_name, docker_image
-        ]
-        run_subprocess(cmd)
-
-    def execute_benchmark(local_paths, docker_name, iterations):
-        """Execute the benchmark script in a docker container and retrieve the output."""
-        cmd = [
-            "docker", "exec", docker_name, "/usr/bin/python3",
-            f"/app/{ORT_BENCHMARKING_SCRIPT}",
-            "--onnx-file", "/app/onnxmodel/model.onnx",
-            "--outputs-file", "/app/out.txt",
-            "--errors-file", "/app/errors.txt",
-            "--iterations", str(iterations),
-        ]
-        run_subprocess(cmd)
-
-        cmd = ["docker", "cp", f"{docker_name}:/app/out.txt", local_paths.outputs_file]
-        run_subprocess(cmd)
-
-    def stop_docker_container(docker_name):
-        """Stop and remove the docker container with the given name."""
-        cmd = ["docker", "stop", docker_name]
-        run_subprocess(cmd)
+    run_benchmark = subprocess.Popen(
+        [
+            python_location,
+            os.path.join(local_paths.output_dir, ORT_BENCHMARKING_SCRIPT),
+            "--output-dir",
+            local_paths.output_dir,
+            "--onnx-file",
+            local_paths.onnx_file,
+            "--outputs-file",
+            local_paths.outputs_file,
+            "--errors-file",
+            local_paths.errors_file,
+            "--iterations",
+            str(iterations),
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    _, stderr = run_benchmark.communicate()
+    if run_benchmark.returncode != 0:
+        raise BenchmarkException(
+            "Error: Failure to run model using ORT - " f"{stderr.decode().strip()}"
+        )
     
-    docker_image = "mlagility-onnxruntime-image"
-    docker_name = "mlagility-onnxruntime-mlas-ep"
-
-    # Build the docker image
-    build_docker_image(local_paths, docker_image)
-
-    # Run the docker container
-    run_docker_container(local_paths, docker_name, docker_image)
-
-    # Execute the benchmark script
-    execute_benchmark(local_paths, docker_name, iterations)
-
-    # Stop and remove the docker container
-    stop_docker_container(docker_name)
-
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
             "No benchmarking outputs file found after benchmarking run. "
