@@ -4,6 +4,8 @@ import pathlib
 import time
 import getpass
 from typing import List, Optional
+import mlagility.common.filesystem as filesystem
+import mlagility.analysis.analysis as analysis
 
 
 def jobs_in_queue(job_name=None) -> List[str]:
@@ -98,7 +100,7 @@ def run_benchit(
     )
 
     # Remove the .py extension from the build name
-    job_name = script.split("/")[-1].split(".")[0]
+    job_name = analysis.clean_script_name(script)
 
     while len(jobs_in_queue()) >= max_jobs:
         print(
@@ -128,3 +130,14 @@ def run_benchit(
 
     print(f"Submitting job {job_name} to Slurm")
     subprocess.check_call(slurm_command)
+
+
+def update_database_builds(cache_dir, input_scripts):
+    # In the parent process, add all builds to the cache database
+    if os.environ.get("USING_SLURM") != "TRUE":
+        db = filesystem.CacheDatabase(cache_dir)
+        for script in input_scripts:
+            clean_script_name = analysis.clean_script_name(script)
+            builds = filesystem.get_builds_from_script(cache_dir, clean_script_name)
+            for build in builds:
+                db.add_build(clean_script_name, build)

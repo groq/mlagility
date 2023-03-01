@@ -176,7 +176,6 @@ def benchmark_script(
         # Add the script to the database
         # Skip this if we are in Slurm mode; it has already been done in the main process
         if os.environ.get("USING_SLURM") != "TRUE":
-            db = filesystem.CacheDatabase(cache_dir)
             db.add_script(clean_script_name(script))
 
         for device in devices:
@@ -232,12 +231,6 @@ def benchmark_script(
             )
             time.sleep(5)
 
-        # In the parent process, add all builds to the cache database
-        if os.environ.get("USING_SLURM") != "TRUE":
-            db = filesystem.CacheDatabase(cache_dir)
-            for script in input_scripts:
-                builds = filesystem.get_builds_from_script(cache_dir, script)
-                for build in builds:
-                    db.add_build(script, build)
+        slurm.update_database_builds(cache_dir, input_scripts)
 
     printing.log_success("The 'benchmark' command is complete.")
