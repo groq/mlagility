@@ -232,11 +232,12 @@ def benchmark_script(
             )
             time.sleep(5)
 
-        # Add all builds to the cache database
-        db = filesystem.CacheDatabase(cache_dir)
-        for script in input_scripts:
-            builds = filesystem.get_builds_from_script(cache_dir, script)
-            for build in builds:
-                db.add_build(script, build)
+        # In the parent process, add all builds to the cache database
+        if os.environ.get("USING_SLURM") != "True":
+            db = filesystem.CacheDatabase(cache_dir)
+            for script in input_scripts:
+                builds = filesystem.get_builds_from_script(cache_dir, script)
+                for build in builds:
+                    db.add_build(script, build)
 
     printing.log_success("The 'benchmark' command is complete.")
