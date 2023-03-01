@@ -224,7 +224,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile"]
     elif device_type == "groqchip":
         # Check if at least one GroqChip Processor is available remotely
         stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
@@ -598,31 +598,32 @@ def execute_ort_locally(
     if not docker_location:
         raise ValueError("docker installation not found. Please install docker")
 
+    def run_subprocess(cmd):
+        """Run a subprocess with the given command and log the output."""
+        logging.info(f"Running subprocess with command: {' '.join(cmd)}")
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logging.info(f"Subprocess finished with command: {' '.join(cmd)}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Subprocess failed with command: {' '.join(cmd)} and error message: {e.stderr}")
+            raise
+
     def build_docker_image(local_paths, docker_image):
         """Build a docker image with the given name."""
         cmd = ["docker", "build", "--no-cache", "-t", docker_image, local_paths.output_dir]
-        logging.info(f"Building docker image with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Built docker image with name: {docker_image}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to build docker image: {e.stderr}")
-            raise
-    
+        run_subprocess(cmd)
+
     def run_docker_container(local_paths, docker_name, docker_image):
         """Run a docker container with the given name and image."""
+        # docker run args:
+        # "-v <path>" -  mount the home dir to access the model inside the docker
+        # "-d" - start the docker in detached mode in the background
+        # "--rm" - remove the container automatically upon stopping
         cmd = [
             "docker", "run", "-d", "--rm", "-v", f"{local_paths.output_dir}:/app",
             "--name", docker_name, docker_image
         ]
-        logging.info(f"Starting docker container with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Started docker container with name: {docker_name}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to start docker container: {e.stderr}")
-            raise
-
+        run_subprocess(cmd)
 
     def execute_benchmark(local_paths, docker_name, iterations):
         """Execute the benchmark script in a docker container and retrieve the output."""
@@ -634,33 +635,15 @@ def execute_ort_locally(
             "--errors-file", "/app/errors.txt",
             "--iterations", str(iterations),
         ]
-        logging.info(f"Executing benchmark script in docker container with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Executed benchmark script in docker container with name: {docker_name}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to execute benchmark script in docker container: {e.stderr}")
-            raise
+        run_subprocess(cmd)
 
         cmd = ["docker", "cp", f"{docker_name}:/app/out.txt", local_paths.outputs_file]
-        logging.info(f"Retrieving output file from docker container with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Retrieved output file from docker container with name: {docker_name}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to retrieve output file from docker container: {e.stderr}")
-            raise
-        
+        run_subprocess(cmd)
+
     def stop_docker_container(docker_name):
         """Stop and remove the docker container with the given name."""
         cmd = ["docker", "stop", docker_name]
-        logging.info(f"Stopping docker container with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Stopped docker container with name: {docker_name}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to stop docker container: {e.stderr}")
-            raise
+        run_subprocess(cmd)
     
     docker_image = "mlagility-onnxruntime-image"
     docker_name = "mlagility-onnxruntime-mlas-ep"
