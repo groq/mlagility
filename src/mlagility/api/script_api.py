@@ -13,7 +13,6 @@ from mlagility.analysis.analysis import (
     evaluate_script,
     TracerArgs,
     Action,
-    clean_script_name,
 )
 from mlagility.analysis.util import ModelInfo
 
@@ -170,13 +169,13 @@ def benchmark_script(
         # We keep track of that using the cache database
         db = filesystem.CacheDatabase(cache_dir)
         if db.exists():
-            if resume and db.script_in_database(clean_script_name(script)):
+            if resume and db.script_in_database(filesystem.clean_script_name(script)):
                 continue
 
         # Add the script to the database
         # Skip this if we are in Slurm mode; it has already been done in the main process
         if os.environ.get("USING_SLURM") != "TRUE":
-            db.add_script(clean_script_name(script))
+            db.add_script(filesystem.clean_script_name(script))
 
         for device in devices:
             if use_slurm:

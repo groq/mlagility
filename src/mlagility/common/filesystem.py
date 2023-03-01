@@ -21,6 +21,11 @@ CACHE_MARKER = ".mlacache"
 BUILD_MARKER = ".mlabuild"
 
 
+def clean_script_name(script_path: str) -> str:
+    # Trim the ".py"
+    return pathlib.Path(script_path).stem
+
+
 class CacheError(exc.GroqFlowError):
     """
     Raise this exception when the cache is being accessed incorrectly

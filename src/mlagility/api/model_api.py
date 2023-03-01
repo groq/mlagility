@@ -125,7 +125,7 @@ def benchmark_model(
         db = filesystem.CacheDatabase(cache_dir)
 
         if script_name is None:
-            db_script_name = sys.argv[0].split("/")[-1].split(".")[0]
+            db_script_name = filesystem.clean_script_name(sys.argv[0])
         else:
             db_script_name = script_name
 
