@@ -232,7 +232,6 @@ class Testing(unittest.TestCase):
 
         return super().setUp()
 
-    """
     def test_001_cli_single(self):
 
         # Test the first model in the corpus
@@ -633,7 +632,6 @@ class Testing(unittest.TestCase):
         # All builds except for crash.py should have succeeded
         test_scripts = [x for x in test_scripts if x != "crash.py"]
         assert_success_of_builds(test_scripts)
-    """
 
     def test_013_cli_labels(self):
 
