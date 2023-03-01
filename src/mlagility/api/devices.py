@@ -224,7 +224,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", "run_ort_model.py"]
     elif device_type == "groqchip":
         # Check if at least one GroqChip Processor is available remotely
         stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
@@ -521,30 +521,14 @@ def execute_ort_remotely(
         s.mkdir(remote_paths.onnx_dir)
         s.put(state.converted_onnx_file, remote_paths.onnx_file)
 
-    # Check if conda is installed on the remote machine
-    conda_location, exit_code = exec_command(client, f"ls /home/{username}")
-    if "miniconda3" not in conda_location:
-        raise ValueError(
-            f"conda installation not found in /home/{username}. Please install miniconda3"
-        )
-    # TODO: Remove requirement that conda has to be installed on the /home/user
-    conda_src = f"/home/{username}"
-
-    # Run benchmarking script
-    env_name = "mlagility-onnxruntime-env"
-    exec_command(
-        client,
-        f"bash {remote_paths.output_dir}/setup_ort_env.sh {env_name} {conda_src}",
-        ignore_error=True,
-    )
-
     _, exit_code = exec_command(
         client,
-        f"/home/{username}/miniconda3/envs/{env_name}/bin/python "
+        f"/usr/bin/python3 "
         f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
-        f"--onnx-file {remote_paths.onnx_file} --outputs-file {remote_paths.outputs_file} "
-        f"--errors-file {remote_paths.errors_file} --iterations {iterations}",
+        f"--output-dir {remote_paths.output_dir} --onnx-file {remote_paths.onnx_file} --outputs-file {remote_paths.outputs_file} "
+        f"--iterations {iterations}",
     )
+
     if exit_code == 1:
         msg = """
         Failed to execute CPU(s) remotely.
@@ -555,9 +539,9 @@ def execute_ort_remotely(
     with MySFTPClient.from_transport(client.get_transport()) as s:
         try:
             s.get(remote_paths.outputs_file, local_paths.outputs_file)
-            s.get(remote_paths.errors_file, local_paths.errors_file)
+            # s.get(remote_paths.errors_file, local_paths.errors_file)
             s.remove(remote_paths.outputs_file)
-            s.remove(remote_paths.errors_file)
+            # s.remove(remote_paths.errors_file)
         except FileNotFoundError as e:
             raise FileNotFoundError(
                 "Output/ error files not found! Please make sure your remote CPU machine is"
@@ -612,8 +596,6 @@ def execute_ort_locally(
             local_paths.onnx_file,
             "--outputs-file",
             local_paths.outputs_file,
-            "--errors-file",
-            local_paths.errors_file,
             "--iterations",
             str(iterations),
         ],

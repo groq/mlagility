@@ -7,100 +7,17 @@ This script doesn't depend on GroqFlow to be executed.
 import argparse
 import subprocess
 import json
-import re
-import math
-import sys
 import logging
 from statistics import mean
 from timeit import default_timer as timer
-import numpy as np
 import onnxruntime as ort
 
 BATCHSIZE = 1
-
-
-code = """
-import argparse
-import subprocess
-import json
-import re
-import math
-import logging
-from statistics import mean
-from timeit import default_timer as timer
-import numpy as np
-import onnxruntime as ort
-
-def run_ort_profile(source_onnx, num_iterations=100):
-    # Run the provided onnx model using onnxruntime and measure average latency
-
-    per_iteration_latency = []
-    exception = None
-    sess_options = ort.SessionOptions()
-    sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-    onnx_session = ort.InferenceSession(source_onnx, sess_options)
-    sess_input = onnx_session.get_inputs()
-    input_feed = _dummy_inputs(sess_input)
-    output_name = onnx_session.get_outputs()[0].name
-
-    for _ in range(num_iterations):
-        start = timer()
-        try:
-            onnx_session.run([output_name], input_feed)
-        except Exception as e:  # pylint: disable=broad-except
-            exception = e
-        end = timer()
-        iteration_latency = end - start
-        per_iteration_latency.append(iteration_latency)
-
-    return per_iteration_latency, exception
-
-
-def _dummy_inputs(sess_input) -> dict:
-    # Generate dummy inputs of the expected shape and type for the input model
-    input_stats = []
-    for _idx, input_ in enumerate(range(len(sess_input))):
-        input_name = sess_input[input_].name
-        input_shape = sess_input[input_].shape
-
-        # TODO: Use onnx update_inputs_outputs_dims to automatically freeze models
-        for dim in input_shape:
-            if isinstance(dim, str) is True or math.isnan(dim) is True:
-                raise AssertionError(
-                    "Error: Model has dynamic inputs. Freeze the graph and try again"
-                )
-
-        input_type = sess_input[input_].type
-        input_stats.append([input_name, input_shape, input_type])
-
-    input_feed = {}
-    for stat in input_stats:
-        dtype_str = re.search(r"\((.*)\)", stat[2])
-        assert dtype_str is not None
-        datatype = dtype_ort2str(dtype_str.group(1))
-        input_feed[stat[0]] = np.random.rand(*stat[1]).astype(datatype)
-    return input_feed
-
-
-def dtype_ort2str(dtype_str: str):
-    if dtype_str == "float16":
-        datatype = "float16"
-    if dtype_str == "float":
-        datatype = "float32"
-    if dtype_str == "double":
-        datatype = "float64"
-    if dtype_str == "long":
-        datatype = "int64"
-    else:
-        datatype = dtype_str
-    return datatype
-"""
 
 def run(
     output_dir: str,
     onnx_file: str,
     outputs_file: str,
-    errors_file: str,
     num_iterations: int,
 ):
 
@@ -131,24 +48,13 @@ def run(
         ]
         run_subprocess(cmd)
 
-    # def execute_benchmark(onnx_file, docker_name, num_iterations):
-        # """Execute the benchmark script in a docker container and retrieve the output."""
-        # cmd = [
-        #     "docker", "exec", docker_name, "/usr/bin/python3",
-        #     "/app/run_ort_model.py", "--onnx-file", "/app/onnxmodel/model.onnx", "--iterations", str(num_iterations)
-        # ]
-
-        # output = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        # stdout = output.stdout.strip()
-
-        # return eval(stdout)
     def execute_benchmark(onnx_file, docker_name, num_iterations):
         """Execute the benchmark script in a docker container and retrieve the output."""
         cmd = f"docker exec {docker_name} /usr/bin/python3 /app/run_ort_model.py --onnx-file /app/onnxmodel/model.onnx --iterations {num_iterations}"
 
         with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) as proc:
             stdout, stderr = proc.communicate()
-            if proc.returncode != 0:
+            if proc.returncode != 0 or not stdout:
                 raise ValueError(f"Execution of command {cmd} failed with stderr: {stderr}")
             try:
                 output_list = json.loads(stdout.decode('utf-8').strip())
@@ -215,9 +121,6 @@ def run(
     with open(outputs_file, "w", encoding="utf-8") as out_file:
         json.dump(cpu_performance, out_file, ensure_ascii=False, indent=4)
 
-    # with open(errors_file, "w", encoding="utf-8") as e:
-    #     e.writelines(str(exception))
-
 
 if __name__ == "__main__":
     # Parse Inputs
@@ -238,11 +141,6 @@ if __name__ == "__main__":
         help="File in which the outputs will be saved",
     )
     parser.add_argument(
-        "--errors-file",
-        required=True,
-        help="File in which the outputs will be saved",
-    )
-    parser.add_argument(
         "--iterations",
         required=True,
         type=int,
@@ -254,6 +152,5 @@ if __name__ == "__main__":
         output_dir=args.output_dir,
         onnx_file=args.onnx_file,
         outputs_file=args.outputs_file,
-        errors_file=args.errors_file,
         num_iterations=args.iterations,
     )
