@@ -7,7 +7,6 @@ import time
 import shlex
 import functools
 import dataclasses
-import pathlib
 import traceback
 from typing import Union, List, Dict
 from types import FrameType, TracebackType
@@ -461,19 +460,10 @@ def recursive_search(
                 )
 
 
-def clean_script_name(script_path: str) -> str:
-    # Trim the ".py"
-    return pathlib.Path(script_path).stem
-
-
 def evaluate_script(
     tracer_args: TracerArgs, input_args: str = None
 ) -> Dict[str, util.ModelInfo]:
-    tracer_args.script_name = clean_script_name(tracer_args.input)
-
-    # Add the script to the database
-    db = filesystem.CacheDatabase(tracer_args.cache_dir)
-    db.add_script(tracer_args.script_name)
+    tracer_args.script_name = filesystem.clean_script_name(tracer_args.input)
 
     # Get a pointer to the script's python module
     spec = importlib.util.spec_from_file_location(

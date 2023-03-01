@@ -21,6 +21,11 @@ CACHE_MARKER = ".mlacache"
 BUILD_MARKER = ".mlabuild"
 
 
+def clean_script_name(script_path: str) -> str:
+    # Trim the ".py"
+    return pathlib.Path(script_path).stem
+
+
 class CacheError(exc.GroqFlowError):
     """
     Raise this exception when the cache is being accessed incorrectly
@@ -268,9 +273,21 @@ def clean_builds(args):
             )
 
 
+def build_name_to_script_name(build_name: str) -> str:
+    """
+    Convert a build name to the name of the script it came from
+    Build names have the format: <script_name>_hash
+    """
+
+    # Get everything except the trailing _<hash>
+    return "_".join(build_name.split("_")[:-1])
+
+
 def get_builds_from_script(cache_dir, script_name):
     all_builds_in_cache = get_available_builds(cache_dir)
-    script_builds = [x for x in all_builds_in_cache if script_name in x]
+    script_builds = [
+        x for x in all_builds_in_cache if script_name == build_name_to_script_name(x)
+    ]
 
     return script_builds
 

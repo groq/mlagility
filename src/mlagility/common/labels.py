@@ -68,11 +68,8 @@ def save_to_cache(cache_dir: str, build_name: str, label_dict: Dict[str, List[st
     labels_list = [f"{k}::{','.join(label_dict[k])}" for k in label_dict.keys()]
 
     # Create labels folder if it doesn't exist
-    if not os.path.exists(cache_dir):
-        os.makedirs(cache_dir)
     labels_dir = os.path.join(cache_dir, "labels")
-    if not os.path.exists(labels_dir):
-        os.makedirs(labels_dir)
+    os.makedirs(labels_dir, exist_ok=True)
 
     # Save labels to cache
     file_path = os.path.join(labels_dir, f"{build_name}.txt")
