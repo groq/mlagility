@@ -471,10 +471,6 @@ def evaluate_script(
 ) -> Dict[str, util.ModelInfo]:
     tracer_args.script_name = clean_script_name(tracer_args.input)
 
-    # Add the script to the database
-    db = filesystem.CacheDatabase(tracer_args.cache_dir)
-    db.add_script(tracer_args.script_name)
-
     # Get a pointer to the script's python module
     spec = importlib.util.spec_from_file_location(
         tracer_args.script_name, tracer_args.input

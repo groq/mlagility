@@ -173,6 +173,12 @@ def benchmark_script(
             if resume and db.script_in_database(clean_script_name(script)):
                 continue
 
+        # Add the script to the database
+        # Skip this if we are in Slurm mode; it has already been done in the main process
+        if os.environ.get("USING_SLURM") != "True":
+            db = filesystem.CacheDatabase(cache_dir)
+            db.add_script(clean_script_name(script))
+
         for device in devices:
             if use_slurm:
                 slurm.run_benchit(
@@ -225,5 +231,12 @@ def benchmark_script(
                 f"jobs left in queue: {slurm.jobs_in_queue()}"
             )
             time.sleep(5)
+
+        # Add all builds to the cache database
+        db = filesystem.CacheDatabase(cache_dir)
+        for script in input_scripts:
+            builds = filesystem.get_builds_from_script(cache_dir, script)
+            for build in builds:
+                db.add_build(script, build)
 
     printing.log_success("The 'benchmark' command is complete.")
