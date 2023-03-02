@@ -137,8 +137,6 @@ def call_benchit(
             model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
-        status.update(tracer_args.models_found)
-
     except exp.GroqitStageError:
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
@@ -184,6 +182,10 @@ def call_benchit(
                 key=perf.device,
                 value=vars(perf),
             )
+    finally:
+        # Ensure that stdout is not being forwarded before updating status
+        sys.stdout = sys.__stdout__
+        status.update(tracer_args.models_found)
 
 
 def get_model_hash(
