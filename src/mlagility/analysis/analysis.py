@@ -184,7 +184,8 @@ def call_benchit(
             )
     finally:
         # Ensure that stdout is not being forwarded before updating status
-        sys.stdout = sys.__stdout__
+        if hasattr(sys.stdout, "terminal"):
+            sys.stdout = sys.stdout.terminal
         status.update(tracer_args.models_found)
 
 
@@ -385,6 +386,8 @@ def explore_frame(
                 )
                 # Ensure that groqit() doesn't interfere with our execution count
                 model_info.executed = 1
+
+            status.update(tracer_args.models_found)
 
             # Turn tracing on again after computing the outputs
             sys.setprofile(tracer)
