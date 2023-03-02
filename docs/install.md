@@ -52,7 +52,8 @@ Slurm is an open source workload manager for clusters. If you would like to use 
 
 ### Setup your Slurm environment
 
-Go to the mlagility folder, run the following command and wait for the Slurm job to finish:
+Ensure that your MLAgility folder and your conda installation are both inside a shared volume that can be accessed by Slurm.
+Then, run the following command and wait for the Slurm job to finish:
 
 ```
 sbatch --mem=128000 src/mlagility/cli/setup_venv.sh
