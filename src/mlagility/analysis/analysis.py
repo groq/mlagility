@@ -137,6 +137,8 @@ def call_benchit(
             model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
+        status.update(tracer_args.models_found)
+
     except exp.GroqitStageError:
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
@@ -381,8 +383,6 @@ def explore_frame(
                 )
                 # Ensure that groqit() doesn't interfere with our execution count
                 model_info.executed = 1
-
-            status.update(tracer_args.models_found)
 
             # Turn tracing on again after computing the outputs
             sys.setprofile(tracer)
