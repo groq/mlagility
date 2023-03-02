@@ -5,13 +5,13 @@ from stat import S_ISDIR
 import shutil
 import yaml
 import paramiko
-import logging
 import groqflow.common.exceptions as exp
 import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
 from groqflow.groqmodel import groqmodel
 
 ORT_BENCHMARKING_SCRIPT = "execute_ort.py"
+ORT_EXECUTION_SCRIPT = "run_ort_model.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 
 
@@ -224,7 +224,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", "run_ort_model.py"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", ORT_EXECUTION_SCRIPT]
     elif device_type == "groqchip":
         # Check if at least one GroqChip Processor is available remotely
         stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
@@ -262,7 +262,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", "run_ort_model.py"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", ORT_EXECUTION_SCRIPT]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -372,7 +372,7 @@ def execute_trt_remotely(
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    remote_paths = BenchmarkPaths(cache_dir, build_name, "remote", username)
+    remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
     os.makedirs(local_paths.output_dir, exist_ok=True)
@@ -525,7 +525,9 @@ def execute_ort_remotely(
         client,
         f"/usr/bin/python3 "
         f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
-        f"--output-dir {remote_paths.output_dir} --onnx-file {remote_paths.onnx_file} --outputs-file {remote_paths.outputs_file} "
+        f"--output-dir {remote_paths.output_dir} " 
+        f"--onnx-file {remote_paths.onnx_file} "
+        f"--outputs-file {remote_paths.outputs_file} "
         f"--iterations {iterations}",
     )
 
@@ -539,9 +541,7 @@ def execute_ort_remotely(
     with MySFTPClient.from_transport(client.get_transport()) as s:
         try:
             s.get(remote_paths.outputs_file, local_paths.outputs_file)
-            # s.get(remote_paths.errors_file, local_paths.errors_file)
             s.remove(remote_paths.outputs_file)
-            # s.remove(remote_paths.errors_file)
         except FileNotFoundError as e:
             raise FileNotFoundError(
                 "Output/ error files not found! Please make sure your remote CPU machine is"
@@ -577,10 +577,10 @@ def execute_ort_locally(
     os.makedirs(local_paths.onnx_dir)
     shutil.copy(state.converted_onnx_file, local_paths.onnx_file)
 
-    # Check if conda is installed
+    # Check if docker and python are installed on the local machine
     docker_location = shutil.which("docker")
     if not docker_location:
-        raise ValueError("docker installation not found. Please install docker")
+        raise ValueError("docker installation not found. Please install docker>=20.10")
 
     python_location = shutil.which("python")
     if not python_location:
@@ -607,7 +607,7 @@ def execute_ort_locally(
         raise BenchmarkException(
             "Error: Failure to run model using ORT - " f"{stderr.decode().strip()}"
         )
-    
+
     if not os.path.isfile(local_paths.outputs_file):
         raise BenchmarkException(
             "No benchmarking outputs file found after benchmarking run. "
