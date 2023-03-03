@@ -9,7 +9,6 @@ import subprocess
 import json
 import logging
 from statistics import mean
-import onnxruntime as ort
 
 BATCHSIZE = 1
 
@@ -104,19 +103,23 @@ def run(
     docker_image = "mlagility-onnxruntime-image"
     docker_name = "mlagility-onnxruntime-mlas-ep"
 
-    # Build the docker image
-    build_docker_image(output_dir, docker_image)
+    try:
+        # Build the docker image
+        build_docker_image(output_dir, docker_image)
 
-    # Run the docker container
-    run_docker_container(output_dir, docker_name, docker_image)
+        # Run the docker container
+        run_docker_container(output_dir, docker_name, docker_image)
 
-    # Execute the benchmark script
-    perf_result = execute_benchmark(onnx_file, docker_name, num_iterations)
+        # Execute the benchmark script
+        perf_result = execute_benchmark(onnx_file, docker_name, num_iterations)
 
-    ort_version = get_ort_version(docker_name)
+        ort_version = get_ort_version(docker_name)
+    except:
+        raise ValueError(f"Docker execution failed")
 
-    # Stop and remove the docker container
-    stop_docker_container(docker_name)
+    # Make sure the container is stopped even if there is a failure
+    finally:
+        stop_docker_container(docker_name)
 
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
