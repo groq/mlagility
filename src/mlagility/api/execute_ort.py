@@ -12,22 +12,25 @@ from statistics import mean
 
 BATCHSIZE = 1
 
+
 def run_subprocess(cmd):
-        """Run a subprocess with the given command and log the output."""
-        logging.info(f"Running subprocess with command: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logging.info(f"Subprocess finished with command: {' '.join(cmd)}")
-        except subprocess.CalledProcessError as e:
-            logging.error(
-                f"Subprocess failed with command: {' '.join(cmd)} and error message: {e.stderr}"
-            )
-            raise
+    """Run a subprocess with the given command and log the output."""
+    logging.info(f"Running subprocess with command: {' '.join(cmd)}")
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        logging.info(f"Subprocess finished with command: {' '.join(cmd)}")
+    except subprocess.CalledProcessError as e:
+        logging.error(
+            f"Subprocess failed with command: {' '.join(cmd)} and error message: {e.stderr}"
+        )
+        raise
+
 
 def build_docker_image(output_dir, docker_image):
     """Build a docker image with the given name."""
     cmd = ["docker", "build", "-t", docker_image, output_dir]
     run_subprocess(cmd)
+
 
 def run_docker_container(output_dir, docker_name, docker_image):
     """Run a docker container with the given name and image."""
@@ -48,22 +51,23 @@ def run_docker_container(output_dir, docker_name, docker_image):
     ]
     run_subprocess(cmd)
 
+
 def execute_benchmark(onnx_file, docker_name, num_iterations):
     """Execute the benchmark script in a docker container and retrieve the output."""
-    cmd = ("docker exec "
-            f"{docker_name} "
-            "/usr/bin/python3 /app/run_ort_model.py "
-            "--onnx-file /app/onnxmodel/model.onnx "
-            f"--iterations {num_iterations}")
-    
+    cmd = (
+        "docker exec "
+        f"{docker_name} "
+        "/usr/bin/python3 /app/run_ort_model.py "
+        f"--onnx-file {onnx_file} "
+        f"--iterations {num_iterations}"
+    )
+
     with subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     ) as proc:
         stdout, stderr = proc.communicate()
         if proc.returncode != 0 or not stdout:
-            raise ValueError(
-                f"Execution of command {cmd} failed with stderr: {stderr}"
-            )
+            raise ValueError(f"Execution of command {cmd} failed with stderr: {stderr}")
         try:
             output_list = json.loads(stdout.decode("utf-8").strip())
         except json.JSONDecodeError as e:
@@ -72,27 +76,30 @@ def execute_benchmark(onnx_file, docker_name, num_iterations):
             )
         return output_list
 
+
 def stop_docker_container(docker_name):
     """Stop and remove the docker container with the given name."""
     cmd = ["docker", "stop", docker_name]
     run_subprocess(cmd)
 
+
 def get_ort_version(docker_name):
     """Stop and remove the docker container with the given name."""
-    cmd = ("docker exec "
-            f"{docker_name} "
-            "/usr/bin/python3 -c \"import onnxruntime as ort; print(ort.__version__)\"")
+    cmd = (
+        "docker exec "
+        f"{docker_name} "
+        '/usr/bin/python3 -c "import onnxruntime as ort; print(ort.__version__)"'
+    )
 
     with subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     ) as proc:
         stdout, stderr = proc.communicate()
         if proc.returncode != 0 or not stdout:
-            raise ValueError(
-                f"Execution of command {cmd} failed with stderr: {stderr}"
-            )
+            raise ValueError(f"Execution of command {cmd} failed with stderr: {stderr}")
     version = stdout.decode("utf-8").strip()
     return version
+
 
 def run(
     output_dir: str,
@@ -115,7 +122,7 @@ def run(
 
         ort_version = get_ort_version(docker_name)
     except:
-        raise ValueError(f"Docker execution failed")
+        raise ValueError("Docker execution failed")
 
     # Make sure the container is stopped even if there is a failure
     finally:
@@ -147,12 +154,9 @@ def run(
                 cpu_performance[key] = format_field(line)
                 break
 
-
     cpu_performance["OnnxRuntime Version"] = str(ort_version)
     cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
-    cpu_performance["Throughput"] = str(
-        BATCHSIZE / mean(perf_result)
-    )
+    cpu_performance["Throughput"] = str(BATCHSIZE / mean(perf_result))
     cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000)
     cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000)
 

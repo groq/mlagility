@@ -507,6 +507,7 @@ def execute_ort_remotely(
     # Setup remote execution folders to save outputs/ errors
     remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
     os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
@@ -526,7 +527,7 @@ def execute_ort_remotely(
         f"/usr/bin/python3 "
         f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
         f"--output-dir {remote_paths.output_dir} " 
-        f"--onnx-file {remote_paths.onnx_file} "
+        f"--onnx-file {docker_paths.onnx_file} "
         f"--outputs-file {remote_paths.outputs_file} "
         f"--iterations {iterations}",
     )
@@ -565,6 +566,7 @@ def execute_ort_locally(
 
     # Setup local execution folders to save outputs/ errors
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
     setup_local_host(device_type=device, output_dir=local_paths.output_dir)
 
@@ -593,7 +595,7 @@ def execute_ort_locally(
             "--output-dir",
             local_paths.output_dir,
             "--onnx-file",
-            local_paths.onnx_file,
+            docker_paths.onnx_file,
             "--outputs-file",
             local_paths.outputs_file,
             "--iterations",

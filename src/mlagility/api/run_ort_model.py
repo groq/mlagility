@@ -1,7 +1,6 @@
 import argparse
 import re
 import math
-from statistics import mean
 from timeit import default_timer as timer
 import numpy as np
 import onnxruntime as ort
@@ -10,7 +9,6 @@ def run_ort_profile(onnx_file, num_iterations=100):
     # Run the provided onnx model using onnxruntime and measure average latency
 
     per_iteration_latency = []
-    exception = None
     sess_options = ort.SessionOptions()
     sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
     onnx_session = ort.InferenceSession(onnx_file, sess_options)
@@ -20,14 +18,11 @@ def run_ort_profile(onnx_file, num_iterations=100):
 
     for _ in range(num_iterations):
         start = timer()
-        try:
-            onnx_session.run([output_name], input_feed)
-        except Exception as e:  # pylint: disable=broad-except
-            exception = e
+        onnx_session.run([output_name], input_feed)
         end = timer()
         iteration_latency = end - start
         per_iteration_latency.append(iteration_latency)
-    
+
     print (per_iteration_latency)
 
 
