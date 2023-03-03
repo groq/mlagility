@@ -7,7 +7,6 @@ import time
 import shlex
 import functools
 import dataclasses
-import pathlib
 import traceback
 from typing import Union, List, Dict
 from types import FrameType, TracebackType
@@ -23,7 +22,6 @@ import mlagility.analysis.tf_helpers as tf_helpers
 import mlagility.common.labels as labels
 from mlagility.api.model_api import benchmark_model
 import mlagility.common.filesystem as filesystem
-import mlagility.common.groqflow_helpers as groqflow_helpers
 
 
 class Action(Enum):
@@ -169,19 +167,20 @@ def call_benchit(
         _store_traceback(model_info)
 
     else:
-        # Stats that we want to save into the model's state.yaml file
+        # Stats that we want to save into the build's mlagility_stats.yaml file
         # so that they can be easily accessed by the report command later
-        build_state = build.load_state(
-            cache_dir=tracer_args.cache_dir, build_name=build_name
+        filesystem.save_stat(tracer_args.cache_dir, build_name, "hash", model_info.hash)
+        filesystem.save_stat(
+            tracer_args.cache_dir, build_name, "parameters", model_info.params
         )
-        groqflow_helpers.add_mlagility_stat(build_state, "hash", model_info.hash)
-        # groqflow_helpers.add_mlagility_stat(
-        #    build_state, "parameters", model_info.params
-        # )
 
-        if perf is not None:
-            groqflow_helpers.add_mlagility_stat(
-                build_state, f"{perf.device} performance", vars(perf)
+        if perf:
+            filesystem.add_sub_stat(
+                cache_dir=tracer_args.cache_dir,
+                build_name=build_name,
+                parent_key="performance",
+                key=perf.device,
+                value=vars(perf),
             )
 
 
@@ -461,19 +460,10 @@ def recursive_search(
                 )
 
 
-def clean_script_name(script_path: str) -> str:
-    # Trim the ".py"
-    return pathlib.Path(script_path).stem
-
-
 def evaluate_script(
     tracer_args: TracerArgs, input_args: str = None
 ) -> Dict[str, util.ModelInfo]:
-    tracer_args.script_name = clean_script_name(tracer_args.input)
-
-    # Add the script to the database
-    db = filesystem.CacheDatabase(tracer_args.cache_dir)
-    db.add_script(tracer_args.script_name)
+    tracer_args.script_name = filesystem.clean_script_name(tracer_args.input)
 
     # Get a pointer to the script's python module
     spec = importlib.util.spec_from_file_location(

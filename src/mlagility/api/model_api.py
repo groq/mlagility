@@ -1,4 +1,5 @@
 import sys
+import os
 from typing import Any, Dict, Optional, List
 from groqflow import groqit
 import groqflow.common.build as build
@@ -118,15 +119,17 @@ def benchmark_model(
 
     # Make sure the cache exists, and populate the cache database
     # with this script and build.
-    filesystem.make_cache_dir(cache_dir)
-    db = filesystem.CacheDatabase(cache_dir)
+    # Skip this if we are in Slurm mode; it will be done in the main process
+    if os.environ.get("USING_SLURM") != "TRUE":
+        filesystem.make_cache_dir(cache_dir)
+        db = filesystem.CacheDatabase(cache_dir)
 
-    if script_name is None:
-        db_script_name = sys.argv[0].split("/")[-1].split(".")[0]
-    else:
-        db_script_name = script_name
+        if script_name is None:
+            db_script_name = filesystem.clean_script_name(sys.argv[0])
+        else:
+            db_script_name = script_name
 
-    db.add_build(db_script_name, build_name)
+        db.add_build(db_script_name, build_name)
 
     # Build and benchmark the model
     try:
