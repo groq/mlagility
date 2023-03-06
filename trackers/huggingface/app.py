@@ -21,10 +21,44 @@ def add_faq() -> None:
     """
     faq = Collapsable()
     faq.add_section(
-        "Why is this so empty?",
+        "How is MLAgility different from MLPerf?",
         (
-            "Because the FAQ of huggingface website still needs to be written. "
-            "We don't use the same FAQ as in our internal dashboard."
+            "Deep learning pioneers have been judging their progress with the Machine "
+            "Learning Performance (MLPerf) inference benchmark. However, the corpus of "
+            "models in MLPerf is small enough that vendors primarily compete by paying "
+            "computer architecture experts to exhaustively hand-optimize kernels. This "
+            "workflow is not representative of the turnkey workflow of the mass adoption "
+            "customer, as they are neither likely to deploy off-the-shelf research models "
+            "as-is, nor manually optimize their models by hand-writing kernels for "
+            "hardware accelerators. MLAgility addresses the disconnect between MLPerf and "
+            "mass adoption customers by examining a larger corpus of models, while "
+            "disallowing hand-written kernels."
+        ),
+    )
+    faq.add_section(
+        "Who runs MLAgility?",
+        (
+            "MLAgility is lead and maintained by a consortium of industry leaders and innovators."
+        ),
+    )
+    faq.add_section(
+        "Why now for MLAgility?",
+        (
+            "Deep learning (DL) algorithms and their associated DL hardware accelerators are "
+            "transitioning from early adoption into mass adoption. Production DL is now "
+            "becoming available to the masses, with a desire to customize models to tackle "
+            "their specific problems, and then take the path of least resistance into "
+            "production. A market for turnkey solutions, starting with a model as input and "
+            "provision a cost- and latency-effective acceleration solution, often in the cloud, "
+            "as output, has emerged."
+        ),
+    )
+    faq.add_section(
+        "What are the current key limitations of MLAgility?",
+        (
+            "Groq's latency is computed using GroqModel.estimate_latency(), which takes"
+            " into account deterministic compute time and estimates an ideal runtime with"
+            " ideal I/O time. It does not take into account runtime performance."
         ),
     )
 
