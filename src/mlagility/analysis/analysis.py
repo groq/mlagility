@@ -182,6 +182,11 @@ def call_benchit(
                 key=perf.device,
                 value=vars(perf),
             )
+    finally:
+        # Ensure that stdout is not being forwarded before updating status
+        if hasattr(sys.stdout, "terminal"):
+            sys.stdout = sys.stdout.terminal
+        status.update(tracer_args.models_found)
 
 
 def get_model_hash(
