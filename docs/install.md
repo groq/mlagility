@@ -70,6 +70,15 @@ To allow slurm to use your api token, simply export your token as an environment
 export HUGGINGFACE_API_KEY=<YOUR_API_KEY>
 ```
 
+### Setup a shared download folder (optional)
+
+Both Torch Hub and Hugging Face models save model content to a local cache. A good practice is to store that data with users that might use the same models using a shared folder. MLAgility allows you to setup a shared ML download cache folder when using Slurm by exporting an environment variable as shown below:
+
+
+```
+export SLURM_ML_CACHE=<PATH_TO_A_SHARED_FOLDER>
+```
+
 ### Test it
 
 Go to the mlagility folder and build multiple models simultaneously using Slurm.
