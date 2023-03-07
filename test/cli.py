@@ -337,6 +337,9 @@ class Testing(unittest.TestCase):
             "groq_estimated_latency",
             "nvidia_latency",
             "x86_latency",
+            "onnx_exported",
+            "onnx_optimized",
+            "onnx_converted",
         ]
         linear_summary = summary[1]
         assert len(summary) == len(test_scripts)
@@ -358,6 +361,15 @@ class Testing(unittest.TestCase):
         assert (
             float(linear_summary["x86_latency"]) > 0
         ), f"x86 latency must be >0, got {linear_summary['x86_latency']}"
+        assert (
+            linear_summary["onnx_exported"] == "True"
+        ), f"onnx_exported must be True, got {linear_summary['onnx_exported']}"
+        assert (
+            linear_summary["onnx_optimized"] == "True"
+        ), f"onnx_optimized must be True, got {linear_summary['onnx_optimized']}"
+        assert (
+            linear_summary["onnx_converted"] == "True"
+        ), f"onnx_converted must be True, got {linear_summary['onnx_converted']}"
 
     def test_005_cli_list(self):
 
