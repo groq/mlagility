@@ -72,6 +72,8 @@ with st.sidebar:
 
 st.markdown("## Summary Results")
 
+graphs.device_funnel(None)
+
 cols = st.columns(2)
 with cols[0]:
     st.markdown("""#### Workload origin""")

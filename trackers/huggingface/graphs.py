@@ -613,3 +613,141 @@ def results_table(df: pd.DataFrame):
         df = df[[model_name in x for x in df["Model Name"]]]
 
     st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
+
+
+def device_funnel(current_df: pd.DataFrame) -> None:
+    """
+    Show count of how many models compile, assemble, etc
+    """
+    # current = StageCount(current_df)
+
+    stages = [
+        "All models",
+        "Convert to ONNX",
+        "Optimize ONNX file",
+        "Converts to FP16",
+        "Builds",
+    ]
+    cols = st.columns(len(stages))
+
+    for idx, stage in enumerate(stages):
+        with cols[idx]:
+            st.markdown(stage)
+
+    # Show Sankey graph with percentages
+    sk_val = {
+        "All models": "172 models - 100%",
+        "Convert to ONNX": "172 models - " + str(int(100)) + "%",
+        "Optimize ONNX file": "171 models - " + str(int(99)) + "%",
+        "Converts to FP16": "170 models - " + str(int(98)) + "%",
+        "Builds Nvidia": "89 models - " + str(int(51)) + "% (Nvidia)",
+        "Builds Groq": "54 models - " + str(int(31)) + "% (Groq)",
+        "Builds x86": "84 models - " + str(int(48)) + "% (x86)",
+    }
+    option = {
+        "series": {
+            "type": "sankey",
+            "animationDuration": 1,
+            "top": "0%",
+            "bottom": "20%",
+            "left": "0%",
+            "right": "19%",
+            "darkMode": "true",
+            "nodeWidth": 2,
+            "textStyle": {"fontSize": 16},
+            "lineStyle": {"curveness": 0},
+            "layoutIterations": 0,
+            "layout": "none",
+            "emphasis": {"focus": "adjacency"},
+            "data": [
+                {
+                    "name": "All models",
+                    "value": sk_val["All models"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Convert to ONNX",
+                    "value": sk_val["Convert to ONNX"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Optimize ONNX file",
+                    "value": sk_val["Optimize ONNX file"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Converts to FP16",
+                    "value": sk_val["Converts to FP16"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Builds Nvidia",
+                    "value": sk_val["Builds Nvidia"],
+                    "itemStyle": {
+                        "color": device_colors["nvidia"],
+                        "borderColor": device_colors["nvidia"],
+                    },
+                },
+                {
+                    "name": "Builds Groq",
+                    "value": sk_val["Builds Groq"],
+                    "itemStyle": {
+                        "color": device_colors["groq"],
+                        "borderColor": device_colors["groq"],
+                    },
+                },
+                {
+                    "name": "Builds x86",
+                    "value": sk_val["Builds x86"],
+                    "itemStyle": {
+                        "color": device_colors["x86"],
+                        "borderColor": device_colors["x86"],
+                    },
+                },
+            ],
+            "label": {
+                "position": "insideTopLeft",
+                "borderWidth": 0,
+                "fontSize": 16,
+                "color": "white",
+                "textBorderWidth": 0,
+                "formatter": "{c}",
+            },
+            "links": [
+                {
+                    "source": "All models",
+                    "target": "Convert to ONNX",
+                    "value": 172,
+                },
+                {
+                    "source": "Convert to ONNX",
+                    "target": "Optimize ONNX file",
+                    "value": 171,
+                },
+                {
+                    "source": "Optimize ONNX file",
+                    "target": "Converts to FP16",
+                    "value": 169,
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Builds Nvidia",
+                    "value": 89,
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Builds Groq",
+                    "value": 54,
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Builds x86",
+                    "value": 84,
+                },
+            ],
+        }
+    }
+    st_echarts(
+        options=option,
+        height="75px",
+    )
