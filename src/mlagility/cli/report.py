@@ -14,7 +14,11 @@ from mlagility.api.devices import BenchmarkException
 import mlagility.common.filesystem as filesystem
 
 
-def _update_numeric_attribute(
+def _successCleanup(item):
+    return item if item is not None else False
+
+
+def _update_attribute(
     new_val, current_val, default="-", build_name=None, parameter_name=None
 ):
     """
@@ -128,6 +132,18 @@ class BuildResults:
     # Source: benchit.benchmark() on 100 runs
     x86_latency: str = "-"
 
+    # Description: Wether the model was successfully converted to ONNX
+    # Source: Computed by benchit() during the "build" Stage
+    onnx_exported: str = "-"
+
+    # Description: Wether the ONNX model was successfully optimized
+    # Source: Computed by benchit() during the "build" Stage
+    onnx_optimized: str = "-"
+
+    # Description: Wether the model was successfully converted to FP16
+    # Source: Computed by benchit() during the "build" Stage
+    onnx_converted: str = "-"
+
 
 def summary_spreadsheet(args) -> None:
 
@@ -162,20 +178,45 @@ def summary_spreadsheet(args) -> None:
             build_name = state.config.build_name
 
             # Load MLAgility stats from the YAML file
-            mlagility_stats = filesystem.get_stats(cache_dir, build_name)
+            # FIXME: Use mlagility_stats for hash and parameters
+            # https://github.com/groq/mlagility/issues/174
+            # mlagility_stats = filesystem.get_stats(cache_dir, build_name)
 
             # Add model to report if it doesn't exist
             if build_name not in report:
                 report[build_name] = BuildResults()
 
             # Model hash from the Analysis stage
-            report[build_name].hash = mlagility_stats["hash"]
+            # FIXME: Use mlagility_stats for hash
+            # https://github.com/groq/mlagility/issues/174
+            report[build_name].hash = build_name.split("_")[-1]
 
-            report[build_name].params = _update_numeric_attribute(
-                mlagility_stats["parameters"],
+            # FIXME: Use mlagility_stats for parameters
+            # https://github.com/groq/mlagility/issues/174
+            report[build_name].params = _update_attribute(
+                state.info.num_parameters,
                 report[build_name].params,
                 build_name=build_name,
                 parameter_name="params",
+            )
+
+            report[build_name].onnx_exported = _update_attribute(
+                _successCleanup(state.info.base_onnx_exported),
+                report[build_name].onnx_exported,
+                build_name=build_name,
+                parameter_name="onnx_exported",
+            )
+            report[build_name].onnx_optimized = _update_attribute(
+                _successCleanup(state.info.opt_onnx_exported),
+                report[build_name].onnx_optimized,
+                build_name=build_name,
+                parameter_name="onnx_optimized",
+            )
+            report[build_name].onnx_converted = _update_attribute(
+                _successCleanup(state.info.converted_onnx_exported),
+                report[build_name].onnx_converted,
+                build_name=build_name,
+                parameter_name="onnx_converted",
             )
 
             # Extract labels (if any)
@@ -195,13 +236,13 @@ def summary_spreadsheet(args) -> None:
 
             # Get Groq latency and number of chips
             groq_estimated_latency = _get_estimated_groq_latency(build_name, cache_dir)
-            report[build_name].groq_estimated_latency = _update_numeric_attribute(
+            report[build_name].groq_estimated_latency = _update_attribute(
                 groq_estimated_latency,
                 report[build_name].groq_estimated_latency,
                 build_name=build_name,
                 parameter_name="groq_estimated_latency",
             )
-            report[build_name].groq_chips_used = _update_numeric_attribute(
+            report[build_name].groq_chips_used = _update_attribute(
                 state.num_chips_used,
                 report[build_name].groq_chips_used,
                 build_name=build_name,

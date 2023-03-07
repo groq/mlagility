@@ -38,9 +38,9 @@ class StageCount:
 class DeviceStageCount:
     def __init__(self, df: pd.DataFrame) -> None:
         self.all_models = len(df)
-        self.base_onnx = 170  # int(np.sum(df["base_onnx"]))
-        self.optimized_onnx = 169  # int(np.sum(df["optimized_onnx"]))
-        self.fp16_onnx = 168  # int(np.sum(df["fp16_onnx"]))
+        self.base_onnx = int(np.sum(df["onnx_exported"]))
+        self.optimized_onnx = int(np.sum(df["onnx_optimized"]))
+        self.fp16_onnx = int(np.sum(df["onnx_converted"]))
         self.x86 = df.loc[df.x86_latency != "-", "x86_latency"].count()
         self.nvidia = df.loc[df.nvidia_latency != "-", "nvidia_latency"].count()
         self.groq = df.loc[
