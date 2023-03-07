@@ -113,6 +113,7 @@ def call_benchit(
     tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
     labels.save_to_cache(tracer_args.cache_dir, build_name, tracer_args.labels)
 
+    perf = None
     try:
         perf = benchmark_model(
             model_info.model,
@@ -165,8 +166,12 @@ def call_benchit(
         model_info.status_message_color = printing.Colors.WARNING
 
         _store_traceback(model_info)
+    finally:
+        # Ensure that stdout is not being forwarded before updating status
+        if hasattr(sys.stdout, "terminal"):
+            sys.stdout = sys.stdout.terminal
+        status.update(tracer_args.models_found)
 
-    else:
         # Stats that we want to save into the build's mlagility_stats.yaml file
         # so that they can be easily accessed by the report command later
         filesystem.save_stat(tracer_args.cache_dir, build_name, "hash", model_info.hash)
@@ -182,11 +187,6 @@ def call_benchit(
                 key=perf.device,
                 value=vars(perf),
             )
-    finally:
-        # Ensure that stdout is not being forwarded before updating status
-        if hasattr(sys.stdout, "terminal"):
-            sys.stdout = sys.stdout.terminal
-        status.update(tracer_args.models_found)
 
 
 def get_model_hash(
