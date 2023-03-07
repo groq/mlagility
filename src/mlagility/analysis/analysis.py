@@ -142,7 +142,7 @@ def call_benchit(
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
-        if len(build_state.info.opt_onnx_unsupported_ops) > 0:
+        if build_state.info.opt_onnx_unsupported_ops:
             model_info.status_message = "Unsupported op(s) " + ", ".join(
                 build_state.info.opt_onnx_unsupported_ops
             )
