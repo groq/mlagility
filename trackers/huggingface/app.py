@@ -72,7 +72,7 @@ with st.sidebar:
 
 st.markdown("## Summary Results")
 
-graphs.device_funnel(None)
+graphs.device_funnel(report)
 
 cols = st.columns(2)
 with cols[0]:

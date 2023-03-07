@@ -35,6 +35,19 @@ class StageCount:
         self.assembles = int(np.sum(df["assembles"]))
 
 
+class DeviceStageCount:
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.all_models = len(df)
+        self.base_onnx = 170  # int(np.sum(df["base_onnx"]))
+        self.optimized_onnx = 169  # int(np.sum(df["optimized_onnx"]))
+        self.fp16_onnx = 168  # int(np.sum(df["fp16_onnx"]))
+        self.x86 = df.loc[df.x86_latency != "-", "x86_latency"].count()
+        self.nvidia = df.loc[df.nvidia_latency != "-", "nvidia_latency"].count()
+        self.groq = df.loc[
+            df.groq_estimated_latency != "-", "groq_estimated_latency"
+        ].count()
+
+
 def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> None:
     """
     Show count of how many models compile, assemble, etc
@@ -615,11 +628,11 @@ def results_table(df: pd.DataFrame):
     st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
 
 
-def device_funnel(current_df: pd.DataFrame) -> None:
+def device_funnel(df: pd.DataFrame) -> None:
     """
     Show count of how many models compile, assemble, etc
     """
-    # current = StageCount(current_df)
+    summ = DeviceStageCount(df)
 
     stages = [
         "All models",
@@ -636,13 +649,25 @@ def device_funnel(current_df: pd.DataFrame) -> None:
 
     # Show Sankey graph with percentages
     sk_val = {
-        "All models": "172 models - 100%",
-        "Convert to ONNX": "172 models - " + str(int(100)) + "%",
-        "Optimize ONNX file": "171 models - " + str(int(99)) + "%",
-        "Converts to FP16": "170 models - " + str(int(98)) + "%",
-        "Builds Nvidia": "89 models - " + str(int(51)) + "% (Nvidia)",
-        "Builds Groq": "54 models - " + str(int(31)) + "% (Groq)",
-        "Builds x86": "84 models - " + str(int(48)) + "% (x86)",
+        "All models": f"{summ.all_models} models - 100%",
+        "Convert to ONNX": f"{summ.base_onnx} models - "
+        + str(int(100 * summ.base_onnx / summ.all_models))
+        + "%",
+        "Optimize ONNX file": f"{summ.optimized_onnx} models - "
+        + str(int(100 * summ.optimized_onnx / summ.all_models))
+        + "%",
+        "Converts to FP16": f"{summ.fp16_onnx} models - "
+        + str(int(100 * summ.fp16_onnx / summ.all_models))
+        + "%",
+        "Builds Nvidia": f"{summ.nvidia} models - "
+        + str(int(100 * summ.nvidia / summ.all_models))
+        + "% (Nvidia)",
+        "Builds Groq": f"{summ.groq} models - "
+        + str(int(100 * summ.groq / summ.all_models))
+        + "% (Groq)",
+        "Builds x86": f"{summ.x86} models - "
+        + str(int(100 * summ.x86 / summ.all_models))
+        + "% (x86)",
     }
     option = {
         "series": {
@@ -655,8 +680,10 @@ def device_funnel(current_df: pd.DataFrame) -> None:
             "darkMode": "true",
             "nodeWidth": 2,
             "textStyle": {"fontSize": 16},
+            "nodeAlign": "left",
             "lineStyle": {"curveness": 0},
             "layoutIterations": 0,
+            "nodeGap": 12,
             "layout": "none",
             "emphasis": {"focus": "adjacency"},
             "data": [
@@ -717,37 +744,47 @@ def device_funnel(current_df: pd.DataFrame) -> None:
                 {
                     "source": "All models",
                     "target": "Convert to ONNX",
-                    "value": 172,
+                    "value": summ.all_models,
                 },
                 {
                     "source": "Convert to ONNX",
                     "target": "Optimize ONNX file",
-                    "value": 171,
+                    "value": summ.optimized_onnx,
                 },
                 {
                     "source": "Optimize ONNX file",
                     "target": "Converts to FP16",
-                    "value": 169,
+                    "value": summ.fp16_onnx,
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Builds Nvidia",
-                    "value": 89,
+                    "value": int(
+                        summ.nvidia
+                        * summ.fp16_onnx
+                        / (summ.x86 + summ.nvidia + summ.groq)
+                    ),
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Builds Groq",
-                    "value": 54,
+                    "value": int(
+                        summ.groq
+                        * summ.fp16_onnx
+                        / (summ.x86 + summ.nvidia + summ.groq)
+                    ),
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Builds x86",
-                    "value": 84,
+                    "value": int(
+                        summ.x86 * summ.fp16_onnx / (summ.x86 + summ.nvidia + summ.groq)
+                    ),
                 },
             ],
         }
     }
     st_echarts(
         options=option,
-        height="75px",
+        height="70px",
     )
