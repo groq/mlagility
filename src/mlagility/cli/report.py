@@ -187,18 +187,20 @@ def summary_spreadsheet(args) -> None:
                 report[build_name] = BuildResults()
 
             # Model hash from the Analysis stage
-            # FIXME: Use mlagility_stats for hash
-            # https://github.com/groq/mlagility/issues/174
-            report[build_name].hash = build_name.split("_")[-1]
+            if "hash" in mlagility_stats:
+                report[build_name].hash = mlagility_stats["hash"]
+            else:
+                report[build_name].hash = "-"
 
-            # FIXME: Use mlagility_stats for parameters
-            # https://github.com/groq/mlagility/issues/174
-            report[build_name].params = _update_attribute(
-                state.info.num_parameters,
-                report[build_name].params,
-                build_name=build_name,
-                parameter_name="params",
-            )
+            if "parameters" in mlagility_stats:
+                report[build_name].params = _update_numeric_attribute(
+                    mlagility_stats["parameters"],
+                    report[build_name].params,
+                    build_name=build_name,
+                    parameter_name="params",
+                )
+            else:
+                report[build_name].params = "-"
 
             report[build_name].onnx_exported = _update_attribute(
                 _successCleanup(state.info.base_onnx_exported),

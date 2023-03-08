@@ -695,6 +695,50 @@ class Testing(unittest.TestCase):
         state_files = [Path(p).stem for p in cache.get_all(cache_dir)]
         assert state_files == ["linear_d5b1df11_state", "linear2_80b93950_state"]
 
+    def test_014_report_on_failed_build(self):
+
+        # Run benchit on groq device (will fail since the HW is not available)
+        testargs = [
+            "benchit",
+            bash(f"{corpus_dir}/linear.py"),
+            "--device",
+            "groq",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        # Ensure test failed
+        build_state = build.load_state(state_path=cache.get_all(cache_dir)[0])
+        assert build_state.build_status != build.Status.SUCCESSFUL_BUILD
+
+        # Generate report
+        testargs = [
+            "benchit",
+            "cache",
+            "report",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        # Read generated CSV file
+        summary_csv_path = report.get_report_name()
+        summary = None
+        with open(summary_csv_path, "r", encoding="utf8") as summary_csv:
+            summary = list(csv.DictReader(summary_csv))
+
+        # Ensure parameters and hash have been saved despite crash
+        assert (
+            len(summary) == 1
+        ), "Report must contain only one row, but got {len(summary)}"
+        assert (
+            summary[0]["params"] == "110"
+        ), "Wrong number of parameters found in report"
+        assert summary[0]["hash"] == "d5b1df11", "Wrong hash found in report"
+
 
 if __name__ == "__main__":
     unittest.main()

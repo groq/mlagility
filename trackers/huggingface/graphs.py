@@ -18,9 +18,9 @@ colors = {
     "ocean_green": "#3ba272",
 }
 device_colors = {
-    "x86": colors["blue"],
-    "nvidia": colors["green"],
-    "groq": colors["orange"],
+    "x86": "#0071c5",
+    "nvidia": "#76b900",
+    "groq": "#F55036",
 }
 
 
@@ -489,14 +489,14 @@ def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
         )
 
 
-def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
+def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="#FFFFFF"):
 
     title = f"""<br><br>
     <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Median {device} Acceleration ({len(compute_ratio)} models):</p>"""
     if is_baseline:
         return (
             title
-            + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>"""
+            + f"""<p style="font-family:sans-serif; color:{color}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>"""
         )
 
     if len(compute_ratio) > 0:
@@ -510,8 +510,8 @@ def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
 
     return (
         title
-        + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {kpi_median}x</p>
-    <p style="font-family:sans-serif; color:{colors[color]}; font-size: 20px;text-align: center;"> min {kpi_min}x; max {kpi_max}x</p>
+        + f"""<p style="font-family:sans-serif; color:{color}; font-size: 26px;text-align: center;"> {kpi_median}x</p>
+    <p style="font-family:sans-serif; color:{color}; font-size: 20px;text-align: center;"> min {kpi_min}x; max {kpi_max}x</p>
     """
     )
 
@@ -536,19 +536,19 @@ def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
     x86_text = kpi_to_markdown(
         x86_compute_ratio,
         device="Intel(R) Xeon(R) X40 CPU @ 2.00GHz",
-        color="blue",
+        color=device_colors["x86"],
         is_baseline=baseline == "x86",
     )
     groq_text = kpi_to_markdown(
         groq_compute_ratio,
         device="GroqChip 1",
-        color="orange",
+        color=device_colors["groq"],
         is_baseline=baseline == "groq",
     )
     nvidia_text = kpi_to_markdown(
         nvidia_compute_ratio,
         device="NVIDIA A100-PCIE-40GB",
-        color="green",
+        color=device_colors["nvidia"],
         is_baseline=baseline == "nvidia",
     )
 
