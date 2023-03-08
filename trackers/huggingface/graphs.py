@@ -638,7 +638,7 @@ def device_funnel(df: pd.DataFrame) -> None:
         "All models",
         "Export to ONNX",
         "Optimize ONNX file",
-        "Converts to FP16",
+        "Convert to FP16",
         "Builds",
     ]
     cols = st.columns(len(stages))
