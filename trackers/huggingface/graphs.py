@@ -82,7 +82,7 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
     )
 
     kpi[4].metric(
-        label="Converts to FP16",
+        label="Convert to FP16",
         value=current.fp16_onnx,
         delta=current.fp16_onnx - prev.fp16_onnx,
     )
@@ -111,8 +111,7 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
             int(100 * current.all_ops_supported / current.all_models)
         )
         + "%",
-        "Converts to FP16": str(int(100 * current.fp16_onnx / current.all_models))
-        + "%",
+        "Convert to FP16": str(int(100 * current.fp16_onnx / current.all_models)) + "%",
         "Compiles": str(int(100 * current.compiles / current.all_models)) + "%",
         "Assembles": str(int(100 * current.assembles / current.all_models)) + "%",
     }
@@ -153,8 +152,8 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
-                    "name": "Converts to FP16",
-                    "value": sk_val["Converts to FP16"],
+                    "name": "Convert to FP16",
+                    "value": sk_val["Convert to FP16"],
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
@@ -194,11 +193,11 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
                 },
                 {
                     "source": "All ops supported",
-                    "target": "Converts to FP16",
+                    "target": "Convert to FP16",
                     "value": current.fp16_onnx,
                 },
                 {
-                    "source": "Converts to FP16",
+                    "source": "Convert to FP16",
                     "target": "Compiles",
                     "value": current.compiles,
                 },
@@ -656,7 +655,7 @@ def device_funnel(df: pd.DataFrame) -> None:
         "Optimize ONNX file": f"{summ.optimized_onnx} models - "
         + str(int(100 * summ.optimized_onnx / summ.all_models))
         + "%",
-        "Converts to FP16": f"{summ.fp16_onnx} models - "
+        "Convert to FP16": f"{summ.fp16_onnx} models - "
         + str(int(100 * summ.fp16_onnx / summ.all_models))
         + "%",
         "Acquires Nvidia Perf": f"{summ.nvidia} models - "
@@ -703,8 +702,8 @@ def device_funnel(df: pd.DataFrame) -> None:
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
-                    "name": "Converts to FP16",
-                    "value": sk_val["Converts to FP16"],
+                    "name": "Convert to FP16",
+                    "value": sk_val["Convert to FP16"],
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
@@ -753,11 +752,11 @@ def device_funnel(df: pd.DataFrame) -> None:
                 },
                 {
                     "source": "Optimize ONNX file",
-                    "target": "Converts to FP16",
+                    "target": "Convert to FP16",
                     "value": summ.fp16_onnx,
                 },
                 {
-                    "source": "Converts to FP16",
+                    "source": "Convert to FP16",
                     "target": "Acquires Nvidia Perf",
                     "value": int(
                         summ.nvidia
@@ -766,7 +765,7 @@ def device_funnel(df: pd.DataFrame) -> None:
                     ),
                 },
                 {
-                    "source": "Converts to FP16",
+                    "source": "Convert to FP16",
                     "target": "Acquires Groq Perf",
                     "value": int(
                         summ.groq
@@ -775,7 +774,7 @@ def device_funnel(df: pd.DataFrame) -> None:
                     ),
                 },
                 {
-                    "source": "Converts to FP16",
+                    "source": "Convert to FP16",
                     "target": "Acquires x86 Perf",
                     "value": int(
                         summ.x86 * summ.fp16_onnx / (summ.x86 + summ.nvidia + summ.groq)
