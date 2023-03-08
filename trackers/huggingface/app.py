@@ -93,7 +93,7 @@ def add_faq() -> None:
         "Who runs MLAgility?",
         (
             "MLAgility is currently maintained by the following individuals (in alphabetical order): "
-            "Daniel Holanda Noronha, Jeremy Fowers, Kalin Ovtcharov, and Ramakrishnan Sivakumar."
+            "Daniel Holanda Noronha, Jeremy Fowers, Kalin Ovtcharov, and Ramakrishnan Sivakumar. We are actively seeking collaborators from across the industry."
         ),
     )
     faq.add_section(
