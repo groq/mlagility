@@ -154,6 +154,8 @@ with st.sidebar:
 
 st.markdown("## Summary Results")
 
+graphs.device_funnel(report)
+
 st.markdown("""#### Benchmark results""")
 baseline = st.selectbox("Baseline", ("x86", "nvidia", "groq"))
 graphs.speedup_text_summary(report, baseline)

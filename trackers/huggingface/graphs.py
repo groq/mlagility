@@ -18,9 +18,9 @@ colors = {
     "ocean_green": "#3ba272",
 }
 device_colors = {
-    "x86": "#0071c5",
-    "nvidia": "#76b900",
-    "groq": "#F55036",
+    "x86": colors["blue"],
+    "nvidia": colors["green"],
+    "groq": colors["orange"],
 }
 
 
@@ -33,6 +33,19 @@ class StageCount:
         self.fp16_onnx = int(np.sum(df["fp16_onnx"]))
         self.compiles = int(np.sum(df["compiles"]))
         self.assembles = int(np.sum(df["assembles"]))
+
+
+class DeviceStageCount:
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.all_models = len(df)
+        self.base_onnx = int(np.sum(df["onnx_exported"]))
+        self.optimized_onnx = int(np.sum(df["onnx_optimized"]))
+        self.fp16_onnx = int(np.sum(df["onnx_converted"]))
+        self.x86 = df.loc[df.x86_latency != "-", "x86_latency"].count()
+        self.nvidia = df.loc[df.nvidia_latency != "-", "nvidia_latency"].count()
+        self.groq = df.loc[
+            df.groq_estimated_latency != "-", "groq_estimated_latency"
+        ].count()
 
 
 def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> None:
@@ -51,19 +64,19 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
     )
 
     kpi[1].metric(
-        label="Convert to ONNX",
+        label="Converts to ONNX",
         value=current.base_onnx,
         delta=current.base_onnx - prev.base_onnx,
     )
 
     kpi[2].metric(
-        label="Optimize ONNX file",
+        label="Optimizes ONNX file",
         value=current.optimized_onnx,
         delta=current.optimized_onnx - prev.optimized_onnx,
     )
 
     kpi[3].metric(
-        label="All ops supported",
+        label="Supports all ops",
         value=current.all_ops_supported,
         delta=current.all_ops_supported - prev.all_ops_supported,
     )
@@ -89,12 +102,13 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
     # Show Sankey graph with percentages
     sk_val = {
         "All models": "100%",
-        "Convert to ONNX": str(int(100 * current.base_onnx / current.all_models)) + "%",
-        "Optimize ONNX file": str(
+        "Converts to ONNX": str(int(100 * current.base_onnx / current.all_models))
+        + "%",
+        "Optimizes ONNX file": str(
             int(100 * current.optimized_onnx / current.all_models)
         )
         + "%",
-        "All ops supported": str(
+        "Supports all ops": str(
             int(100 * current.all_ops_supported / current.all_models)
         )
         + "%",
@@ -125,18 +139,18 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
-                    "name": "Convert to ONNX",
-                    "value": sk_val["Convert to ONNX"],
+                    "name": "Converts to ONNX",
+                    "value": sk_val["Converts to ONNX"],
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
-                    "name": "Optimize ONNX file",
-                    "value": sk_val["Optimize ONNX file"],
+                    "name": "Optimizes ONNX file",
+                    "value": sk_val["Optimizes ONNX file"],
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
-                    "name": "All ops supported",
-                    "value": sk_val["All ops supported"],
+                    "name": "Supports all ops",
+                    "value": sk_val["Supports all ops"],
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
@@ -166,21 +180,21 @@ def stages_count_summary(current_df: pd.DataFrame, prev_df: pd.DataFrame) -> Non
             "links": [
                 {
                     "source": "All models",
-                    "target": "Convert to ONNX",
+                    "target": "Converts to ONNX",
                     "value": current.base_onnx,
                 },
                 {
-                    "source": "Convert to ONNX",
-                    "target": "Optimize ONNX file",
+                    "source": "Converts to ONNX",
+                    "target": "Optimizes ONNX file",
                     "value": current.optimized_onnx,
                 },
                 {
-                    "source": "Optimize ONNX file",
-                    "target": "All ops supported",
+                    "source": "Optimizes ONNX file",
+                    "target": "Supports all ops",
                     "value": current.all_ops_supported,
                 },
                 {
-                    "source": "All ops supported",
+                    "source": "Supports all ops",
                     "target": "Converts to FP16",
                     "value": current.fp16_onnx,
                 },
@@ -476,14 +490,14 @@ def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
         )
 
 
-def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="#FFFFFF"):
+def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
 
     title = f"""<br><br>
     <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Median {device} Acceleration ({len(compute_ratio)} models):</p>"""
     if is_baseline:
         return (
             title
-            + f"""<p style="font-family:sans-serif; color:{color}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>"""
+            + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>"""
         )
 
     if len(compute_ratio) > 0:
@@ -497,8 +511,8 @@ def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="#FFFFFF"):
 
     return (
         title
-        + f"""<p style="font-family:sans-serif; color:{color}; font-size: 26px;text-align: center;"> {kpi_median}x</p>
-    <p style="font-family:sans-serif; color:{color}; font-size: 20px;text-align: center;"> min {kpi_min}x; max {kpi_max}x</p>
+        + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {kpi_median}x</p>
+    <p style="font-family:sans-serif; color:{colors[color]}; font-size: 20px;text-align: center;"> min {kpi_min}x; max {kpi_max}x</p>
     """
     )
 
@@ -523,19 +537,19 @@ def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
     x86_text = kpi_to_markdown(
         x86_compute_ratio,
         device="Intel(R) Xeon(R) X40 CPU @ 2.00GHz",
-        color=device_colors["x86"],
+        color="blue",
         is_baseline=baseline == "x86",
     )
     groq_text = kpi_to_markdown(
         groq_compute_ratio,
         device="GroqChip 1",
-        color=device_colors["groq"],
+        color="orange",
         is_baseline=baseline == "groq",
     )
     nvidia_text = kpi_to_markdown(
         nvidia_compute_ratio,
         device="NVIDIA A100-PCIE-40GB",
-        color=device_colors["nvidia"],
+        color="green",
         is_baseline=baseline == "nvidia",
     )
 
@@ -613,3 +627,165 @@ def results_table(df: pd.DataFrame):
         df = df[[model_name in x for x in df["Model Name"]]]
 
     st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
+
+
+def device_funnel(df: pd.DataFrame) -> None:
+    """
+    Show count of how many models compile, assemble, etc
+    """
+    summ = DeviceStageCount(df)
+
+    stages = [
+        "All models",
+        "Export to ONNX",
+        "Optimize ONNX file",
+        "Convert to FP16",
+        "Acquire Performance",
+    ]
+    cols = st.columns(len(stages))
+
+    for idx, stage in enumerate(stages):
+        with cols[idx]:
+            st.markdown(stage)
+
+    # Show Sankey graph with percentages
+    sk_val = {
+        "All models": f"{summ.all_models} models - 100%",
+        "Converts to ONNX": f"{summ.base_onnx} models - "
+        + str(int(100 * summ.base_onnx / summ.all_models))
+        + "%",
+        "Optimizes ONNX file": f"{summ.optimized_onnx} models - "
+        + str(int(100 * summ.optimized_onnx / summ.all_models))
+        + "%",
+        "Converts to FP16": f"{summ.fp16_onnx} models - "
+        + str(int(100 * summ.fp16_onnx / summ.all_models))
+        + "%",
+        "Acquires Nvidia Perf": f"{summ.nvidia} models - "
+        + str(int(100 * summ.nvidia / summ.all_models))
+        + "% (Nvidia)",
+        "Acquires Groq Perf": f"{summ.groq} models - "
+        + str(int(100 * summ.groq / summ.all_models))
+        + "% (Groq)",
+        "Acquires x86 Perf": f"{summ.x86} models - "
+        + str(int(100 * summ.x86 / summ.all_models))
+        + "% (x86)",
+    }
+    option = {
+        "series": {
+            "type": "sankey",
+            "animationDuration": 1,
+            "top": "0%",
+            "bottom": "20%",
+            "left": "0%",
+            "right": "19%",
+            "darkMode": "true",
+            "nodeWidth": 2,
+            "textStyle": {"fontSize": 16},
+            "nodeAlign": "left",
+            "lineStyle": {"curveness": 0},
+            "layoutIterations": 0,
+            "nodeGap": 12,
+            "layout": "none",
+            "emphasis": {"focus": "adjacency"},
+            "data": [
+                {
+                    "name": "All models",
+                    "value": sk_val["All models"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Converts to ONNX",
+                    "value": sk_val["Converts to ONNX"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Optimizes ONNX file",
+                    "value": sk_val["Optimizes ONNX file"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Converts to FP16",
+                    "value": sk_val["Converts to FP16"],
+                    "itemStyle": {"color": "white", "borderColor": "white"},
+                },
+                {
+                    "name": "Acquires Nvidia Perf",
+                    "value": sk_val["Acquires Nvidia Perf"],
+                    "itemStyle": {
+                        "color": device_colors["nvidia"],
+                        "borderColor": device_colors["nvidia"],
+                    },
+                },
+                {
+                    "name": "Acquires Groq Perf",
+                    "value": sk_val["Acquires Groq Perf"],
+                    "itemStyle": {
+                        "color": device_colors["groq"],
+                        "borderColor": device_colors["groq"],
+                    },
+                },
+                {
+                    "name": "Acquires x86 Perf",
+                    "value": sk_val["Acquires x86 Perf"],
+                    "itemStyle": {
+                        "color": device_colors["x86"],
+                        "borderColor": device_colors["x86"],
+                    },
+                },
+            ],
+            "label": {
+                "position": "insideTopLeft",
+                "borderWidth": 0,
+                "fontSize": 16,
+                "color": "white",
+                "textBorderWidth": 0,
+                "formatter": "{c}",
+            },
+            "links": [
+                {
+                    "source": "All models",
+                    "target": "Converts to ONNX",
+                    "value": summ.all_models,
+                },
+                {
+                    "source": "Converts to ONNX",
+                    "target": "Optimizes ONNX file",
+                    "value": summ.optimized_onnx,
+                },
+                {
+                    "source": "Optimizes ONNX file",
+                    "target": "Converts to FP16",
+                    "value": summ.fp16_onnx,
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Acquires Nvidia Perf",
+                    "value": int(
+                        summ.nvidia
+                        * summ.fp16_onnx
+                        / (summ.x86 + summ.nvidia + summ.groq)
+                    ),
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Acquires Groq Perf",
+                    "value": int(
+                        summ.groq
+                        * summ.fp16_onnx
+                        / (summ.x86 + summ.nvidia + summ.groq)
+                    ),
+                },
+                {
+                    "source": "Converts to FP16",
+                    "target": "Acquires x86 Perf",
+                    "value": int(
+                        summ.x86 * summ.fp16_onnx / (summ.x86 + summ.nvidia + summ.groq)
+                    ),
+                },
+            ],
+        }
+    }
+    st_echarts(
+        options=option,
+        height="70px",
+    )
