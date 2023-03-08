@@ -639,7 +639,7 @@ def device_funnel(df: pd.DataFrame) -> None:
         "Export to ONNX",
         "Optimize ONNX file",
         "Convert to FP16",
-        "Builds",
+        "Acquire Performance",
     ]
     cols = st.columns(len(stages))
 
@@ -659,13 +659,13 @@ def device_funnel(df: pd.DataFrame) -> None:
         "Converts to FP16": f"{summ.fp16_onnx} models - "
         + str(int(100 * summ.fp16_onnx / summ.all_models))
         + "%",
-        "Builds Nvidia": f"{summ.nvidia} models - "
+        "Acquires Nvidia Perf": f"{summ.nvidia} models - "
         + str(int(100 * summ.nvidia / summ.all_models))
         + "% (Nvidia)",
-        "Builds Groq": f"{summ.groq} models - "
+        "Acquires Groq Perf": f"{summ.groq} models - "
         + str(int(100 * summ.groq / summ.all_models))
         + "% (Groq)",
-        "Builds x86": f"{summ.x86} models - "
+        "Acquires x86 Perf": f"{summ.x86} models - "
         + str(int(100 * summ.x86 / summ.all_models))
         + "% (x86)",
     }
@@ -708,24 +708,24 @@ def device_funnel(df: pd.DataFrame) -> None:
                     "itemStyle": {"color": "white", "borderColor": "white"},
                 },
                 {
-                    "name": "Builds Nvidia",
-                    "value": sk_val["Builds Nvidia"],
+                    "name": "Acquires Nvidia Perf",
+                    "value": sk_val["Acquires Nvidia Perf"],
                     "itemStyle": {
                         "color": device_colors["nvidia"],
                         "borderColor": device_colors["nvidia"],
                     },
                 },
                 {
-                    "name": "Builds Groq",
-                    "value": sk_val["Builds Groq"],
+                    "name": "Acquires Groq Perf",
+                    "value": sk_val["Acquires Groq Perf"],
                     "itemStyle": {
                         "color": device_colors["groq"],
                         "borderColor": device_colors["groq"],
                     },
                 },
                 {
-                    "name": "Builds x86",
-                    "value": sk_val["Builds x86"],
+                    "name": "Acquires x86 Perf",
+                    "value": sk_val["Acquires x86 Perf"],
                     "itemStyle": {
                         "color": device_colors["x86"],
                         "borderColor": device_colors["x86"],
@@ -758,7 +758,7 @@ def device_funnel(df: pd.DataFrame) -> None:
                 },
                 {
                     "source": "Converts to FP16",
-                    "target": "Builds Nvidia",
+                    "target": "Acquires Nvidia Perf",
                     "value": int(
                         summ.nvidia
                         * summ.fp16_onnx
@@ -767,7 +767,7 @@ def device_funnel(df: pd.DataFrame) -> None:
                 },
                 {
                     "source": "Converts to FP16",
-                    "target": "Builds Groq",
+                    "target": "Acquires Groq Perf",
                     "value": int(
                         summ.groq
                         * summ.fp16_onnx
@@ -776,7 +776,7 @@ def device_funnel(df: pd.DataFrame) -> None:
                 },
                 {
                     "source": "Converts to FP16",
-                    "target": "Builds x86",
+                    "target": "Acquires x86 Perf",
                     "value": int(
                         summ.x86 * summ.fp16_onnx / (summ.x86 + summ.nvidia + summ.groq)
                     ),
