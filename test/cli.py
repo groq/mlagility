@@ -697,6 +697,10 @@ class Testing(unittest.TestCase):
         with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
 
+        # Ensure test failed
+        build_state = build.load_state(state_path=cache.get_all(cache_dir)[0])
+        assert build_state.build_status != build.Status.SUCCESSFUL_BUILD
+
         # Generate report
         testargs = [
             "benchit",
