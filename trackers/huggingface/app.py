@@ -47,12 +47,24 @@ def add_faq() -> None:
         ),
     )
     faq.add_section(
-        "How were those results generated?",
+        "Which tool was used to generate those results?",
         (
             "All MLAgility results have been generated using the <b>benchit</b> tool, which is part "
             "of the MLAgility Github Repository. You can learn more about it "
             '<a href="https://github.com/groq/mlagility">here</a>.'
         ),
+    )
+    faq.add_section(
+        "What is the experimental setup for each of the devices?",
+        [
+            "<b>x86</b>: Intel(R) Xeon(R) X40 CPU @ 2.00GHz on Google Cloud (custom: n2, 80 vCPU, 64.00 GiB) and OnnxRuntime version 1.14.0.",
+            "<b>nvidia</b>: NVIDIA A100 40GB on Google Cloud (a2-highgpu-1g) and TensorRT version 22.12-py3.",
+            "<b>groq</b>: GroqChip 1 on GroqFlow version 2.5.2 and GroqWare™ Suite version 0.9.2.",
+            (
+                "You can find more details about the methodology "
+                '<a href="https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md">here</a>.'
+            ),
+        ],
     )
     faq.add_section(
         "What are the current key limitations of those results?",
