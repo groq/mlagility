@@ -6,13 +6,13 @@ import graphs
 from streamlit_helpers import add_filter, slider_filter, Collapsable
 
 st.set_page_config(
-    page_title="ML Agility tracker",
+    page_title="MLAgility tracker",
     page_icon="⚡",
     layout="wide",
 )
 
 # dashboard title
-st.title("ML Agility tracker ⚡")
+st.title("MLAgility tracker ⚡")
 
 
 def add_faq() -> None:
@@ -154,6 +154,11 @@ with st.sidebar:
 
 st.markdown("## Summary Results")
 
+st.markdown("""#### Benchmark results""")
+baseline = st.selectbox("Baseline", ("x86", "nvidia", "groq"))
+graphs.speedup_text_summary(report, baseline)
+graphs.speedup_bar_chart(report, baseline)
+
 cols = st.columns(2)
 with cols[0]:
     st.markdown("""#### Workload origin""")
@@ -162,12 +167,6 @@ with cols[0]:
 with cols[1]:
     st.markdown("""#### Parameter Size Distribution""")
     graphs.parameter_histogram(report, show_assembled=False)
-
-
-st.markdown("""#### Benchmark results""")
-baseline = st.selectbox("Baseline", ("x86", "nvidia", "groq"))
-graphs.speedup_text_summary(report, baseline)
-graphs.speedup_bar_chart(report, baseline)
 
 # FAQ Block
 st.markdown("""## About this workload analysis (FAQ)""")
