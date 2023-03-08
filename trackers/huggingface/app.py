@@ -49,7 +49,7 @@ def add_faq() -> None:
     faq.add_section(
         "Which tool was used to generate those results?",
         (
-            "All MLAgility results have been generated using the <b>benchit</b> tool, which is part "
+            "All MLAgility results have been generated using the <b>benchit</b> tool v1.0.0, which is part "
             "of the MLAgility Github Repository. You can learn more about it "
             '<a href="https://github.com/groq/mlagility">here</a>.'
         ),
