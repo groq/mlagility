@@ -23,28 +23,21 @@ def add_faq() -> None:
     faq.add_section(
         "How is MLAgility different from MLPerf?",
         (
-            "Deep learning pioneers have been judging their progress with the Machine "
-            "Learning Performance (MLPerf) inference benchmark. However, the corpus of "
-            "models in MLPerf is small enough that vendors primarily compete by paying "
-            "computer architecture experts to exhaustively hand-optimize kernels. This "
-            "workflow is not representative of the turnkey workflow of the mass adoption "
-            "customer, as they are neither likely to deploy off-the-shelf research models "
-            "as-is, nor manually optimize their models by hand-writing kernels for "
-            "hardware accelerators. MLAgility addresses the disconnect between MLPerf and "
-            "mass adoption customers by examining a larger corpus of models, while "
-            "disallowing hand-written kernels."
-        ),
-    )
-    faq.add_section(
-        "Who runs MLAgility?",
-        (
-            "MLAgility is lead and maintained by a consortium of industry leaders and innovators."
+            "Deep learning pioneers have been judging their progress with the Machine Learning "
+            "Performance (MLPerf) inference benchmark, but have found that the corpus of models "
+            "is small enough that it allows vendors to primarily compete by hand-optimizing "
+            "kernels. MLAgility offers a complementary approach to MLPerf by examining the "
+            "capability of vendors to provide turnkey solutions to a larger corpus of "
+            "off-the-shelf models. By providing a workflow that is representative of the "
+            "mass adoption customer on a variety of ML accelerators and effectively disallowing "
+            "hand-crafted kernels, MLAgility bridges the gap between MLPerf and the mass adoption "
+            "of hardware acceleration."
         ),
     )
     faq.add_section(
         "Why now for MLAgility?",
         (
-            "Deep learning (DL) algorithms and their associated DL hardware accelerators are "
+            "Deep learning algorithms and their associated DL hardware accelerators are "
             "transitioning from early adoption into mass adoption. Production DL is now "
             "becoming available to the masses, with a desire to customize models to tackle "
             "their specific problems, and then take the path of least resistance into "
@@ -54,11 +47,54 @@ def add_faq() -> None:
         ),
     )
     faq.add_section(
-        "What are the current key limitations of MLAgility?",
+        "How were those results generated?",
         (
-            "Groq's latency is computed using GroqModel.estimate_latency(), which takes"
-            " into account deterministic compute time and estimates an ideal runtime with"
-            " ideal I/O time. It does not take into account runtime performance."
+            "All MLAgility results have been generated using the <b>benchit</b> tool, which is part "
+            "of the MLAgility Github Repository. You can learn more about it "
+            '<a href="https://github.com/groq/mlagility">here</a>.'
+        ),
+    )
+    faq.add_section(
+        "What are the current key limitations of those results?",
+        [
+            (
+                "Groq's latency is computed using GroqModel.estimate_latency(), which takes"
+                " into account deterministic compute time and estimates an ideal runtime with"
+                " ideal I/O time. It does not take into account runtime performance."
+            ),
+            "Results currently only represent batch 1 performance on a limited number of models, "
+            "devices, vendors, and runtimes. You can learn more about future directions by reading "
+            'the "What are the future directions of MLAgility?" FAQ section.',
+        ],
+    )
+    faq.add_section(
+        "What are the future directions of MLAgility?",
+        [
+            "Include additional classes of models (e.g. LLMs, GNNs, DLRMs).",
+            "Perform experiments that include sweeps over batch and input sizes.",
+            "Increase the number of devices from existing vendors (e.g. T4, A10, and H100).",
+            "Include devices from additional vendors (e.g. ARM, and AMD)."
+            "Include the number of runtimes supported (e.g. ORT and PyTorch for CUDA, PyTorch for x86).",
+        ],
+    )
+    faq.add_section(
+        "Who runs MLAgility?",
+        (
+            "MLAgility is currently maintained by the following individuals (in alphabetical order): "
+            "Daniel Holanda Noronha, Jeremy Fowers, Kalin Ovtcharov, and Ramakrishnan Sivakumar."
+        ),
+    )
+    faq.add_section(
+        "License and Liability",
+        (
+            'THE MLAGILITY BENCHMARK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR '
+            "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+            "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+            "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+            "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+            "OUT OF OR IN CONNECTION WITH THE BENCHMARK OR THE USE OR OTHER DEALINGS IN THE "
+            "BENCHMARK. Read more about it "
+            '<a href="https://github.com/groq/mlagility/blob/main/LICENSE">here</a>.'
         ),
     )
 
@@ -122,11 +158,8 @@ graphs.speedup_text_summary(report, baseline)
 graphs.speedup_bar_chart(report, baseline)
 
 # FAQ Block
-cols = st.columns(2)
-with cols[0]:
-
-    st.markdown("""## About this workload analysis (FAQ)""")
-    add_faq()
+st.markdown("""## About this workload analysis (FAQ)""")
+add_faq()
 
 # Detailed data view (table)
 st.markdown("## Detailed Data View")
