@@ -629,16 +629,21 @@ def results_table(df: pd.DataFrame):
     st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
 
 
-def calculate_percentage(dividend: int, divisor: int) -> str:
-    """ ""
-    Calculates the percentage between dividend and divisor
+def device_funnel_metrics(num_models: int, num_total_models: int) -> str:
+    """
+    Calculates the percentage between models and total_models
     Avoids ZeroDivisionError when dividend is zero
     """
-    if not dividend:
-        return "0%"
-    if dividend / divisor < 0.01:
-        return "< 1%"
-    return f"{int(100*dividend / divisor)}%"
+    models_message = f"{num_models} model"
+    models_message = models_message + "s" if num_models != 1 else models_message
+    percentage_message = ""
+    if num_total_models > 0:
+        model_ratio = num_models / num_total_models
+        if model_ratio < 0.01 and model_ratio != 0:
+            percentage_message = " - < 1%"
+        else:
+            percentage_message = f" - {int(100*num_models / num_total_models)}%"
+    return f"{models_message}{percentage_message}"
 
 
 def device_funnel(df: pd.DataFrame) -> None:
@@ -662,21 +667,17 @@ def device_funnel(df: pd.DataFrame) -> None:
 
     # Show Sankey graph with percentages
     sk_val = {
-        "All models": f"{summ.all_models} models - 100%",
-        "Converts to ONNX": f"{summ.base_onnx} models - "
-        + calculate_percentage(summ.base_onnx, summ.all_models),
-        "Optimizes ONNX file": f"{summ.optimized_onnx} models - "
-        + calculate_percentage(summ.optimized_onnx, summ.all_models),
-        "Converts to FP16": f"{summ.fp16_onnx} models - "
-        + calculate_percentage(summ.fp16_onnx, summ.all_models),
-        "Acquires Nvidia Perf": f"{summ.nvidia} models - "
-        + calculate_percentage(summ.nvidia, summ.all_models)
+        "All models": device_funnel_metrics(summ.all_models, summ.all_models),
+        "Converts to ONNX": device_funnel_metrics(summ.base_onnx, summ.all_models),
+        "Optimizes ONNX file": device_funnel_metrics(
+            summ.optimized_onnx, summ.all_models
+        ),
+        "Converts to FP16": device_funnel_metrics(summ.fp16_onnx, summ.all_models),
+        "Acquires Nvidia Perf": device_funnel_metrics(summ.nvidia, summ.all_models)
         + " (Nvidia)",
-        "Acquires Groq Perf": f"{summ.groq} models - "
-        + calculate_percentage(summ.groq, summ.all_models)
+        "Acquires Groq Perf": device_funnel_metrics(summ.groq, summ.all_models)
         + " (Groq)",
-        "Acquires x86 Perf": f"{summ.x86} models - "
-        + calculate_percentage(summ.x86, summ.all_models)
+        "Acquires x86 Perf": device_funnel_metrics(summ.x86, summ.all_models)
         + " (x86)",
     }
 
@@ -688,6 +689,7 @@ def device_funnel(df: pd.DataFrame) -> None:
     groq_models = max(summ.groq, 1)
     num_models_benchmarked = x86_models + nvidia_models + groq_models
     target_combined_height = max(default_bar_size, summ.fp16_onnx)
+    device_bar_size = target_combined_height / 3
     x86_bar_size = x86_models * target_combined_height / num_models_benchmarked
     nvidia_bar_size = nvidia_models * target_combined_height / num_models_benchmarked
     groq_bar_size = groq_models * target_combined_height / num_models_benchmarked
