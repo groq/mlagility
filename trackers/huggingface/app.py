@@ -59,7 +59,7 @@ def add_faq() -> None:
         [
             "<b>x86</b>: Intel(R) Xeon(R) X40 CPU @ 2.00GHz on Google Cloud (custom: n2, 80 vCPU, 64.00 GiB) and OnnxRuntime version 1.14.0.",
             "<b>nvidia</b>: NVIDIA A100 40GB on Google Cloud (a2-highgpu-1g) and TensorRT version 22.12-py3.",
-            "<b>groq</b>: GroqChip 1 on GroqFlow version 2.5.2 and GroqWare™ Suite version 0.9.2.",
+            "<b>groq</b>: GroqChip 1 on selfhosted GroqNode server, GroqFlow version 3.0.2 TestPyPI package, and GroqWare™ Suite version 0.9.2.",
             (
                 "You can find more details about the methodology "
                 '<a href="https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md">here</a>.'
