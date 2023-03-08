@@ -191,7 +191,7 @@ def summary_spreadsheet(args) -> None:
                 report[build_name].hash = "-"
 
             if "parameters" in mlagility_stats:
-                report[build_name].params = _update_numeric_attribute(
+                report[build_name].params = _update_attribute(
                     mlagility_stats["parameters"],
                     report[build_name].params,
                     build_name=build_name,
