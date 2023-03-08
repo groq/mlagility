@@ -178,9 +178,7 @@ def summary_spreadsheet(args) -> None:
             build_name = state.config.build_name
 
             # Load MLAgility stats from the YAML file
-            # FIXME: Use mlagility_stats for hash and parameters
-            # https://github.com/groq/mlagility/issues/174
-            # mlagility_stats = filesystem.get_stats(cache_dir, build_name)
+            mlagility_stats = filesystem.get_stats(cache_dir, build_name)
 
             # Add model to report if it doesn't exist
             if build_name not in report:
