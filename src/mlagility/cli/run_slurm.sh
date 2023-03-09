@@ -5,7 +5,7 @@ WORKING_DIRECTORY="$3"
 ML_CACHE="$4"
 
 source "$(dirname $(dirname $(which conda)))"/etc/profile.d/conda.sh
-conda activate tracker_slurm
+conda activate mla_slurm
 export USING_SLURM="TRUE"
 
 # Export ML cache dir if needed
