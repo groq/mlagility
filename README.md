@@ -12,6 +12,8 @@ Feel free to open issues with any early feedback.
 ----
 # The MLAgility Project
 
+<img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
+
 MLAgility is on a mission to create and benchmark an enormous corpus of deep learning models. All of the model scripts and benchmarking code will be published as open source software. The performance data will be available on the open web as a dashboard on a Huggingface Space (coming soon).
 
 This repository is home to both:
