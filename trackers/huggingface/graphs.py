@@ -684,15 +684,8 @@ def device_funnel(df: pd.DataFrame) -> None:
     # Calculate bar heights for each of the devices
     # Bar height is proportional to the number of models benchmarked by each device
     default_bar_size = 1
-    x86_models = max(summ.x86, 1)
-    nvidia_models = max(summ.x86, 1)
-    groq_models = max(summ.groq, 1)
-    num_models_benchmarked = x86_models + nvidia_models + groq_models
     target_combined_height = max(default_bar_size, summ.fp16_onnx)
     device_bar_size = target_combined_height / 3
-    x86_bar_size = x86_models * target_combined_height / num_models_benchmarked
-    nvidia_bar_size = nvidia_models * target_combined_height / num_models_benchmarked
-    groq_bar_size = groq_models * target_combined_height / num_models_benchmarked
 
     option = {
         "series": {
@@ -784,17 +777,17 @@ def device_funnel(df: pd.DataFrame) -> None:
                 {
                     "source": "Converts to FP16",
                     "target": "Acquires Nvidia Perf",
-                    "value": nvidia_bar_size,
+                    "value": device_bar_size,
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Acquires Groq Perf",
-                    "value": groq_bar_size,
+                    "value": device_bar_size,
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Acquires x86 Perf",
-                    "value": x86_bar_size,
+                    "value": device_bar_size,
                 },
             ],
         }
