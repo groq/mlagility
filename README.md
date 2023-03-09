@@ -12,8 +12,6 @@ Feel free to open issues with any early feedback.
 ----
 # The MLAgility Project
 
-<img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
-
 MLAgility is on a mission to create and benchmark an enormous corpus of deep learning models. All of the model scripts and benchmarking code will be published as open source software. The performance data will be available on the open web as a dashboard on a Huggingface Space (coming soon).
 
 This repository is home to both:
@@ -22,6 +20,10 @@ This repository is home to both:
 - Automated benchmarking tools, the `benchit` CLI and API, for CPUs, GPUs, and GroqChip processors, in `src/`
   - See the [`benchit` CLI tutorials](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) to go hands on.
   - See the [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md) to learn the details.
+
+## Demo
+
+<img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
 
 ## Installation
 
