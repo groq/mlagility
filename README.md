@@ -2,8 +2,7 @@
 <tr>
 <td>⚠️</td>
 <td>
-<strong>NOTE:</strong> Welcome to MLAgility. Our team is hard at work to bring you the best experience possible. However, as with any work in progress, there may be bugs, unfinished features, and other issues that need to be addressed. We appreciate your patience and understanding as we work to make this project the best it can be. Stay tuned for updates and improvements in the near future.
-Feel free to open issues with any early feedback.
+<strong>NOTE:</strong> MLAgility is a work in progress. However, feel free to open issues with any early feedback.
 </td>
 <td>⚠️</td>
 </tr>
@@ -14,13 +13,21 @@ Feel free to open issues with any early feedback.
 
 MLAgility is on a mission to create and benchmark an enormous corpus of deep learning models. All of the model scripts and benchmarking code will be published as open source software. The performance data will be available on the open web as a dashboard on a Huggingface Space (coming soon).
 
+## Demo
+
+The demo below shows BERT-Base being benchmarked on both Nvidia A100 and Intel Xeon.
+
+<img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
+
+## About this repository 
+
 This repository is home to both:
 - A diverse corpus of hundreds of models, in `models/`
   - See the [benchmark readme](https://github.com/groq/mlagility/blob/main/models/readme.md) to learn more.
 - Automated benchmarking tools, the `benchit` CLI and API, for CPUs, GPUs, and GroqChip processors, in `src/`
   - See the [`benchit` CLI tutorials](#https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) to go hands on.
   - See the [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md) to learn the details.
-
+  
 ## Installation
 
 Please refer to our [mlagility installation guide](https://github.com/groq/mlagility/blob/main/docs/install.md) to get instructions on how to install mlagility.
