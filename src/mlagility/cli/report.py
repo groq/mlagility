@@ -24,13 +24,15 @@ def _update_attribute(
     """
     Updates a numeric attribute if needed
     """
+    new_val = new_val if new_val is not None else default
     if current_val == default:
-        return new_val if new_val is not None else default
+        return new_val
     else:
         if (
             build_name is not None
             and parameter_name is not None
             and new_val != current_val
+            and new_val != default
         ):
             printing.log_warning(
                 (
