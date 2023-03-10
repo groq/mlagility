@@ -5,6 +5,7 @@ Tests focused on the command-level functionality of benchit CLI
 import os
 import glob
 import csv
+import time
 from typing import List, Tuple, Any, Union
 import unittest
 from unittest.mock import patch
@@ -691,7 +692,7 @@ class Testing(unittest.TestCase):
         ]
         with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
-
+        time.sleep(1)
         state_files = [Path(p).stem for p in cache.get_all(cache_dir)]
         assert state_files == ["linear_d5b1df11_state", "linear2_80b93950_state"]
 
