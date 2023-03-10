@@ -490,15 +490,20 @@ def speedup_bar_chart(df: pd.DataFrame, baseline) -> None:
         )
 
 
-def kpi_to_markdown(compute_ratio, device, is_baseline=False, color="blue"):
+def kpi_to_markdown(
+    compute_ratio, device, num_baseline_models, is_baseline=False, color="blue"
+):
 
-    title = f"""<br><br>
-    <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Median {device} Acceleration ({len(compute_ratio)} models):</p>"""
     if is_baseline:
+        title = f"""<br><br>
+        <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Median {device} Acceleration ({len(compute_ratio)} models):</p>"""
         return (
             title
             + f"""<p style="font-family:sans-serif; color:{colors[color]}; font-size: 26px;text-align: center;"> {1}x (Baseline)</p>"""
         )
+
+    title = f"""<br><br>
+    <p style="font-family:sans-serif; font-size: 20px;text-align: center;">Median {device} Acceleration ({len(compute_ratio)}/{num_baseline_models} models):</p>"""
 
     if len(compute_ratio) > 0:
         kpi_min, kpi_median, kpi_max = (
@@ -534,21 +539,25 @@ def speedup_text_summary(df: pd.DataFrame, baseline) -> None:
     nvidia_compute_ratio = nvidia_compute_ratio[nvidia_compute_ratio != 0]
     groq_compute_ratio = groq_compute_ratio[groq_compute_ratio != 0]
 
+    num_baseline_models = len(df[f"{baseline}_compute_ratio"])
     x86_text = kpi_to_markdown(
         x86_compute_ratio,
         device="Intel(R) Xeon(R) X40 CPU @ 2.00GHz",
+        num_baseline_models=num_baseline_models,
         color="blue",
         is_baseline=baseline == "x86",
     )
     groq_text = kpi_to_markdown(
         groq_compute_ratio,
-        device="GroqChip 1",
+        device="GroqChip 1 Estimated",
+        num_baseline_models=num_baseline_models,
         color="orange",
         is_baseline=baseline == "groq",
     )
     nvidia_text = kpi_to_markdown(
         nvidia_compute_ratio,
         device="NVIDIA A100-PCIE-40GB",
+        num_baseline_models=num_baseline_models,
         color="green",
         is_baseline=baseline == "nvidia",
     )
