@@ -629,6 +629,23 @@ def results_table(df: pd.DataFrame):
     st.dataframe(df, height=min((len(df) + 1) * 35, 35 * 21))
 
 
+def device_funnel_metrics(num_models: int, num_total_models: int) -> str:
+    """
+    Calculates the percentage between models and total_models
+    Avoids ZeroDivisionError when dividend is zero
+    """
+    models_message = f"{num_models} model"
+    models_message = models_message + "s" if num_models != 1 else models_message
+    percentage_message = ""
+    if num_total_models > 0:
+        model_ratio = num_models / num_total_models
+        if model_ratio < 0.01 and model_ratio != 0:
+            percentage_message = " - < 1%"
+        else:
+            percentage_message = f" - {int(100*num_models / num_total_models)}%"
+    return f"{models_message}{percentage_message}"
+
+
 def device_funnel(df: pd.DataFrame) -> None:
     """
     Show count of how many models compile, assemble, etc
@@ -650,26 +667,26 @@ def device_funnel(df: pd.DataFrame) -> None:
 
     # Show Sankey graph with percentages
     sk_val = {
-        "All models": f"{summ.all_models} models - 100%",
-        "Converts to ONNX": f"{summ.base_onnx} models - "
-        + str(int(100 * summ.base_onnx / summ.all_models))
-        + "%",
-        "Optimizes ONNX file": f"{summ.optimized_onnx} models - "
-        + str(int(100 * summ.optimized_onnx / summ.all_models))
-        + "%",
-        "Converts to FP16": f"{summ.fp16_onnx} models - "
-        + str(int(100 * summ.fp16_onnx / summ.all_models))
-        + "%",
-        "Acquires Nvidia Perf": f"{summ.nvidia} models - "
-        + str(int(100 * summ.nvidia / summ.all_models))
-        + "% (Nvidia)",
-        "Acquires Groq Perf": f"{summ.groq} models - "
-        + str(int(100 * summ.groq / summ.all_models))
-        + "% (Groq)",
-        "Acquires x86 Perf": f"{summ.x86} models - "
-        + str(int(100 * summ.x86 / summ.all_models))
-        + "% (x86)",
+        "All models": device_funnel_metrics(summ.all_models, summ.all_models),
+        "Converts to ONNX": device_funnel_metrics(summ.base_onnx, summ.all_models),
+        "Optimizes ONNX file": device_funnel_metrics(
+            summ.optimized_onnx, summ.all_models
+        ),
+        "Converts to FP16": device_funnel_metrics(summ.fp16_onnx, summ.all_models),
+        "Acquires Nvidia Perf": device_funnel_metrics(summ.nvidia, summ.all_models)
+        + " (Nvidia)",
+        "Acquires Groq Perf": device_funnel_metrics(summ.groq, summ.all_models)
+        + " (Groq)",
+        "Acquires x86 Perf": device_funnel_metrics(summ.x86, summ.all_models)
+        + " (x86)",
     }
+
+    # Calculate bar heights for each of the devices
+    # Bar height is proportional to the number of models benchmarked by each device
+    default_bar_size = 1
+    target_combined_height = max(default_bar_size, summ.fp16_onnx)
+    device_bar_size = target_combined_height / 3
+
     option = {
         "series": {
             "type": "sankey",
@@ -745,42 +762,32 @@ def device_funnel(df: pd.DataFrame) -> None:
                 {
                     "source": "All models",
                     "target": "Converts to ONNX",
-                    "value": summ.all_models,
+                    "value": max(default_bar_size, summ.all_models),
                 },
                 {
                     "source": "Converts to ONNX",
                     "target": "Optimizes ONNX file",
-                    "value": summ.optimized_onnx,
+                    "value": max(default_bar_size, summ.optimized_onnx),
                 },
                 {
                     "source": "Optimizes ONNX file",
                     "target": "Converts to FP16",
-                    "value": summ.fp16_onnx,
+                    "value": max(default_bar_size, summ.fp16_onnx),
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Acquires Nvidia Perf",
-                    "value": int(
-                        summ.nvidia
-                        * summ.fp16_onnx
-                        / (summ.x86 + summ.nvidia + summ.groq)
-                    ),
+                    "value": device_bar_size,
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Acquires Groq Perf",
-                    "value": int(
-                        summ.groq
-                        * summ.fp16_onnx
-                        / (summ.x86 + summ.nvidia + summ.groq)
-                    ),
+                    "value": device_bar_size,
                 },
                 {
                     "source": "Converts to FP16",
                     "target": "Acquires x86 Perf",
-                    "value": int(
-                        summ.x86 * summ.fp16_onnx / (summ.x86 + summ.nvidia + summ.groq)
-                    ),
+                    "value": device_bar_size,
                 },
             ],
         }
