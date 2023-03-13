@@ -262,6 +262,17 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
+    
+    elif device_type == "arm":
+        # Check if arm CPU is available locally
+        check_device = subprocess.run(
+            ["uname"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+        )
+        stdout = check_device.stdout.decode().strip()
+        if stdout != "Darwin" or check_device.returncode == 1:
+            msg = "Only Mac OS is supported at this time for arm benchmarking"
+            raise exp.GroqModelRuntimeError(msg)
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -580,7 +591,6 @@ def execute_ort_locally(
 
     # Setup local execution folders to save outputs/ errors
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
-
     setup_local_host(device_type=device, output_dir=local_paths.output_dir)
 
     # Check if ONNX file has been generated
@@ -644,6 +654,8 @@ def execute_ort_locally(
             local_paths.errors_file,
             "--iterations",
             str(iterations),
+            "--device",
+            device
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

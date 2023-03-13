@@ -87,15 +87,10 @@ def run(
     outputs_file: str,
     errors_file: str,
     num_iterations: int,
+    device: str
 ):
 
     perf_result, exception = run_ort_profile(onnx_file, num_iterations)
-
-    # Get CPU spec from lscpu
-    cpu_info_command = "lscpu"
-    cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
-    cpu_info_output, _ = cpu_info.communicate()
-    decoded_info = bytes(str(cpu_info_output), "utf-8").decode("unicode_escape")
 
     field_mapping = {
         "Architecture": "CPU Architecture",
@@ -106,16 +101,27 @@ def run(
         "CPU MHz": "CPU Max Frequency (MHz)",
         "CPU(s)": "CPU Core Count",
     }
-
-    def format_field(line: str) -> str:
-        return line.split(":")[-1].strip()
-
     cpu_performance = {}
-    for line in decoded_info.split("\n"):
-        for field, key in field_mapping.items():
-            if field in line:
-                cpu_performance[key] = format_field(line)
-                break
+
+    if device == "x86":
+        cpu_info_command = "lscpu"
+        cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
+        cpu_info_output, _ = cpu_info.communicate()
+        decoded_info = bytes(str(cpu_info_output), "utf-8").decode("unicode_escape")
+
+        def format_field(line: str) -> str:
+            return line.split(":")[-1].strip()
+        
+        for line in decoded_info.split("\n"):
+            for field, key in field_mapping.items():
+                if field in line:
+                    cpu_performance[key] = format_field(line)
+                    break
+    if device == "arm":
+        cpu_info_command = "sysctl -n machdep.cpu.brand_string"
+        cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
+        cpu_info_output, _ = cpu_info.communicate()
+        cpu_performance["CPU Name"]= cpu_info_output.decode("utf-8")
 
     cpu_performance["OnnxRuntime Version"] = str(ort.__version__)
     cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
@@ -156,6 +162,12 @@ if __name__ == "__main__":
         type=int,
         help="Number of times to execute the received onnx model",
     )
+    parser.add_argument(
+        "--device",
+        required=True,
+        type=str,
+        help="Device type to be userd (x86 or arm)",
+    )
     args = parser.parse_args()
 
     run(
@@ -163,4 +175,5 @@ if __name__ == "__main__":
         outputs_file=args.outputs_file,
         errors_file=args.errors_file,
         num_iterations=args.iterations,
+        device=args.device
     )
