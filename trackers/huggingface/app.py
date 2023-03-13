@@ -6,13 +6,24 @@ import graphs
 from streamlit_helpers import add_filter, slider_filter, Collapsable
 
 st.set_page_config(
-    page_title="MLAgility tracker",
+    page_title="MLAgility Tracker",
     page_icon="⚡",
     layout="wide",
 )
 
 # dashboard title
-st.title("MLAgility tracker ⚡")
+st.title("MLAgility Tracker ⚡")
+
+st.warning(
+    (
+        "MLAgility is under active development and we are currently working on a list of critical data "
+        "validation tasks available at github.com/groq/mlagility/labels/validation. We are sharing this "
+        "dashboard and the data within for the sole purpose of gathering early feedback. See our FAQ below "
+        "for more details about license and liability. For feedback please email "
+        "{jfowers,dhnoronha,rsivakumar}@groq.com."
+    ),
+    icon="⚠️",
+)
 
 
 def add_faq() -> None:
@@ -74,9 +85,16 @@ def add_faq() -> None:
                 " into account deterministic compute time and estimates an ideal runtime with"
                 " ideal I/O time. It does not take into account runtime performance."
             ),
-            "Results currently only represent batch 1 performance on a limited number of models, "
-            "devices, vendors, and runtimes. You can learn more about future directions by reading "
-            'the "What are the future directions of MLAgility?" FAQ section.',
+            (
+                "Results currently only represent batch 1 performance on a limited number of models, "
+                "devices, vendors, and runtimes. You can learn more about future directions by reading "
+                'the "What are the future directions of MLAgility?" FAQ section.'
+            ),
+            (
+                "Results are currently being validated. You can have a look at our current validation "
+                "tasks and other limitations "
+                '<a href="https://github.com/groq/mlagility/labels/validation">here</a>.'
+            ),
         ],
     )
     faq.add_section(
