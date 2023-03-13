@@ -8,7 +8,7 @@ source "$(dirname $(dirname $(which conda)))"/etc/profile.d/conda.sh
 
 # Parse arguments
 MLAGILITY_PATH=${1:-"$PWD"}
-ENV_NAME=${2:-tracker_slurm}
+ENV_NAME=${2:-mla_slurm}
 
 # Create environment (if it doen't exist)
 export CONDA_ALWAYS_YES="true"

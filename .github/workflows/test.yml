@@ -94,6 +94,6 @@ jobs:
         shell: bash -el {0}
         run: |
           bash src/mlagility/cli/setup_venv.sh
-          conda activate tracker_slurm
+          conda activate mla_slurm
           python -m pip check
           conda deactivate
