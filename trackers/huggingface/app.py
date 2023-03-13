@@ -6,13 +6,24 @@ import graphs
 from streamlit_helpers import add_filter, slider_filter, Collapsable
 
 st.set_page_config(
-    page_title="ML Agility tracker",
+    page_title="MLAgility Tracker",
     page_icon="⚡",
     layout="wide",
 )
 
 # dashboard title
-st.title("ML Agility tracker ⚡")
+st.title("MLAgility Tracker ⚡")
+
+st.warning(
+    (
+        "MLAgility is under active development and we are currently working on a list of critical data "
+        "validation tasks available at github.com/groq/mlagility/labels/validation. We are sharing this "
+        "dashboard and the data within for the sole purpose of gathering early feedback. See our FAQ below "
+        "for more details about license and liability. For feedback please email "
+        "{jfowers,dhnoronha,rsivakumar}@groq.com."
+    ),
+    icon="⚠️",
+)
 
 
 def add_faq() -> None:
@@ -21,10 +32,99 @@ def add_faq() -> None:
     """
     faq = Collapsable()
     faq.add_section(
-        "Why is this so empty?",
+        "How is MLAgility different from MLPerf?",
         (
-            "Because the FAQ of huggingface website still needs to be written. "
-            "We don't use the same FAQ as in our internal dashboard."
+            "Deep learning pioneers have been judging their progress with the Machine Learning "
+            "Performance (MLPerf) inference benchmark, but have found that the corpus of models "
+            "is small enough that it allows vendors to primarily compete by hand-optimizing "
+            "kernels. MLAgility offers a complementary approach to MLPerf by examining the "
+            "capability of vendors to provide turnkey solutions to a larger corpus of "
+            "off-the-shelf models. By providing a workflow that is representative of the "
+            "mass adoption customer on a variety of ML accelerators and effectively disallowing "
+            "hand-crafted kernels, MLAgility bridges the gap between MLPerf and the mass adoption "
+            "of hardware acceleration."
+        ),
+    )
+    faq.add_section(
+        "Why now for MLAgility?",
+        (
+            "Deep learning algorithms and their associated DL hardware accelerators are "
+            "transitioning from early adoption into mass adoption. Production DL is now "
+            "becoming available to the masses, with a desire to customize models to tackle "
+            "their specific problems, and then take the path of least resistance into "
+            "production. A market for turnkey solutions, starting with a model as input and "
+            "provision a cost- and latency-effective acceleration solution, often in the cloud, "
+            "as output, has emerged."
+        ),
+    )
+    faq.add_section(
+        "Which tool was used to generate those results?",
+        (
+            "All MLAgility results have been generated using the <b>benchit</b> tool v1.0.0, which is part "
+            "of the MLAgility Github Repository. You can learn more about it "
+            '<a href="https://github.com/groq/mlagility">here</a>.'
+        ),
+    )
+    faq.add_section(
+        "What is the experimental setup for each of the devices?",
+        [
+            "<b>x86</b>: Intel(R) Xeon(R) X40 CPU @ 2.00GHz on Google Cloud (custom: n2, 80 vCPU, 64.00 GiB) and OnnxRuntime version 1.14.0.",
+            "<b>nvidia</b>: NVIDIA A100 40GB on Google Cloud (a2-highgpu-1g) and TensorRT version 22.12-py3.",
+            "<b>groq</b>: GroqChip 1 on selfhosted GroqNode server, GroqFlow version 3.0.2 TestPyPI package, and a pre-release of GroqWare™ Suite version 0.10.0.",
+            (
+                "You can find more details about the methodology "
+                '<a href="https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md">here</a>.'
+            ),
+        ],
+    )
+    faq.add_section(
+        "What are the current key limitations of those results?",
+        [
+            (
+                "Groq's latency is computed using GroqModel.estimate_latency(), which takes"
+                " into account deterministic compute time and estimates an ideal runtime with"
+                " ideal I/O time. It does not take into account runtime performance."
+            ),
+            (
+                "Results currently only represent batch 1 performance on a limited number of models, "
+                "devices, vendors, and runtimes. You can learn more about future directions by reading "
+                'the "What are the future directions of MLAgility?" FAQ section.'
+            ),
+            (
+                "Results are currently being validated. You can have a look at our current validation "
+                "tasks and other limitations "
+                '<a href="https://github.com/groq/mlagility/labels/validation">here</a>.'
+            ),
+        ],
+    )
+    faq.add_section(
+        "What are the future directions of MLAgility?",
+        [
+            "Include additional classes of models (e.g. LLMs, GNNs, DLRMs).",
+            "Perform experiments that include sweeps over batch and input sizes.",
+            "Increase the number of devices from existing vendors (e.g. T4, A10, and H100).",
+            "Include devices from additional vendors (e.g. ARM, and AMD)."
+            "Include the number of runtimes supported (e.g. ORT and PyTorch for CUDA, PyTorch for x86).",
+        ],
+    )
+    faq.add_section(
+        "Who runs MLAgility?",
+        (
+            "MLAgility is currently maintained by the following individuals (in alphabetical order): "
+            "Daniel Holanda Noronha, Jeremy Fowers, Kalin Ovtcharov, and Ramakrishnan Sivakumar. We are actively seeking collaborators from across the industry."
+        ),
+    )
+    faq.add_section(
+        "License and Liability",
+        (
+            'THE MLAGILITY BENCHMARK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR '
+            "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+            "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+            "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+            "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+            "OUT OF OR IN CONNECTION WITH THE BENCHMARK OR THE USE OR OTHER DEALINGS IN THE "
+            "BENCHMARK. Read more about it "
+            '<a href="https://github.com/groq/mlagility/blob/main/LICENSE">here</a>.'
         ),
     )
 
@@ -72,6 +172,13 @@ with st.sidebar:
 
 st.markdown("## Summary Results")
 
+graphs.device_funnel(report)
+
+st.markdown("""#### Benchmark results""")
+baseline = st.selectbox("Baseline", ("x86", "nvidia", "groq"))
+graphs.speedup_text_summary(report, baseline)
+graphs.speedup_bar_chart(report, baseline)
+
 cols = st.columns(2)
 with cols[0]:
     st.markdown("""#### Workload origin""")
@@ -81,18 +188,9 @@ with cols[1]:
     st.markdown("""#### Parameter Size Distribution""")
     graphs.parameter_histogram(report, show_assembled=False)
 
-
-st.markdown("""#### Benchmark results""")
-baseline = st.selectbox("Baseline", ("x86", "nvidia", "groq"))
-graphs.speedup_text_summary(report, baseline)
-graphs.speedup_bar_chart(report, baseline)
-
 # FAQ Block
-cols = st.columns(2)
-with cols[0]:
-
-    st.markdown("""## About this workload analysis (FAQ)""")
-    add_faq()
+st.markdown("""## About this workload analysis (FAQ)""")
+add_faq()
 
 # Detailed data view (table)
 st.markdown("## Detailed Data View")

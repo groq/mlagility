@@ -14,19 +14,25 @@ from mlagility.api.devices import BenchmarkException
 import mlagility.common.filesystem as filesystem
 
 
-def _update_numeric_attribute(
+def _successCleanup(item):
+    return item if item is not None else False
+
+
+def _update_attribute(
     new_val, current_val, default="-", build_name=None, parameter_name=None
 ):
     """
     Updates a numeric attribute if needed
     """
+    new_val = new_val if new_val is not None else default
     if current_val == default:
-        return new_val if new_val is not None else default
+        return new_val
     else:
         if (
             build_name is not None
             and parameter_name is not None
             and new_val != current_val
+            and new_val != default
         ):
             printing.log_warning(
                 (
@@ -128,6 +134,18 @@ class BuildResults:
     # Source: benchit.benchmark() on 100 runs
     x86_latency: str = "-"
 
+    # Description: Wether the model was successfully converted to ONNX
+    # Source: Computed by benchit() during the "build" Stage
+    onnx_exported: str = "-"
+
+    # Description: Wether the ONNX model was successfully optimized
+    # Source: Computed by benchit() during the "build" Stage
+    onnx_optimized: str = "-"
+
+    # Description: Wether the model was successfully converted to FP16
+    # Source: Computed by benchit() during the "build" Stage
+    onnx_converted: str = "-"
+
 
 def summary_spreadsheet(args) -> None:
 
@@ -169,13 +187,38 @@ def summary_spreadsheet(args) -> None:
                 report[build_name] = BuildResults()
 
             # Model hash from the Analysis stage
-            report[build_name].hash = mlagility_stats["hash"]
+            if "hash" in mlagility_stats:
+                report[build_name].hash = mlagility_stats["hash"]
+            else:
+                report[build_name].hash = "-"
 
-            report[build_name].params = _update_numeric_attribute(
-                mlagility_stats["parameters"],
-                report[build_name].params,
+            if "parameters" in mlagility_stats:
+                report[build_name].params = _update_attribute(
+                    mlagility_stats["parameters"],
+                    report[build_name].params,
+                    build_name=build_name,
+                    parameter_name="params",
+                )
+            else:
+                report[build_name].params = "-"
+
+            report[build_name].onnx_exported = _update_attribute(
+                _successCleanup(state.info.base_onnx_exported),
+                report[build_name].onnx_exported,
                 build_name=build_name,
-                parameter_name="params",
+                parameter_name="onnx_exported",
+            )
+            report[build_name].onnx_optimized = _update_attribute(
+                _successCleanup(state.info.opt_onnx_exported),
+                report[build_name].onnx_optimized,
+                build_name=build_name,
+                parameter_name="onnx_optimized",
+            )
+            report[build_name].onnx_converted = _update_attribute(
+                _successCleanup(state.info.converted_onnx_exported),
+                report[build_name].onnx_converted,
+                build_name=build_name,
+                parameter_name="onnx_converted",
             )
 
             # Extract labels (if any)
@@ -195,13 +238,13 @@ def summary_spreadsheet(args) -> None:
 
             # Get Groq latency and number of chips
             groq_estimated_latency = _get_estimated_groq_latency(build_name, cache_dir)
-            report[build_name].groq_estimated_latency = _update_numeric_attribute(
+            report[build_name].groq_estimated_latency = _update_attribute(
                 groq_estimated_latency,
                 report[build_name].groq_estimated_latency,
                 build_name=build_name,
                 parameter_name="groq_estimated_latency",
             )
-            report[build_name].groq_chips_used = _update_numeric_attribute(
+            report[build_name].groq_chips_used = _update_attribute(
                 state.num_chips_used,
                 report[build_name].groq_chips_used,
                 build_name=build_name,

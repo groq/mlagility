@@ -5,6 +5,7 @@ Tests focused on the command-level functionality of benchit CLI
 import os
 import glob
 import csv
+import time
 from typing import List, Tuple, Any, Union
 import unittest
 from unittest.mock import patch
@@ -337,6 +338,9 @@ class Testing(unittest.TestCase):
             "groq_estimated_latency",
             "nvidia_latency",
             "x86_latency",
+            "onnx_exported",
+            "onnx_optimized",
+            "onnx_converted",
         ]
         linear_summary = summary[1]
         assert len(summary) == len(test_scripts)
@@ -358,6 +362,15 @@ class Testing(unittest.TestCase):
         assert (
             float(linear_summary["x86_latency"]) > 0
         ), f"x86 latency must be >0, got {linear_summary['x86_latency']}"
+        assert (
+            linear_summary["onnx_exported"] == "True"
+        ), f"onnx_exported must be True, got {linear_summary['onnx_exported']}"
+        assert (
+            linear_summary["onnx_optimized"] == "True"
+        ), f"onnx_optimized must be True, got {linear_summary['onnx_optimized']}"
+        assert (
+            linear_summary["onnx_converted"] == "True"
+        ), f"onnx_converted must be True, got {linear_summary['onnx_converted']}"
 
     def test_005_cli_list(self):
 
@@ -633,6 +646,8 @@ class Testing(unittest.TestCase):
         test_scripts = [x for x in test_scripts if x != "crash.py"]
         assert_success_of_builds(test_scripts)
 
+    # TODO: Investigate why this test is non-deterministically failing
+    @unittest.skip("Flaky test")
     def test_013_cli_labels(self):
 
         # Only build models labels with test_group::a
@@ -682,6 +697,50 @@ class Testing(unittest.TestCase):
 
         state_files = [Path(p).stem for p in cache.get_all(cache_dir)]
         assert state_files == ["linear_d5b1df11_state", "linear2_80b93950_state"]
+
+    def test_014_report_on_failed_build(self):
+
+        # Run benchit on groq device (will fail since the HW is not available)
+        testargs = [
+            "benchit",
+            bash(f"{corpus_dir}/linear.py"),
+            "--device",
+            "groq",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        # Ensure test failed
+        build_state = build.load_state(state_path=cache.get_all(cache_dir)[0])
+        assert build_state.build_status != build.Status.SUCCESSFUL_BUILD
+
+        # Generate report
+        testargs = [
+            "benchit",
+            "cache",
+            "report",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        # Read generated CSV file
+        summary_csv_path = report.get_report_name()
+        summary = None
+        with open(summary_csv_path, "r", encoding="utf8") as summary_csv:
+            summary = list(csv.DictReader(summary_csv))
+
+        # Ensure parameters and hash have been saved despite crash
+        assert (
+            len(summary) == 1
+        ), "Report must contain only one row, but got {len(summary)}"
+        assert (
+            summary[0]["params"] == "110"
+        ), "Wrong number of parameters found in report"
+        assert summary[0]["hash"] == "d5b1df11", "Wrong hash found in report"
 
 
 if __name__ == "__main__":

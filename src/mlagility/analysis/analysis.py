@@ -113,6 +113,7 @@ def call_benchit(
     tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
     labels.save_to_cache(tracer_args.cache_dir, build_name, tracer_args.labels)
 
+    perf = None
     try:
         perf = benchmark_model(
             model_info.model,
@@ -141,7 +142,7 @@ def call_benchit(
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
-        if len(build_state.info.opt_onnx_unsupported_ops) > 0:
+        if build_state.info.opt_onnx_unsupported_ops:
             model_info.status_message = "Unsupported op(s) " + ", ".join(
                 build_state.info.opt_onnx_unsupported_ops
             )
@@ -165,8 +166,12 @@ def call_benchit(
         model_info.status_message_color = printing.Colors.WARNING
 
         _store_traceback(model_info)
+    finally:
+        # Ensure that stdout is not being forwarded before updating status
+        if hasattr(sys.stdout, "terminal"):
+            sys.stdout = sys.stdout.terminal
+        status.update(tracer_args.models_found)
 
-    else:
         # Stats that we want to save into the build's mlagility_stats.yaml file
         # so that they can be easily accessed by the report command later
         filesystem.save_stat(tracer_args.cache_dir, build_name, "hash", model_info.hash)
