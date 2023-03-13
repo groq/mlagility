@@ -117,11 +117,11 @@ def run(
                 if field in line:
                     cpu_performance[key] = format_field(line)
                     break
-    if device == "arm":
+    if device == "apple":
         cpu_info_command = "sysctl -n machdep.cpu.brand_string"
         cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
         cpu_info_output, _ = cpu_info.communicate()
-        cpu_performance["CPU Name"]= cpu_info_output.decode("utf-8")
+        cpu_performance["CPU Name"]= cpu_info_output.decode("utf-8").strip()
 
     cpu_performance["OnnxRuntime Version"] = str(ort.__version__)
     cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         "--device",
         required=True,
         type=str,
-        help="Device type to be userd (x86 or arm)",
+        help="Device type to be userd (x86 or apple)",
     )
     args = parser.parse_args()
 

@@ -263,14 +263,14 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
     
-    elif device_type == "arm":
-        # Check if arm CPU is available locally
+    elif device_type == "apple":
+        # Check if device contains apple silicon locally
         check_device = subprocess.run(
             ["uname"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
         )
         stdout = check_device.stdout.decode().strip()
         if stdout != "Darwin" or check_device.returncode == 1:
-            msg = "Only Mac OS is supported at this time for arm benchmarking"
+            msg = "Only Mac OS is supported for Apple benchmarking"
             raise exp.GroqModelRuntimeError(msg)
         files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
 

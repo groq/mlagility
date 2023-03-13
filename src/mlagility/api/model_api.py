@@ -180,7 +180,7 @@ def benchmark_model(
                 )
                 perf = gpu_model.benchmark(backend=backend)
 
-        elif device == "x86" or device=="arm":
+        elif device == "x86" or device=="apple":
             gmodel = exportit(
                 model=model,
                 inputs=inputs,
@@ -200,7 +200,7 @@ def benchmark_model(
                 perf = cpu_model.benchmark(backend=backend)
         else:
             raise ValueError(
-                "Only groq, x86, arm, or nvidia are allowed values for device type, "
+                "Only groq, x86, apple, or nvidia are allowed values for device type, "
                 f"but got {device}"
             )
 
