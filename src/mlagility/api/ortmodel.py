@@ -6,12 +6,12 @@ from mlagility.api.performance import MeasuredPerformance
 
 
 class ORTModel:
-    def __init__(self, cache_dir: str, build_name: str, tensor_type=np.array):
+    def __init__(self, cache_dir: str, build_name: str, tensor_type=np.array, device : str = "x86"):
 
         self.tensor_type = tensor_type
         self.cache_dir = cache_dir
         self.build_name = build_name
-        self.device_type = "x86"
+        self.device_type = device
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"

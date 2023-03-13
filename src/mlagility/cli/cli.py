@@ -172,6 +172,7 @@ def main():
             "x86",
             "nvidia",
             "groq",
+            "apple",
         ],
         nargs="+",
         dest="devices",
