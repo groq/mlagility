@@ -534,7 +534,7 @@ def execute_ort_remotely(
 
     if exit_code == 1:
         msg = """
-        Failed to execute CPU(s) remotely.
+        Failed to execute model on ORT container.
         """
         raise exp.GroqModelRuntimeError(msg)
 
