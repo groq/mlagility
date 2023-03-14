@@ -143,7 +143,8 @@ minimal_tokenizer = """
 
 # Create a test directory
 test_dir = "analysis_test_dir"
-cache_dir = "cache-dir"
+cache_dir_name = "cache-dir"
+cache_dir = os.path.abspath(cache_dir_name)
 dirpath = Path(test_dir)
 if dirpath.is_dir():
     shutil.rmtree(dirpath)
