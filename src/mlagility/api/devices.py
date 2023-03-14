@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 from typing import Tuple, Union, Dict, Any
 from stat import S_ISDIR
@@ -10,7 +11,7 @@ import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
 from groqflow.groqmodel import groqmodel
 
-ORT_BENCHMARKING_SCRIPT = "execute_ort.py"
+ORT_BENCHMARKING_SCRIPT = "setup_ort.py"
 ORT_EXECUTION_SCRIPT = "run_ort_model.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 
@@ -459,7 +460,7 @@ def execute_trt_locally(
         )
 
     # Check if python is installed
-    python_location = shutil.which("python")
+    python_location = sys.executable
     if not python_location:
         raise ValueError("'python' installation not found. Please install python>=3.8")
 
@@ -584,7 +585,7 @@ def execute_ort_locally(
     if not docker_location:
         raise ValueError("Docker installation not found. Please install Docker>=20.10")
 
-    python_location = shutil.which("python")
+    python_location = sys.executable
     if not python_location:
         raise ValueError("'python' installation not found. Please install python>=3.8")
 
