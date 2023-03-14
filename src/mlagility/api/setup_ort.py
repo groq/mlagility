@@ -12,13 +12,17 @@ from statistics import mean
 
 BATCHSIZE = 1
 
+# Set a 15 minutes timeout for all docker commands
+TIMEOUT = 900
 
 def run_subprocess(cmd):
     """Run a subprocess with the given command and log the output."""
     logging.info(f"Running subprocess with command: {' '.join(cmd)}")
     try:
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=TIMEOUT)
         logging.info(f"Subprocess finished with command: {' '.join(cmd)}")
+    except subprocess.TimeoutExpired:
+        logging.error(f"{' '.join(cmd)} timed out after {TIMEOUT} seconds")
     except subprocess.CalledProcessError as e:
         logging.error(
             f"Subprocess failed with command: {' '.join(cmd)} and error message: {e.stderr}"

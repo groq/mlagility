@@ -6,8 +6,11 @@ This script doesn't depend on GroqFlow to be executed.
 # pylint: disable = import-error
 import argparse
 import subprocess
+import logging
 import json
 
+# Set a 15 minutes timeout for all docker commands
+TIMEOUT = 900
 
 def run(
     output_dir: str,
@@ -43,15 +46,30 @@ def run(
 
     # Run TensorRT docker in interactive model
     run_docker = subprocess.Popen(run_command.split(), stdout=subprocess.PIPE)
-    run_docker.communicate()
+    try:
+        run_docker.communicate(timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        logging.error(f"{run_command} timed out!")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"{run_command} failed with error code {e.returncode}: {e}")
 
     # Execute the onnx model user trtexec inside the container
     run_trtexec = subprocess.Popen(exec_command.split(), stdout=subprocess.PIPE)
-    trtexec_output, trtexec_error = run_trtexec.communicate()
+    try:
+        trtexec_output, trtexec_error = run_trtexec.communicate(timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        logging.error(f"{exec_command} timed out!")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"{exec_command}  failed with error code {e.returncode}: {e}")
 
     # Stop the container
     stop_docker = subprocess.Popen(stop_command.split(), stdout=subprocess.PIPE)
-    stop_docker.communicate()
+    try:
+        stop_docker.communicate(timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        logging.error(f"{stop_command} timed out!")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"{stop_command} failed with error code {e.returncode}: {e}")
 
     output = str(trtexec_output)
     error = str(trtexec_error)
