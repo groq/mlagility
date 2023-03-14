@@ -113,16 +113,26 @@ def run(
     try:
         # Build the docker image
         build_docker_image(output_dir, docker_image)
+    except Exception as e:
+        raise ValueError(f"Docker image build failed with exception: {e}")
 
+    try:
         # Run the docker container
         run_docker_container(output_dir, docker_name, docker_image)
+    except Exception as e:
+        raise ValueError(f"Docker container run failed with exception: {e}")
 
+    try:
         # Execute the benchmark script
         perf_result = execute_benchmark(onnx_file, docker_name, num_iterations)
+    except Exception as e:
+        raise ValueError(f"Benchmark execution failed with exception: {e}")
 
+    try:
         ort_version = get_ort_version(docker_name)
-    except:
-        raise ValueError("Docker execution failed")
+    except Exception as e:
+        raise ValueError(f"Get ort version failed with exception: {e}")
+
 
     # Make sure the container is stopped even if there is a failure
     finally:
