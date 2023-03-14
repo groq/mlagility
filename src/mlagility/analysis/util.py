@@ -10,6 +10,12 @@ import groqflow.common.build as build
 from mlagility.api.performance import MeasuredPerformance
 
 
+class AnalysisException(Exception):
+    """
+    Indicates a failure during analysis
+    """
+
+
 @dataclass
 class ModelInfo:
     model: torch.nn.Module
@@ -66,15 +72,12 @@ def count_parameters(model: torch.nn.Module, model_type: build.ModelType) -> int
     Returns the number of parameters of a given model
     """
     if model_type == build.ModelType.PYTORCH:
-        total_params = 0
-        for _, parameter in model.named_parameters():
-            if not parameter.requires_grad:
-                continue
-            params = parameter.numel()
-            total_params += params
+        return sum([parameter.numel() for _, parameter in model.named_parameters()])
     elif build.ModelType.KERAS:
-        total_params = model.count_params()
-    return total_params
+        return model.count_params()
+
+    # Raise exception if an unsupported model type is provided
+    raise AnalysisException(f"model_type {model_type} is not supported")
 
 
 def stop_stdout_forward() -> None:
