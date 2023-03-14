@@ -582,7 +582,7 @@ def execute_ort_locally(
     # Check if docker and python are installed on the local machine
     docker_location = shutil.which("docker")
     if not docker_location:
-        raise ValueError("docker installation not found. Please install docker>=20.10")
+        raise ValueError("Docker installation not found. Please install Docker>=20.10")
 
     python_location = shutil.which("python")
     if not python_location:
