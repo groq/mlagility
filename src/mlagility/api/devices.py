@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 from typing import Tuple, Union, Dict, Any
 from stat import S_ISDIR
@@ -10,7 +11,8 @@ import groqflow.common.build as build
 import groqflow.common.sdk_helpers as sdk
 from groqflow.groqmodel import groqmodel
 
-ORT_BENCHMARKING_SCRIPT = "execute_ort.py"
+ORT_BENCHMARKING_SCRIPT = "setup_ort.py"
+ORT_EXECUTION_SCRIPT = "run_ort_model.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 
 
@@ -223,7 +225,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", ORT_EXECUTION_SCRIPT]
     elif device_type == "groqchip":
         # Check if at least one GroqChip Processor is available remotely
         stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
@@ -261,7 +263,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
             raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "setup_ort_env.sh"]
+        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", ORT_EXECUTION_SCRIPT]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -371,7 +373,7 @@ def execute_trt_remotely(
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
-    remote_paths = BenchmarkPaths(cache_dir, build_name, "remote", username)
+    remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
     os.makedirs(local_paths.output_dir, exist_ok=True)
@@ -458,7 +460,7 @@ def execute_trt_locally(
         )
 
     # Check if python is installed
-    python_location = shutil.which("python")
+    python_location = sys.executable
     if not python_location:
         raise ValueError("'python' installation not found. Please install python>=3.8")
 
@@ -506,6 +508,7 @@ def execute_ort_remotely(
     # Setup remote execution folders to save outputs/ errors
     remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
     os.makedirs(local_paths.output_dir, exist_ok=True)
 
     # Connect to remote machine and transfer common files
@@ -520,33 +523,19 @@ def execute_ort_remotely(
         s.mkdir(remote_paths.onnx_dir)
         s.put(state.converted_onnx_file, remote_paths.onnx_file)
 
-    # Check if conda is installed on the remote machine
-    conda_location, exit_code = exec_command(client, f"ls /home/{username}")
-    if "miniconda3" not in conda_location:
-        raise ValueError(
-            f"conda installation not found in /home/{username}. Please install miniconda3"
-        )
-    # TODO: Remove requirement that conda has to be installed on the /home/user
-    conda_src = f"/home/{username}"
-
-    # Run benchmarking script
-    env_name = "mlagility-onnxruntime-env"
-    exec_command(
-        client,
-        f"bash {remote_paths.output_dir}/setup_ort_env.sh {env_name} {conda_src}",
-        ignore_error=True,
-    )
-
     _, exit_code = exec_command(
         client,
-        f"/home/{username}/miniconda3/envs/{env_name}/bin/python "
+        f"/usr/bin/python3 "
         f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
-        f"--onnx-file {remote_paths.onnx_file} --outputs-file {remote_paths.outputs_file} "
-        f"--errors-file {remote_paths.errors_file} --iterations {iterations}",
+        f"--output-dir {remote_paths.output_dir} " 
+        f"--onnx-file {docker_paths.onnx_file} "
+        f"--outputs-file {remote_paths.outputs_file} "
+        f"--iterations {iterations}",
     )
+
     if exit_code == 1:
         msg = """
-        Failed to execute CPU(s) remotely.
+        Failed to execute model on ORT container.
         """
         raise exp.GroqModelRuntimeError(msg)
 
@@ -554,9 +543,7 @@ def execute_ort_remotely(
     with MySFTPClient.from_transport(client.get_transport()) as s:
         try:
             s.get(remote_paths.outputs_file, local_paths.outputs_file)
-            s.get(remote_paths.errors_file, local_paths.errors_file)
             s.remove(remote_paths.outputs_file)
-            s.remove(remote_paths.errors_file)
         except FileNotFoundError as e:
             raise FileNotFoundError(
                 "Output/ error files not found! Please make sure your remote CPU machine is"
@@ -580,6 +567,7 @@ def execute_ort_locally(
 
     # Setup local execution folders to save outputs/ errors
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
+    docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
     setup_local_host(device_type=device, output_dir=local_paths.output_dir)
 
@@ -592,56 +580,25 @@ def execute_ort_locally(
     os.makedirs(local_paths.onnx_dir)
     shutil.copy(state.converted_onnx_file, local_paths.onnx_file)
 
-    # Check if conda is installed
-    conda_location = shutil.which("conda")
-    if not conda_location:
-        raise ValueError("conda installation not found.")
-    conda_src = conda_location.split("condabin")[0]
+    # Check if docker and python are installed on the local machine
+    docker_location = shutil.which("docker")
+    if not docker_location:
+        raise ValueError("Docker installation not found. Please install Docker>=20.10")
 
-    # Create/ update local conda environment for CPU benchmarking
-    env_name = "mlagility-onnxruntime-env"
+    python_location = sys.executable
+    if not python_location:
+        raise ValueError("'python' installation not found. Please install python>=3.8")
 
-    def available_conda_envs():
-        result = subprocess.run(
-            ["conda", "env", "list"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-        return result.stdout.decode()
-
-    if env_name not in available_conda_envs():
-        print(
-            "Creating a new conda environment to benchmark with CPU. This takes a few seconds..."
-        )
-
-        setup_env = subprocess.Popen(
-            [
-                "bash",
-                os.path.join(local_paths.output_dir, "setup_ort_env.sh"),
-                env_name,
-                conda_src,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        _, stderr = setup_env.communicate()
-        if setup_env.returncode != 0:
-            print(
-                f"Error: Failure to setup conda environment - {stderr.decode().strip()}"
-            )
-
-    # Run the benchmark
     run_benchmark = subprocess.Popen(
         [
-            f"{conda_src}envs/{env_name}/bin/python",
+            python_location,
             os.path.join(local_paths.output_dir, ORT_BENCHMARKING_SCRIPT),
+            "--output-dir",
+            local_paths.output_dir,
             "--onnx-file",
-            local_paths.onnx_file,
+            docker_paths.onnx_file,
             "--outputs-file",
             local_paths.outputs_file,
-            "--errors-file",
-            local_paths.errors_file,
             "--iterations",
             str(iterations),
         ],
@@ -651,7 +608,7 @@ def execute_ort_locally(
     _, stderr = run_benchmark.communicate()
     if run_benchmark.returncode != 0:
         raise BenchmarkException(
-            f"Error: Failure to run model using onnxruntime - {stderr.decode().strip()}"
+            "Error: Failure to run model using ORT - " f"{stderr.decode().strip()}"
         )
 
     if not os.path.isfile(local_paths.outputs_file):
