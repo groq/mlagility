@@ -141,7 +141,8 @@ def get_sequence():
 
 # Create a test directory and make it the CWD
 test_dir = "cli_test_dir"
-cache_dir = "cache-dir"
+cache_dir_name = "cache-dir"
+cache_dir = os.path.abspath(cache_dir_name)
 dirpath = Path(test_dir)
 if dirpath.is_dir():
     shutil.rmtree(dirpath)
