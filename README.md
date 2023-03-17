@@ -7,7 +7,7 @@
 
 
 
-MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a larger corpus of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data will be available on the open web as a dashboard on a Huggingface Space (coming soon).
+MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a larger corpus of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data is now available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility).
 
 ## Benchmarking Tool
 
@@ -15,7 +15,7 @@ _Benchit_ allows you to benchmark Pytorch models without changing a single line 
 
 <img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
 
-## Models
+## Tons of Models
 
 [![Transformers](https://img.shields.io/github/directory-file-count/groq/mlagility/models/transformers?label=transformers)](https://github.com/groq/mlagility/tree/main/models/transformers "Transformer models")
 [![Diffusers](https://img.shields.io/github/directory-file-count/groq/mlagility/models/diffusers?label=diffusers)](https://github.com/groq/mlagility/tree/main/models/diffusers "Diffusion models")
@@ -24,6 +24,12 @@ _Benchit_ allows you to benchmark Pytorch models without changing a single line 
 [![torchvision](https://img.shields.io/github/directory-file-count/groq/mlagility/models/torchvision?label=torchvision)](https://github.com/groq/mlagility/tree/main/models/torchvision "Models from Torch Vision")
 
 This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. For more information about each of those models, please click on the corresponding badge.
+
+## Benchmarking results
+
+We are also working on making MLAgility results publicly available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility). Check it out!
+
+<img src="https://github.com/groq/mlagility/raw/main/docs/img/dashboard.gif"  width="800"/>
 
 ## Installation
 
