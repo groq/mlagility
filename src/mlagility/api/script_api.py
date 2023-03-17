@@ -3,9 +3,9 @@ import os
 import types
 import importlib.machinery
 from typing import Tuple, List, Dict, Optional, Union
-import groqflow.common.printing as printing
-import groqflow.common.exceptions as exceptions
-from groqflow.justgroqit.stage import Sequence
+import onnxflow.common.printing as printing
+import onnxflow.common.exceptions as exceptions
+from onnxflow.justbuildit.stage import Sequence
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels_library
@@ -108,11 +108,11 @@ def benchmark_script(
     # Validate that the script exists
     for script in clean_scripts:
         if os.path.isdir(script):
-            raise exceptions.GroqitArgError(
+            raise exceptions.BuilditArgError(
                 f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
             )
         if not os.path.isfile(script):
-            raise exceptions.GroqitArgError(
+            raise exceptions.BuilditArgError(
                 (
                     f"{script} could not be found. If this corresponds to a "
                     "regular expression, the regular expression did not match "
@@ -120,7 +120,7 @@ def benchmark_script(
                 )
             )
         if not script.endswith(".py"):
-            raise exceptions.GroqitArgError(f"Script must end with .py (got {script})")
+            raise exceptions.BuilditArgError(f"Script must end with .py (got {script})")
 
     # Decode benchit args into TracerArgs flags
     if analyze_only:

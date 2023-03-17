@@ -19,8 +19,8 @@ from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
 from mlagility.common import filesystem
 import mlagility.api.ortmodel as ortmodel
-import groqflow.common.build as build
-import groqflow.common.cache as cache
+import onnxflow.common.build as build
+import onnxflow.common.cache as cache
 
 
 # We generate a corpus on to the filesystem during the test

@@ -12,11 +12,28 @@ setup(
     author_email="jfowers@groq.com, dhnoronha@groq.com, rsivakumar@groq.com, vgodsoe@groq.com",
     license="MIT",
     package_dir={"": "src"},
-    packages=["mlagility"],
+    packages=["mlagility", "onnxflow"],
     install_requires=[
-        "groqflow @ https://test-files.pythonhosted.org/packages/dd/7a/88995b701257dfaef0b5044cca1f82f18a3eda33367f72b60126f82c89ee/groqflow-3.0.2.tar.gz",
         "invoke>=2.0.0",
+        "onnx>=1.11.0",
+        "onnxmltools==1.10.0",
+        "hummingbird-ml==0.4.4",
+        "scikit-learn==1.1.1",
+        "xgboost==1.6.1",
+        "onnxruntime>=1.10.0",
+        "paramiko==2.11.0",
+        "torch>=1.12.1",
+        "protobuf>=3.17.3",
+        "pyyaml>=5.4",
+        "typeguard>=2.3.13",
+        "packaging>=21.3",
     ],
+    extras_require={
+        "tensorflow": ["tensorflow-cpu>=2.8.1", "tf2onnx>=1.12.0"],
+        "groq": [
+            "groqflow @ https://test-files.pythonhosted.org/packages/dd/7a/88995b701257dfaef0b5044cca1f82f18a3eda33367f72b60126f82c89ee/groqflow-3.0.2.tar.gz",
+        ],
+    },
     classifiers=[],
     entry_points={
         "console_scripts": [

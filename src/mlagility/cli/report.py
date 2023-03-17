@@ -3,10 +3,9 @@ import csv
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
-import groqflow.common.printing as printing
-import groqflow.common.build as build
-import groqflow.common.cache as cache
-from groqflow.groqmodel import groqmodel
+import onnxflow.common.printing as printing
+import onnxflow.common.build as build
+import onnxflow.common.cache as cache
 from mlagility.common import labels
 from mlagility.api.ortmodel import ORTModel
 from mlagility.api.trtmodel import TRTModel
@@ -43,11 +42,15 @@ def _update_attribute(
         return current_val
 
 
-def _get_estimated_groq_latency(model_folder, cache_folder):
+def _get_groq_stats(model_folder, cache_folder):
     """
-    Returns estimated Groq latency (io + compute - not including runtime) in ms
+    Returns estimated Groq latency (io + compute - not including runtime) in ms,
+    as well as the number of GroqChip processors used for the build
     """
     try:
+        # pylint: disable=import-error
+        from groqflow.groqmodel import groqmodel
+
         gmodel = groqmodel.load(model_folder, cache_folder)
         if (
             gmodel.state.info.assembler_success  # pylint: disable=singleton-comparison
@@ -61,11 +64,11 @@ def _get_estimated_groq_latency(model_folder, cache_folder):
                         f"but got {perf.latency_units}"
                     )
                 )
-            return 1000 * perf.latency
+            return 1000 * perf.latency, gmodel.state.num_chips_used
         else:
-            return "-"
+            return "-", "-"
     except FileNotFoundError:
-        return "-"
+        return "-", "-"
 
 
 def get_report_name() -> str:
@@ -237,7 +240,9 @@ def summary_spreadsheet(args) -> None:
                     report[build_name].__dict__[results_attr] = parsed_labels[label][0]
 
             # Get Groq latency and number of chips
-            groq_estimated_latency = _get_estimated_groq_latency(build_name, cache_dir)
+            groq_estimated_latency, groq_chips_used = _get_groq_stats(
+                build_name, cache_dir
+            )
             report[build_name].groq_estimated_latency = _update_attribute(
                 groq_estimated_latency,
                 report[build_name].groq_estimated_latency,
@@ -245,7 +250,7 @@ def summary_spreadsheet(args) -> None:
                 parameter_name="groq_estimated_latency",
             )
             report[build_name].groq_chips_used = _update_attribute(
-                state.num_chips_used,
+                groq_chips_used,
                 report[build_name].groq_chips_used,
                 build_name=build_name,
                 parameter_name="groq_chips_used",

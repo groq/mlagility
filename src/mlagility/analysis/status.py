@@ -1,7 +1,7 @@
 import os
 from typing import Dict, Union, List
-from groqflow.common import printing
-import groqflow.common.build as build
+from onnxflow.common import printing
+import onnxflow.common.build as build
 from mlagility.analysis.util import ModelInfo
 
 

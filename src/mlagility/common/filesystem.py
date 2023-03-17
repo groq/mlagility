@@ -5,10 +5,10 @@ import pathlib
 import datetime
 from typing import Dict
 import yaml
-import groqflow.common.printing as printing
-import groqflow.common.cache as cache
-import groqflow.common.build as build
-import groqflow.common.exceptions as exc
+import onnxflow.common.printing as printing
+import onnxflow.common.cache as cache
+import onnxflow.common.build as build
+import onnxflow.common.exceptions as exc
 
 # Allow an environment variable to override the default
 # location for the build cache
@@ -26,7 +26,7 @@ def clean_script_name(script_path: str) -> str:
     return pathlib.Path(script_path).stem
 
 
-class CacheError(exc.GroqFlowError):
+class CacheError(exc.OnnxFlowError):
     """
     Raise this exception when the cache is being accessed incorrectly
     """
