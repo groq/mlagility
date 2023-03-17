@@ -35,4 +35,4 @@ We are actively seeking collaborators from across the industry. If you would lik
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE]([[LICENSE.md](https://github.com/groq/mlagility/blob/main/docs/contribute.md)](https://github.com/groq/mlagility/blob/main/LICENSE)) file for details.
