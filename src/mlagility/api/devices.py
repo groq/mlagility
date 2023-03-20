@@ -527,7 +527,7 @@ def execute_ort_remotely(
         client,
         f"/usr/bin/python3 "
         f"{os.path.join(remote_paths.output_dir, ORT_BENCHMARKING_SCRIPT)} "
-        f"--output-dir {remote_paths.output_dir} " 
+        f"--output-dir {remote_paths.output_dir} "
         f"--onnx-file {docker_paths.onnx_file} "
         f"--outputs-file {remote_paths.outputs_file} "
         f"--iterations {iterations}",
