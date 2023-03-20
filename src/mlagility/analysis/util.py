@@ -1,6 +1,7 @@
 import sys
 import re
 from dataclasses import dataclass
+from collections import defaultdict
 from typing import Callable, List, Union, Dict
 import inspect
 import torch
@@ -85,33 +86,37 @@ def get_onnx_ops_list(onnx_model) -> Dict:
     """
     List unique ops found in the onnx model 
     """
-    onnx_ops_counter = {}
-    model = onnx.load(onnx_model)
-    assert model is not None
-    for node in model.graph.node:
-        if node.op_type not in onnx_ops_counter:
-            onnx_ops_counter[node.op_type] = 1
-        else:
+    onnx_ops_counter = defaultdict(int)
+    try:
+        model = onnx.load(onnx_model)
+        for node in model.graph.node:
             onnx_ops_counter[node.op_type] += 1
-    return onnx_ops_counter
+    except Exception as e:
+        print(f"Failed to get ONNX ops list from {onnx_model}: {str(e)}")
+    return dict(onnx_ops_counter)
 
 def populate_onnx_model_info(onnx_model) -> Dict:
     """
     Read the model metadata to populate IR, Opset and model size
     """
-    model_metadata = {}
-    model = onnx.load(onnx_model)
-    model_metadata["ir_version"] = model.ir_version
-    opset_str = str(model.opset_import)
-    model_metadata["opset"] = int(re.search(r"\d+", opset_str).group())
-    model_metadata["size on disk(KiB)"] = int(model.ByteSize())/1024
-    return model_metadata
+    try:
+        model = onnx.load(onnx_model)
+    except Exception as e:
+        print(f"An error occurred while loading the ONNX model: {str(e)}")
+    return {
+        "ir_version": getattr(model, "ir_version", None),
+        "opset": getattr(model.opset_import[-1], "version", None),
+        "size on disk (KiB)": round(model.SerializeToString().__sizeof__() / 1024, 2),
+    }
 
 def onnx_input_dimensions(onnx_model) -> Dict:
     """
     Read model input dimensions
     """
-    model = onnx.load(onnx_model)
+    try:
+        model = onnx.load(onnx_model)
+    except Exception as e:
+        print(f"An error occurred while loading the ONNX model: {str(e)}")
     input_shape = {}
     for inp in model.graph.input:
         shape = str(inp.type.tensor_type.shape.dim)
