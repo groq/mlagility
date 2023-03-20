@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::openai_doublehead author::huggingface_pytorch
+# labels: test_group::mlagility name::openai_doublehead author::transformers
 from mlagility.parser import parse
 import transformers
 import torch

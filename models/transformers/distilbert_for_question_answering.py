@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::distilbert_for_question_answering author::huggingface_pytorch
+# labels: test_group::mlagility name::distilbert_for_question_answering author::transformers
 from mlagility.parser import parse
 import transformers
 import torch
