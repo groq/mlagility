@@ -7,7 +7,7 @@
 
 
 
-MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a larger corpus of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data is now available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility).
+MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a corpus of hundreds of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data is available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility).
 
 ## Benchmarking Tool
 
