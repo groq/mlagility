@@ -176,12 +176,8 @@ def call_benchit(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
         onnx_ops_counter = util.get_onnx_ops_list(build_state.converted_onnx_file)
-
         onnx_model_info = util.populate_onnx_model_info(build_state.converted_onnx_file)
-
-        onnx_input_dimensions = util.onnx_input_dimensions(
-            build_state.converted_onnx_file
-        )
+        onnx_input_dimensions = util.onnx_input_dimensions(build_state.converted_onnx_file)
         # Stats that we want to save into the build's mlagility_stats.yaml file
         # so that they can be easily accessed by the report command later
         filesystem.save_stat(tracer_args.cache_dir, build_name, "hash", model_info.hash)
@@ -195,10 +191,7 @@ def call_benchit(
             tracer_args.cache_dir, build_name, "onnx_model_information", onnx_model_info
         )
         filesystem.save_stat(
-            tracer_args.cache_dir,
-            build_name,
-            "onnx_input_dimensions",
-            onnx_input_dimensions,
+            tracer_args.cache_dir, build_name, "onnx_input_dimensions", onnx_input_dimensions
         )
 
         if perf:

@@ -89,10 +89,11 @@ def get_onnx_ops_list(onnx_model) -> Dict:
     onnx_ops_counter = defaultdict(int)
     try:
         model = onnx.load(onnx_model)
-        for node in model.graph.node: # pylint: disable=E1101
-            onnx_ops_counter[node.op_type] += 1
     except Exception as e: # pylint: disable=broad-except
-        print(f"Failed to get ONNX ops list from {onnx_model}: {str(e)}")
+        print (f"Failed to get ONNX ops list from {onnx_model}: {str(e)}")
+        return "ONNX model analysis failed"
+    for node in model.graph.node: # pylint: disable=E1101
+        onnx_ops_counter[node.op_type] += 1
     return dict(onnx_ops_counter)
 
 
@@ -103,7 +104,8 @@ def populate_onnx_model_info(onnx_model) -> Dict:
     try:
         model = onnx.load(onnx_model)
     except Exception as e: # pylint: disable=broad-except
-        print(f"An error occurred while loading the ONNX model: {str(e)}")
+        print(f"Failed to get ONNX ops list from {onnx_model}: {str(e)}")
+        return "ONNX model analysis failed"
     return {
         "ir_version": getattr(model, "ir_version", None),
         "opset": getattr(model.opset_import[-1], "version", None), # pylint: disable=E1101
@@ -118,7 +120,8 @@ def onnx_input_dimensions(onnx_model) -> Dict:
     try:
         model = onnx.load(onnx_model)
     except Exception as e: # pylint: disable=broad-except
-        print(f"An error occurred while loading the ONNX model: {str(e)}")
+        print(f"Failed to get ONNX ops list from {onnx_model}: {str(e)}")
+        return "ONNX model analysis failed"
     input_shape = {}
     for inp in model.graph.input: # pylint: disable=E1101
         shape = str(inp.type.tensor_type.shape.dim)
