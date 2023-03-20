@@ -67,7 +67,7 @@ def _get_groq_stats(model_folder, cache_folder):
             return 1000 * perf.latency, gmodel.state.num_chips_used
         else:
             return "-", "-"
-    except FileNotFoundError:
+    except (FileNotFoundError, ImportError):
         return "-", "-"
 
 

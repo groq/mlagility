@@ -122,9 +122,8 @@ example_sequence_file = "example_sequence.py"
 
 extras_dot_py = {
     example_sequence_file: """
-from groqflow.justgroqit.stage import Sequence
-import groqflow.justgroqit.export as export
-from mlagility.common.groqflow_helpers import SuccessStage
+from onnxflow.justbuildit.stage import Sequence
+import onnxflow.justbuildit.export as export
 
 def get_sequence():
     return Sequence(
@@ -132,7 +131,7 @@ def get_sequence():
         monitor_message="Example pytorch sequence that only exports ONNX",
         stages=[
             export.ExportPytorchModel(),
-            SuccessStage(),
+            export.SuccessStage(),
         ],
         enable_model_validation=True,
     )
@@ -699,6 +698,9 @@ class Testing(unittest.TestCase):
         state_files = [Path(p).stem for p in cache.get_all(cache_dir)]
         assert state_files == ["linear_d5b1df11_state", "linear2_80b93950_state"]
 
+    # TODO: Re-implement to be more robust. Current implementation relies on
+    # coincidence (whether or not Groq HW is installed) to function.
+    @unittest.skip("Needs re-implementation")
     def test_014_report_on_failed_build(self):
 
         # Run benchit on groq device (will fail since the HW is not available)
