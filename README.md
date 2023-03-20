@@ -23,7 +23,7 @@ Our _benchit_ CLI allows you to benchmark Pytorch models without changing a sing
 [![torch_hub](https://img.shields.io/github/directory-file-count/groq/mlagility/models/torch_hub?label=torch_hub)](https://github.com/groq/mlagility/tree/main/models/torch_hub "Models from Torch Hub")
 [![torchvision](https://img.shields.io/github/directory-file-count/groq/mlagility/models/torchvision?label=torchvision)](https://github.com/groq/mlagility/tree/main/models/torchvision "Models from Torch Vision")
 
-This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. For more information about each of those models, please click on the corresponding badge.
+This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. You can see the set of models in each category by clicking on the corresponding badge.
 
 ## Benchmarking results
 
