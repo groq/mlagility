@@ -40,7 +40,7 @@ pip install -r models/requirements.txt
 
 ## Installing Groq support
 
-When you install `pip install` `mlagility`, `pip` will also install the `groqflow` `pip` package for you. 
+When you install `pip install` `mlagility[groq]`, `pip` will also install the `groqflow` `pip` package for you. 
 
 However, if you want to use mlagility with your Groq SDK and GroqChip processor hardware you must also follow the steps in the [GroqFlow Install Guide](https://github.com/groq/groqflow/blob/release/0921/docs/install.md), particularly:
 1. [Prerequisites](https://github.com/groq/groqflow/blob/release/0921/docs/install.md#prerequisites): install the GroqWare™ Suite.

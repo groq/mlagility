@@ -404,7 +404,7 @@ Replaces the default build sequence in `benchmark_model()` with a custom build s
 Usage:
 - `benchit benchmark INPUT_SCRIPTS --sequence-file FILE`
 
-This script must define a function, `get_sequence()`, that returns an instance of `groqflow.common.stage.Sequence`. See [examples/extras/example_sequence.py](https://github.com/groq/mlagility/blob/main/examples/cli/extras/example_sequence.py) for an example of a sequence file.
+This script must define a function, `get_sequence()`, that returns an instance of `onnxflow.common.stage.Sequence`. See [examples/extras/example_sequence.py](https://github.com/groq/mlagility/blob/main/examples/cli/extras/example_sequence.py) for an example of a sequence file.
 
 Also available as API arguments:
 - `benchmark_script(sequence=...)`
