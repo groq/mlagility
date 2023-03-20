@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::electra_for_sequence_classification author::huggingface_pytorch
+# labels: test_group::mlagility name::electra_for_sequence_classification author::transformers
 from mlagility.parser import parse
 import transformers
 import torch

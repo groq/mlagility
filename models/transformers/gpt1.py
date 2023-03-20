@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::gpt1 author::huggingface_pytorch
+# labels: test_group::mlagility name::gpt1 author::transformers
 from mlagility.parser import parse
 import transformers
 import torch

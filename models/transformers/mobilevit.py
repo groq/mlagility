@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mobilevit author::huggingface_pytorch
+# labels: test_group::mlagility name::mobilevit author::transformers
 """https://huggingface.co/docs/transformers/model_doc/mobilevit"""
 from mlagility.parser import parse
 import transformers
