@@ -33,7 +33,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           conda install pylint
-          if [ -f setup.py ]; then pip install -e .; fi
+          if [ -f setup.py ]; then pip install -e .[tensorflow]; fi
           pip install transformers
           python -m pip check
       - name: Lint with PyLint
