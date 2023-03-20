@@ -47,9 +47,21 @@ jobs:
           rm -rf ~/.cache/mlagility
           python test/database.py
 
-          # Examples
+          # onnxflow examples
+          rm -rf ~/.cache/onnxflow
+          python examples/onnxflow/hello_torch_world.py
+          rm -rf ~/.cache/onnxflow
+          python examples/onnxflow/hello_keras_world.py
+          rm -rf ~/.cache/onnxflow
+          python examples/onnxflow/hello_onnx_world.py
+          rm -rf ~/.cache/onnxflow
+          python examples/onnxflow/randomforest.py
+          rm -rf ~/.cache/onnxflow
+          python examples/onnxflow/xgbclassifier.py.py
+
+          # mlagility examples
           rm -rf ~/.cache/mlagility
-          python examples/api/hello_world.py
+          python examples/model_api/hello_world.py
           rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py
           rm -rf ~/.cache/mlagility
