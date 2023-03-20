@@ -8,7 +8,7 @@ Please read about our [repo and code organization](https://github.com/groq/mlagi
 
 ## Issues
 
-Please file any bugs or feature requests you have as an [Issue](https://github.com/groq/mlagility/issues) and we will take a look.
+Please file any bugs or feature requests you have as an [Issue](https://github.com/groq/mlagility/issues) and we will take a look. Please tag @jeremyfowers and @danielholanda when creating an issue.
 
 ## Pull Requests
 
