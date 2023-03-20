@@ -1,8 +1,10 @@
 import sys
+import re
 from dataclasses import dataclass
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Dict
 import inspect
 import torch
+import onnx
 import groqflow.justgroqit.export as export
 import groqflow.justgroqit.stage as stage
 from groqflow.common import printing
@@ -79,6 +81,42 @@ def count_parameters(model: torch.nn.Module, model_type: build.ModelType) -> int
     # Raise exception if an unsupported model type is provided
     raise AnalysisException(f"model_type {model_type} is not supported")
 
+def get_onnx_ops_list(onnx_model) -> Dict:
+    """
+    List unique ops found in the onnx model 
+    """
+    onnx_ops_counter = {}
+    model = onnx.load(onnx_model)
+    assert model is not None
+    for node in model.graph.node:
+        if node.op_type not in onnx_ops_counter:
+            onnx_ops_counter[node.op_type] = 1
+        else:
+            onnx_ops_counter[node.op_type] += 1
+    return onnx_ops_counter
+
+def populate_onnx_model_info(onnx_model) -> Dict:
+    """
+    Read the model metadata to populate IR, Opset and model size
+    """
+    model_metadata = {}
+    model = onnx.load(onnx_model)
+    model_metadata["ir_version"] = model.ir_version
+    opset_str = str(model.opset_import)
+    model_metadata["opset"] = int(re.search(r"\d+", opset_str).group())
+    model_metadata["size on disk(KiB)"] = int(model.ByteSize())/1024
+    return model_metadata
+
+def onnx_input_dimensions(onnx_model) -> Dict:
+    """
+    Read model input dimensions
+    """
+    model = onnx.load(onnx_model)
+    input_shape = {}
+    for inp in model.graph.input:
+        shape = str(inp.type.tensor_type.shape.dim)
+        input_shape[inp.name] = [int(s) for s in shape.split() if s.isdigit()]
+    return input_shape
 
 def stop_stdout_forward() -> None:
     """
