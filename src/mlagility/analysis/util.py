@@ -1,5 +1,4 @@
 import sys
-import re
 from dataclasses import dataclass
 from collections import defaultdict
 from typing import Callable, List, Union, Dict
@@ -82,18 +81,20 @@ def count_parameters(model: torch.nn.Module, model_type: build.ModelType) -> int
     # Raise exception if an unsupported model type is provided
     raise AnalysisException(f"model_type {model_type} is not supported")
 
+
 def get_onnx_ops_list(onnx_model) -> Dict:
     """
-    List unique ops found in the onnx model 
+    List unique ops found in the onnx model
     """
     onnx_ops_counter = defaultdict(int)
     try:
         model = onnx.load(onnx_model)
-        for node in model.graph.node:
+        for node in model.graph.node: # pylint: disable=E1101
             onnx_ops_counter[node.op_type] += 1
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-except
         print(f"Failed to get ONNX ops list from {onnx_model}: {str(e)}")
     return dict(onnx_ops_counter)
+
 
 def populate_onnx_model_info(onnx_model) -> Dict:
     """
@@ -101,13 +102,14 @@ def populate_onnx_model_info(onnx_model) -> Dict:
     """
     try:
         model = onnx.load(onnx_model)
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-except
         print(f"An error occurred while loading the ONNX model: {str(e)}")
     return {
         "ir_version": getattr(model, "ir_version", None),
-        "opset": getattr(model.opset_import[-1], "version", None),
-        "size on disk (KiB)": round(model.SerializeToString().__sizeof__() / 1024, 2),
+        "opset": getattr(model.opset_import[-1], "version", None), # pylint: disable=E1101
+        "size on disk (KiB)": round(model.SerializeToString().__sizeof__() / 1024, 4),
     }
+
 
 def onnx_input_dimensions(onnx_model) -> Dict:
     """
@@ -115,13 +117,14 @@ def onnx_input_dimensions(onnx_model) -> Dict:
     """
     try:
         model = onnx.load(onnx_model)
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-except
         print(f"An error occurred while loading the ONNX model: {str(e)}")
     input_shape = {}
-    for inp in model.graph.input:
+    for inp in model.graph.input: # pylint: disable=E1101
         shape = str(inp.type.tensor_type.shape.dim)
         input_shape[inp.name] = [int(s) for s in shape.split() if s.isdigit()]
     return input_shape
+
 
 def stop_stdout_forward() -> None:
     """
