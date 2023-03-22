@@ -7,6 +7,7 @@ from typing import Optional, Any, List, Dict, Union
 from collections.abc import Collection
 import dataclasses
 import hashlib
+import psutil
 import yaml
 import torch
 import numpy as np
@@ -141,7 +142,8 @@ class Status(enum.Enum):
 # Create a unique ID from this run by hashing pid + process start time
 def unique_id():
     pid = os.getpid()
-    start_time = os.path.getctime(f"/proc/{pid}/stat")
+    p = psutil.Process(pid)
+    start_time = p.create_time()
     return hashlib.sha256(f"{pid}{start_time}".encode()).hexdigest()
 
 

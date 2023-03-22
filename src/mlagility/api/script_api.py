@@ -108,11 +108,11 @@ def benchmark_script(
     # Validate that the script exists
     for script in clean_scripts:
         if os.path.isdir(script):
-            raise exceptions.BuilditArgError(
+            raise exceptions.ArgError(
                 f'"{script}" is a directory. Do you mean "{script}/*.py" ?'
             )
         if not os.path.isfile(script):
-            raise exceptions.BuilditArgError(
+            raise exceptions.ArgError(
                 (
                     f"{script} could not be found. If this corresponds to a "
                     "regular expression, the regular expression did not match "
@@ -120,7 +120,7 @@ def benchmark_script(
                 )
             )
         if not script.endswith(".py"):
-            raise exceptions.BuilditArgError(f"Script must end with .py (got {script})")
+            raise exceptions.ArgError(f"Script must end with .py (got {script})")
 
     # Decode benchit args into TracerArgs flags
     if analyze_only:

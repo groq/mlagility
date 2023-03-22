@@ -50,11 +50,11 @@ The `onnxflow` codebase is housed in the repo's `src/onnxflow` directory. The co
 
 The mission of `build_model()` is to get your model ready to to use in the ONNX ecosystem with only 1 function call on 1 line of code. This involves taking all the complexity of working with multiple ML frameworks, the ONNX ecosystem, and other tools and abstracting all of it away from the user. As such, there is a fair amount of internal complexity, but we have done our best to organize in a way that is reasonable to understand, maintain, and most importantly, extend.
 
-The first thing you need to know about the groqit code is that it is all structured around a rocket ship pun. The `build_model()` function is built from a `Sequence` of `Stages` that must undergo `ignition` and then `launch()`.
+The first thing you need to know about the code is that it is all structured around a rocket ship pun. The `build_model()` function is built from a `Sequence` of `Stages` that must undergo `ignition` and then `launch()`.
 
 The second thing you need to know is that although `build_model()` must be magically simple in the average case, it is also designed to be completely customizable when needed. Custom `Sequences` and `Stages` empower developers to add support for virtually any input format or model transformation.
 
-## `build_model()` Function
+### `build_model()` Function
 
 We wanted to keep `build_model()`'s definition clean and easy to understand, so it is made up of a series of function calls to a sub-module called `ignition`.
 
@@ -70,7 +70,7 @@ If `build_model()` need to perform a build, the `sequence` from `model intake` c
 
 Finally, if the sequence is successful, build_model() will display a success message and then return a `Model` instance. You can read about `Model` below. On failure, build_model() will display an error message that should be as helpful and actionable as possible.
 
-## Sequence and Stage Classes
+### Sequence and Stage Classes
 
 All of the logic for actually building models is contained in `Stage` classes. Generally, each `Stage` is a model-to-model transformation. For example, the `ExportPytorchModel` `Stage` transforms a PyTorch model instance into an ONNX model file.
 
@@ -90,7 +90,7 @@ Every `Stage` in build_model() is defined by inheriting the `Stage` base class. 
 * Set `state.build_status` to 'successful' if the state of the build represents a working basis for a `BaseModel`
 * Return an updated `state` instance
 
-## State Class
+## `common.State` Class
 
 The `State` class keeps track of the state of a `build_model()` build. `State` is also automatically saved to disk as a `state.yaml` file in the `build cache` whenever an attribute is modified. There are three key intentions behind this implementation and usage of `State`:
 
@@ -98,19 +98,6 @@ The `State` class keeps track of the state of a `build_model()` build. `State` i
 1. Facilitate debugging by keeping the latest information and build decisions in one place on disk
 1. Make it easy to collect and report statistics across a large number of builds
 
-# groqmodel Module
+## `model` Module
 
-The `groqmodel` module primarily contains the `GroqModel` class, which wraps all the logic required to:
-
-* Load successful build `State` corresponding to a model from the `GroqFlow build cache`
-* Configure `GroqCard` accelerators and their `GroqChip` processors to execute the model
-* Execute the model against inputs and return the results
-* Visualize the model with Netron and visualize the build with `GroqView`
-
-The `GroqModel` base class implements a primary function, `run()`, which performs all of the required configuration and execution steps. We also provide a `PytorchModelWrapper` class, which inherits from `GroqModel` and provides PyTorch's familiar callable-instance interface.
-
-Today's implementation of GroqModel is not coded with performance in mind. We do not recommend it for any kind of benchmarking or performance scenario. Instead, it is primarily intended to automate all steps involved with running models on Groq hardware.
-
-# Command Line Interface (CLI)
-
-We will add this section to the guide when we release the CLI.
+The `model` module primarily contains the `BaseModel` class, which provides some helper functions for programmatically using ONNX files. `BaseModel` will be most useful when it is inherited into a vendor-specific `Model` class such as `OrtModel`, `TrtModel`, `GroqModel`, etc. However, the work of unifying all of these `*Model` classes under a single base class is still a work in progress.

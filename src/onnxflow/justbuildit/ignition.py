@@ -224,8 +224,9 @@ def _validate_cached_model(
             or state.build_status == build.Status.BUILD_RUNNING
         ) and version == state.onnxflow_version:
             msg = (
-                "build_model() has detected that you already attempted building this model with the "
-                "exact same model, inputs, options, and version of onnxflow, and that build failed."
+                "build_model() has detected that you already attempted building "
+                "this model with the exact same model, inputs, options, and version of "
+                "onnxflow, and that build failed."
             )
             result.append(msg)
 
@@ -391,8 +392,8 @@ def load_or_make_state(
             ):
                 msg = (
                     f"Model {config.build_name} was partially built in a previous call to "
-                    "build_model(). This call to build_model() found that partial build and is loading "
-                    "it from the model cache."
+                    "build_model(). This call to build_model() found that partial build and "
+                    "is loading it from the build cache."
                 )
 
                 printing.log_info(msg)
@@ -419,8 +420,8 @@ def load_or_make_state(
                             f"{config.build_name}, and found that it "
                             "is likely invalid for the following reasons: \n\n"
                             f"{problem_report} \n\n"
-                            'However, since you have set rebuild="never", build_model() will attempt '
-                            "to load the build from cache anyways (with no guarantee of "
+                            'However, since you have set rebuild="never", build_model() will '
+                            "attempt to load the build from cache anyways (with no guarantee of "
                             "functionality or correctness). "
                         )
                         printing.log_warning(msg)
