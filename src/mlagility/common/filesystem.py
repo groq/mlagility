@@ -26,7 +26,7 @@ def clean_script_name(script_path: str) -> str:
     return pathlib.Path(script_path).stem
 
 
-class CacheError(exc.OnnxFlowError):
+class CacheError(exc.Error):
     """
     Raise this exception when the cache is being accessed incorrectly
     """

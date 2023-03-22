@@ -452,7 +452,7 @@ class Logger:
     """
 
     def __init__(self, log_path=None):
-        self.debug = os.environ.get(environment_variables["debug"]) == "True"
+        self.debug = os.environ.get("ONNXFLOW_DEBUG") == "True"
         self.terminal = sys.stdout
         self.log_file = (
             None if log_path is None else open(log_path, "w", encoding="utf8")
