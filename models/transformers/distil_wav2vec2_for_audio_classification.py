@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::distil_wav2vec2_for_audio_classification author::huggingface_pytorch
+# labels: test_group::mlagility name::distil_wav2vec2_for_audio_classification author::transformers
 """https://huggingface.co/bookbot/distil-wav2vec2-xls-r-adult-child-cls-89m"""
 from mlagility.parser import parse
 import transformers

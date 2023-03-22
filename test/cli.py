@@ -520,6 +520,16 @@ class Testing(unittest.TestCase):
                 assert isinstance(stats_dict["parameters"], int), stats_dict[
                     "parameters"
                 ]
+                assert isinstance(stats_dict["onnx_input_dimensions"], dict), stats_dict[
+                    "onnx_input_dimensions"
+                ]
+                assert isinstance(stats_dict["onnx_model_information"], dict), stats_dict[
+                    "onnx_model_information"
+                ]
+                assert isinstance(stats_dict["onnx_ops_counter"], dict), stats_dict[
+                    "onnx_ops_counter"
+                ]
+
 
     def test_008_cli_version(self):
 

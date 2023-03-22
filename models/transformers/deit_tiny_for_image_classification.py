@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::deit_tiny_for_image_classification author::huggingface_pytorch
+# labels: test_group::mlagility name::deit_tiny_for_image_classification author::transformers
 """https://huggingface.co/facebook/deit-tiny-patch16-224"""
 from mlagility.parser import parse
 import transformers

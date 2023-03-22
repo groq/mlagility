@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::bert author::huggingface_pytorch
+# labels: test_group::mlagility name::bert author::transformers
 """
 https://huggingface.co/docs/transformers/v4.26.1/en/model_doc/bert#overview
 """
