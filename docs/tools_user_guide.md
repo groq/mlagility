@@ -582,12 +582,12 @@ export MLAGILITY_CACHE_DIR=~/a_different_cache_dir
 
 ### Show Traceback
 
-By default, `benchit` and `benchmark_script()` catch any exceptions during model build and benchmark and display a simple error message like `Status: Unknown benchit error: {e}`. The intention behind this behavior is to allow the MLAgility tools to iterate over many scripts and models without stopping for exceptions. 
+By default, `benchit` and `benchmark_script()` will display the traceback for any exceptions caught during model build. However, you may sometimes want a cleaner output on your terminal. To accomplish this, set the `MLAGILITY_TRACEBACK` environment variable to `False`, which will catch any exceptions during model build and benchmark and display a simple error message like `Status: Unknown benchit error: {e}`. 
 
-However, you may want to see the full traceback for each exception encountered. To do so, set the `MLAGILITY_TRACEBACK` environment variable to `True`. For example:
+For example:
 
 ```
-export MLAGILITY_TRACEBACK=True
+export MLAGILITY_TRACEBACK=False
 ```
 
 ### Preserve Terminal Outputs
