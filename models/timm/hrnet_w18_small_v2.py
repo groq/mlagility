@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::hrnet_w18_small_v2 author::timm
+# labels: name::hrnet_w18_small_v2 author::timm
 import torch
 import timm
 from mlagility.parser import parse

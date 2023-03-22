@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::xcit_nano_12_p16_224 author::timm
+# labels: name::xcit_nano_12_p16_224 author::timm
 import torch
 import timm
 from mlagility.parser import parse

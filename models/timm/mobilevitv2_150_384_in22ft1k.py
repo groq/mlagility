@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mobilevitv2_150_384_in22ft1k author::timm
+# labels: name::mobilevitv2_150_384_in22ft1k author::timm
 import torch
 import timm
 from mlagility.parser import parse

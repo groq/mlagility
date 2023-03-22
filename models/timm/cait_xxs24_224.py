@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::cait_xxs24_224 author::timm
+# labels: name::cait_xxs24_224 author::timm
 import torch
 import timm
 from mlagility.parser import parse

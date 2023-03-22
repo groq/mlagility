@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::poolformer_m48 author::timm
+# labels: name::poolformer_m48 author::timm
 import torch
 import timm
 from mlagility.parser import parse

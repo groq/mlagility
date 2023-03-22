@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::tf_efficientnetv2_l author::timm
+# labels: name::tf_efficientnetv2_l author::timm
 import torch
 import timm
 from mlagility.parser import parse

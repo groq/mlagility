@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::tinynet_e author::timm
+# labels: name::tinynet_e author::timm
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::deit_base_patch16_224 author::timm
+# labels: name::deit_base_patch16_224 author::timm
 import torch
 import timm
 from mlagility.parser import parse

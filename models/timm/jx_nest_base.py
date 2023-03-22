@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::jx_nest_base author::timm
+# labels: name::jx_nest_base author::timm
 import torch
 import timm
 from mlagility.parser import parse

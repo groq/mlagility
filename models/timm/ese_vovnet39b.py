@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::ese_vovnet39b author::timm
+# labels: name::ese_vovnet39b author::timm
 import torch
 import timm
 from mlagility.parser import parse

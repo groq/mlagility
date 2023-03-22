@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::spnasnet_100 author::timm
+# labels: name::spnasnet_100 author::timm
 import torch
 import timm
 from mlagility.parser import parse

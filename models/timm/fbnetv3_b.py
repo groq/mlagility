@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::fbnetv3_b author::timm
+# labels: name::fbnetv3_b author::timm
 import torch
 import timm
 from mlagility.parser import parse

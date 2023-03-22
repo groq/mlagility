@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::ssl_resnext101_32x16d author::timm
+# labels: name::ssl_resnext101_32x16d author::timm
 import torch
 import timm
 from mlagility.parser import parse

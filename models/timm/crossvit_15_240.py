@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::crossvit_15_240 author::timm
+# labels: name::crossvit_15_240 author::timm
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mixer_b16_224_miil author::timm
+# labels: name::mixer_b16_224_miil author::timm
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mobilenetv3_large_075 author::timm
+# labels: name::mobilenetv3_large_075 author::timm
 import torch
 import timm
 from mlagility.parser import parse

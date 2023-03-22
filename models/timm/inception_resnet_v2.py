@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::inception_resnet_v2 author::timm
+# labels: name::inception_resnet_v2 author::timm
 import torch
 import timm
 from mlagility.parser import parse

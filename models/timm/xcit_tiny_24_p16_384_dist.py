@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::xcit_tiny_24_p16_384_dist author::timm
+# labels: name::xcit_tiny_24_p16_384_dist author::timm
 import torch
 import timm
 from mlagility.parser import parse

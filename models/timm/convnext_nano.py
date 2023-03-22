@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::convnext_nano author::timm
+# labels: name::convnext_nano author::timm
 import torch
 import timm
 from mlagility.parser import parse

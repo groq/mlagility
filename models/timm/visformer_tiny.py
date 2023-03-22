@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::visformer_tiny author::timm
+# labels: name::visformer_tiny author::timm
 import torch
 import timm
 from mlagility.parser import parse

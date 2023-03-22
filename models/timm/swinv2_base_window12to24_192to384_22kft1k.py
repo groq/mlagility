@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::swinv2_base_window12to24_192to384_22kft1k author::timm
+# labels: name::swinv2_base_window12to24_192to384_22kft1k author::timm
 import torch
 import timm
 from mlagility.parser import parse

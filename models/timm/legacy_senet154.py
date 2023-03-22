@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::legacy_senet154 author::timm
+# labels: name::legacy_senet154 author::timm
 import torch
 import timm
 from mlagility.parser import parse

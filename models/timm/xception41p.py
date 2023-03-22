@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::xception41p author::timm
+# labels: name::xception41p author::timm
 import torch
 import timm
 from mlagility.parser import parse

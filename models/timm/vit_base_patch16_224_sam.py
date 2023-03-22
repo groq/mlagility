@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::vit_base_patch16_224_sam author::timm
+# labels: name::vit_base_patch16_224_sam author::timm
 import torch
 import timm
 from mlagility.parser import parse

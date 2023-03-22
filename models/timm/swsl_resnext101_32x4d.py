@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::swsl_resnext101_32x4d author::timm
+# labels: name::swsl_resnext101_32x4d author::timm
 import torch
 import timm
 from mlagility.parser import parse

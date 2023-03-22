@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::sequencer2d_m author::timm
+# labels: name::sequencer2d_m author::timm
 import torch
 import timm
 from mlagility.parser import parse

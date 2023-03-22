@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::botnet26t_256 author::timm
+# labels: name::botnet26t_256 author::timm
 import torch
 import timm
 from mlagility.parser import parse

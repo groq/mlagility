@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::nf_regnet_b3 author::timm
+# labels: name::nf_regnet_b3 author::timm
 import torch
 import timm
 from mlagility.parser import parse

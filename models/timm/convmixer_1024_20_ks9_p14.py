@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::convmixer_1024_20_ks9_p14 author::timm
+# labels: name::convmixer_1024_20_ks9_p14 author::timm
 import torch
 import timm
 from mlagility.parser import parse
