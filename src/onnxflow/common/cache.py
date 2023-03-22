@@ -1,5 +1,5 @@
 """
-Helper functions for managing the OnnxFlow cache
+Helper functions for managing the onnxflow cache
 """
 
 import os

@@ -18,13 +18,13 @@ def check_shapes_and_dtypes(inputs, expected_shapes, expected_dtypes):
         Model built to always take input of shape
         {expected_shapes} but got {current_shapes}
         """
-        raise exp.OnnxFlowError(msg)
+        raise exp.Error(msg)
     elif not expected_dtypes == current_dtypes:
         msg = f"""
         Model built to always take input of types
         {expected_dtypes} but got {current_dtypes}
         """
-        raise exp.OnnxFlowError(msg)
+        raise exp.Error(msg)
 
 
 def save_inputs(inputs, inputs_file, input_dtypes=None, downcast=True):

@@ -1,9 +1,9 @@
 import onnxflow.common.printing as printing
 
 
-class OnnxFlowError(Exception):
+class Error(Exception):
     """
-    Indicates the user did something wrong with benchit()
+    Indicates something has gone wrong while running the onnxflow tools
     """
 
     def __init__(self, msg):
@@ -11,33 +11,31 @@ class OnnxFlowError(Exception):
         printing.log_error(msg)
 
 
-class BuilditCacheError(OnnxFlowError):
+class CacheError(Error):
     """
-    Indicates ambiguous behavior from
-    when a build already exists in the OnnxFlow cache,
+    Indicates ambiguous behavior from when a build already exists in the cache,
     but the model, inputs, or args have changed thereby invalidating
     the cached copy of the model.
     """
 
 
-class BuilditEnvError(OnnxFlowError):
+class EnvError(Error):
     """
     Indicates to the user that the required tools are not
     available on their PATH.
     """
 
 
-class BuilditArgError(OnnxFlowError):
+class ArgError(Error):
     """
-    Indicates to the user that they provided invalid arguments to
-    benchit()
+    Indicates to the user that they provided invalid arguments
     """
 
 
-class BuilditStageError(Exception):
+class StageError(Exception):
     """
     Let the user know that something went wrong while
-    firing off a benchit() Stage.
+    firing off a Stage.
 
     Note: not overloading __init__() so that the
     attempt to print to stdout isn't captured into
@@ -45,34 +43,34 @@ class BuilditStageError(Exception):
     """
 
 
-class BuilditStateError(Exception):
+class StateError(Exception):
     """
     Raised when something goes wrong with State
     """
 
 
-class BuilditIntakeError(Exception):
+class IntakeError(Exception):
     """
     Let the user know that something went wrong during the
     initial intake process of analyzing a model.
     """
 
 
-class OnnxFlowIOError(OnnxFlowError):
+class IOError(Error):
     """
     Indicates to the user that an input/output operation failed,
     such trying to open a file.
     """
 
 
-class ModelArgError(OnnxFlowError):
+class ModelArgError(Error):
     """
     Indicates to the user that values provided to a Model instance method
     were not allowed.
     """
 
 
-class ModelRuntimeError(OnnxFlowError):
+class ModelRuntimeError(Error):
     """
     Indicates to the user that attempting to invoke a Model instance failed.
     """

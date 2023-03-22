@@ -3,15 +3,15 @@
 
     This example uses a small model to carry out a single vector matrix
     multiplication to demonstrate building and running a Keras model
-    with GroqFlow.
+    with build_model().
 
     This example will help identify what you should expect from each groqit()
     Keras build. You can find the build results in the cache directory at
-    ~/.cache/groqflow/hello_keras_world/ (unless otherwise specified).
+    <current_working_directory>/hello_keras_world/ (unless otherwise specified).
 """
 
 import tensorflow as tf
-from onnxflow import buildit
+from onnxflow import build_model
 
 tf.random.set_seed(0)
 
@@ -35,7 +35,7 @@ keras_model.build(input_shape=(batch_size, input_size))
 inputs = {"x": tf.random.uniform((batch_size, input_size), dtype=tf.float32)}
 
 # Build model
-omodel = buildit(keras_model, inputs, build_name="hello_keras_world")
+omodel = build_model(keras_model, inputs, build_name="hello_keras_world")
 
 # Print build results
 print(f"OnnxFlow build status: {omodel.state.build_status}")

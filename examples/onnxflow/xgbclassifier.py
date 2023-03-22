@@ -1,13 +1,12 @@
 """
 The following example trains an XGBClassifier against random data
-then compares the xgboost result to GroqChip executed via GroqFlow.
+then builds it into an ONNX file.
 """
 
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
 from xgboost import XGBClassifier  # pylint: disable=import-error
-from onnxflow import buildit
+from onnxflow import build_model
 
 batch_size = 320
 
@@ -28,7 +27,7 @@ xgb_model = XGBClassifier(
 xgb_model.fit(x_train, y_train)
 
 # Build the model
-omodel = buildit(xgb_model, {"input_0": x_test})
+omodel = build_model(xgb_model, {"input_0": x_test})
 
 # Print build results
 print(f"OnnxFlow build status: {omodel.state.build_status}")

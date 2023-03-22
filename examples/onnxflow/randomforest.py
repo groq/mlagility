@@ -1,13 +1,12 @@
 """
 The following example trains a RandomForestClassifier against random data
-then compares the sklearn result to GroqChip executed via GroqFlow.
+then builds it into an ONNX file.
 """
 
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
-from onnxflow import buildit
+from onnxflow import build_model
 
 batch_size = 320
 
@@ -26,7 +25,7 @@ skl_model = RandomForestClassifier(n_estimators=10, max_depth=5, random_state=0)
 skl_model.fit(x_train, y_train)
 
 # Build the model
-omodel = buildit(skl_model, {"input_0": x_test})
+omodel = build_model(skl_model, {"input_0": x_test})
 
 # Print build results
 print(f"OnnxFlow build status: {omodel.state.build_status}")

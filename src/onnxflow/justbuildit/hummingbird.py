@@ -119,7 +119,7 @@ class ConvertHummingbirdModel(stage.Stage):
             Supported xgboost models:
               - xgboost.XGBClassifier
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         state.info.opset = build.DEFAULT_ONNX_OPSET
         # TODO: By default the strategy will be chosen wih Hummingbird's logic.
@@ -128,14 +128,14 @@ class ConvertHummingbirdModel(stage.Stage):
 
         inputs = state.inputs
         if inputs is None:
-            raise exp.BuilditStageError(
+            raise exp.StageError(
                 "Hummingbird conversion requires inputs to be provided to benchit(),"
                 " however `inputs` is None."
             )
         test_X = inputs["input_0"]
         batch_size = test_X.shape[0]
         if test_X.dtype == np.float64:
-            raise exp.BuilditStageError(
+            raise exp.StageError(
                 "Fitting a model with float64 inputs can cause issues"
                 " with conversion and compilation. This can be corrected by changing"
                 " code like model.fit(X, y) to model.fit(X.astype(numpy.float32), y)."
@@ -158,9 +158,7 @@ class ConvertHummingbirdModel(stage.Stage):
             MissingConverter,
             MissingBackend,
         ) as e:
-            raise exp.BuilditStageError(
-                f"Hummingbird conversion failed with error: {e}"
-            )
+            raise exp.StageError(f"Hummingbird conversion failed with error: {e}")
 
         input_dims = {
             "input_0": [

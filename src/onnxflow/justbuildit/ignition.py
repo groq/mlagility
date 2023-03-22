@@ -83,20 +83,20 @@ def lock_config(
 ) -> Tuple[build.Config, bool]:
 
     """
-    Process the user's configuration arguments to buildit():
+    Process the user's configuration arguments to build_model():
     1. Raise exceptions for illegal arguments
     2. Replace unset arguments with default values
     3. Lock the configuration into an immutable object
     """
 
-    # The default model name is the name of the python file that calls benchit()
+    # The default model name is the name of the python file that calls build_model()
     auto_name = False
     if build_name is None:
         build_name = sys.argv[0].split("/")[-1].split(".")[0]
         auto_name = True
 
     if sequence is None:
-        # The value ["default"] indicates that buildit will be assigning some
+        # The value ["default"] indicates that build_model() will be assigning some
         # default sequence later in the program
         stage_names = ["default"]
     else:
@@ -120,7 +120,7 @@ def _validate_cached_model(
     inputs: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """
-    Verify whether anything in the call to buildit changed
+    Verify whether anything in the call to build_model() changed
     We require the user to resolve the discrepancy when such a
     change occurs, so the purpose of this function is simply to
     detect these conditions and raise an appropriate error.
@@ -142,9 +142,9 @@ def _validate_cached_model(
     if out_of_date:
         msg = (
             f"Your build {state.config.build_name} was previously built against "
-            f"OnnxFlow version {state.onnxflow_version}, "
-            f"however you are now using OnnxFlow version {version}. The previous build is "
-            f"incompatible with this version of OnnxFlow, as indicated by the {out_of_date} "
+            f"onnxflow version {state.onnxflow_version}, "
+            f"however you are now using onxxflow version {version}. The previous build is "
+            f"incompatible with this version of onnxflow, as indicated by the {out_of_date} "
             "version number changing. See **docs/versioning.md** for details."
         )
         result.append(msg)
@@ -183,7 +183,7 @@ def _validate_cached_model(
         ):
             msg = (
                 "You are building multiple different models in the same script "
-                "without specifying a unique buildit(..., build_name=) for each build."
+                "without specifying a unique build_model(..., build_name=) for each build."
             )
             result.append(msg)
 
@@ -212,7 +212,7 @@ def _validate_cached_model(
         if len(changed_args) > 0:
             for key_name, current_arg, previous_arg in changed_args:
                 msg = (
-                    f'buildit() argument "{key_name}" for build '
+                    f'build_model() argument "{key_name}" for build '
                     f"{config.build_name} changed from "
                     f"{previous_arg} to {current_arg} since the last build."
                 )
@@ -224,8 +224,8 @@ def _validate_cached_model(
             or state.build_status == build.Status.BUILD_RUNNING
         ) and version == state.onnxflow_version:
             msg = (
-                "buildit() has detected that you already attempted building this model with the "
-                "exact same model, inputs, options, and version of OnnxFlow, and that build failed."
+                "build_model() has detected that you already attempted building this model with the "
+                "exact same model, inputs, options, and version of onnxflow, and that build failed."
             )
             result.append(msg)
 
@@ -269,11 +269,11 @@ def _begin_fresh_build(
 def _rebuild_if_needed(problem_report: str, state_args: Dict):
     build_name = state_args["config"].build_name
     msg = (
-        f"buildit() discovered a cached build of {build_name}, but decided to "
+        f"build_model() discovered a cached build of {build_name}, but decided to "
         "rebuild for the following reasons: \n\n"
         f"{problem_report} \n\n"
-        "buildit() will now rebuild your model to ensure correctness. You can change this "
-        "policy by setting the buildit(rebuild=...) argument."
+        "build_model() will now rebuild your model to ensure correctness. You can change this "
+        "policy by setting the build_model(rebuild=...) argument."
     )
     printing.log_warning(msg)
 
@@ -291,7 +291,7 @@ def load_or_make_state(
     quantization_samples: Optional[Collection] = None,
 ) -> build.State:
     """
-    Decide whether we can load the model from the OnnxFlow model cache
+    Decide whether we can load the model from the model cache
     (return a valid State instance) or whether we need to rebuild it (return
     a new State instance).
     """
@@ -324,16 +324,16 @@ def load_or_make_state(
                     if rebuild == "never":
                         msg = (
                             f"Model {config.build_name} was built in a previous call to "
-                            "buildit() with post-training quantization sample enabled."
+                            "build_model() with post-training quantization sample enabled."
                             "However, post-training quantization is not enabled in the "
                             "current build. Rebuild is necessary but currently the rebuild"
                             "policy is set to 'never'. "
                         )
-                        raise exp.BuilditCacheError(msg)
+                        raise exp.CacheError(msg)
 
                     msg = (
                         f"Model {config.build_name} was built in a previous call to "
-                        "buildit() with post-training quantization sample enabled."
+                        "build_model() with post-training quantization sample enabled."
                         "However, post-training quantization is not enabled in the "
                         "current build. Starting a fresh build."
                     )
@@ -345,16 +345,16 @@ def load_or_make_state(
                     if rebuild == "never":
                         msg = (
                             f"Model {config.build_name} was built in a previous call to "
-                            "buildit() with post-training quantization sample disabled."
+                            "build_model() with post-training quantization sample disabled."
                             "However, post-training quantization is enabled in the "
                             "current build. Rebuild is necessary but currently the rebuild"
                             "policy is set to 'never'. "
                         )
-                        raise exp.BuilditCacheError(msg)
+                        raise exp.CacheError(msg)
 
                     msg = (
                         f"Model {config.build_name} was built in a previous call to "
-                        "buildit() with post-training quantization sample disabled."
+                        "build_model() with post-training quantization sample disabled."
                         "However, post-training quantization is enabled in the "
                         "current build. Starting a fresh build."
                     )
@@ -362,9 +362,9 @@ def load_or_make_state(
                     printing.log_info(msg)
                     return _begin_fresh_build(**state_args)
 
-            except exp.BuilditStateError as e:
+            except exp.StateError as e:
                 problem = (
-                    "- buildit() failed to load "
+                    "- build_model() failed to load "
                     f"{build.state_file(cache_dir, config.build_name)}"
                 )
 
@@ -372,7 +372,7 @@ def load_or_make_state(
                     return _rebuild_if_needed(problem, state_args)
                 else:
                     # Give the rebuild="never" users a chance to address the problem
-                    raise exp.BuilditCacheError(e)
+                    raise exp.CacheError(e)
 
             if (
                 model_type == build.ModelType.UNKNOWN
@@ -380,7 +380,7 @@ def load_or_make_state(
             ):
                 msg = (
                     "Model caching is disabled for successful builds against custom Sequences. "
-                    "Your model will rebuild whenever you call buildit() on it."
+                    "Your model will rebuild whenever you call build_model() on it."
                 )
                 printing.log_warning(msg)
 
@@ -391,8 +391,8 @@ def load_or_make_state(
             ):
                 msg = (
                     f"Model {config.build_name} was partially built in a previous call to "
-                    "buildit(). This call to buildit() found that partial build and is loading "
-                    "it from the OnnxFlow model cache."
+                    "build_model(). This call to build_model() found that partial build and is loading "
+                    "it from the model cache."
                 )
 
                 printing.log_info(msg)
@@ -415,11 +415,11 @@ def load_or_make_state(
                         return _rebuild_if_needed(problem_report, state_args)
                     if rebuild == "never":
                         msg = (
-                            "buildit() discovered a cached build of "
+                            "build_model() discovered a cached build of "
                             f"{config.build_name}, and found that it "
                             "is likely invalid for the following reasons: \n\n"
                             f"{problem_report} \n\n"
-                            'However, since you have set rebuild="never", buildit() will attempt '
+                            'However, since you have set rebuild="never", build_model() will attempt '
                             "to load the build from cache anyways (with no guarantee of "
                             "functionality or correctness). "
                         )
@@ -436,21 +436,21 @@ def load_or_make_state(
 def _load_model_from_file(path_to_model, user_inputs):
     if not os.path.isfile(path_to_model):
         msg = f"""
-        buildit() model argument was passed a string (path to a model file),
+        build_model() model argument was passed a string (path to a model file),
         however no file was found at {path_to_model}.
         """
-        raise exp.BuilditIntakeError(msg)
+        raise exp.IntakeError(msg)
 
     if path_to_model.endswith(".onnx"):
         return path_to_model, user_inputs
 
     else:
         msg = f"""
-        buildit() received a model argument that was a string. However, model string
+        build_model() received a model argument that was a string. However, model string
         arguments are required to be a path to either a .py or .onnx file, and the
         following argument is neither: {path_to_model}
         """
-        raise exp.BuilditIntakeError(msg)
+        raise exp.IntakeError(msg)
 
 
 model_type_to_sequence = {
@@ -475,22 +475,22 @@ def _validate_inputs(inputs: Dict):
 
     if inputs is None:
         msg = """
-        buildit() requires model inputs. Check your call to buildit() to make sure
+        build_model() requires model inputs. Check your call to build_model() to make sure
         you are passing the inputs argument.
         """
-        raise exp.BuilditIntakeError(msg)
+        raise exp.IntakeError(msg)
 
     if not isinstance(inputs, dict):
         msg = f"""
-        The "inputs" argument to buildit() is required to be a dictionary, where the
+        The "inputs" argument to build_model() is required to be a dictionary, where the
         keys map to the named arguments in the model's forward function. The inputs
-        received by buildit() were of type {type(inputs)}, not dict.
+        received by build_model() were of type {type(inputs)}, not dict.
         """
-        raise exp.BuilditIntakeError(msg)
+        raise exp.IntakeError(msg)
 
 
 def identify_model_type(model) -> build.ModelType:
-    # Validate that the model's type is supported by buildit()
+    # Validate that the model's type is supported by build_model()
     # and assign a ModelType tag
     if isinstance(model, (torch.nn.Module, torch.jit.ScriptModule)):
         model_type = build.ModelType.PYTORCH
@@ -500,20 +500,20 @@ def identify_model_type(model) -> build.ModelType:
     elif tf_helpers.is_keras_model(model):
         model_type = build.ModelType.KERAS
         if not tf_helpers.is_executing_eagerly():
-            raise exp.BuilditIntakeError(
-                "`buildit()` requires Keras models to be run in eager execution mode. "
+            raise exp.IntakeError(
+                "`build_model()` requires Keras models to be run in eager execution mode. "
                 "Enable eager execution to continue."
             )
         if not model.built:
-            raise exp.BuilditIntakeError(
+            raise exp.IntakeError(
                 "Keras model has not been built. Please call "
-                "model.build(input_shape) before running buildit()"
+                "model.build(input_shape) before running build_model()"
             )
     elif hummingbird.is_supported_model(model):
         model_type = build.ModelType.HUMMINGBIRD
     else:
-        raise exp.BuilditIntakeError(
-            "Argument 'model' passed to buildit() is "
+        raise exp.IntakeError(
+            "Argument 'model' passed to build_model() is "
             f"of unsupported type {type(model)}"
         )
 
@@ -542,11 +542,11 @@ def model_intake(
 
         if user_model is None and user_inputs is None:
             msg = """
-            You are running buildit() without any model, inputs, or custom Sequence. The purpose
-            of non-customized buildit() is to build a model against some inputs, so you need to
+            You are running build_model() without any model, inputs, or custom Sequence. The purpose
+            of non-customized build_model() is to build a model against some inputs, so you need to
             provide both.
             """
-            raise exp.BuilditIntakeError(msg)
+            raise exp.IntakeError(msg)
 
         # Convert paths to models into models
         if isinstance(user_model, str):
@@ -561,7 +561,7 @@ def model_intake(
             # Assign a sequence based on the ModelType
             if user_quantization_samples:
                 if model_type != build.ModelType.PYTORCH:
-                    raise exp.BuilditIntakeError(
+                    raise exp.IntakeError(
                         "Currently, post training quantization only supports Pytorch models."
                     )
                 sequence = model_type_to_sequence_with_quantization[model_type]

@@ -73,13 +73,13 @@ class ReceiveOnnxModel(stage.Stage):
             ONNX files, however the stage received a model of type
             {type(state.model)}.
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
         if not state.model.endswith(".onnx"):
             msg = f"""
             The current stage (ReceiveOnnxModel) expects a path to ONNX
             model, however the stage received {state.model}.
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         dummy_inputs = tuple(state.inputs.values())
         dummy_input_names = tuple(state.inputs.keys())
@@ -105,7 +105,7 @@ class ReceiveOnnxModel(stage.Stage):
                     input dimensions.
                     More information may be available in the log file at **{self.logfile_path}**
                     """
-                    raise exp.BuilditStageError(msg)
+                    raise exp.StageError(msg)
 
         if opset < build.DEFAULT_ONNX_OPSET and opset >= build.MINIMUM_ONNX_OPSET:
             print(
@@ -118,7 +118,7 @@ class ReceiveOnnxModel(stage.Stage):
             try upgrading the model to opset 13.
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         shutil.copy(state.model, state.base_onnx_file)
 
@@ -143,7 +143,7 @@ class ReceiveOnnxModel(stage.Stage):
             Any optimizations performed on the model could result in an error.
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         return state
 
@@ -175,7 +175,7 @@ class ExportPytorchModel(stage.Stage):
             models of type torch.nn.Module or torch.jit.ScriptModule, however
             the stage received a model of type {type(state.model)}.
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         # TODO: check that state.inputs is valid
         # https://git.groq.io/code/Groq/-/issues/13947
@@ -276,7 +276,7 @@ class ExportPytorchModel(stage.Stage):
             compatible with this third party software, then re-run benchit().
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         return state
 
@@ -312,7 +312,7 @@ class ExportKerasModel(stage.Stage):
             models of type tf.keras.Model, however
             the stage received a model of type {type(state.model)}.
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         user_provided_args = state.inputs.keys()
 
@@ -396,7 +396,7 @@ class ExportKerasModel(stage.Stage):
             compatible with this third party software, then re-run benchit().
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         return state
 
@@ -459,7 +459,7 @@ class OptimizeOnnxModel(stage.Stage):
             compatible with this third party software, then re-run benchit().
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         return state
 
@@ -542,7 +542,7 @@ class ConvertOnnxToFp16(stage.Stage):
             model to the float16 datatype, however this operation was not successful.
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         return state
 
@@ -591,7 +591,7 @@ class QuantizeONNXModel(stage.Stage):
             model to int8 datatype, however this operation was not successful.
             More information may be available in the log file at **{self.logfile_path}**
             """
-            raise exp.BuilditStageError(msg)
+            raise exp.StageError(msg)
 
         return state
 
@@ -599,7 +599,7 @@ class QuantizeONNXModel(stage.Stage):
 class SuccessStage(stage.Stage):
     """
     Stage that sets state.build_status = build.Status.SUCCESSFUL_BUILD,
-    indicating that buildit() has completed all of the requested build stages.
+    indicating that the build sequence has completed all of the requested build stages.
     """
 
     def __init__(self):

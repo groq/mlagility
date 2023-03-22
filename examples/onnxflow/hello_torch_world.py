@@ -2,16 +2,15 @@
     Hello ** PyTorch ** World!
 
     This example uses a small model to carry out a single vector matrix
-    multiplication to demonstrate building and build a PyTorch model
-    with OnnxFlow.
+    multiplication to demonstrate building and build a PyTorch model.
 
-    This example will help identify what you should expect from each buildit()
+    This example will help identify what you should expect from each build_model()
     PyTorch build. You can find the build results in the cache directory at
-    ~/.cache/onnxflow/hello_pytorch_world/ (unless otherwise specified).
+    <current_working_directory>/hello_pytorch_world/ (unless otherwise specified).
 """
 
 import torch
-from onnxflow import buildit
+from onnxflow import build_model
 
 torch.manual_seed(0)
 
@@ -33,7 +32,7 @@ pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}
 
 # Build model
-omodel = buildit(pytorch_model, inputs, build_name="hello_pytorch_world")
+omodel = build_model(pytorch_model, inputs, build_name="hello_pytorch_world")
 
 # Print build results
 print(f"OnnxFlow build status: {omodel.state.build_status}")

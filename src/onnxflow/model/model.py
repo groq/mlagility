@@ -94,7 +94,7 @@ class BaseModel:
         if not all(node in output_nodes for node in output_nodes_received):
             raise exp.ModelRuntimeError(
                 (
-                    f"OnnxFlow expected outputs {str(self.state.expected_output_names)} "
+                    f"Model expected outputs {str(self.state.expected_output_names)} "
                     f"but got {str(output_nodes_received)}"
                 )
             )

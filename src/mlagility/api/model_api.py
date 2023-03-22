@@ -1,7 +1,7 @@
 import sys
 import os
 from typing import Any, Dict, Optional, List
-from onnxflow import buildit
+from onnxflow import build_model
 from onnxflow.justbuildit.stage import Sequence
 import onnxflow.common.printing as printing
 from mlagility.api import trtmodel, ortmodel
@@ -81,7 +81,7 @@ def benchmark_model(
                 )
 
         elif device == "nvidia":
-            omodel = buildit(
+            omodel = build_model(
                 model=model,
                 inputs=inputs,
                 build_name=build_name,
@@ -99,7 +99,7 @@ def benchmark_model(
                 perf = gpu_model.benchmark(backend=backend)
 
         elif device == "x86":
-            omodel = buildit(
+            omodel = build_model(
                 model=model,
                 inputs=inputs,
                 build_name=build_name,

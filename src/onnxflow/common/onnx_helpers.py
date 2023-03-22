@@ -56,9 +56,9 @@ def io_bytes(onnx_path: str) -> Tuple[int, int]:
             or elem_type == onnx.TensorProto.DataType.STRING
             or elem_type == onnx.TensorProto.DataType.UNDEFINED
         ):
-            raise exp.OnnxFlowError("Unsupported data type")
+            raise exp.Error("Unsupported data type")
         else:
-            raise exp.OnnxFlowError("Unsupported data type (unknown to ONNX)")
+            raise exp.Error("Unsupported data type (unknown to ONNX)")
 
     def get_nodes_bytes(nodes):
         nodes_bytes = {}

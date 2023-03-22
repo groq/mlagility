@@ -24,36 +24,11 @@ UnionValidModelInstanceTypes = Union[
     sklearn.base.BaseEstimator,
 ]
 
-environment_variables = {
-    "cache_dir": "ONNXFLOW_CACHE_DIR",
-    "rebuild": "ONNXFLOW_REBUILD_POLICY",
-    "debug": "ONNXFLOW_DEBUG",
-    "internal": "ONNXFLOW_INTERNAL_FEATURES",
-}
-
 DEFAULT_ONNX_OPSET = 14
 MINIMUM_ONNX_OPSET = 11
 
-# Allow an environment variable to override the default
-# location for the OnnxFlow build cache
-if os.environ.get(environment_variables["cache_dir"]):
-    DEFAULT_CACHE_DIR = os.environ.get(environment_variables["cache_dir"])
-else:
-    DEFAULT_CACHE_DIR = os.path.expanduser("~/.cache/onnxflow")
-
-# Allow an environment variable to override the default
-# rebuild policy
-if os.environ.get(environment_variables["rebuild"]):
-    DEFAULT_REBUILD_POLICY = os.environ.get(environment_variables["rebuild"])
-    rebuild_allowed_values = ["if_needed", "always", "never"]
-    if DEFAULT_REBUILD_POLICY not in rebuild_allowed_values:
-        raise ValueError(
-            f'Environment variable set for {environment_variables["rebuild"]} has '
-            f"value {DEFAULT_REBUILD_POLICY}, which is not one of the following allowed "
-            f"values: {rebuild_allowed_values} "
-        )
-else:
-    DEFAULT_REBUILD_POLICY = "if_needed"
+DEFAULT_CACHE_DIR = os.getcwd()
+DEFAULT_REBUILD_POLICY = "if_needed"
 
 
 class Backend(enum.Enum):
@@ -76,7 +51,7 @@ def load_yaml(file_path):
         try:
             return yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as e:
-            raise exp.OnnxFlowIOError(
+            raise exp.IOError(
                 f"Failed while trying to open {file_path}."
                 f"The exception that triggered this was:\n{e}"
             )
@@ -150,7 +125,7 @@ def hash_model(model, model_type: ModelType, hash_params: bool = True):
 
     else:
         msg = f"""
-        model_type "{model_type}" unsupported by buildit's hash_model function
+        model_type "{model_type}" unsupported by this hash_model function
         """
         raise ValueError(msg)
 
@@ -197,7 +172,7 @@ def get_shapes_and_dtypes(inputs: dict):
         elif value is None:
             pass
         else:
-            raise exp.OnnxFlowError(
+            raise exp.Error(
                 "One of the provided inputs contains the unsupported "
                 f' type {type(value)} at key "{key}".'
             )
@@ -208,9 +183,8 @@ def get_shapes_and_dtypes(inputs: dict):
 @dataclasses.dataclass(frozen=True)
 class Config:
     """
-    User-provided build configuration. OnnxFlow is not allowed
-    to change instances of Config once they have been
-    instantiated (frozen=True enforces this).
+    User-provided build configuration. Instances of Config should not be modified
+    once they have been instantiated (frozen=True enforces this).
 
     Note: modifying this struct can create a breaking change that
     requires users to rebuild their models. Increment the minor
@@ -228,8 +202,8 @@ class Info:
     Information about a build that may be useful for analysis
     or debugging purposes.
 
-    Note: OnnxFlow does not guarantee that members of this class will
-    have non-None values at the end of a build. OnnxFlow code must
+    Note: There is no guarantee that members of this class will
+    have non-None values at the end of a build. Do
     not take a dependence on any member of this class.
     """
 
@@ -276,7 +250,7 @@ class State:
     after_post_init: bool = False
 
     # All of the following are critical aspects of the build,
-    # including properties of OnnxFlow and choices made by OnnxFlow
+    # including properties of the tool and choices made
     # while building the model, which determine the outcome of the build.
     # NOTE: adding or changing a member name in this struct can create
     # a breaking change that requires users to rebuild their models.
@@ -459,7 +433,7 @@ def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) ->
             path_suggestion = output_dir(cache_dir, build_name)
         msg = f"""
         The cached build of this model was built with an
-        incompatible older version of OnnxFlow.
+        incompatible older version of the tool.
 
         Suggested solution: delete the build with
         rm -rf {path_suggestion}
@@ -467,7 +441,7 @@ def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) ->
         The underlying code raised this exception:
         {e}
         """
-        raise exp.BuilditStateError(msg)
+        raise exp.StateError(msg)
 
     return state
 

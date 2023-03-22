@@ -7,7 +7,7 @@ import onnxflow.common.printing as printing
 import onnxflow.common.build as build
 
 
-def buildit(
+def build_model(
     model: build.UnionValidModelInstanceTypes = None,
     inputs: Optional[Dict[str, Any]] = None,
     build_name: Optional[str] = None,
@@ -18,7 +18,7 @@ def buildit(
     quantization_samples: Collection = None,
 ) -> omodel.BaseModel:
 
-    """Use OnnxFlow to build a model instance into an optimized ONNX file.
+    """Use build a model instance into an optimized ONNX file.
 
     Args:
         model: Model to be mapped to an optimized ONNX file, which can be a PyTorch
@@ -28,19 +28,20 @@ def buildit(
             built to handle inputs with the same static shape only.
         build_name: Unique name for the model that will be
             used to store the ONNX file and build state on disk. Defaults to the
-            name of the file that calls buildit().
-        cache_dir: Directory to use as the OnnxFlow cache for this build. Output files
+            name of the file that calls build_model().
+        cache_dir: Directory to use as the cache for this build. Output files
             from this build will be stored at cache_dir/build_name/
-            Defaults to ~/.cache/onnxflow
+            Defaults to the current working directory, but we recommend setting it to
+            an absolute path of your choosing.
         monitor: Display a monitor on the command line that
-            tracks the progress of benchit() as it builds the ONNX file.
+            tracks the progress of this function as it builds the ONNX file.
         rebuild: determines whether to rebuild or load a cached build. Options:
             - "if_needed" (default): overwrite invalid cached builds with a rebuild
             - "always": overwrite valid cached builds with a rebuild
             - "never": load cached builds without checking validity, with no guarantee
                 of functionality or correctness
             - None: Falls back to default
-        sequence: Override benchit()'s default sequence of build stages. Power
+        sequence: Override the default sequence of build stages. Power
             users only.
         quantization_samples: If set, performs post-training quantization
             on the ONNX model using the provided samplesIf the previous build used samples
@@ -49,15 +50,15 @@ def buildit(
             in order to create a new ONNX file.
     """
 
-    # Validate and lock in the benchit() config (user arguments that
-    # configure the build) that will be used by the rest of benchit()
+    # Validate and lock in the config (user arguments that
+    # configure the build) that will be used by the rest of the toolchain
     (config, auto_name) = ignition.lock_config(
         build_name=build_name,
         sequence=sequence,
     )
 
     # Analyze the user's model argument and lock in the model, inputs,
-    # and sequence that will be used by the rest of benchit()
+    # and sequence that will be used by the rest of the toolchain
     (model_locked, inputs_locked, sequence_locked, model_type,) = ignition.model_intake(
         model,
         inputs,
@@ -65,7 +66,7 @@ def buildit(
         user_quantization_samples=quantization_samples,
     )
 
-    # Get the state of the model from the OnnxFlow cache if a valid build is available
+    # Get the state of the model from the cache if a valid build is available
     state = ignition.load_or_make_state(
         config=config,
         cache_dir=cache_dir,
@@ -106,7 +107,7 @@ def buildit(
             f"Build Sequence {sequence_locked.unique_name} completed successfully"
         )
         msg = """
-        benchit() only returns a Model instance if the Sequence includes a Stage
+        build_model() only returns a Model instance if the Sequence includes a Stage
         that sets state.build_status=onnxflow.build.Status.SUCCESSFUL_BUILD.
         """
         printing.log_warning(msg)

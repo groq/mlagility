@@ -29,7 +29,7 @@ def _name_is_file_safe(name: str):
 
     if len(name) == 0:
         msg = """
-        buildit() Stage __init__() was passed a unique_name with no length. A
+        Stage __init__() was passed a unique_name with no length. A
         uniquely identifying unique_name is required.
         """
         raise ValueError(msg)
@@ -37,7 +37,7 @@ def _name_is_file_safe(name: str):
     for char in name:
         if char not in allowed_in_unique_name:
             msg = f"""
-            buildit() Stage __init__() was passed a unique_name:
+            Stage __init__() was passed a unique_name:
             {name}
             with illegal characters. The unique_name must be safe to
             use in a filename, meaning it can only use characters: {allowed_in_unique_name}
@@ -48,8 +48,7 @@ def _name_is_file_safe(name: str):
 class Stage(abc.ABC):
     def status_line(self, successful, verbosity):
         """
-        Print a line of status information for this Stage into the
-        buildit() monitor.
+        Print a line of status information for this Stage into the monitor.
         """
         if verbosity:
             success_tick = "✓"
@@ -84,7 +83,7 @@ class Stage(abc.ABC):
         """
         Developer-defined function to fire the stage.
         In less punny terms, this is the function that
-        OnnxFlow will run to implement a model-to-model
+        build_model() will run to implement a model-to-model
         transformation on the flow to producing a Model.
         """
 
@@ -118,7 +117,7 @@ class Stage(abc.ABC):
             state = self.fire(state)
             sys.stdout = sys.stdout.terminal
 
-        except exp.BuilditStageError:
+        except exp.StageError:
             # Stop redirecting output to log file
             sys.stdout = sys.stdout.terminal
 
@@ -230,7 +229,7 @@ class Sequence(Stage):
 
     def show_monitor(self, config: build.Config, verbosity: bool):
         """
-        Displays the buildit() monitor on the terminal. The purpose of the monitor
+        Displays the monitor on the terminal. The purpose of the monitor
         is to show the status of each stage (success, failure, not started yet,
         or in-progress).
         """
@@ -239,7 +238,7 @@ class Sequence(Stage):
             print("\n\n")
 
             printing.logn(
-                f'OnnxFlow is building "{config.build_name}"',
+                f'Building "{config.build_name}"',
                 c=printing.Colors.BOLD,
             )
 
@@ -250,9 +249,9 @@ class Sequence(Stage):
 
     def launch(self, state: build.State) -> build.State:
         """
-        Executes a benchit() launch sequence.
+        Executes a launch sequence.
         In less punny terms, this method is called by the top-level
-        buildit() function to iterate over all of the Stages required for a build.
+        build_model() function to iterate over all of the Stages required for a build.
         Builds are defined by self.stages in a top-level Sequence, and self.stages
         can include both Stages and Sequences (ie, sequences can be nested).
         """
@@ -261,12 +260,12 @@ class Sequence(Stage):
             state.build_status = build.Status.PARTIAL_BUILD
         elif state.build_status == build.Status.SUCCESSFUL_BUILD:
             msg = """
-            buildit() is running a build on a model that already built successfully, which
+            build_model() is running a build on a model that already built successfully, which
             should not happen because the build should have loaded from cache or rebuilt from scratch.
             If you are using custom Stages and Sequences then you have some debugging to do. Otherwise,
-            please file an issue at https://github.com/groq/onnxflow/issues
+            please file an issue at https://github.com/groq/mlagility/issues
             """
-            raise exp.OnnxFlowError(msg)
+            raise exp.Error(msg)
 
         # Collect telemetry for the build
         state.info.all_build_stages = self.get_names()
@@ -287,7 +286,7 @@ class Sequence(Stage):
                     time.time() - start_time
                 )
 
-        except exp.BuilditStageError as e:
+        except exp.StageError as e:
             # Advance the cursor below the monitor so
             # we can print an error message
             stage_depth_in_sequence = self.get_depth() - self.get_names().index(

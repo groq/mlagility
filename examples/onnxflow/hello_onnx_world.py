@@ -3,16 +3,16 @@
 
     This example uses a small model to carry out a single vector matrix
     multiplication to demonstrate building and running an ONNX model
-    with GroqFlow.
+    with build_model().
 
     This example will help identify what you should expect from each groqit()
     ONNX build. You can find the build results in the cache directory at
-    ~/.cache/groqflow/hello_onnx_world/ (unless otherwise specified).
+    <current_working_directory>/hello_onnx_world/ (unless otherwise specified).
 """
 
 import os
 import torch
-from groqflow import groqit
+from onnxflow import build_model
 import onnxruntime as ort
 
 torch.manual_seed(0)
