@@ -1,4 +1,5 @@
 # labels: name::tresnet_m author::timm task::computer_vision
+# Skip reason: Requires non-standard library (InplaceABN)
 import torch
 import timm
 from mlagility.parser import parse
@@ -7,7 +8,7 @@ from mlagility.parser import parse
 batch_size = parse(["batch_size"])
 
 # Creating model and set it to evaluation mode
-model = timm.create_model("tresnet_m", pretrained = False)
+model = timm.create_model("tresnet_m", pretrained=False)
 model.eval()
 
 # Creating inputs

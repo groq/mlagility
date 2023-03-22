@@ -1,4 +1,5 @@
 # labels: name::ese_vovnet99b_iabn author::timm task::computer_vision
+# Skip reason: Requires non-standard library (InplaceABN)
 import torch
 import timm
 from mlagility.parser import parse
@@ -7,7 +8,7 @@ from mlagility.parser import parse
 batch_size = parse(["batch_size"])
 
 # Creating model and set it to evaluation mode
-model = timm.create_model("ese_vovnet99b_iabn", pretrained = False)
+model = timm.create_model("ese_vovnet99b_iabn", pretrained=False)
 model.eval()
 
 # Creating inputs

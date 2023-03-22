@@ -1,4 +1,5 @@
 # labels: name::efficientnet_b3_pruned author::timm task::computer_vision
+# Skip reason: Fails during the analysis stage of benchit
 import torch
 import timm
 from mlagility.parser import parse
@@ -7,7 +8,7 @@ from mlagility.parser import parse
 batch_size = parse(["batch_size"])
 
 # Creating model and set it to evaluation mode
-model = timm.create_model("efficientnet_b3_pruned", pretrained = False)
+model = timm.create_model("efficientnet_b3_pruned", pretrained=False)
 model.eval()
 
 # Creating inputs
