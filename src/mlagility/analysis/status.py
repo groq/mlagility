@@ -104,7 +104,7 @@ def print_model(
             )
 
             if model_info.traceback is not None:
-                if os.environ.get("MLAGILITY_TRACEBACK") == "True":
+                if os.environ.get("MLAGILITY_TRACEBACK") != "False":
                     for line in model_info.traceback:
                         for subline in line.split("\n")[:-1]:
                             print(f"{ident}\t{subline}")
