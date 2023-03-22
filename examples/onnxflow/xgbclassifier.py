@@ -27,7 +27,11 @@ xgb_model = XGBClassifier(
 xgb_model.fit(x_train, y_train)
 
 # Build the model
-omodel = build_model(xgb_model, {"input_0": x_test})
+omodel = build_model(
+    xgb_model,
+    {"input_0": x_test},
+    cache_dir="~/.cache/onnxflow_test_cache",
+)
 
 # Print build results
-print(f"OnnxFlow build status: {omodel.state.build_status}")
+print(f"Build status: {omodel.state.build_status}")

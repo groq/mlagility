@@ -48,16 +48,20 @@ jobs:
           python test/database.py
 
           # onnxflow examples
-          rm -rf ~/.cache/onnxflow
+          rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/hello_torch_world.py
-          rm -rf ~/.cache/onnxflow
+          rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/hello_keras_world.py
-          rm -rf ~/.cache/onnxflow
+          rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/hello_onnx_world.py
-          rm -rf ~/.cache/onnxflow
+          rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/randomforest.py
-          rm -rf ~/.cache/onnxflow
+          rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/xgbclassifier.py.py
+
+          # onnxflow tests
+          rm -rf ~/.cache/onnxflow_test_cache
+          python test/build_model.py
 
           # mlagility examples
           rm -rf ~/.cache/mlagility

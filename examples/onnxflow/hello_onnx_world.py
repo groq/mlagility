@@ -7,7 +7,7 @@
 
     This example will help identify what you should expect from each groqit()
     ONNX build. You can find the build results in the cache directory at
-    <current_working_directory>/hello_onnx_world/ (unless otherwise specified).
+    ~/.cache/onnxflow_test_cache/hello_onnx_world/ (unless otherwise specified).
 """
 
 import os
@@ -61,16 +61,15 @@ input_name = ort_sess.get_inputs()[0].name
 numpy_inputs = to_numpy(input_tensor)
 
 # Build ONNX model
-groq_model = groqit(onnx_model, inputs, build_name="hello_onnx_world")
+omodel = build_model(
+    onnx_model,
+    inputs,
+    cache_dir="~/.cache/onnxflow_test_cache",
+)
 
 # Remove intermediate onnx file so that you don't pollute your disk
 if os.path.exists(onnx_model):
     os.remove(onnx_model)
 
-# Compute ONNX and Groq results
-onnx_outputs = ort_sess.run(None, {input_name: numpy_inputs})
-groq_outputs = groq_model.run(inputs)
-
-# Print ONNX and Groq results
-print(f"Groq_outputs: {groq_outputs}")
-print(f"Onnx_outputs: {onnx_outputs}")
+# Print build results
+print(f"Build status: {omodel.state.build_status}")

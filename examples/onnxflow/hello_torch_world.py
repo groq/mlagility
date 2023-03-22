@@ -6,7 +6,7 @@
 
     This example will help identify what you should expect from each build_model()
     PyTorch build. You can find the build results in the cache directory at
-    <current_working_directory>/hello_pytorch_world/ (unless otherwise specified).
+    ~/.cache/onnxflow_test_cache/hello_pytorch_world/ (unless otherwise specified).
 """
 
 import torch
@@ -32,7 +32,11 @@ pytorch_model = SmallModel(input_size, output_size)
 inputs = {"x": torch.rand(input_size)}
 
 # Build model
-omodel = build_model(pytorch_model, inputs, build_name="hello_pytorch_world")
+omodel = build_model(
+    pytorch_model,
+    inputs,
+    cache_dir="~/.cache/onnxflow_test_cache",
+)
 
 # Print build results
-print(f"OnnxFlow build status: {omodel.state.build_status}")
+print(f"Build status: {omodel.state.build_status}")
