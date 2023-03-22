@@ -75,7 +75,7 @@ class Testing(unittest.TestCase):
     def test_002_custom_stage(self):
         build_name = "custom_stage"
 
-        class MyCustomStage(stage.GroqitStage):
+        class MyCustomStage(stage.Stage):
             def __init__(self, funny_saying):
                 super().__init__(
                     unique_name="funny_stage",
