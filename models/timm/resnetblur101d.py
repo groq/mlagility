@@ -6,8 +6,9 @@ from mlagility.parser import parse
 # Parsing command-line arguments
 batch_size = parse(["batch_size"])
 
-# Creating model
+# Creating model and set it to evaluation mode
 model = timm.create_model("resnetblur101d", pretrained = False)
+model.eval()
 
 # Creating inputs
 input_size = model.default_cfg["input_size"]
