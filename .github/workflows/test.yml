@@ -57,7 +57,7 @@ jobs:
           rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/randomforest.py
           rm -rf ~/.cache/onnxflow_test_cache
-          python examples/onnxflow/xgbclassifier.py.py
+          python examples/onnxflow/xgbclassifier.py
 
           # onnxflow tests
           rm -rf ~/.cache/onnxflow_test_cache
