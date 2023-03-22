@@ -17,3 +17,4 @@ nltk
 sentence_transformers
 scipy
 numpy
+timm
