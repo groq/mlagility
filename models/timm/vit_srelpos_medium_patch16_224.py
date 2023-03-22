@@ -1,4 +1,4 @@
-# labels: name::vit_srelpos_medium_patch16_224 author::timm
+# labels: name::vit_srelpos_medium_patch16_224 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

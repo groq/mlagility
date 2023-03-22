@@ -1,4 +1,4 @@
-# labels: name::resnest50d_4s2x40d author::timm
+# labels: name::resnest50d_4s2x40d author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

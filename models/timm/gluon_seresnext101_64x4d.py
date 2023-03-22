@@ -1,4 +1,4 @@
-# labels: name::gluon_seresnext101_64x4d author::timm
+# labels: name::gluon_seresnext101_64x4d author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

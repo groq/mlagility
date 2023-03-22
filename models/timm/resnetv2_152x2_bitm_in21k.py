@@ -1,4 +1,4 @@
-# labels: name::resnetv2_152x2_bitm_in21k author::timm
+# labels: name::resnetv2_152x2_bitm_in21k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

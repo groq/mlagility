@@ -1,4 +1,4 @@
-# labels: name::nasnetalarge author::timm
+# labels: name::nasnetalarge author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

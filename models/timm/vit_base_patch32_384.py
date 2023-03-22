@@ -1,4 +1,4 @@
-# labels: name::vit_base_patch32_384 author::timm
+# labels: name::vit_base_patch32_384 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

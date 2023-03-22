@@ -1,4 +1,4 @@
-# labels: name::adv_inception_v3 author::timm
+# labels: name::adv_inception_v3 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

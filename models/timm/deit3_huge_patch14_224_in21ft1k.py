@@ -1,4 +1,4 @@
-# labels: name::deit3_huge_patch14_224_in21ft1k author::timm
+# labels: name::deit3_huge_patch14_224_in21ft1k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

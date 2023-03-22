@@ -1,4 +1,4 @@
-# labels: name::ig_resnext101_32x32d author::timm
+# labels: name::ig_resnext101_32x32d author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

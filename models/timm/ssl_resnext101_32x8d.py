@@ -1,4 +1,4 @@
-# labels: name::ssl_resnext101_32x8d author::timm
+# labels: name::ssl_resnext101_32x8d author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: name::vovnet39a author::timm
+# labels: name::vovnet39a author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

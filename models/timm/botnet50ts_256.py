@@ -1,4 +1,4 @@
-# labels: name::botnet50ts_256 author::timm
+# labels: name::botnet50ts_256 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

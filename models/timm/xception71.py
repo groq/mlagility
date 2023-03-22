@@ -1,4 +1,4 @@
-# labels: name::xception71 author::timm
+# labels: name::xception71 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

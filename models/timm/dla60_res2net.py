@@ -1,4 +1,4 @@
-# labels: name::dla60_res2net author::timm
+# labels: name::dla60_res2net author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

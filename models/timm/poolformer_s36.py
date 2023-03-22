@@ -1,4 +1,4 @@
-# labels: name::poolformer_s36 author::timm
+# labels: name::poolformer_s36 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: name::beit_large_patch16_512 author::timm
+# labels: name::beit_large_patch16_512 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

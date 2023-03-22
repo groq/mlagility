@@ -1,4 +1,4 @@
-# labels: name::crossvit_18_dagger_408 author::timm
+# labels: name::crossvit_18_dagger_408 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

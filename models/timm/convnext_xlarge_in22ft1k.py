@@ -1,4 +1,4 @@
-# labels: name::convnext_xlarge_in22ft1k author::timm
+# labels: name::convnext_xlarge_in22ft1k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

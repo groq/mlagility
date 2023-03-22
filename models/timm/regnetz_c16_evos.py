@@ -1,4 +1,4 @@
-# labels: name::regnetz_c16_evos author::timm
+# labels: name::regnetz_c16_evos author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

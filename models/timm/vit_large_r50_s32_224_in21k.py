@@ -1,4 +1,4 @@
-# labels: name::vit_large_r50_s32_224_in21k author::timm
+# labels: name::vit_large_r50_s32_224_in21k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

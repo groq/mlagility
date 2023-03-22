@@ -1,4 +1,4 @@
-# labels: name::vit_tiny_r_s16_p8_224_in21k author::timm
+# labels: name::vit_tiny_r_s16_p8_224_in21k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

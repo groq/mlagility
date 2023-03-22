@@ -1,4 +1,4 @@
-# labels: name::mobilevitv2_200_in22ft1k author::timm
+# labels: name::mobilevitv2_200_in22ft1k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

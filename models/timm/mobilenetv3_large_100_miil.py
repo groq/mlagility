@@ -1,4 +1,4 @@
-# labels: name::mobilenetv3_large_100_miil author::timm
+# labels: name::mobilenetv3_large_100_miil author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

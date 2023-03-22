@@ -1,4 +1,4 @@
-# labels: name::swinv2_large_window12to24_192to384_22kft1k author::timm
+# labels: name::swinv2_large_window12to24_192to384_22kft1k author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

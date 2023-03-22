@@ -1,4 +1,4 @@
-# labels: name::efficientnetv2_l author::timm
+# labels: name::efficientnetv2_l author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

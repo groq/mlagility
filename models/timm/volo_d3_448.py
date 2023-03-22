@@ -1,4 +1,4 @@
-# labels: name::volo_d3_448 author::timm
+# labels: name::volo_d3_448 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

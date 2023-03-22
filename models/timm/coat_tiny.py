@@ -1,4 +1,4 @@
-# labels: name::coat_tiny author::timm
+# labels: name::coat_tiny author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

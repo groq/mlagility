@@ -1,4 +1,4 @@
-# labels: name::ese_vovnet19b_dw author::timm
+# labels: name::ese_vovnet19b_dw author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

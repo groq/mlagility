@@ -1,4 +1,4 @@
-# labels: name::gluon_resnet152_v1c author::timm
+# labels: name::gluon_resnet152_v1c author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: name::ecaresnext50t_32x4d author::timm
+# labels: name::ecaresnext50t_32x4d author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

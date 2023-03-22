@@ -1,4 +1,4 @@
-# labels: name::ghostnet_050 author::timm
+# labels: name::ghostnet_050 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

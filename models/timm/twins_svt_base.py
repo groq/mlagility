@@ -1,4 +1,4 @@
-# labels: name::twins_svt_base author::timm
+# labels: name::twins_svt_base author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: name::hardcorenas_c author::timm
+# labels: name::hardcorenas_c author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

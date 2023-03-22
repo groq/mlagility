@@ -1,4 +1,4 @@
-# labels: name::densenet169 author::timm
+# labels: name::densenet169 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

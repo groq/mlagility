@@ -1,4 +1,4 @@
-# labels: name::swinv2_base_window16_256 author::timm
+# labels: name::swinv2_base_window16_256 author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

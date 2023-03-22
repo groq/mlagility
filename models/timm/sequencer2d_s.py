@@ -1,4 +1,4 @@
-# labels: name::sequencer2d_s author::timm
+# labels: name::sequencer2d_s author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

@@ -1,4 +1,4 @@
-# labels: name::mixer_b16_224_miil author::timm
+# labels: name::mixer_b16_224_miil author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse

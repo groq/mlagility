@@ -1,4 +1,4 @@
-# labels: name::resnet51q author::timm
+# labels: name::resnet51q author::timm task::computer_vision
 import torch
 import timm
 from mlagility.parser import parse
