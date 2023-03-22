@@ -1,3 +1,4 @@
+import os
 from typing import Optional, List, Dict, Any
 from collections.abc import Collection
 import onnxflow.model as omodel
@@ -50,6 +51,9 @@ def build_model(
             in order to create a new ONNX file.
     """
 
+    # Support "~" in the cache_dir argument
+    parsed_cache_dir = os.path.expanduser(cache_dir)
+
     # Validate and lock in the config (user arguments that
     # configure the build) that will be used by the rest of the toolchain
     (config, auto_name) = ignition.lock_config(
@@ -69,7 +73,7 @@ def build_model(
     # Get the state of the model from the cache if a valid build is available
     state = ignition.load_or_make_state(
         config=config,
-        cache_dir=cache_dir,
+        cache_dir=parsed_cache_dir,
         rebuild=rebuild or build.DEFAULT_REBUILD_POLICY,
         model_type=model_type,
         monitor=monitor,

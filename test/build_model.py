@@ -45,7 +45,7 @@ class SmallKerasModel(tf.keras.Model):  # pylint: disable=abstract-method
         return self.dense(x)
 
 
-cache_location = "~/.cache/onnxflow_test_cache"
+cache_location = ".cache/onnxflow_test_cache"
 
 # Define pytorch model and inputs
 pytorch_model = SmallPytorchModel()
@@ -214,13 +214,6 @@ def full_compile_individual_stages():
     )
     build_model(
         build_name=build_name,
-        sequence=stage.Sequence(
-            "CheckCompatibility_seq", "", [export.CheckOnnxCompatibility()]
-        ),
-        cache_dir=cache_location,
-    )
-    build_model(
-        build_name=build_name,
         sequence=stage.Sequence("Fp16Conversion_seq", "", [export.ConvertOnnxToFp16()]),
         cache_dir=cache_location,
     )
@@ -268,7 +261,6 @@ def custom_stage():
         stages=[
             export.ExportPytorchModel(),
             export.OptimizeOnnxModel(),
-            export.CheckOnnxCompatibility(),
             my_custom_stage,
             export.SuccessStage(),
         ],
@@ -334,15 +326,9 @@ def nested_sequence():
         cache_dir=cache_location,
     )
 
-    log_1_path = os.path.join(
-        build.DEFAULT_CACHE_DIR, build_name, f"log_{stage_1_name}.txt"
-    )
-    log_2_path = os.path.join(
-        build.DEFAULT_CACHE_DIR, build_name, f"log_{stage_2_name}.txt"
-    )
-    log_3_path = os.path.join(
-        build.DEFAULT_CACHE_DIR, build_name, f"log_{stage_3_name}.txt"
-    )
+    log_1_path = os.path.join(cache_location, build_name, f"log_{stage_1_name}.txt")
+    log_2_path = os.path.join(cache_location, build_name, f"log_{stage_2_name}.txt")
+    log_3_path = os.path.join(cache_location, build_name, f"log_{stage_3_name}.txt")
 
     with open(log_1_path, "r", encoding="utf8") as f:
         log_1 = f.readline()
@@ -381,15 +367,9 @@ def custom_sequence():
         cache_dir=cache_location,
     )
 
-    log_1_path = os.path.join(
-        build.DEFAULT_CACHE_DIR, build_name, f"log_{stage_1_name}.txt"
-    )
-    log_2_path = os.path.join(
-        build.DEFAULT_CACHE_DIR, build_name, f"log_{stage_2_name}.txt"
-    )
-    log_3_path = os.path.join(
-        build.DEFAULT_CACHE_DIR, build_name, f"log_{stage_3_name}.txt"
-    )
+    log_1_path = os.path.join(cache_location, build_name, f"log_{stage_1_name}.txt")
+    log_2_path = os.path.join(cache_location, build_name, f"log_{stage_2_name}.txt")
+    log_3_path = os.path.join(cache_location, build_name, f"log_{stage_3_name}.txt")
 
     with open(log_1_path, "r", encoding="utf8") as f:
         log_1 = f.readline()
@@ -437,7 +417,7 @@ def rebuild_always():
             cache_dir=cache_location,
         )
 
-        yaml_file_path = build.state_file(build.DEFAULT_CACHE_DIR, build_name)
+        yaml_file_path = build.state_file(cache_location, build_name)
 
         # Read the the file modification timestamp
         if os.path.isfile(yaml_file_path):
@@ -499,7 +479,7 @@ def rebuild_if_needed():
         if build_purpose == "initial":
             gmodel.state.save()
 
-        yaml_file_path = build.state_file(build.DEFAULT_CACHE_DIR, build_name)
+        yaml_file_path = build.state_file(cache_location, build_name)
 
         # Read the the file modification timestamp
         if os.path.isfile(yaml_file_path):
