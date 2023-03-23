@@ -1,99 +1,14 @@
 import sys
 import os
 from typing import Any, Dict, Optional, List
-from groqflow import groqit
-import groqflow.common.build as build
-from groqflow.justgroqit.stage import Sequence
-from groqflow.justgroqit.ignition import identify_model_type
-import groqflow.justgroqit.export as export
-import groqflow.justgroqit.hummingbird as hummingbird
-import groqflow.common.printing as printing
-from groqflow.groqmodel import GroqModel
+from onnxflow import build_model
+from onnxflow.justbuildit.stage import Sequence
+import onnxflow.common.printing as printing
 from mlagility.api import trtmodel, ortmodel
 import mlagility.common.filesystem as filesystem
 from mlagility.api.performance import MeasuredPerformance
-import mlagility.common.groqflow_helpers as groqflow_helpers
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
-
-
-model_type_to_export_sequence = {
-    build.ModelType.PYTORCH: Sequence(
-        unique_name="pytorch_bench",
-        monitor_message="Benchmark sequence for PyTorch",
-        stages=[
-            export.ExportPytorchModel(),
-            export.OptimizeOnnxModel(),
-            export.ConvertOnnxToFp16(),
-            groqflow_helpers.SuccessStage(),
-        ],
-        enable_model_validation=True,
-    ),
-    build.ModelType.KERAS: Sequence(
-        unique_name="keras_bench",
-        monitor_message="Benchmark sequence for PyTorch",
-        stages=[
-            export.ExportKerasModel(),
-            export.OptimizeOnnxModel(),
-            export.ConvertOnnxToFp16(),
-            groqflow_helpers.SuccessStage(),
-        ],
-        enable_model_validation=True,
-    ),
-    build.ModelType.ONNX_FILE: Sequence(
-        unique_name="onnx_bench",
-        monitor_message="Benchmark sequence for PyTorch",
-        stages=[
-            export.ReceiveOnnxModel(),
-            export.OptimizeOnnxModel(),
-            export.ConvertOnnxToFp16(),
-            groqflow_helpers.SuccessStage(),
-        ],
-        enable_model_validation=True,
-    ),
-    build.ModelType.HUMMINGBIRD: Sequence(
-        unique_name="pytorch_bench",
-        monitor_message="Benchmark sequence for PyTorch",
-        stages=[
-            hummingbird.ConvertHummingbirdModel(),
-            export.OptimizeOnnxModel(),
-            export.ConvertOnnxToFp16(),
-            groqflow_helpers.SuccessStage(),
-        ],
-        enable_model_validation=True,
-    ),
-}
-
-
-def exportit(
-    model: Any,
-    inputs: Dict[str, Any],
-    build_name: Optional[str] = None,
-    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
-    rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
-    sequence: Sequence = None,
-) -> GroqModel:
-    """
-    Export a model to ONNX and save it to the cache
-    """
-
-    model_type = identify_model_type(model)
-
-    if sequence is None:
-        sequence_arg = model_type_to_export_sequence[model_type]
-    else:
-        sequence_arg = sequence
-
-    gmodel = groqit(
-        model=model,
-        inputs=inputs,
-        build_name=build_name,
-        cache_dir=cache_dir,
-        sequence=sequence_arg,
-        rebuild=rebuild,
-    )
-
-    return gmodel
 
 
 def benchmark_model(
@@ -135,6 +50,9 @@ def benchmark_model(
     try:
 
         if device == "groq":
+            # pylint: disable=import-error
+            from groqflow import groqit
+
             gmodel = groqit(
                 model=model,
                 inputs=inputs,
@@ -163,7 +81,7 @@ def benchmark_model(
                 )
 
         elif device == "nvidia":
-            gmodel = exportit(
+            omodel = build_model(
                 model=model,
                 inputs=inputs,
                 build_name=build_name,
@@ -175,13 +93,13 @@ def benchmark_model(
             if not build_only:
                 printing.log_info(f"Benchmarking on {backend} {device}...")
                 gpu_model = trtmodel.TRTModel(
-                    cache_dir=gmodel.state.cache_dir,
-                    build_name=gmodel.state.config.build_name,
+                    cache_dir=omodel.state.cache_dir,
+                    build_name=omodel.state.config.build_name,
                 )
                 perf = gpu_model.benchmark(backend=backend)
 
         elif device == "x86":
-            gmodel = exportit(
+            omodel = build_model(
                 model=model,
                 inputs=inputs,
                 build_name=build_name,
@@ -193,8 +111,8 @@ def benchmark_model(
             if not build_only:
                 printing.log_info(f"Benchmarking on {backend} {device}...")
                 cpu_model = ortmodel.ORTModel(
-                    build_name=gmodel.state.config.build_name,
-                    cache_dir=gmodel.state.cache_dir,
+                    build_name=omodel.state.config.build_name,
+                    cache_dir=omodel.state.cache_dir,
                 )
                 perf = cpu_model.benchmark(backend=backend)
 

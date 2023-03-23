@@ -6,10 +6,8 @@ from stat import S_ISDIR
 import shutil
 import yaml
 import paramiko
-import groqflow.common.exceptions as exp
-import groqflow.common.build as build
-import groqflow.common.sdk_helpers as sdk
-from groqflow.groqmodel import groqmodel
+import onnxflow.common.exceptions as exp
+import onnxflow.common.build as build
 
 ORT_BENCHMARKING_SCRIPT = "setup_ort.py"
 ORT_EXECUTION_SCRIPT = "run_ort_model.py"
@@ -203,7 +201,7 @@ def configure_remote(device: str) -> Tuple[str, str]:
         username = username or input(f"Username for {ip}: ")
 
         if not username or not ip:
-            raise exp.GroqModelRuntimeError("Username and hostname are required")
+            raise exp.ModelRuntimeError("Username and hostname are required")
 
         # Store information on yaml file
         save_remote_config(ip, username, device)
@@ -217,24 +215,32 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         stdout, exit_code = exec_command(client, "lspci | grep -i nvidia")
         if stdout == "" or exit_code == 1:
             msg = "No NVIDIA GPUs available on the remote machine"
-            raise exp.GroqModelRuntimeError(msg)
+            raise exp.ModelRuntimeError(msg)
         files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
     elif device_type == "x86":
         # Check if x86_64 CPU is available remotely
         stdout, exit_code = exec_command(client, "uname -i")
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
-            raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", ORT_EXECUTION_SCRIPT]
+            raise exp.ModelRuntimeError(msg)
+        files_to_transfer = [
+            ORT_BENCHMARKING_SCRIPT,
+            "Dockerfile",
+            ORT_EXECUTION_SCRIPT,
+        ]
     elif device_type == "groqchip":
+        # pylint: disable=import-error
+        import groqflow.common.sdk_helpers as sdk
+        import groqflow.common.exceptions as groq_exp
+
         # Check if at least one GroqChip Processor is available remotely
         stdout, exit_code = exec_command(client, "/usr/bin/lspci -n")
         if stdout == "" or exit_code == 1:
             msg = "Failed to run lspci to get GroqChip Processors available"
-            raise exp.GroqModelRuntimeError(msg)
+            raise groq_exp.GroqModelRuntimeError(msg)
         num_chips_available = sdk.get_num_chips_available(stdout.split("\n"))
         if num_chips_available < 1:
-            raise exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
+            raise groq_exp.GroqModelRuntimeError("No GroqChip Processor(s) found")
         files_to_transfer = ["execute.py"]
     else:
         raise ValueError(
@@ -245,6 +251,9 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
     if device_type == "groqchip":
+        # pylint: disable=import-error
+        from groqflow.groqmodel import groqmodel
+
         dir_path = os.path.dirname(os.path.realpath(groqmodel.__file__))
     else:
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -262,8 +271,12 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
         stdout = check_device.stdout.decode().strip()
         if stdout != "x86_64" or check_device.returncode == 1:
             msg = "Only x86_64 CPUs are supported at this time for competitive benchmarking"
-            raise exp.GroqModelRuntimeError(msg)
-        files_to_transfer = [ORT_BENCHMARKING_SCRIPT, "Dockerfile", ORT_EXECUTION_SCRIPT]
+            raise exp.ModelRuntimeError(msg)
+        files_to_transfer = [
+            ORT_BENCHMARKING_SCRIPT,
+            "Dockerfile",
+            ORT_EXECUTION_SCRIPT,
+        ]
 
     elif device_type == "nvidia":
         # Check if at least one NVIDIA GPU is available locally
@@ -277,7 +290,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
 
         if "NVIDIA" not in result.stdout or result.returncode == 1:
             msg = "No NVIDIA GPUs available on the local machine"
-            raise exp.GroqModelRuntimeError(msg)
+            raise exp.ModelRuntimeError(msg)
         files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
 
     else:
@@ -321,7 +334,7 @@ def execute_groqchip_remotely(
     # Transfer iop and inputs file
     if not os.path.exists(state.execution_inputs_file):
         msg = "Model input file not found"
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.mkdir("groqflow_remote_cache/compile")
@@ -352,7 +365,7 @@ def execute_groqchip_remotely(
         msg = """
         Failed to execute GroqChip Processor(s) remotely.
         """
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
@@ -384,7 +397,7 @@ def execute_trt_remotely(
     state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.mkdir(remote_paths.onnx_dir)
@@ -402,7 +415,7 @@ def execute_trt_remotely(
         msg = """
         Failed to execute GPU(s) remotely.
         """
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
@@ -447,7 +460,7 @@ def execute_trt_locally(
     state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     os.makedirs(local_paths.onnx_dir)
     shutil.copy(state.converted_onnx_file, local_paths.onnx_file)
@@ -517,7 +530,7 @@ def execute_ort_remotely(
     state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     with MySFTPClient.from_transport(client.get_transport()) as s:
         s.mkdir(remote_paths.onnx_dir)
@@ -537,7 +550,7 @@ def execute_ort_remotely(
         msg = """
         Failed to execute model on ORT container.
         """
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     # Get output files back
     with MySFTPClient.from_transport(client.get_transport()) as s:
@@ -575,7 +588,7 @@ def execute_ort_locally(
     state = build.load_state(cache_dir, build_name)
     if not os.path.exists(state.converted_onnx_file):
         msg = "Model file not found"
-        raise exp.GroqModelRuntimeError(msg)
+        raise exp.ModelRuntimeError(msg)
 
     os.makedirs(local_paths.onnx_dir)
     shutil.copy(state.converted_onnx_file, local_paths.onnx_file)

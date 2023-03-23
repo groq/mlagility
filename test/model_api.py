@@ -3,10 +3,10 @@ import unittest
 import torch
 import shutil
 from pathlib import Path
-import groqflow.justgroqit.stage as stage
-import groqflow.common.cache as cache
-import groqflow.justgroqit.export as export
-import groqflow.common.build as build
+import onnxflow.justbuildit.stage as stage
+import onnxflow.common.cache as cache
+import onnxflow.justbuildit.export as export
+import onnxflow.common.build as build
 from mlagility import benchmark_model
 
 
@@ -75,7 +75,7 @@ class Testing(unittest.TestCase):
     def test_002_custom_stage(self):
         build_name = "custom_stage"
 
-        class MyCustomStage(stage.GroqitStage):
+        class MyCustomStage(stage.Stage):
             def __init__(self, funny_saying):
                 super().__init__(
                     unique_name="funny_stage",
