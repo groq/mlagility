@@ -30,7 +30,7 @@ setup(
     ],
     extras_require={
         "tensorflow": [
-            "tensorflow-cpu>=2.8.1",
+            "tensorflow-cpu>=2.8.1,<2.12",
             "tf2onnx>=1.12.0",
         ],
         "groq": [
