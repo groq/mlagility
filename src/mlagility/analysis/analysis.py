@@ -107,10 +107,10 @@ def call_benchit(
                 inputs[all_args[i]] = args[i]
     model_info.inputs = inputs
 
+    build_name = f"{tracer_args.script_name}_"
     if "author" in tracer_args.labels:
-        build_name = f"{tracer_args.script_name}_{tracer_args.labels['author'][0]}_{model_info.hash}"
-    else:
-        build_name = f"{tracer_args.script_name}_{model_info.hash}"
+        build_name += f"{tracer_args.labels['author'][0]}_"
+    build_name += f"{model_info.hash}"
 
     # Save model labels
     tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
