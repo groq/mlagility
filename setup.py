@@ -29,9 +29,12 @@ setup(
         "packaging>=21.3",
     ],
     extras_require={
-        "tensorflow": ["tensorflow-cpu>=2.8.1", "tf2onnx>=1.12.0"],
+        "tensorflow": [
+            "tensorflow-cpu>=2.8.1",
+            "tf2onnx>=1.12.0",
+        ],
         "groq": [
-            "groqflow @ https://test-files.pythonhosted.org/packages/dd/7a/88995b701257dfaef0b5044cca1f82f18a3eda33367f72b60126f82c89ee/groqflow-3.0.2.tar.gz",
+            "groqflow==2.5.2",
         ],
     },
     classifiers=[],
