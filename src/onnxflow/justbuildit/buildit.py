@@ -56,7 +56,7 @@ def build_model(
 
     # Validate and lock in the config (user arguments that
     # configure the build) that will be used by the rest of the toolchain
-    (config, auto_name) = ignition.lock_config(
+    config = ignition.lock_config(
         build_name=build_name,
         sequence=sequence,
     )
@@ -87,7 +87,7 @@ def build_model(
     if state.build_status == build.Status.SUCCESSFUL_BUILD:
         # Successful builds can be loaded from cache and returned with
         # no additional steps
-        additional_msg = " (build_name auto-selected)" if auto_name else ""
+        additional_msg = " (build_name auto-selected)" if config.auto_name else ""
         printing.log_success(
             f' Build "{config.build_name}"{additional_msg} found in cache. Loading it!',
         )

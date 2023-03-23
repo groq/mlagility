@@ -80,7 +80,7 @@ default_assembler_flags = [
 def lock_config(
     build_name: Optional[str] = None,
     sequence: stage.Sequence = None,
-) -> Tuple[build.Config, bool]:
+) -> build.Config:
 
     """
     Process the user's configuration arguments to build_model():
@@ -105,17 +105,22 @@ def lock_config(
     # Store the args that should be immutable
     config = build.Config(
         build_name=build_name,
+        auto_name=auto_name,
         sequence=stage_names,
     )
 
-    return config, auto_name
+    return config
 
 
-def _validate_cached_model(
+def decode_version_number(version: str) -> Dict[str, int]:
+    numbers = [int(x) for x in version.split(".")]
+    return {"major": numbers[0], "minor": numbers[1], "patch": numbers[0]}
+
+
+def validate_cached_model(
     config: build.Config,
     model_type: build.ModelType,
     state: build.State,
-    version: str,
     model: build.UnionValidModelInstanceTypes = None,
     inputs: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
@@ -130,8 +135,8 @@ def _validate_cached_model(
 
     result = []
 
-    current_version_decoded = _decode_version_number(version)
-    state_version_decoded = _decode_version_number(state.onnxflow_version)
+    current_version_decoded = decode_version_number(onnxflow_version)
+    state_version_decoded = decode_version_number(state.onnxflow_version)
 
     out_of_date: Union[str, bool] = False
     if current_version_decoded["major"] > state_version_decoded["major"]:
@@ -143,7 +148,7 @@ def _validate_cached_model(
         msg = (
             f"Your build {state.config.build_name} was previously built against "
             f"onnxflow version {state.onnxflow_version}, "
-            f"however you are now using onxxflow version {version}. The previous build is "
+            f"however you are now using onxxflow version {onnxflow_version}. The previous build is "
             f"incompatible with this version of onnxflow, as indicated by the {out_of_date} "
             "version number changing. See **docs/versioning.md** for details."
         )
@@ -222,7 +227,7 @@ def _validate_cached_model(
         if (
             state.build_status == build.Status.FAILED_BUILD
             or state.build_status == build.Status.BUILD_RUNNING
-        ) and version == state.onnxflow_version:
+        ) and onnxflow_version == state.onnxflow_version:
             msg = (
                 "build_model() has detected that you already attempted building "
                 "this model with the exact same model, inputs, options, and version of "
@@ -231,11 +236,6 @@ def _validate_cached_model(
             result.append(msg)
 
     return result
-
-
-def _decode_version_number(version: str) -> Dict[str, int]:
-    numbers = [int(x) for x in version.split(".")]
-    return {"major": numbers[0], "minor": numbers[1], "patch": numbers[0]}
 
 
 def _begin_fresh_build(
@@ -399,11 +399,10 @@ def load_or_make_state(
                 printing.log_info(msg)
                 return state
             else:
-                cache_problems = _validate_cached_model(
+                cache_problems = validate_cached_model(
                     config=config,
                     model_type=model_type,
                     state=state,
-                    version=onnxflow_version,
                     model=model,
                     inputs=inputs,
                 )
@@ -434,7 +433,7 @@ def load_or_make_state(
             return _begin_fresh_build(**state_args)
 
 
-def _load_model_from_file(path_to_model, user_inputs):
+def load_model_from_file(path_to_model, user_inputs):
     if not os.path.isfile(path_to_model):
         msg = f"""
         build_model() model argument was passed a string (path to a model file),
@@ -448,7 +447,7 @@ def _load_model_from_file(path_to_model, user_inputs):
     else:
         msg = f"""
         build_model() received a model argument that was a string. However, model string
-        arguments are required to be a path to either a .py or .onnx file, and the
+        arguments are required to be a path a .onnx file, and the
         following argument is neither: {path_to_model}
         """
         raise exp.IntakeError(msg)
@@ -466,7 +465,7 @@ model_type_to_sequence_with_quantization = {
 }
 
 
-def _validate_inputs(inputs: Dict):
+def validate_inputs(inputs: Dict):
     """
     Check the model's inputs and make sure they are legal. Raise an exception
     if they are not legal.
@@ -551,7 +550,7 @@ def model_intake(
 
         # Convert paths to models into models
         if isinstance(user_model, str):
-            model, inputs = _load_model_from_file(user_model, user_inputs)
+            model, inputs = load_model_from_file(user_model, user_inputs)
         else:
             model, inputs = user_model, user_inputs
 
@@ -569,7 +568,7 @@ def model_intake(
             else:
                 sequence = model_type_to_sequence[model_type]
 
-        _validate_inputs(inputs)
+        validate_inputs(inputs)
 
     else:
         # We turn off a significant amount of automation and validation
