@@ -3,7 +3,7 @@ import sys
 import pathlib
 import copy
 import enum
-from typing import Optional, Any, List, Dict, Union
+from typing import Optional, Any, List, Dict, Union, Type
 from collections.abc import Collection
 import dataclasses
 import hashlib
@@ -381,7 +381,14 @@ class State:
         self.save_yaml(state_dict)
 
 
-def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) -> State:
+def load_state(
+    cache_dir=DEFAULT_CACHE_DIR,
+    build_name=None,
+    state_path=None,
+    config_type: Type = Config,
+    info_type: Type = Info,
+    state_type: Type = State,
+) -> State:
     if state_path is not None:
         file_path = state_path
     elif build_name is not None:
@@ -397,7 +404,7 @@ def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) ->
         # Special case for loading enums
         state_dict["model_type"] = ModelType(state_dict["model_type"])
         state_dict["build_status"] = Status(state_dict["build_status"])
-        state_dict["config"] = Config(**state_dict["config"])
+        state_dict["config"] = config_type(**state_dict["config"])
 
         # The info section is meant to be forwards compatible with future
         # version of onnxflow. Fields available in the state.yaml are copied
@@ -407,16 +414,16 @@ def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) ->
 
         info_tmp = {}
         for key, value in state_dict["info"].items():
-            info_keys = [field.name for field in dataclasses.fields(Info)]
+            info_keys = [field.name for field in dataclasses.fields(info_type)]
             if key in info_keys:
                 if key == "backend":
                     info_tmp["backend"] = Backend(value)
                 else:
                     info_tmp[key] = value
 
-        state_dict["info"] = Info(**info_tmp)
+        state_dict["info"] = info_type(**info_tmp)
 
-        state = State(**state_dict)
+        state = state_type(**state_dict)
 
     except (KeyError, TypeError) as e:
         if state_path is not None:
