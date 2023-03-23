@@ -177,9 +177,6 @@ class ExportPytorchModel(stage.Stage):
             """
             raise exp.StageError(msg)
 
-        # TODO: check that state.inputs is valid
-        # https://git.groq.io/code/Groq/-/issues/13947
-
         # The `torch.onnx.export()` function accepts a tuple of positional inputs
         # followed by a dictionary with all keyword inputs.
         # The dictionary must be last item in tuple.
@@ -219,9 +216,6 @@ class ExportPytorchModel(stage.Stage):
 
             # Create tuple: (first input, {rest of user_args dict as keyword args})
             dummy_inputs = (first_input, user_args)
-
-        # TODO: Test with optional inputs
-        # https://git.groq.io/code/Groq/-/issues/14581
 
         else:  # state.model is a torch.jit.ScriptModule
             dummy_inputs = tuple(state.inputs.values())
@@ -422,8 +416,6 @@ class OptimizeOnnxModel(stage.Stage):
 
     def fire(self, state: build.State):
 
-        # TODO: validate this input
-        # https://git.groq.io/code/Groq/-/issues/13947
         input_onnx = state.intermediate_results[0]
 
         # Perform some basic optimizations on the model to remove shape related
@@ -484,13 +476,11 @@ class ConvertOnnxToFp16(stage.Stage):
 
     def fire(self, state: build.State):
 
-        # TODO: validate this input
-        # https://git.groq.io/code/Groq/-/issues/13947
         input_onnx = state.intermediate_results[0]
 
         # Convert the model to FP16
         # Some ops will not be converted to fp16 because they are in a block list
-        # The latest list can be found here. It is not neccesarily the list that
+        # The latest list can be found here. It is not necessarily the list that
         # our version of onnxmltools sees
         # https://github.com/microsoft/onnxconverter-common/blob/master/onnxconverter_common/float16.py#L82
 

@@ -54,12 +54,6 @@ def to_numpy(tensor):
     )
 
 
-# Setup OnnxRuntime session for ONNX model so that you can
-# present a CPU baseline for the ONNX model inference
-ort_sess = ort.InferenceSession(onnx_model)
-input_name = ort_sess.get_inputs()[0].name
-numpy_inputs = to_numpy(input_tensor)
-
 # Build ONNX model
 omodel = build_model(
     onnx_model,
