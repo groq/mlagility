@@ -39,7 +39,7 @@ jobs:
       - name: Lint with PyLint
         shell: bash -el {0}
         run: |
-          pylint src --rcfile .pylintrc
+          pylint src/onnxflow --rcfile .pylintrc
       - name: Test with unittest
         shell: bash -el {0}
         run: |
