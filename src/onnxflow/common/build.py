@@ -233,9 +233,9 @@ class State:
     config: Config
 
     # User-provided args that do not influence the generated model
-    monitor: bool
-    rebuild: str
-    cache_dir: str
+    monitor: bool = False
+    rebuild: str = ""
+    cache_dir: str = ""
 
     # User-provided args that will not be saved as part of state.yaml
     model: UnionValidModelInstanceTypes = None
@@ -385,8 +385,6 @@ def load_state(
     cache_dir=DEFAULT_CACHE_DIR,
     build_name=None,
     state_path=None,
-    config_type: Type = Config,
-    info_type: Type = Info,
     state_type: Type = State,
 ) -> State:
     if state_path is not None:
@@ -399,6 +397,11 @@ def load_state(
         )
 
     state_dict = load_yaml(file_path)
+
+    # Get the type of Config and Info in case they have been overloaded
+    field_types = {field.name: field.type for field in dataclasses.fields(state_type)}
+    config_type = field_types["config"]
+    info_type = field_types["info"]
 
     try:
         # Special case for loading enums

@@ -142,12 +142,7 @@ def call_benchit(
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
-        if build_state.info.opt_onnx_unsupported_ops:
-            model_info.status_message = "Unsupported op(s) " + ", ".join(
-                build_state.info.opt_onnx_unsupported_ops
-            )
-        else:
-            model_info.status_message = "Build Error: see log files for details."
+        model_info.status_message = "Build Error: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
 
         _store_traceback(model_info)
