@@ -16,7 +16,7 @@ import sys
 from mlagility.cli.cli import main as benchitcli
 import mlagility.common.labels as labels
 from mlagility.parser import parse
-import groqflow.common.cache as cache
+import onnxflow.common.cache as cache
 
 try:
     # pylint: disable=unused-import

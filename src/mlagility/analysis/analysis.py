@@ -12,10 +12,10 @@ from typing import Union, List, Dict
 from types import FrameType, TracebackType
 from enum import Enum
 import torch
-from groqflow.common import printing
-import groqflow.common.build as build
-import groqflow.common.exceptions as exp
-from groqflow.justgroqit.stage import Sequence
+from onnxflow.common import printing
+import onnxflow.common.build as build
+import onnxflow.common.exceptions as exp
+from onnxflow.justbuildit.stage import Sequence
 import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 import mlagility.analysis.tf_helpers as tf_helpers
@@ -141,7 +141,7 @@ def call_benchit(
             model_info.status_message = "Model successfully built!"
         model_info.status_message_color = printing.Colors.OKGREEN
 
-    except exp.GroqitStageError:
+    except exp.StageError:
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
@@ -155,7 +155,7 @@ def call_benchit(
 
         _store_traceback(model_info)
 
-    except exp.GroqFlowError:
+    except exp.Error:
         model_info.status_message = "GroqFlowError: see log files for details."
         model_info.status_message_color = printing.Colors.WARNING
 
@@ -356,7 +356,7 @@ def explore_frame(
 
             # Raise exception if user tries to use max_depth!=0 for a keras model
             if tracer_args.max_depth != 0:
-                raise exp.GroqFlowError("max_depth is not supported for Keras models")
+                raise exp.Error("max_depth is not supported for Keras models")
         local_var.old_forward = old_forward
 
         def forward_spy(*args, **kwargs):

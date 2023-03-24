@@ -12,9 +12,8 @@ You can pass this file into benchit with a command like:
     benchit benchmark INPUT_SCRIPTS --sequence-file example_sequence.py --build-only
 """
 
-from groqflow.justgroqit.stage import Sequence
-import groqflow.justgroqit.export as export
-from mlagility.common.groqflow_helpers import SuccessStage
+from onnxflow.justbuildit.stage import Sequence
+import onnxflow.justbuildit.export as export
 
 
 def get_sequence():
@@ -23,7 +22,7 @@ def get_sequence():
         monitor_message="Example pytorch sequence that only exports ONNX",
         stages=[
             export.ExportPytorchModel(),
-            SuccessStage(),
+            export.SuccessStage(),
         ],
         enable_model_validation=True,
     )
