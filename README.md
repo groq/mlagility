@@ -16,13 +16,14 @@ Our _benchit_ CLI allows you to benchmark Pytorch models without changing a sing
 
 <img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
 
-## Tons of Models
+## 1000+ Models
 
 [![Transformers](https://img.shields.io/github/directory-file-count/groq/mlagility/models/transformers?label=transformers)](https://github.com/groq/mlagility/tree/main/models/transformers "Transformer models")
 [![Diffusers](https://img.shields.io/github/directory-file-count/groq/mlagility/models/diffusers?label=diffusers)](https://github.com/groq/mlagility/tree/main/models/diffusers "Diffusion models")
 [![popular_on_huggingface](https://img.shields.io/github/directory-file-count/groq/mlagility/models/popular_on_huggingface?label=popular_on_huggingface)](https://github.com/groq/mlagility/tree/main/models/popular_on_huggingface "Popular Models on Huggingface")
 [![torch_hub](https://img.shields.io/github/directory-file-count/groq/mlagility/models/torch_hub?label=torch_hub)](https://github.com/groq/mlagility/tree/main/models/torch_hub "Models from Torch Hub")
 [![torchvision](https://img.shields.io/github/directory-file-count/groq/mlagility/models/torchvision?label=torchvision)](https://github.com/groq/mlagility/tree/main/models/torchvision "Models from Torch Vision")
+[![timm](https://img.shields.io/github/directory-file-count/groq/mlagility/models/timm?label=timm)](https://github.com/groq/mlagility/tree/main/models/timm "Pytorch Image Models")
 
 This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. You can see the set of models in each category by clicking on the corresponding badge.
 
