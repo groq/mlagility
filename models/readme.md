@@ -29,6 +29,7 @@ The corpora in the MLAgility benchmark are:
 - `torchvision`: image recognition models from the [`torchvision` library](https://pytorch.org/vision/stable/index.html).
   - _Note_: the `torchvision` library also includes many image classification models, but we excluded them to avoid overlap between our `torch_hub` and `torchvision` corpora.
 - `transformers`: Transformer models from the [Huggingface `transformers` library](https://huggingface.co/docs/transformers/index).
+- `timm`: A collection of SOTA computer vision models from the [`timm` library](https://timm.fast.ai/).
 
 ## Running the Benchmark
 
