@@ -14,8 +14,11 @@ BATCHSIZE = 1
 
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
+
+
 class SubprocessError(Exception):
     pass
+
 
 def run_subprocess(cmd):
     """Run a subprocess with the given command and log the output."""
@@ -153,7 +156,7 @@ def run(
 
     except Exception as e:
         raise ValueError(f"Docker container run failed with exception: {e}")
-    
+
     # Make sure the container is stopped even if there is a failure
     finally:
         if container_id:
