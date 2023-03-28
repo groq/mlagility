@@ -3,8 +3,11 @@ Helper functions for dealing with ONNX files and ONNX models
 """
 
 from typing import Tuple
+import re
+import math
 import numpy as np
 import onnx
+import onnxruntime as ort
 import onnxflow.common.exceptions as exp
 
 
@@ -82,3 +85,48 @@ def io_bytes(onnx_path: str) -> Tuple[int, int]:
     onnx_output_bytes = get_nodes_bytes(model.graph.output)
 
     return int(sum(onnx_input_bytes.values())), int(sum(onnx_output_bytes.values()))
+
+
+def dtype_ort2str(dtype_str: str):
+    if dtype_str == "float16":
+        datatype = "float16"
+    if dtype_str == "float":
+        datatype = "float32"
+    if dtype_str == "double":
+        datatype = "float64"
+    if dtype_str == "long":
+        datatype = "int64"
+    else:
+        datatype = dtype_str
+    return datatype
+
+
+def dummy_inputs(onnx_file: str) -> dict:
+    # Generate dummy inputs of the expected shape and type for the input model
+    sess_options = ort.SessionOptions()
+    sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    onnx_session = ort.InferenceSession(onnx_file, sess_options)
+    sess_input = onnx_session.get_inputs()
+
+    input_stats = []
+    for _idx, input_ in enumerate(range(len(sess_input))):
+        input_name = sess_input[input_].name
+        input_shape = sess_input[input_].shape
+
+        # TODO: Use onnx update_inputs_outputs_dims to automatically freeze models
+        for dim in input_shape:
+            if isinstance(dim, str) is True or math.isnan(dim) is True:
+                raise AssertionError(
+                    "Error: Model has dynamic inputs. Freeze the graph and try again"
+                )
+
+        input_type = sess_input[input_].type
+        input_stats.append([input_name, input_shape, input_type])
+
+    input_feed = {}
+    for stat in input_stats:
+        dtype_str = re.search(r"\((.*)\)", stat[2])
+        assert dtype_str is not None
+        datatype = dtype_ort2str(dtype_str.group(1))
+        input_feed[stat[0]] = np.random.rand(*stat[1]).astype(datatype)
+    return input_feed

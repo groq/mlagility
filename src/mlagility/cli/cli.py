@@ -2,9 +2,12 @@ import argparse
 import os
 import sys
 import onnxflow.common.build as build
+import onnxflow.justbuildit.stage as stage
+import onnxflow.justbuildit.export as export
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_script
+from mlagility.api.model_api import benchmark_model
 from mlagility.version import __version__ as mlagility_version
 
 
@@ -36,31 +39,74 @@ def print_stats(args):
     )
 
 
-def benchmark_script_argparse(args):
+def benchmark_files(args):
     """
-    Convert argparse args into benchmark_script keyword args
+    Inspect the input_files and sort them into .py and .onnx files.
+    Pass .py files into benchmark_script() and .onnx files into benchmark_model().
     """
 
-    benchmark_script(
-        input_scripts=args.input_scripts,
-        use_slurm=args.use_slurm,
-        lean_cache=args.lean_cache,
-        cache_dir=args.cache_dir,
-        labels=args.labels,
-        rebuild=args.rebuild,
-        devices=args.devices,
-        backend=args.backend,
-        analyze_only=args.analyze_only,
-        build_only=args.build_only,
-        resume=args.resume,
-        script_args=args.script_args,
-        max_depth=args.max_depth,
-        sequence=args.sequence_file,
-        groq_compiler_flags=args.groq_compiler_flags,
-        groq_assembler_flags=args.groq_assembler_flags,
-        groq_num_chips=args.groq_num_chips,
-        groqview=args.groqview,
-    )
+    python_scripts = []
+    onnx_files = []
+
+    for file in args.input_files:
+        if ".py" in file:
+            python_scripts.append(file)
+        elif file.endswith(".onnx"):
+            onnx_files.append(file)
+
+    if len(python_scripts):
+        # Pass the args straight into benchmark_script(), which knows how
+        # to iterate over python scripts
+        benchmark_script(
+            input_scripts=python_scripts,
+            use_slurm=args.use_slurm,
+            lean_cache=args.lean_cache,
+            cache_dir=args.cache_dir,
+            labels=args.labels,
+            rebuild=args.rebuild,
+            devices=args.devices,
+            backend=args.backend,
+            analyze_only=args.analyze_only,
+            build_only=args.build_only,
+            resume=args.resume,
+            script_args=args.script_args,
+            max_depth=args.max_depth,
+            sequence=args.sequence_file,
+            groq_compiler_flags=args.groq_compiler_flags,
+            groq_assembler_flags=args.groq_assembler_flags,
+            groq_num_chips=args.groq_num_chips,
+            groqview=args.groqview,
+        )
+
+    # Iterate and pass each ONNX file into benchmark_model() one at a time
+    for onnx_file in onnx_files:
+        build_name = filesystem.clean_script_name(onnx_file)
+
+        # Sequence that just passes the onnx file into the cache
+        sequence = stage.Sequence(
+            unique_name="onnx_passthrough",
+            monitor_message="Pass through ONNX file",
+            stages=[export.ReceiveOnnxModel(), export.SuccessStage()],
+            enable_model_validation=True,
+        )
+
+        for device in args.devices:
+            benchmark_model(
+                model=onnx_file,
+                inputs=None,
+                build_name=build_name,
+                cache_dir=args.cache_dir,
+                device=device,
+                backend=args.backend,
+                build_only=args.build_only,
+                lean_cache=args.lean_cache,
+                rebuild=args.rebuild,
+                groq_compiler_flags=args.groq_compiler_flags,
+                groq_assembler_flags=args.groq_assembler_flags,
+                groq_num_chips=args.groq_num_chips,
+                groqview=args.groqview,
+                sequence=sequence,
+            )
 
 
 def main():
@@ -92,12 +138,12 @@ def main():
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Benchmark the performance of one or more models"
     )
-    benchmark_parser.set_defaults(func=benchmark_script_argparse)
+    benchmark_parser.set_defaults(func=benchmark_files)
 
     benchmark_parser.add_argument(
-        "input_scripts",
+        "input_files",
         nargs="+",
-        help="One or more script (.py) files to be benchmarked",
+        help="One or more script (.py) or ONNX (.onnx) files to be benchmarked",
     )
 
     benchmark_parser.add_argument(

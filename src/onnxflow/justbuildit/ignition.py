@@ -11,6 +11,7 @@ import onnxflow.common.tf_helpers as tf_helpers
 import onnxflow.justbuildit.export as export
 import onnxflow.justbuildit.stage as stage
 import onnxflow.justbuildit.hummingbird as hummingbird
+import onnxflow.common.onnx_helpers as onnx_helpers
 from onnxflow.version import __version__ as onnxflow_version
 
 polish_onnx_sequence = stage.Sequence(
@@ -434,26 +435,6 @@ def load_or_make_state(
             return _begin_fresh_build(**state_args)
 
 
-def _load_model_from_file(path_to_model, user_inputs):
-    if not os.path.isfile(path_to_model):
-        msg = f"""
-        build_model() model argument was passed a string (path to a model file),
-        however no file was found at {path_to_model}.
-        """
-        raise exp.IntakeError(msg)
-
-    if path_to_model.endswith(".onnx"):
-        return path_to_model, user_inputs
-
-    else:
-        msg = f"""
-        build_model() received a model argument that was a string. However, model string
-        arguments are required to be a path to either a .py or .onnx file, and the
-        following argument is neither: {path_to_model}
-        """
-        raise exp.IntakeError(msg)
-
-
 model_type_to_sequence = {
     build.ModelType.PYTORCH: default_pytorch_sequence,
     build.ModelType.KERAS: default_keras_sequence,
@@ -549,13 +530,31 @@ def model_intake(
             """
             raise exp.IntakeError(msg)
 
-        # Convert paths to models into models
+        # Make sure that if the model is a file path, it is valid
         if isinstance(user_model, str):
-            model, inputs = _load_model_from_file(user_model, user_inputs)
-        else:
-            model, inputs = user_model, user_inputs
+            if not os.path.isfile(user_model):
+                msg = f"""
+                build_model() model argument was passed a string (path to a model file),
+                however no file was found at {user_model}.
+                """
+                raise exp.IntakeError(msg)
 
-        model_type = identify_model_type(model)
+            if not user_model.endswith(".onnx"):
+                msg = f"""
+                build_model() received a model argument that was a string. However, model string
+                arguments are required to be a path to a .onnx file, but the argument was: {user_model}
+                """
+                raise exp.IntakeError(msg)
+
+            # Create dummy inputs based on the ONNX spec, if none were provided by the user
+            if user_inputs is None:
+                inputs = onnx_helpers.dummy_inputs(user_model)
+            else:
+                inputs = user_inputs
+        else:
+            inputs = user_inputs
+
+        model_type = identify_model_type(user_model)
 
         sequence = user_sequence
         if sequence is None:
@@ -574,9 +573,8 @@ def model_intake(
     else:
         # We turn off a significant amount of automation and validation
         # to provide custom stages and sequences with maximum flexibility
-        sequence = user_sequence
-        model = user_model
         inputs = user_inputs
+        sequence = user_sequence
         model_type = build.ModelType.UNKNOWN
 
-    return (model, inputs, sequence, model_type)
+    return (user_model, inputs, sequence, model_type)

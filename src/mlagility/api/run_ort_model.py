@@ -5,6 +5,11 @@ from timeit import default_timer as timer
 import numpy as np
 import onnxruntime as ort
 
+# NOTE: functionality in this module is replicated in onnxflow.common.onnx_helpers
+# to help make it available to all onnxflow users. This code could be de-duplicated
+# if mlagility allows this module to import onnxflow.
+
+
 def run_ort_profile(onnx_file, num_iterations=100):
     # Run the provided onnx model using onnxruntime and measure average latency
 
@@ -23,7 +28,7 @@ def run_ort_profile(onnx_file, num_iterations=100):
         iteration_latency = end - start
         per_iteration_latency.append(iteration_latency)
 
-    print (per_iteration_latency)
+    print(per_iteration_latency)
 
 
 def _dummy_inputs(sess_input) -> dict:
@@ -64,6 +69,7 @@ def dtype_ort2str(dtype_str: str):
     else:
         datatype = dtype_str
     return datatype
+
 
 if __name__ == "__main__":
     # Parse Inputs
