@@ -14,6 +14,8 @@ BATCHSIZE = 1
 
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
+class SubprocessError(Exception):
+    pass
 
 def run_subprocess(cmd):
     """Run a subprocess with the given command and log the output."""
@@ -27,7 +29,12 @@ def run_subprocess(cmd):
         logging.error(
             f"Subprocess failed with command: {' '.join(cmd)} and error message: {e.stderr}"
         )
-        raise
+        raise SubprocessError("CalledProcessError")
+    except (OSError, ValueError) as e:
+        logging.error(
+            f"Subprocess failed with command: {' '.join(cmd)} and error message: {str(e)}"
+        )
+        raise SubprocessError(str(e))
 
 
 def build_docker_image(output_dir, docker_image):
@@ -53,7 +60,15 @@ def run_docker_container(output_dir, docker_name, docker_image):
         docker_name,
         docker_image,
     ]
-    run_subprocess(cmd)
+    try:
+        output = subprocess.check_output(cmd, text=True).strip()
+        logging.info(f"Container {docker_name} started with ID: {output}")
+        return output
+    except subprocess.CalledProcessError as e:
+        logging.error(
+            f"Failed to start Docker container with command: {' '.join(cmd)} and error message: {e.stderr}"
+        )
+        raise
 
 
 def execute_benchmark(onnx_file, docker_name, num_iterations):
@@ -81,9 +96,9 @@ def execute_benchmark(onnx_file, docker_name, num_iterations):
         return output_list
 
 
-def stop_docker_container(docker_name):
-    """Stop and remove the docker container with the given name."""
-    cmd = ["docker", "stop", docker_name]
+def stop_docker_container(container_id):
+    """Stop and remove the docker container with the given container ID."""
+    cmd = ["docker", "stop", container_id]
     run_subprocess(cmd)
 
 
@@ -122,7 +137,7 @@ def run(
 
     try:
         # Run the docker container
-        run_docker_container(output_dir, docker_name, docker_image)
+        container_id = run_docker_container(output_dir, docker_name, docker_image)
     except Exception as e:
         raise ValueError(f"Docker container run failed with exception: {e}")
 
@@ -137,10 +152,14 @@ def run(
     except Exception as e:
         raise ValueError(f"Get ort version failed with exception: {e}")
 
-
     # Make sure the container is stopped even if there is a failure
     finally:
-        stop_docker_container(docker_name)
+        if container_id:
+            try:
+                logging.info(f"Stopping docker container with ID: {container_id}")
+                stop_docker_container(container_id)
+            except SubprocessError as e:
+                logging.error(f"Failed to stop Docker container with exception: {e}")
 
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
