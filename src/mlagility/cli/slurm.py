@@ -136,7 +136,6 @@ def update_database_builds(cache_dir, input_scripts):
     if os.environ.get("USING_SLURM") != "TRUE":
         db = filesystem.CacheDatabase(cache_dir)
         for script in input_scripts:
-            clean_script_name = filesystem.clean_script_name(script)
-            builds = filesystem.get_builds_from_script(cache_dir, clean_script_name)
+            builds, script_name = filesystem.get_builds_from_script(cache_dir, script)
             for build in builds:
-                db.add_build(clean_script_name, build)
+                db.add_build(script_name, build)
