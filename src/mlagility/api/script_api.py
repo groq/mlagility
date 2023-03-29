@@ -5,10 +5,12 @@ import importlib.machinery
 from typing import Tuple, List, Dict, Optional, Union
 import onnxflow.common.printing as printing
 import onnxflow.common.exceptions as exceptions
-from onnxflow.justbuildit.stage import Sequence
+import onnxflow.justbuildit.stage as stage
+import onnxflow.justbuildit.export as export
 import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels_library
+from mlagility.api.model_api import benchmark_model
 from mlagility.analysis.analysis import (
     evaluate_script,
     TracerArgs,
@@ -53,7 +55,7 @@ def benchmark_script(
     resume: bool = False,
     script_args: str = "",
     max_depth: int = 0,
-    sequence: Union[str, Sequence] = None,
+    sequence: Union[str, stage.Sequence] = None,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
     groq_num_chips: Optional[int] = None,
@@ -80,7 +82,7 @@ def benchmark_script(
             loader.exec_module(mod)
             # pylint: disable = no-member
             custom_sequence = mod.get_sequence()
-        elif isinstance(sequence, Sequence):
+        elif isinstance(sequence, stage.Sequence):
             custom_sequence = sequence
         else:
             raise ValueError(
@@ -233,3 +235,93 @@ def benchmark_script(
         slurm.update_database_builds(cache_dir, input_scripts)
 
     printing.log_success("The 'benchmark' command is complete.")
+
+
+def benchmark_files(
+    input_files: str = None,
+    use_slurm: bool = False,
+    lean_cache: bool = False,
+    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
+    labels: List[str] = None,
+    rebuild: Optional[str] = None,
+    devices: List[str] = None,
+    backend: str = "local",
+    analyze_only: bool = False,
+    build_only: bool = False,
+    resume: bool = False,
+    script_args: str = "",
+    max_depth: int = 0,
+    sequence: Union[str, stage.Sequence] = None,
+    groq_compiler_flags: Optional[List[str]] = None,
+    groq_assembler_flags: Optional[List[str]] = None,
+    groq_num_chips: Optional[int] = None,
+    groqview: bool = False,
+):
+
+    """
+    Inspect the input_files and sort them into .py and .onnx files.
+    Pass .py files into benchmark_script() and .onnx files into benchmark_model().
+    """
+
+    python_scripts = []
+    onnx_files = []
+
+    for file in input_files:
+        if ".py" in file:
+            python_scripts.append(file)
+        elif file.endswith(".onnx"):
+            onnx_files.append(file)
+
+    if len(python_scripts):
+        # Pass the args straight into benchmark_script(), which knows how
+        # to iterate over python scripts
+        benchmark_script(
+            input_scripts=python_scripts,
+            use_slurm=use_slurm,
+            lean_cache=lean_cache,
+            cache_dir=cache_dir,
+            labels=labels,
+            rebuild=rebuild,
+            devices=devices,
+            backend=backend,
+            analyze_only=analyze_only,
+            build_only=build_only,
+            resume=resume,
+            script_args=script_args,
+            max_depth=max_depth,
+            sequence=sequence,
+            groq_compiler_flags=groq_compiler_flags,
+            groq_assembler_flags=groq_assembler_flags,
+            groq_num_chips=groq_num_chips,
+            groqview=groqview,
+        )
+
+    # Iterate and pass each ONNX file into benchmark_model() one at a time
+    for onnx_file in onnx_files:
+        build_name = filesystem.clean_script_name(onnx_file)
+
+        # Sequence that just passes the onnx file into the cache
+        onnx_sequence = stage.Sequence(
+            unique_name="onnx_passthrough",
+            monitor_message="Pass through ONNX file",
+            stages=[export.ReceiveOnnxModel(), export.SuccessStage()],
+            enable_model_validation=True,
+        )
+
+        for device in devices:
+            benchmark_model(
+                model=onnx_file,
+                inputs=None,
+                build_name=build_name,
+                cache_dir=cache_dir,
+                device=device,
+                backend=backend,
+                build_only=build_only,
+                lean_cache=lean_cache,
+                rebuild=rebuild,
+                groq_compiler_flags=groq_compiler_flags,
+                groq_assembler_flags=groq_assembler_flags,
+                groq_num_chips=groq_num_chips,
+                groqview=groqview,
+                sequence=onnx_sequence,
+            )
