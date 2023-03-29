@@ -490,7 +490,7 @@ class Testing(unittest.TestCase):
         # Make sure we can print the builds in the cache
         for test_script in test_scripts_dot_py.keys():
             script_name = strip_dot_py(test_script)
-            builds = filesystem.get_builds_from_script(cache_dir, script_name)
+            builds, _ = filesystem.get_builds_from_script(cache_dir, script_name)
 
             for build_name in builds:
                 # Make sure each build can be accessed with `benchit cache stats`
