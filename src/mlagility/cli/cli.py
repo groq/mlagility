@@ -42,7 +42,7 @@ def benchmark_command(args):
     """
 
     benchmark_files(
-        input_scripts=args.input_scripts,
+        input_files=args.input_files,
         use_slurm=args.use_slurm,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
@@ -92,7 +92,7 @@ def main():
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Benchmark the performance of one or more models"
     )
-    benchmark_parser.set_defaults(func=benchmark_files)
+    benchmark_parser.set_defaults(func=benchmark_command)
 
     benchmark_parser.add_argument(
         "input_files",
