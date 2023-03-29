@@ -3,12 +3,14 @@ import shutil
 import glob
 import pathlib
 import datetime
-from typing import Dict
+from typing import Dict, List
 import yaml
 import onnxflow.common.printing as printing
 import onnxflow.common.cache as cache
 import onnxflow.common.build as build
 import onnxflow.common.exceptions as exc
+from mlagility.common import labels
+
 
 # Allow an environment variable to override the default
 # location for the build cache
@@ -273,23 +275,42 @@ def clean_builds(args):
             )
 
 
-def build_name_to_script_name(build_name: str) -> str:
+def clean_build_name(build_name: str) -> str:
     """
-    Convert a build name to the name of the script it came from
-    Build names have the format: <script_name>_hash
+    Remove hash from build name
+    Build names have the format: <script_name>_<author>_hash
     """
 
     # Get everything except the trailing _<hash>
     return "_".join(build_name.split("_")[:-1])
 
 
-def get_builds_from_script(cache_dir, script_name):
+def get_build_name(
+    script_name: str, script_labels: Dict[str, List], model_hash: str = None
+):
+    """
+    Create build name from script_name, labels and model hash
+    """
+    build_name = script_name
+    if "author" in script_labels:
+        build_name += f"_{script_labels['author'][0]}"
+    if model_hash:
+        build_name += f"_{model_hash}"
+    return build_name
+
+
+def get_builds_from_script(cache_dir, script):
+    script_name = clean_script_name(script)
+    script_labels = labels.load_from_file(script)
     all_builds_in_cache = get_available_builds(cache_dir)
+
     script_builds = [
-        x for x in all_builds_in_cache if script_name == build_name_to_script_name(x)
+        x
+        for x in all_builds_in_cache
+        if get_build_name(script_name, script_labels) == clean_build_name(x)
     ]
 
-    return script_builds
+    return script_builds, script_name
 
 
 def stats_file(cache_dir: str, build_name: str):
