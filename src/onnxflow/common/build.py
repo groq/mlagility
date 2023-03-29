@@ -3,7 +3,7 @@ import sys
 import pathlib
 import copy
 import enum
-from typing import Optional, Any, List, Dict, Union
+from typing import Optional, Any, List, Dict, Union, Type
 from collections.abc import Collection
 import dataclasses
 import hashlib
@@ -14,6 +14,7 @@ import numpy as np
 import sklearn.base
 import onnxflow.common.exceptions as exp
 import onnxflow.common.tf_helpers as tf_helpers
+from onnxflow.version import __version__ as onnxflow_version
 
 
 UnionValidModelInstanceTypes = Union[
@@ -195,6 +196,7 @@ class Config:
     """
 
     build_name: str
+    auto_name: bool
     sequence: List[str]
 
 
@@ -210,15 +212,11 @@ class Info:
     """
 
     backend: Backend = Backend.AUTO
-    num_parameters: Optional[int] = None
     base_onnx_exported: Optional[bool] = None
     opt_onnx_exported: Optional[bool] = None
     opt_onnx_ops: Optional[List[str]] = None
-    opt_onnx_unsupported_ops: Optional[List[str]] = None
-    opt_onnx_all_ops_supported: Optional[bool] = None
     converted_onnx_exported: Optional[bool] = None
-    measured_latency: Optional[float] = None
-    measured_throughput: Optional[float] = None
+    quantized_onnx_exported: Optional[bool] = None
     skipped_stages: int = 0
     opset: Optional[int] = DEFAULT_ONNX_OPSET
     all_build_stages: List[str] = dataclasses.field(default_factory=list)
@@ -227,7 +225,6 @@ class Info:
     build_stage_execution_times: Dict[str, float] = dataclasses.field(
         default_factory=dict
     )
-    compiler_ram_bytes: float = None
 
 
 @dataclasses.dataclass
@@ -236,9 +233,9 @@ class State:
     config: Config
 
     # User-provided args that do not influence the generated model
-    monitor: bool
-    rebuild: str
-    cache_dir: str
+    monitor: bool = False
+    rebuild: str = ""
+    cache_dir: str = ""
 
     # User-provided args that will not be saved as part of state.yaml
     model: UnionValidModelInstanceTypes = None
@@ -259,7 +256,7 @@ class State:
     # Increment the minor version number of the onnxflow package if you
     # do make a build-breaking change.
 
-    onnxflow_version: str = ""
+    onnxflow_version: str = onnxflow_version
     model_type: ModelType = ModelType.UNKNOWN
     uid: Optional[int] = None
     model_hash: Optional[int] = None
@@ -304,24 +301,6 @@ class State:
         )
 
     @property
-    def execution_inputs_file(self):
-        return os.path.join(
-            output_dir(self.cache_dir, self.config.build_name), "inputs.npy"
-        )
-
-    @property
-    def outputs_file(self):
-        return os.path.join(
-            output_dir(self.cache_dir, self.config.build_name), "outputs.npy"
-        )
-
-    @property
-    def latency_file(self):
-        return os.path.join(
-            output_dir(self.cache_dir, self.config.build_name), "latency.npy"
-        )
-
-    @property
     def onnx_dir(self):
         return os.path.join(output_dir(self.cache_dir, self.config.build_name), "onnx")
 
@@ -353,11 +332,12 @@ class State:
             f"{self.config.build_name}-op{self.info.opset}-opt-quantized_int8.onnx",
         )
 
-    def save(self):
+    def prepare_file_system(self):
         # Create output folder if it doesn't exist
         os.makedirs(output_dir(self.cache_dir, self.config.build_name), exist_ok=True)
         os.makedirs(self.onnx_dir, exist_ok=True)
 
+    def prepare_state_dict(self) -> Dict:
         state_dict = {
             key: value
             for key, value in vars(self).items()
@@ -385,13 +365,28 @@ class State:
         else:
             state_dict["quantization_samples"] = False
 
+        return state_dict
+
+    def save_yaml(self, state_dict: Dict):
         with open(
             state_file(self.cache_dir, self.config.build_name), "w", encoding="utf8"
         ) as outfile:
             yaml.dump(state_dict, outfile)
 
+    def save(self):
+        self.prepare_file_system()
 
-def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) -> State:
+        state_dict = self.prepare_state_dict()
+
+        self.save_yaml(state_dict)
+
+
+def load_state(
+    cache_dir=DEFAULT_CACHE_DIR,
+    build_name=None,
+    state_path=None,
+    state_type: Type = State,
+) -> State:
     if state_path is not None:
         file_path = state_path
     elif build_name is not None:
@@ -403,11 +398,16 @@ def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) ->
 
     state_dict = load_yaml(file_path)
 
+    # Get the type of Config and Info in case they have been overloaded
+    field_types = {field.name: field.type for field in dataclasses.fields(state_type)}
+    config_type = field_types["config"]
+    info_type = field_types["info"]
+
     try:
         # Special case for loading enums
         state_dict["model_type"] = ModelType(state_dict["model_type"])
         state_dict["build_status"] = Status(state_dict["build_status"])
-        state_dict["config"] = Config(**state_dict["config"])
+        state_dict["config"] = config_type(**state_dict["config"])
 
         # The info section is meant to be forwards compatible with future
         # version of onnxflow. Fields available in the state.yaml are copied
@@ -417,16 +417,16 @@ def load_state(cache_dir=DEFAULT_CACHE_DIR, build_name=None, state_path=None) ->
 
         info_tmp = {}
         for key, value in state_dict["info"].items():
-            info_keys = [field.name for field in dataclasses.fields(Info)]
+            info_keys = [field.name for field in dataclasses.fields(info_type)]
             if key in info_keys:
                 if key == "backend":
                     info_tmp["backend"] = Backend(value)
                 else:
                     info_tmp[key] = value
 
-        state_dict["info"] = Info(**info_tmp)
+        state_dict["info"] = info_type(**info_tmp)
 
-        state = State(**state_dict)
+        state = state_type(**state_dict)
 
     except (KeyError, TypeError) as e:
         if state_path is not None:

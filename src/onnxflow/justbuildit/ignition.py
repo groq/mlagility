@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple, Union, Dict, Any
+from typing import Optional, List, Tuple, Union, Dict, Any, Type, Callable
 from collections.abc import Collection
 import sys
 import os
@@ -32,7 +32,7 @@ default_pytorch_sequence = stage.Sequence(
 
 pytorch_sequence_with_quantization = stage.Sequence(
     "pytorch_export_sequence_with_quantization",
-    "Exporting PyTorch Model and Quantizating Exported ONNX",
+    "Exporting PyTorch Model and Quantizing Exported ONNX",
     [
         export.ExportPytorchModel(),
         export.OptimizeOnnxModel(),
@@ -81,7 +81,7 @@ default_assembler_flags = [
 def lock_config(
     build_name: Optional[str] = None,
     sequence: stage.Sequence = None,
-) -> Tuple[build.Config, bool]:
+) -> build.Config:
 
     """
     Process the user's configuration arguments to build_model():
@@ -106,17 +106,22 @@ def lock_config(
     # Store the args that should be immutable
     config = build.Config(
         build_name=build_name,
+        auto_name=auto_name,
         sequence=stage_names,
     )
 
-    return config, auto_name
+    return config
 
 
-def _validate_cached_model(
+def decode_version_number(version: str) -> Dict[str, int]:
+    numbers = [int(x) for x in version.split(".")]
+    return {"major": numbers[0], "minor": numbers[1], "patch": numbers[0]}
+
+
+def validate_cached_model(
     config: build.Config,
     model_type: build.ModelType,
     state: build.State,
-    version: str,
     model: build.UnionValidModelInstanceTypes = None,
     inputs: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
@@ -131,8 +136,8 @@ def _validate_cached_model(
 
     result = []
 
-    current_version_decoded = _decode_version_number(version)
-    state_version_decoded = _decode_version_number(state.onnxflow_version)
+    current_version_decoded = decode_version_number(onnxflow_version)
+    state_version_decoded = decode_version_number(state.onnxflow_version)
 
     out_of_date: Union[str, bool] = False
     if current_version_decoded["major"] > state_version_decoded["major"]:
@@ -144,7 +149,7 @@ def _validate_cached_model(
         msg = (
             f"Your build {state.config.build_name} was previously built against "
             f"onnxflow version {state.onnxflow_version}, "
-            f"however you are now using onxxflow version {version}. The previous build is "
+            f"however you are now using onxxflow version {onnxflow_version}. The previous build is "
             f"incompatible with this version of onnxflow, as indicated by the {out_of_date} "
             "version number changing. See **docs/versioning.md** for details."
         )
@@ -223,7 +228,7 @@ def _validate_cached_model(
         if (
             state.build_status == build.Status.FAILED_BUILD
             or state.build_status == build.Status.BUILD_RUNNING
-        ) and version == state.onnxflow_version:
+        ) and onnxflow_version == state.onnxflow_version:
             msg = (
                 "build_model() has detected that you already attempted building "
                 "this model with the exact same model, inputs, options, and version of "
@@ -234,41 +239,23 @@ def _validate_cached_model(
     return result
 
 
-def _decode_version_number(version: str) -> Dict[str, int]:
-    numbers = [int(x) for x in version.split(".")]
-    return {"major": numbers[0], "minor": numbers[1], "patch": numbers[0]}
-
-
 def _begin_fresh_build(
-    model: build.UnionValidModelInstanceTypes,
-    inputs: Optional[Dict[str, Any]],
-    monitor: bool,
-    rebuild: str,
-    cache_dir: str,
-    config: build.Config,
-    model_type: build.ModelType,
-    version: str,
-    quantization_samples: Collection,
+    state_args: Dict,
+    state_type: Type = build.State,
 ) -> build.State:
     # Wipe this model's directory in the cache and start with a fresh State.
-    cache.rmdir(build.output_dir(cache_dir, config.build_name))
-    state = build.State(
-        model=model,
-        inputs=inputs,
-        monitor=monitor,
-        rebuild=rebuild,
-        cache_dir=cache_dir,
-        config=config,
-        model_type=model_type,
-        onnxflow_version=version,
-        quantization_samples=quantization_samples,
+    cache.rmdir(
+        build.output_dir(state_args["cache_dir"], state_args["config"].build_name)
     )
+    state = state_type(**state_args)
     state.save()
 
     return state
 
 
-def _rebuild_if_needed(problem_report: str, state_args: Dict):
+def _rebuild_if_needed(
+    problem_report: str, state_args: Dict, state_type: Type = build.State
+):
     build_name = state_args["config"].build_name
     msg = (
         f"build_model() discovered a cached build of {build_name}, but decided to "
@@ -279,7 +266,7 @@ def _rebuild_if_needed(problem_report: str, state_args: Dict):
     )
     printing.log_warning(msg)
 
-    return _begin_fresh_build(**state_args)
+    return _begin_fresh_build(state_args, state_type=state_type)
 
 
 def load_or_make_state(
@@ -291,6 +278,9 @@ def load_or_make_state(
     model: build.UnionValidModelInstanceTypes = None,
     inputs: Optional[Dict[str, Any]] = None,
     quantization_samples: Optional[Collection] = None,
+    state_type: Type = build.State,
+    cache_validation_func: Callable = validate_cached_model,
+    extra_state_args: Optional[Dict] = None,
 ) -> build.State:
     """
     Decide whether we can load the model from the model cache
@@ -308,17 +298,24 @@ def load_or_make_state(
         "cache_dir": cache_dir,
         "config": config,
         "model_type": model_type,
-        "version": onnxflow_version,
         "quantization_samples": quantization_samples,
     }
 
+    # Allow customizations of onnxflow to supply additional args
+    if extra_state_args is not None:
+        state_args.update(extra_state_args)
+
     if rebuild == "always":
-        return _begin_fresh_build(**state_args)
+        return _begin_fresh_build(state_args, state_type)
     else:
         # Try to load state and check if model successfully built before
         if os.path.isfile(build.state_file(cache_dir, config.build_name)):
             try:
-                state = build.load_state(cache_dir, config.build_name)
+                state = build.load_state(
+                    cache_dir,
+                    config.build_name,
+                    state_type=state_type,
+                )
 
                 # if the previous build is using quantization while the current is not
                 # or vice versa
@@ -341,7 +338,7 @@ def load_or_make_state(
                     )
 
                     printing.log_info(msg)
-                    return _begin_fresh_build(**state_args)
+                    return _begin_fresh_build(state_args, state_type)
 
                 if not state.quantization_samples and quantization_samples is not None:
                     if rebuild == "never":
@@ -362,7 +359,7 @@ def load_or_make_state(
                     )
 
                     printing.log_info(msg)
-                    return _begin_fresh_build(**state_args)
+                    return _begin_fresh_build(state_args, state_type)
 
             except exp.StateError as e:
                 problem = (
@@ -371,7 +368,7 @@ def load_or_make_state(
                 )
 
                 if rebuild == "if_needed":
-                    return _rebuild_if_needed(problem, state_args)
+                    return _rebuild_if_needed(problem, state_args, state_type)
                 else:
                     # Give the rebuild="never" users a chance to address the problem
                     raise exp.CacheError(e)
@@ -386,7 +383,7 @@ def load_or_make_state(
                 )
                 printing.log_warning(msg)
 
-                return _begin_fresh_build(**state_args)
+                return _begin_fresh_build(state_args, state_type)
             elif (
                 model_type == build.ModelType.UNKNOWN
                 and state.build_status == build.Status.PARTIAL_BUILD
@@ -400,11 +397,10 @@ def load_or_make_state(
                 printing.log_info(msg)
                 return state
             else:
-                cache_problems = _validate_cached_model(
+                cache_problems = cache_validation_func(
                     config=config,
                     model_type=model_type,
                     state=state,
-                    version=onnxflow_version,
                     model=model,
                     inputs=inputs,
                 )
@@ -432,9 +428,32 @@ def load_or_make_state(
 
         else:
             # No state file found, so we have to build
-            return _begin_fresh_build(**state_args)
+            return _begin_fresh_build(state_args, state_type)
 
 
+<<<<<<< HEAD
+=======
+def load_model_from_file(path_to_model, user_inputs):
+    if not os.path.isfile(path_to_model):
+        msg = f"""
+        build_model() model argument was passed a string (path to a model file),
+        however no file was found at {path_to_model}.
+        """
+        raise exp.IntakeError(msg)
+
+    if path_to_model.endswith(".onnx"):
+        return path_to_model, user_inputs
+
+    else:
+        msg = f"""
+        build_model() received a model argument that was a string. However, model string
+        arguments are required to be a path a .onnx file, and the
+        following argument is neither: {path_to_model}
+        """
+        raise exp.IntakeError(msg)
+
+
+>>>>>>> main
 model_type_to_sequence = {
     build.ModelType.PYTORCH: default_pytorch_sequence,
     build.ModelType.KERAS: default_keras_sequence,
@@ -447,7 +466,7 @@ model_type_to_sequence_with_quantization = {
 }
 
 
-def _validate_inputs(inputs: Dict):
+def validate_inputs(inputs: Dict):
     """
     Check the model's inputs and make sure they are legal. Raise an exception
     if they are not legal.
@@ -507,6 +526,12 @@ def model_intake(
     user_inputs,
     user_sequence: Optional[stage.Sequence],
     user_quantization_samples: Optional[Collection] = None,
+    override_quantization_sequence_map: Optional[
+        Dict[build.ModelType, stage.Sequence]
+    ] = None,
+    override_sequence_map: Dict[
+        build.ModelType, stage.Sequence
+    ] = None,
 ) -> Tuple[Any, Any, stage.Sequence, build.ModelType, str]:
 
     # Model intake structure options:
@@ -520,6 +545,16 @@ def model_intake(
     #    |
     #    |------- Hummingbird-supported model object
 
+    if override_quantization_sequence_map is None:
+        quantization_sequence_map = model_type_to_sequence_with_quantization
+    else:
+        quantization_sequence_map = override_quantization_sequence_map
+
+    if override_sequence_map is None:
+        sequence_map = model_type_to_sequence
+    else:
+        sequence_map = override_sequence_map
+
     if user_sequence is None or user_sequence.enable_model_validation:
 
         if user_model is None and user_inputs is None:
@@ -532,6 +567,7 @@ def model_intake(
 
         # Make sure that if the model is a file path, it is valid
         if isinstance(user_model, str):
+<<<<<<< HEAD
             if not os.path.isfile(user_model):
                 msg = f"""
                 build_model() model argument was passed a string (path to a model file),
@@ -551,6 +587,9 @@ def model_intake(
                 inputs = onnx_helpers.dummy_inputs(user_model)
             else:
                 inputs = user_inputs
+=======
+            model, inputs = load_model_from_file(user_model, user_inputs)
+>>>>>>> main
         else:
             inputs = user_inputs
 
@@ -564,11 +603,11 @@ def model_intake(
                     raise exp.IntakeError(
                         "Currently, post training quantization only supports Pytorch models."
                     )
-                sequence = model_type_to_sequence_with_quantization[model_type]
+                sequence = quantization_sequence_map[model_type]
             else:
-                sequence = model_type_to_sequence[model_type]
+                sequence = sequence_map[model_type]
 
-        _validate_inputs(inputs)
+        validate_inputs(inputs)
 
     else:
         # We turn off a significant amount of automation and validation
