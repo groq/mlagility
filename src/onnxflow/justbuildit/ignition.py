@@ -431,29 +431,6 @@ def load_or_make_state(
             return _begin_fresh_build(state_args, state_type)
 
 
-<<<<<<< HEAD
-=======
-def load_model_from_file(path_to_model, user_inputs):
-    if not os.path.isfile(path_to_model):
-        msg = f"""
-        build_model() model argument was passed a string (path to a model file),
-        however no file was found at {path_to_model}.
-        """
-        raise exp.IntakeError(msg)
-
-    if path_to_model.endswith(".onnx"):
-        return path_to_model, user_inputs
-
-    else:
-        msg = f"""
-        build_model() received a model argument that was a string. However, model string
-        arguments are required to be a path a .onnx file, and the
-        following argument is neither: {path_to_model}
-        """
-        raise exp.IntakeError(msg)
-
-
->>>>>>> main
 model_type_to_sequence = {
     build.ModelType.PYTORCH: default_pytorch_sequence,
     build.ModelType.KERAS: default_keras_sequence,
@@ -529,9 +506,7 @@ def model_intake(
     override_quantization_sequence_map: Optional[
         Dict[build.ModelType, stage.Sequence]
     ] = None,
-    override_sequence_map: Dict[
-        build.ModelType, stage.Sequence
-    ] = None,
+    override_sequence_map: Dict[build.ModelType, stage.Sequence] = None,
 ) -> Tuple[Any, Any, stage.Sequence, build.ModelType, str]:
 
     # Model intake structure options:
@@ -567,7 +542,6 @@ def model_intake(
 
         # Make sure that if the model is a file path, it is valid
         if isinstance(user_model, str):
-<<<<<<< HEAD
             if not os.path.isfile(user_model):
                 msg = f"""
                 build_model() model argument was passed a string (path to a model file),
@@ -587,9 +561,6 @@ def model_intake(
                 inputs = onnx_helpers.dummy_inputs(user_model)
             else:
                 inputs = user_inputs
-=======
-            model, inputs = load_model_from_file(user_model, user_inputs)
->>>>>>> main
         else:
             inputs = user_inputs
 
