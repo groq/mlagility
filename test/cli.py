@@ -489,8 +489,10 @@ class Testing(unittest.TestCase):
 
         # Make sure we can print the builds in the cache
         for test_script in test_scripts_dot_py.keys():
-            script_name = strip_dot_py(test_script)
-            builds, _ = filesystem.get_builds_from_script(cache_dir, script_name)
+            test_script_path = os.path.join(corpus_dir, test_script)
+            builds, script_name = filesystem.get_builds_from_script(
+                cache_dir, test_script_path
+            )
 
             for build_name in builds:
                 # Make sure each build can be accessed with `benchit cache stats`
@@ -520,16 +522,15 @@ class Testing(unittest.TestCase):
                 assert isinstance(stats_dict["parameters"], int), stats_dict[
                     "parameters"
                 ]
-                assert isinstance(stats_dict["onnx_input_dimensions"], dict), stats_dict[
-                    "onnx_input_dimensions"
-                ]
-                assert isinstance(stats_dict["onnx_model_information"], dict), stats_dict[
-                    "onnx_model_information"
-                ]
+                assert isinstance(
+                    stats_dict["onnx_input_dimensions"], dict
+                ), stats_dict["onnx_input_dimensions"]
+                assert isinstance(
+                    stats_dict["onnx_model_information"], dict
+                ), stats_dict["onnx_model_information"]
                 assert isinstance(stats_dict["onnx_ops_counter"], dict), stats_dict[
                     "onnx_ops_counter"
                 ]
-
 
     def test_008_cli_version(self):
 
