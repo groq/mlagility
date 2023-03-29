@@ -16,6 +16,7 @@ In this tutorial you will learn things such as:
 - [A "hello world" example, which is the easiest way to get started](#hello-world)
 - [Benchmarking on Nvidia GPUs](#nvidia-benchmarking)
 - [Working with scripts that invoke more than one model](#multiple-models-per-script)
+- [Benchmarking an ONNX file](#onnx-benchmarking)
 
 # Tutorials
 
@@ -137,6 +138,32 @@ Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that both model instances in `two_models.py`, `pytorch_model` and `another_pytorch_model`, are both discovered and benchmarked.
+
+## ONNX Benchmarking
+
+If you already happen to have an ONNX file, `benchit` can benchmark it for you. We can demonstrate this with the ONNX file in `examples/cli/onnx/sample.onnx`.
+
+Run the following command:
+
+```
+benchit onnx/sample.onnx
+```
+
+To get a result like:
+
+```
+Building "sample"
+    ✓ Receiving ONNX Model   
+    ✓ Finishing up   
+
+Woohoo! Saved to ~/mlagility/examples/cli/onnx/tmp_cache/sample
+
+Info: Benchmarking on local x86...
+
+Info: Performance of build sample on x86 device Intel(R) Xeon(R) CPU @ 2.20GHz is:
+        Mean Latency: 0.042 milliseconds (ms)
+        Throughput: 23921.9 inferences per second (IPS)
+```
 
 # Thanks!
 

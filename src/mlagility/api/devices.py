@@ -590,12 +590,12 @@ def execute_ort_locally(
 
     # Check if ONNX file has been generated
     state = build.load_state(cache_dir, build_name)
-    if not os.path.exists(state.converted_onnx_file):
+    if not os.path.exists(state.intermediate_results[0]):
         msg = "Model file not found"
         raise exp.ModelRuntimeError(msg)
 
     os.makedirs(local_paths.onnx_dir)
-    shutil.copy(state.converted_onnx_file, local_paths.onnx_file)
+    shutil.copy(state.intermediate_results[0], local_paths.onnx_file)
 
     # Check if docker and python are installed on the local machine
     docker_location = shutil.which("docker")

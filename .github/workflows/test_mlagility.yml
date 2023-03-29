@@ -58,6 +58,8 @@ jobs:
           benchit examples/cli/scripts/two_models.py
           rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py --sequence-file examples/cli/extras/example_sequence.py --build-only
+          rm -rf ~/.cache/mlagility
+          benchit examples/cli/onnx/sample.onnx
 
           # E2E tests
           rm -rf ~/.cache/mlagility

@@ -4,7 +4,7 @@ import sys
 import onnxflow.common.build as build
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.report as report
-from mlagility.api.script_api import benchmark_script
+from mlagility.api.script_api import benchmark_files
 from mlagility.version import __version__ as mlagility_version
 
 
@@ -36,13 +36,13 @@ def print_stats(args):
     )
 
 
-def benchmark_script_argparse(args):
+def benchmark_command(args):
     """
-    Convert argparse args into benchmark_script keyword args
+    Map the argparse args into benchmark_files() arguments
     """
 
-    benchmark_script(
-        input_scripts=args.input_scripts,
+    benchmark_files(
+        input_files=args.input_files,
         use_slurm=args.use_slurm,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
@@ -92,12 +92,12 @@ def main():
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Benchmark the performance of one or more models"
     )
-    benchmark_parser.set_defaults(func=benchmark_script_argparse)
+    benchmark_parser.set_defaults(func=benchmark_command)
 
     benchmark_parser.add_argument(
-        "input_scripts",
+        "input_files",
         nargs="+",
-        help="One or more script (.py) files to be benchmarked",
+        help="One or more script (.py) or ONNX (.onnx) files to be benchmarked",
     )
 
     benchmark_parser.add_argument(
