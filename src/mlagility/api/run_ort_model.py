@@ -60,11 +60,11 @@ def _dummy_inputs(sess_input) -> dict:
 def dtype_ort2str(dtype_str: str):
     if dtype_str == "float16":
         datatype = "float16"
-    if dtype_str == "float":
+    elif dtype_str == "float":
         datatype = "float32"
-    if dtype_str == "double":
+    elif dtype_str == "double":
         datatype = "float64"
-    if dtype_str == "long":
+    elif dtype_str == "long":
         datatype = "int64"
     else:
         datatype = dtype_str

@@ -386,6 +386,7 @@ def execute_trt_remotely(
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
+    cache_dir = os.path.abspath(cache_dir)
     remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
@@ -452,6 +453,7 @@ def execute_trt_locally(
     """
 
     # Setup local execution folders to save outputs/ errors
+    cache_dir = os.path.abspath(cache_dir)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
@@ -519,6 +521,7 @@ def execute_ort_remotely(
     _ip, username = configure_remote(device)
 
     # Setup remote execution folders to save outputs/ errors
+    cache_dir = os.path.abspath(cache_dir)
     remote_paths = BenchmarkPaths(cache_dir, build_name, device, "remote", username)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
@@ -579,6 +582,7 @@ def execute_ort_locally(
     """
 
     # Setup local execution folders to save outputs/ errors
+    cache_dir = os.path.abspath(cache_dir)
     local_paths = BenchmarkPaths(cache_dir, build_name, device, "local")
     docker_paths = BenchmarkPaths(cache_dir, build_name, device, "docker")
 
