@@ -41,32 +41,13 @@ def decode_input_script(input: str) -> Tuple[str, List[str], str]:
     return script_path, targets, encoded_input
 
 
-def benchmark_script(
-    input_scripts: str = None,
-    use_slurm: bool = False,
-    lean_cache: bool = False,
-    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
-    labels: List[str] = None,
-    rebuild: Optional[str] = None,
-    devices: List[str] = None,
-    backend: str = "local",
-    analyze_only: bool = False,
-    build_only: bool = False,
-    resume: bool = False,
-    script_args: str = "",
-    max_depth: int = 0,
-    sequence: Union[str, stage.Sequence] = None,
-    groq_compiler_flags: Optional[List[str]] = None,
-    groq_assembler_flags: Optional[List[str]] = None,
-    groq_num_chips: Optional[int] = None,
-    groqview: bool = False,
-):
+def load_sequence_from_file(sequence: Union[str, stage.Sequence], use_slurm: bool):
+    """
+    Import the sequence file to get a custom sequence, if the user provided
+    one. Sequence instances are passed through this function as long as
+    the user is not in Slurm mode.
+    """
 
-    # Make sure the cache directory exists
-    filesystem.make_cache_dir(cache_dir)
-
-    # Import the sequence file to get a custom sequence, if the user provided
-    # one
     if sequence is not None:
         if use_slurm:
             # The slurm node will need to load a sequence file
@@ -91,6 +72,35 @@ def benchmark_script(
             )
     else:
         custom_sequence = None
+
+    return custom_sequence
+
+
+def benchmark_script(
+    input_scripts: str = None,
+    use_slurm: bool = False,
+    lean_cache: bool = False,
+    cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
+    labels: List[str] = None,
+    rebuild: Optional[str] = None,
+    devices: List[str] = None,
+    backend: str = "local",
+    analyze_only: bool = False,
+    build_only: bool = False,
+    resume: bool = False,
+    script_args: str = "",
+    max_depth: int = 0,
+    sequence: Union[str, stage.Sequence] = None,
+    groq_compiler_flags: Optional[List[str]] = None,
+    groq_assembler_flags: Optional[List[str]] = None,
+    groq_num_chips: Optional[int] = None,
+    groqview: bool = False,
+):
+
+    # Make sure the cache directory exists
+    filesystem.make_cache_dir(cache_dir)
+
+    custom_sequence = load_sequence_from_file(sequence, use_slurm)
 
     if devices is None:
         devices = ["x86"]
@@ -301,12 +311,15 @@ def benchmark_files(
         build_name = filesystem.clean_script_name(onnx_file)
 
         # Sequence that just passes the onnx file into the cache
-        onnx_sequence = stage.Sequence(
-            unique_name="onnx_passthrough",
-            monitor_message="Pass through ONNX file",
-            stages=[export.ReceiveOnnxModel(), export.SuccessStage()],
-            enable_model_validation=True,
-        )
+        if sequence is None:
+            onnx_sequence = stage.Sequence(
+                unique_name="onnx_passthrough",
+                monitor_message="Pass through ONNX file",
+                stages=[export.ReceiveOnnxModel(), export.SuccessStage()],
+                enable_model_validation=True,
+            )
+        else:
+            onnx_sequence = load_sequence_from_file(sequence, use_slurm)
 
         for device in devices:
             benchmark_model(
