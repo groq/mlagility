@@ -7,19 +7,13 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/groq/mlagility/blob/main/LICENSE "Check out our license")
 
 
-## Architecture
-
-```
-[ditaa, "block-diagram", "png", -E, -S, -W, -h]
-----
-+-----------+     +-----------+     +-----------+
-|   Block1  |---->|   Block2  |---->|   Block3  |
-+-----------+     +-----------+     +-----------+
-----
-```
-
 MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a corpus of hundreds of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data is available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility).
 
+## Architecture
+
+![Block Diagram](docs/block-diagram.png)
+
+* indicates work in progress
 ## Benchmarking Tool
 
 Our _benchit_ CLI allows you to benchmark Pytorch models without changing a single line of code. The demo below shows BERT-Base being benchmarked on both Nvidia A100 and Intel Xeon. For more information checkout out our [Tutorials](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) and [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md).
