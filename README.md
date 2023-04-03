@@ -11,9 +11,10 @@ MLAgility offers a complementary approach to MLPerf by examining the capability 
 
 ## Architecture
 
-![Block Diagram](docs/block-diagram.png)
+<img src="docs/block-diagram.png" alt="Architecture block diagram" width="500" height="300" />
 
-* indicates work in progress
+
+'*' indicates work in progress
 ## Benchmarking Tool
 
 Our _benchit_ CLI allows you to benchmark Pytorch models without changing a single line of code. The demo below shows BERT-Base being benchmarked on both Nvidia A100 and Intel Xeon. For more information checkout out our [Tutorials](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) and [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md).
