@@ -7,6 +7,16 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/groq/mlagility/blob/main/LICENSE "Check out our license")
 
 
+## Architecture
+
+```
+[ditaa, "block-diagram", "png", -E, -S, -W, -h]
+----
++-----------+     +-----------+     +-----------+
+|   Block1  |---->|   Block2  |---->|   Block3  |
++-----------+     +-----------+     +-----------+
+----
+```
 
 MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a corpus of hundreds of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data is available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility).
 
