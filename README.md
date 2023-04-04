@@ -7,8 +7,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/groq/mlagility/blob/main/LICENSE "Check out our license")
 
 
-
 MLAgility offers a complementary approach to MLPerf by examining the capability of vendors to provide turnkey solutions to a corpus of hundreds of off-the-shelf models. All of the model scripts and benchmarking code are published as open source software. The performance data is available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility).
+
 
 ## Benchmarking Tool
 
@@ -27,6 +27,15 @@ Our _benchit_ CLI allows you to benchmark Pytorch models without changing a sing
 
 This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. You can see the set of models in each category by clicking on the corresponding badge.
 
+## Architecture
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/block_diagram_dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/img/block_diagram_light.png">
+  <img src="docs/img/block_diagram_dark.png" alt="Architecture block diagram" width="600" height="800" />
+</picture>
+
+\* indicates work in progress
 ## Benchmarking results
 
 We are also working on making MLAgility results publicly available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility). Check it out!
