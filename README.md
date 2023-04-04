@@ -11,7 +11,7 @@ MLAgility offers a complementary approach to MLPerf by examining the capability 
 
 ## Architecture
 
-<img src="docs/block-diagram.png" alt="Architecture block diagram" width="500" height="300" />
+<img src="docs/block_diagram.png" alt="Architecture block diagram" width="500" height="300" />
 
 
 '*' indicates work in progress
