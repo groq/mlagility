@@ -23,7 +23,7 @@ def run(
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
     # GroqFlow maintainers to keep this up to date with the latest version of release container
     latest_trt_docker = "nvcr.io/nvidia/tensorrt:23.03-py3"
-    docker_name = "tensorrt22.12"
+    docker_name = "tensorrt23.03"
 
     # docker run args:
     # "--gpus all" - use all gpus available
