@@ -45,9 +45,9 @@ def parse(valid_args: List[str]) -> List[Union[int, float]]:
         # Width of the input image that will be used for benchmarking
         "width": Arg("width", default=224, type=int),
         # Args for Graph Neural Networks
-        "k": Arg("k", default=8, type=int),
+        "k": Arg("k", default=2, type=int),
         "alpha": Arg("alpha", default=2.2, type=float),
-        "out_channels": Arg("out_channels", default=16, type=int),
+        "out_channels": Arg("out_channels", default=1500, type=int),
         "num_layers": Arg("num_layers", default=8, type=int),
         "in_channels": Arg("in_channels", default=1433, type=int),
     }

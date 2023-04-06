@@ -15,8 +15,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-# k = parse(["k"])
-k=2
+k = parse(["k"])[0]
 
 model = ChebConv(
     dataset.num_features, dataset.num_classes, k

@@ -16,8 +16,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-# out_channels = parse(["out_channels"])
-out_channels = 16
+out_channels = parse(["out_channels"])[0]
 
 
 model = EGConv(dataset.num_features, out_channels)

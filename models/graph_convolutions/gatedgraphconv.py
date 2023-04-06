@@ -14,8 +14,7 @@ data = dataset[0]
 edge_index_rows = 2
 
 # Parsing command-line arguments
-# num_layers, out_channels = parse(["num_layers", "out_channels"])
-num_layers, out_channels = 8, 2048
+num_layers, out_channels = parse(["num_layers", "out_channels"])
 
 
 model = GatedGraphConv(out_channels, num_layers)
