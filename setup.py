@@ -23,6 +23,7 @@ setup(
         "onnxruntime>=1.10.0",
         "paramiko==2.11.0",
         "torch>=1.12.1",
+        "torch_geometric>=2.3.0",
         "protobuf>=3.17.3",
         "pyyaml>=5.4",
         "typeguard>=2.3.13",
