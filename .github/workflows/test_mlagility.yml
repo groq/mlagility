@@ -98,4 +98,5 @@ jobs:
           bash src/mlagility/cli/setup_venv.sh
           conda activate tracker_slurm
           python -m pip check
+          python -c "import torch_geometric"
           conda deactivate

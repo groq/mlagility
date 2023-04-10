@@ -7,6 +7,7 @@ torch<=1.14.0
 datasets>=2.3.2
 torchvision>=0.11.3
 torchaudio>=0.10.2
+torch_geometric>=2.3.0
 transformers>=4.21.0
 pytorch-pretrained-biggan>=0.1.1
 timm>=0.6.7
