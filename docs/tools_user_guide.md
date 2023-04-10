@@ -279,8 +279,8 @@ Each device type has its own default runtime, as indicated below. Valid values i
 - `groq`: GroqFlow (default for `groq` device type).
 - [future] `pytorch1`: PyTorch 1.x-style eager execution.
 - [future] `pytorch2`: PyTorch 2.x-style compiled graph execution.
-- [future] `ort-*`: Specific [ONNX Runtime execution providers](#https://onnxruntime.ai/docs/
-execution-providers/)
+- [future] `ort-*`: Specific [ONNX Runtime execution providers]
+(#https://onnxruntime.ai/docs/execution-providers/)
 
 In the future this will also be available as API arguments: 
 - `benchmark_script(runtime=...)`
