@@ -27,6 +27,12 @@ Our _benchit_ CLI allows you to benchmark Pytorch models without changing a sing
 
 This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. You can see the set of models in each category by clicking on the corresponding badge.
 
+## Benchmarking results
+
+We are also working on making MLAgility results publicly available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility). Check it out!
+
+<img src="https://github.com/groq/mlagility/raw/main/docs/img/dashboard.gif"  width="800"/>
+
 ## Architecture
 
 <picture>
@@ -36,12 +42,7 @@ This repository is home to a diverse corpus of hundreds of models. We are active
 </picture>
 
 \* indicates work in progress
-## Benchmarking results
-
-We are also working on making MLAgility results publicly available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility). Check it out!
-
-<img src="https://github.com/groq/mlagility/raw/main/docs/img/dashboard.gif"  width="800"/>
-
+The diagram above illustrates the MLAgility repository's structure. Simply put, the MLAgility models are leveraged by our benchmarking tool, benchit, to produce benchmarking outcomes showcased on our Hugging Face page. 
 ## Installation
 
 Please refer to our [mlagility installation guide](https://github.com/groq/mlagility/blob/main/docs/install.md) to get instructions on how to install mlagility.
