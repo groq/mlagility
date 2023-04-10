@@ -27,7 +27,7 @@ Our _benchit_ CLI allows you to benchmark Pytorch models without changing a sing
 
 This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. You can see the set of models in each category by clicking on the corresponding badge.
 
-## How everything fits together
+## Benchmarking results
 
 We are also working on making MLAgility results publicly available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility). Check it out!
 
