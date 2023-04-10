@@ -27,22 +27,21 @@ Our _benchit_ CLI allows you to benchmark Pytorch models without changing a sing
 
 This repository is home to a diverse corpus of hundreds of models. We are actively working on increasing the number of models on our model library. You can see the set of models in each category by clicking on the corresponding badge.
 
-## Benchmarking results
+## How everything fits together
 
 We are also working on making MLAgility results publicly available at our [Huggingface Space](https://huggingface.co/spaces/Groq/mlagility). Check it out!
 
 <img src="https://github.com/groq/mlagility/raw/main/docs/img/dashboard.gif"  width="800"/>
 
-## Architecture
+## How everything fits together
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/img/block_diagram_dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/img/block_diagram_light.png">
-  <img src="docs/img/block_diagram_dark.png" alt="Architecture block diagram" width="600" height="800" />
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/block_diagram_light.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/img/block_diagram_dark.png">
+  <img src="docs/img/block_diagram_dark.png" alt="Architecture block diagram" width="700" height="500" />
 </picture>
 
-\* indicates work in progress
-The diagram above illustrates the MLAgility repository's structure. Simply put, the MLAgility models are leveraged by our benchmarking tool, benchit, to produce benchmarking outcomes showcased on our Hugging Face page. 
+The diagram above illustrates the MLAgility repository's structure. Simply put, the MLAgility models are leveraged by our benchmarking tool, benchit, to produce benchmarking outcomes showcased on our Hugging Face Spaces page. 
 ## Installation
 
 Please refer to our [mlagility installation guide](https://github.com/groq/mlagility/blob/main/docs/install.md) to get instructions on how to install mlagility.
