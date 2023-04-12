@@ -171,6 +171,7 @@ def main():
         choices=[
             "x86",
             "x86_pytorch",
+            "x86_pytorch_compiled",
             "nvidia",
             "groq",
         ],

@@ -121,7 +121,7 @@ def benchmark_model(
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
-        elif device == "x86_pytorch":
+        elif device in ["x86_pytorch", "x86_pytorch_compiled"]:
 
             # Create cache folder with stats file
             # Although building with an empty sequence is possible, we don't want
@@ -136,6 +136,9 @@ def benchmark_model(
                 sequence=sequence,
             )
 
+            if device == "x86_pytorch_compiled":
+                model = torch.compile(model)
+
             if not build_only:
                 repetitions = 100
                 total_time = [0] * repetitions
@@ -148,7 +151,12 @@ def benchmark_model(
                 # Calculate perf from total_time
                 mean_latency_ms = mean(total_time) * 1000
                 throughput_ips = float(1 / (np.sum(total_time) / repetitions))
-                device_name = get_cpu_specs()["CPU Name"] + " (Pytorch)"
+                if device == "x86_pytorch":
+                    device_name = get_cpu_specs()["CPU Name"] + " (Pytorch)"
+                else:
+                    device_name = (
+                        get_cpu_specs()["CPU Name"] + " (Pytorch 2.X Compiled)"
+                    )
 
                 return MeasuredPerformance(
                     mean_latency=mean_latency_ms,
@@ -160,7 +168,7 @@ def benchmark_model(
 
         else:
             raise ValueError(
-                "Only groq, x86, x86_pytorch, and nvidia are allowed values for device type, "
+                "Only groq, x86, x86_pytorch, x86_pytorch_compiled, and nvidia are allowed values for device type, "
                 f"but got {device}"
             )
 
