@@ -1,10 +1,15 @@
 import sys
 import os
+import time
+import torch
+import numpy as np
+from statistics import mean
 from typing import Any, Dict, Optional, List
 from onnxflow import build_model
 from onnxflow.justbuildit.stage import Sequence
 import onnxflow.common.printing as printing
 from mlagility.api import trtmodel, ortmodel
+from mlagility.api.setup_ort import get_cpu_specs
 import mlagility.common.filesystem as filesystem
 from mlagility.api.performance import MeasuredPerformance
 
@@ -116,9 +121,46 @@ def benchmark_model(
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
+        elif device == "x86_pytorch":
+
+            # Create cache folder with stats file
+            # Although building with an empty sequence is possible, we don't want
+            # the model to be rebuilt when other devices are used, causing the
+            # results inside of the stats file to be lost.
+            build_model(
+                model=model,
+                inputs=inputs,
+                build_name=build_name,
+                cache_dir=cache_dir,
+                rebuild=rebuild,
+                sequence=sequence,
+            )
+
+            if not build_only:
+                repetitions = 100
+                total_time = [0] * repetitions
+                for idx in range(repetitions):
+                    start_time = time.process_time()
+                    model(**inputs)
+                    end_time = time.process_time()
+                    total_time[idx] = end_time - start_time
+
+                # Calculate perf from total_time
+                mean_latency_ms = mean(total_time) * 1000
+                throughput_ips = float(1 / (np.sum(total_time) / repetitions))
+                device_name = get_cpu_specs()["CPU Name"] + " (Pytorch)"
+
+                return MeasuredPerformance(
+                    mean_latency=mean_latency_ms,
+                    throughput=throughput_ips,
+                    device=device_name,
+                    device_type=device,
+                    build_name=build_name,
+                )
+
         else:
             raise ValueError(
-                "Only groq, x86, or nvidia are allowed values for device type, "
+                "Only groq, x86, x86_pytorch, and nvidia are allowed values for device type, "
                 f"but got {device}"
             )
 

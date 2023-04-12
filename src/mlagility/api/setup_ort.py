@@ -9,6 +9,7 @@ import subprocess
 import json
 import logging
 from statistics import mean
+from typing import Dict
 
 BATCHSIZE = 1
 
@@ -166,6 +167,18 @@ def run(
             except SubprocessError as e:
                 logging.error(f"Failed to stop Docker container with exception: {e}")
 
+    cpu_performance = get_cpu_specs()
+    cpu_performance["OnnxRuntime Version"] = str(ort_version)
+    cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
+    cpu_performance["Throughput"] = str(BATCHSIZE / mean(perf_result))
+    cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000)
+    cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000)
+
+    with open(outputs_file, "w", encoding="utf-8") as out_file:
+        json.dump(cpu_performance, out_file, ensure_ascii=False, indent=4)
+
+
+def get_cpu_specs() -> Dict:
     # Get CPU spec from lscpu
     cpu_info_command = "lscpu"
     cpu_info = subprocess.Popen(cpu_info_command.split(), stdout=subprocess.PIPE)
@@ -185,21 +198,14 @@ def run(
     def format_field(line: str) -> str:
         return line.split(":")[-1].strip()
 
-    cpu_performance = {}
+    cpu_spec = {}
     for line in decoded_info.split("\n"):
         for field, key in field_mapping.items():
             if field in line:
-                cpu_performance[key] = format_field(line)
+                cpu_spec[key] = format_field(line)
                 break
 
-    cpu_performance["OnnxRuntime Version"] = str(ort_version)
-    cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
-    cpu_performance["Throughput"] = str(BATCHSIZE / mean(perf_result))
-    cpu_performance["Min Latency(ms)"] = str(min(perf_result) * 1000)
-    cpu_performance["Max Latency(ms)"] = str(max(perf_result) * 1000)
-
-    with open(outputs_file, "w", encoding="utf-8") as out_file:
-        json.dump(cpu_performance, out_file, ensure_ascii=False, indent=4)
+    return cpu_spec
 
 
 if __name__ == "__main__":

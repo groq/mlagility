@@ -170,6 +170,7 @@ def main():
         "--devices",
         choices=[
             "x86",
+            "x86_pytorch",
             "nvidia",
             "groq",
         ],
