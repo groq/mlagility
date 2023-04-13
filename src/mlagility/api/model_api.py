@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import json
 import torch
 import numpy as np
 from statistics import mean
@@ -12,6 +13,7 @@ from mlagility.api import trtmodel, ortmodel
 from mlagility.api.setup_ort import get_cpu_specs
 import mlagility.common.filesystem as filesystem
 from mlagility.api.performance import MeasuredPerformance
+from mlagility.api.devices import SUPPORTED_DEVICES
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
@@ -23,6 +25,7 @@ def benchmark_model(
     script_name: str = None,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     device: str = "x86",
+    runtime: str = "ort",
     backend: str = "local",
     build_only: bool = False,
     lean_cache: bool = False,
@@ -36,7 +39,6 @@ def benchmark_model(
     """
     Benchmark a model against some inputs on target hardware
     """
-
     # Make sure the cache exists, and populate the cache database
     # with this script and build.
     # Skip this if we are in Slurm mode; it will be done in the main process
@@ -103,7 +105,7 @@ def benchmark_model(
                 )
                 perf = gpu_model.benchmark(backend=backend)
 
-        elif device == "x86":
+        elif device == "x86" and runtime == "ort":
             omodel = build_model(
                 model=model,
                 inputs=inputs,
@@ -121,7 +123,7 @@ def benchmark_model(
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
-        elif device in ["x86_pytorch", "x86_pytorch_compiled"]:
+        elif device == "x86" and runtime in ["torch", "torch_compiled"]:
 
             # Create cache folder with stats file
             # Although building with an empty sequence is possible, we don't want
@@ -136,7 +138,7 @@ def benchmark_model(
                 sequence=sequence,
             )
 
-            if device == "x86_pytorch_compiled":
+            if runtime == "torch_compiled":
                 model = torch.compile(model)
 
             if not build_only:
@@ -151,11 +153,15 @@ def benchmark_model(
                 # Calculate perf from total_time
                 mean_latency_ms = mean(total_time) * 1000
                 throughput_ips = float(1 / (np.sum(total_time) / repetitions))
-                if device == "x86_pytorch":
-                    device_name = get_cpu_specs()["CPU Name"] + " (Pytorch)"
+                torch_version = torch.__version__
+                if runtime == "torch":
+                    device_name = (
+                        get_cpu_specs()["CPU Name"] + f" (Pytorch {torch_version})"
+                    )
                 else:
                     device_name = (
-                        get_cpu_specs()["CPU Name"] + " (Pytorch 2.X Compiled)"
+                        get_cpu_specs()["CPU Name"]
+                        + f" (Pytorch {torch_version} Compiled)"
                     )
 
                 return MeasuredPerformance(
@@ -168,8 +174,10 @@ def benchmark_model(
 
         else:
             raise ValueError(
-                "Only groq, x86, x86_pytorch, x86_pytorch_compiled, and nvidia are allowed values for device type, "
-                f"but got {device}"
+                (
+                    f"Got device '{device}' and runtime '{runtime}'. "
+                    f"However, only the following combinations are allowed: {SUPPORTED_DEVICES}"
+                )
             )
 
     finally:

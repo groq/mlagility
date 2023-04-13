@@ -35,6 +35,7 @@ class TracerArgs:
     input: str
     device: str
     backend: str
+    runtime: str
     actions: List[Action]
     lean_cache: bool
     targets: List[str]
@@ -122,6 +123,7 @@ def call_benchit(
             inputs,
             device=tracer_args.device,
             backend=tracer_args.backend,
+            runtime=tracer_args.runtime,
             build_name=build_name,
             cache_dir=tracer_args.cache_dir,
             build_only=Action.BENCHMARK not in tracer_args.actions,

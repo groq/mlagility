@@ -12,6 +12,11 @@ import onnxflow.common.build as build
 ORT_BENCHMARKING_SCRIPT = "setup_ort.py"
 ORT_EXECUTION_SCRIPT = "run_ort_model.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
+SUPPORTED_DEVICES = {
+    "x86": ["ort", "torch", "torch_compiled"],
+    "groq": ["groqflow"],
+    "nvidia": ["trt"],
+}
 
 
 class BenchmarkPaths:
@@ -217,7 +222,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
             msg = "No NVIDIA GPUs available on the remote machine"
             raise exp.ModelRuntimeError(msg)
         files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
-    elif device_type in ["x86", "x86_pytorch", "x86_pytorch_compiled"]:
+    elif device_type in ["x86"]:
         # Check if x86_64 CPU is available remotely
         stdout, exit_code = exec_command(client, "uname -i")
         if stdout != "x86_64" or exit_code == 1:
@@ -244,7 +249,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         files_to_transfer = ["execute.py"]
     else:
         raise ValueError(
-            "Only 'nvidia', 'x86', 'x86_pytorch', x86_pytorch_compiled, and 'groqchip' are supported."
+            "Only 'nvidia', 'x86', and 'groqchip' are supported."
             f"But received {device_type}"
         )
 

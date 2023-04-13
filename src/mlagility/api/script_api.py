@@ -11,6 +11,7 @@ import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels_library
 from mlagility.api.model_api import benchmark_model
+from mlagility.api.devices import SUPPORTED_DEVICES
 from mlagility.analysis.analysis import (
     evaluate_script,
     TracerArgs,
@@ -85,6 +86,7 @@ def benchmark_script(
     rebuild: Optional[str] = None,
     devices: List[str] = None,
     backend: str = "local",
+    runtimes: List[str] = None,
     analyze_only: bool = False,
     build_only: bool = False,
     resume: bool = False,
@@ -104,6 +106,8 @@ def benchmark_script(
 
     if devices is None:
         devices = ["x86"]
+    if runtimes is None:
+        runtimes = [SUPPORTED_DEVICES["x86"][0]]
 
     # Force the user to specify a legal cache dir in NFS if they are using slurm
     if cache_dir == filesystem.DEFAULT_CACHE_DIR and use_slurm:
@@ -189,7 +193,7 @@ def benchmark_script(
         if os.environ.get("USING_SLURM") != "TRUE":
             db.add_script(filesystem.clean_script_name(script))
 
-        for device in devices:
+        for runtime, device in zip(runtimes, devices):
             if use_slurm:
                 slurm.run_benchit(
                     op="benchmark",
@@ -201,6 +205,7 @@ def benchmark_script(
                     groq_num_chips=groq_num_chips,
                     groqview=groqview,
                     devices=[device],
+                    runtimes=[runtime],
                     max_depth=max_depth,
                     analyze_only=analyze_only,
                     build_only=build_only,
@@ -224,6 +229,7 @@ def benchmark_script(
                     groqview=groqview,
                     device=device,
                     backend=backend,
+                    runtime=runtime,
                     actions=actions,
                     models_found=models_found,
                     sequence=custom_sequence,
@@ -256,6 +262,7 @@ def benchmark_files(
     rebuild: Optional[str] = None,
     devices: List[str] = None,
     backend: str = "local",
+    runtimes: List[str] = None,
     analyze_only: bool = False,
     build_only: bool = False,
     resume: bool = False,
@@ -294,6 +301,7 @@ def benchmark_files(
             rebuild=rebuild,
             devices=devices,
             backend=backend,
+            runtimes=runtimes,
             analyze_only=analyze_only,
             build_only=build_only,
             resume=resume,
@@ -321,7 +329,7 @@ def benchmark_files(
         else:
             onnx_sequence = load_sequence_from_file(sequence, use_slurm)
 
-        for device in devices:
+        for runtime, device in zip(runtimes, devices):
             benchmark_model(
                 model=onnx_file,
                 inputs=None,
@@ -329,6 +337,7 @@ def benchmark_files(
                 cache_dir=cache_dir,
                 device=device,
                 backend=backend,
+                runtime=runtime,
                 build_only=build_only,
                 lean_cache=lean_cache,
                 rebuild=rebuild,
