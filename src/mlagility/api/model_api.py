@@ -1,11 +1,10 @@
 import sys
 import os
 import time
-import json
-import torch
-import numpy as np
 from statistics import mean
 from typing import Any, Dict, Optional, List
+import torch
+import numpy as np
 from onnxflow import build_model
 from onnxflow.justbuildit.stage import Sequence
 import onnxflow.common.printing as printing

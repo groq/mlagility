@@ -70,7 +70,10 @@ def run_docker_container(output_dir, docker_name, docker_image):
         return output
     except subprocess.CalledProcessError as e:
         logging.error(
-            f"Failed to start Docker container with command: {' '.join(cmd)} and error message: {e.stderr}"
+            (
+                f"Failed to start Docker container with command: "
+                f"{' '.join(cmd)} and error message: {e.stderr}"
+            )
         )
         raise
 
