@@ -17,6 +17,7 @@ SUPPORTED_DEVICES = {
     "groq": ["groqflow"],
     "nvidia": ["trt"],
 }
+DEFAULT_RUNTIME = 0
 
 
 class BenchmarkPaths:

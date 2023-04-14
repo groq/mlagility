@@ -17,7 +17,7 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <sup>†</sup> Requires TensorRT >= 8.5.2  
 <sup>‡</sup> Requires ONNX Runtime >= 1.13.1  
-<sup>†</sup> Requires Pytorch >= 2.0.0
+<sup>*</sup> Requires Pytorch >= 2.0.0
 
 
 # Table of Contents
@@ -279,7 +279,7 @@ Each device type has its own default runtime, as indicated below. Valid values i
 - `ort`: ONNX Runtime (default for `x86` device type).
 - `trt`: Nvidia TensorRT (default for `nvidia` device type).
 - `groq`: GroqFlow (default for `groq` device type).
-- `torch`: PyTorch default execution.
+- `torch`: PyTorch eager execution.
 - `torch-compiled`: PyTorch 2.x-style compiled graph execution.
 - [future] `ort-*`: Specific [ONNX Runtime execution providers]
 (#https://onnxruntime.ai/docs/execution-providers/)

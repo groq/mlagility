@@ -11,7 +11,7 @@ import mlagility.cli.slurm as slurm
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels_library
 from mlagility.api.model_api import benchmark_model
-from mlagility.api.devices import SUPPORTED_DEVICES
+from mlagility.api.devices import SUPPORTED_DEVICES, DEFAULT_RUNTIME
 from mlagility.analysis.analysis import (
     evaluate_script,
     TracerArgs,
@@ -107,7 +107,7 @@ def benchmark_script(
     if devices is None:
         devices = ["x86"]
     if runtimes is None:
-        runtimes = [SUPPORTED_DEVICES["x86"][0]]
+        runtimes = [SUPPORTED_DEVICES["x86"][DEFAULT_RUNTIME]]
 
     # Force the user to specify a legal cache dir in NFS if they are using slurm
     if cache_dir == filesystem.DEFAULT_CACHE_DIR and use_slurm:

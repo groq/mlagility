@@ -149,20 +149,25 @@ def benchmark_model(
                         )
                     )
 
-                model = torch.compile(model)
+            # Compile model if needed
+            selected_model = (
+                torch.compile(model) if runtime == "torch-compiled" else model
+            )
 
             if not build_only:
-                repetitions = 100
-                total_time = [0] * repetitions
-                for idx in range(repetitions):
+                num_iterations = 100
+                per_iteration_latency = [0] * num_iterations
+                for idx in range(num_iterations):
                     start_time = time.process_time()
-                    model(**inputs)
+                    selected_model(**inputs)
                     end_time = time.process_time()
-                    total_time[idx] = end_time - start_time
+                    per_iteration_latency[idx] = end_time - start_time
 
-                # Calculate perf from total_time
-                mean_latency_ms = mean(total_time) * 1000
-                throughput_ips = float(1 / (np.sum(total_time) / repetitions))
+                # Calculate perf from per_iteration_latency
+                mean_latency_ms = mean(per_iteration_latency) * 1000
+                throughput_ips = float(
+                    1 / (np.sum(per_iteration_latency) / num_iterations)
+                )
 
                 if runtime == "torch":
                     device_name = (
