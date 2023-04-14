@@ -4,6 +4,7 @@ import time
 from statistics import mean
 from typing import Any, Dict, Optional, List
 import torch
+from packaging import version
 import numpy as np
 from onnxflow import build_model
 from onnxflow.justbuildit.stage import Sequence
@@ -12,7 +13,7 @@ from mlagility.api import trtmodel, ortmodel
 from mlagility.api.setup_ort import get_cpu_specs
 import mlagility.common.filesystem as filesystem
 from mlagility.api.performance import MeasuredPerformance
-from mlagility.api.devices import SUPPORTED_DEVICES
+from mlagility.api.devices import SUPPORTED_DEVICES, BenchmarkException
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
@@ -137,7 +138,17 @@ def benchmark_model(
                 sequence=sequence,
             )
 
+            torch_version = torch.__version__
             if runtime == "torch_compiled":
+                clean_torch_version = torch_version.split("+")[0]
+                if version.parse(clean_torch_version) < version.parse("2.0.0"):
+                    BenchmarkException(
+                        (
+                            f"{runtime} can only be used with Pytorch 2.0.0 or above. "
+                            f"However, version {torch_version} was found."
+                        )
+                    )
+
                 model = torch.compile(model)
 
             if not build_only:
@@ -152,7 +163,7 @@ def benchmark_model(
                 # Calculate perf from total_time
                 mean_latency_ms = mean(total_time) * 1000
                 throughput_ips = float(1 / (np.sum(total_time) / repetitions))
-                torch_version = torch.__version__
+
                 if runtime == "torch":
                     device_name = (
                         get_cpu_specs()["CPU Name"] + f" (Pytorch {torch_version})"
