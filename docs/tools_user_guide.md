@@ -11,7 +11,7 @@ MLAgility's tools currently support the following combinations of runtimes and d
 | Device Type | Device arg | Runtime                                                            | Runtime arg                | Specific Devices                              |
 | ----------- | ---------- | ------------------------------------------------------------------ | -------------------------- | --------------------------------------------- |
 | Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                               | trt                        | Any Nvidia GPU supported by TensorRT          |
-| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch, Pytoch 2.x Compiled<sup>*</sup> | ort, torch, torch_compiled | Any Intel or AMD CPU supported by the runtime |
+| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch, Pytoch 2.x Compiled<sup>*</sup> | ort, torch, torch-compiled | Any Intel or AMD CPU supported by the runtime |
 | Groq        | groq       | GroqFlow                                                           | groqflow                   | GroqChip1                                     |
 </span>
 
@@ -280,7 +280,7 @@ Each device type has its own default runtime, as indicated below. Valid values i
 - `trt`: Nvidia TensorRT (default for `nvidia` device type).
 - `groq`: GroqFlow (default for `groq` device type).
 - `torch`: PyTorch default execution.
-- `torch_compiled`: PyTorch 2.x-style compiled graph execution.
+- `torch-compiled`: PyTorch 2.x-style compiled graph execution.
 - [future] `ort-*`: Specific [ONNX Runtime execution providers]
 (#https://onnxruntime.ai/docs/execution-providers/)
 

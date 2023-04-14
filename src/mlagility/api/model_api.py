@@ -123,7 +123,7 @@ def benchmark_model(
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
-        elif device == "x86" and runtime in ["torch", "torch_compiled"]:
+        elif device == "x86" and runtime in ["torch", "torch-compiled"]:
 
             # Create cache folder with stats file
             # Although building with an empty sequence is possible, we don't want
@@ -139,7 +139,7 @@ def benchmark_model(
             )
 
             torch_version = torch.__version__
-            if runtime == "torch_compiled":
+            if runtime == "torch-compiled":
                 clean_torch_version = torch_version.split("+")[0]
                 if version.parse(clean_torch_version) < version.parse("2.0.0"):
                     BenchmarkException(
