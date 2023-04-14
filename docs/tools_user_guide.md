@@ -8,16 +8,17 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime                                                            | Runtime arg                | Specific Devices                              |
-| ----------- | ---------- | ------------------------------------------------------------------ | -------------------------- | --------------------------------------------- |
-| Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                               | trt                        | Any Nvidia GPU supported by TensorRT          |
-| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch, Pytoch 2.x Compiled<sup>*</sup> | ort, torch, torch-compiled | Any Intel or AMD CPU supported by the runtime |
-| Groq        | groq       | GroqFlow                                                           | groqflow                   | GroqChip1                                     |
+| Device Type | Device arg | Runtime                                                                         | Runtime arg                | Specific Devices                              |
+| ----------- | ---------- | ------------------------------------------------------------------------------- | -------------------------- | --------------------------------------------- |
+| Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                                            | trt                        | Any Nvidia GPU supported by TensorRT          |
+| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch<sup>§</sup>, Pytoch 2.x Compiled<sup>*§</sup> | ort, torch, torch-compiled | Any Intel or AMD CPU supported by the runtime |
+| Groq        | groq       | GroqFlow                                                                        | groqflow                   | GroqChip1                                     |
 </span>
 
 <sup>†</sup> Requires TensorRT >= 8.5.2  
 <sup>‡</sup> Requires ONNX Runtime >= 1.13.1  
-<sup>*</sup> Requires Pytorch >= 2.0.0
+<sup>*</sup> Requires Pytorch >= 2.0.0  
+<sup>§</sup> Only available on `local` backend
 
 
 # Table of Contents
@@ -258,6 +259,7 @@ Valid values:
 > _Note_: while `--backend remote` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
 >- Currently requires Okta SFT authentication, which not everyone will have.
 >- Not covered by our automatic testing yet.
+>- Not all runtimes may be supported when using the remote backend as discussed in the runtime section.
 
 Also available as API arguments:
 - `benchmark_script(backend=...)`
@@ -265,7 +267,7 @@ Also available as API arguments:
 
 ### Runtimes
 
-Indicates which software runtime should be used for the benchmark (e.g., ONNX Runtime vs. TensorRT for a GPU benchmark).
+Indicates which software runtime(s) should be used for the benchmark (e.g., ONNX Runtime vs. TensorRT for a GPU benchmark).
 
 Usage:
 - `benchit benchmark INPUT_FILES --runtime SW`
@@ -280,10 +282,11 @@ Each device type has its own default runtime, as indicated below.
 - Valid runtimes for `groq` device
   - `groq`: GroqFlow (default).
 
-
 This feature is also be available as an API argument: 
-- `benchmark_script(runtimes=...)`
+- `benchmark_script(runtimes=[...])`
 - `benchmark_model(runtime=...)`
+
+> _Note_: `torch` and `torch-compiled` are not available whe using the `remote` backend.
 
 # Additional Commands and Options
 
