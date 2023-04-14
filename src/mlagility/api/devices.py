@@ -222,7 +222,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
             msg = "No NVIDIA GPUs available on the remote machine"
             raise exp.ModelRuntimeError(msg)
         files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
-    elif device_type in ["x86"]:
+    elif device_type == "x86":
         # Check if x86_64 CPU is available remotely
         stdout, exit_code = exec_command(client, "uname -i")
         if stdout != "x86_64" or exit_code == 1:
