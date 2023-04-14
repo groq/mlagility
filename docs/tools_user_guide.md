@@ -8,13 +8,17 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime      | Specific Devices                                         |
-| ----------- | ---------- | ------------ | -------------------------------------------------------- |
-| Nvidia GPU  | nvidia     | TensorRT     | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
-| x86 CPU     | x86        | ONNX Runtime | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
-| Groq        | groq       | GroqFlow     | GroqChip1                                                |
-
+| Device Type | Device arg | Runtime                                                            | Device arg                 | Specific Devices                              |
+| ----------- | ---------- | ------------------------------------------------------------------ | -------------------------- | --------------------------------------------- |
+| Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                               | trt                        | Any Nvidia GPU supported by TensorRT          |
+| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch, Pytoch 2.x Compiled<sup>*</sup> | ort, torch, torch_compiled | Any Intel or AMD CPU supported by the runtime |
+| Groq        | groq       | GroqFlow                                                           | groqflow                   | GroqChip1                                     |
 </span>
+
+<sup>†</sup> Requires TensorRT >= 8.5.2  
+<sup>‡</sup> Requires ONNX Runtime >= 1.13.1  
+<sup>†</sup> Requires Pytorch >= 2.0.0
+
 
 # Table of Contents
 
@@ -262,9 +266,7 @@ Also available as API arguments:
 - `benchmark_script(backend=...)`
 - `benchmark_model(backend=...)`
 
-### Runtime (future feature)
-
-*Future feature, not yet implemented.* 
+### Runtime
 
 Indicates which software runtime should be used for the benchmark (e.g., ONNX Runtime vs. TensorRT for a GPU benchmark).
 
@@ -277,14 +279,16 @@ Each device type has its own default runtime, as indicated below. Valid values i
 - `ort`: ONNX Runtime (default for `x86` device type).
 - `trt`: Nvidia TensorRT (default for `nvidia` device type).
 - `groq`: GroqFlow (default for `groq` device type).
-- [future] `pytorch1`: PyTorch 1.x-style eager execution.
-- [future] `pytorch2`: PyTorch 2.x-style compiled graph execution.
+- `torch`: PyTorch default execution.
+- `torch_compiled`: PyTorch 2.x-style compiled graph execution.
 - [future] `ort-*`: Specific [ONNX Runtime execution providers]
 (#https://onnxruntime.ai/docs/execution-providers/)
 
-In the future this will also be available as API arguments: 
-- `benchmark_script(runtime=...)`
+This feature is also be available as an API argument: 
+- `benchmark_script(runtimes=...)`
 - `benchmark_model(runtime=...)`
+
+> _Note_: One runtime must be specified for each device. If no runtimes are specified, default values are used.
 
 # Additional Commands and Options
 
