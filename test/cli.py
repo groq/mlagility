@@ -6,6 +6,7 @@ import os
 import glob
 import csv
 import time
+import argparse
 from typing import List, Tuple, Any, Union
 import unittest
 from unittest.mock import patch
@@ -755,6 +756,63 @@ class Testing(unittest.TestCase):
             summary[0]["params"] == "110"
         ), "Wrong number of parameters found in report"
         assert summary[0]["hash"] == "d5b1df11", "Wrong hash found in report"
+
+    def test_015_runtimes(self):
+
+        # Attempt to benchmark using an invalid runtime
+        with self.assertRaises(argparse.ArgumentError):
+            testargs = [
+                "benchit",
+                "benchmark",
+                bash(f"{corpus_dir}/linear.py"),
+                "--cache-dir",
+                cache_dir,
+                "--device",
+                "x86",
+                "--runtime",
+                "trt",
+            ]
+            with patch.object(sys, "argv", flatten(testargs)):
+                benchitcli()
+
+        # Benchmark with Onnx Runtime
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/linear.py"),
+            "--cache-dir",
+            cache_dir,
+            "--device",
+            "x86",
+            "--runtime",
+            "ort",
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        # Benchmark with Pytorch
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/linear.py"),
+            "--cache-dir",
+            cache_dir,
+            "--device",
+            "x86",
+            "--runtime",
+            "torch",
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        # Ensure that we have two benchmarking results as part of the state file
+        stats_file = os.path.join(
+            build.output_dir(cache_dir, "linear_benchit_d5b1df11"),
+            "mlagility_stats.yaml",
+        )
+        with open(stats_file, "r", encoding="utf8") as stream:
+            stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
+        assert len(stats_dict["performance"]) == 2
 
 
 if __name__ == "__main__":
