@@ -444,24 +444,25 @@ def main():
     args = parser.parse_args()
 
     # Validate runtime arg
-    if args.runtimes:
-        if len(args.runtimes) != len(args.devices):
-            raise argparse.ArgumentError(
-                argparse_runtimes, "The number of devices and runtimes must match"
-            )
-        for device, runtime in zip(args.devices, args.runtimes):
-            if runtime not in SUPPORTED_DEVICES[device]:
+    if args.func == benchmark_command:
+        if args.runtimes:
+            if len(args.runtimes) != len(args.devices):
                 raise argparse.ArgumentError(
-                    argparse_runtimes,
-                    (
-                        f"Runtime '{runtime}' is not valid for device '{device}'. "
-                        f"Expected one of the following: {SUPPORTED_DEVICES[device]}."
-                    ),
+                    argparse_runtimes, "The number of devices and runtimes must match"
                 )
-    # Assign default runtimes
-    else:
-        for device in args.devices:
-            args.runtimes.append(SUPPORTED_DEVICES[device][0])
+            for device, runtime in zip(args.devices, args.runtimes):
+                if runtime not in SUPPORTED_DEVICES[device]:
+                    raise argparse.ArgumentError(
+                        argparse_runtimes,
+                        (
+                            f"Runtime '{runtime}' is not valid for device '{device}'. "
+                            f"Expected one of the following: {SUPPORTED_DEVICES[device]}."
+                        ),
+                    )
+        # Assign default runtimes
+        else:
+            for device in args.devices:
+                args.runtimes.append(SUPPORTED_DEVICES[device][0])
 
     args.func(args)
 
