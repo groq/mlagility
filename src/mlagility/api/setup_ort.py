@@ -171,7 +171,6 @@ def run(
                 logging.error(f"Failed to stop Docker container with exception: {e}")
 
     cpu_performance = get_cpu_specs()
-    cpu_performance["CPU Name"] += " (ORT)"
     cpu_performance["OnnxRuntime Version"] = str(ort_version)
     cpu_performance["Mean Latency(ms)"] = str(mean(perf_result) * 1000)
     cpu_performance["Throughput"] = str(BATCHSIZE / mean(perf_result))

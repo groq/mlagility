@@ -84,7 +84,7 @@ def print_model(
     if model_info.performance:
         printing.log(f"{ident}\tStatus:\t\t")
         printing.logn(
-            f"Model successfully benchmarked on {model_info.performance.device}",
+            f"Successfully benchmarked on {model_info.performance.device} ({model_info.performance.runtime} v{model_info.performance.runtime_version})",
             c=model_info.status_message_color,
         )
         printing.logn(

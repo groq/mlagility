@@ -84,6 +84,8 @@ def benchmark_model(
                     mean_latency=groq_perf.latency,
                     device="GroqChip1",
                     device_type="groq",
+                    runtime="groq",
+                    runtime_version=gmodel.state.groqflow_version,
                     build_name=gmodel.state.config.build_name,
                 )
 
@@ -138,7 +140,7 @@ def benchmark_model(
                 sequence=sequence,
             )
 
-            torch_version = torch.__version__
+            torch_version = str(torch.__version__)
             if runtime == "torch-compiled":
                 clean_torch_version = torch_version.split("+")[0]
                 if version.parse(clean_torch_version) < version.parse("2.0.0"):
@@ -169,21 +171,13 @@ def benchmark_model(
                     1 / (np.sum(per_iteration_latency) / num_iterations)
                 )
 
-                if runtime == "torch":
-                    device_name = (
-                        get_cpu_specs()["CPU Name"] + f" (Pytorch {torch_version})"
-                    )
-                else:
-                    device_name = (
-                        get_cpu_specs()["CPU Name"]
-                        + f" (Pytorch {torch_version} Compiled)"
-                    )
-
                 return MeasuredPerformance(
                     mean_latency=mean_latency_ms,
                     throughput=throughput_ips,
-                    device=device_name,
+                    device=get_cpu_specs()["CPU Name"],
                     device_type=device,
+                    runtime=runtime,
+                    runtime_version=torch_version,
                     build_name=build_name,
                 )
 

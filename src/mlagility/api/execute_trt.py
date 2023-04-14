@@ -12,6 +12,9 @@ import json
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
 
+TRT_VERSION = "23.03-py3"
+
+
 def run(
     output_dir: str,
     onnx_file: str,
@@ -22,8 +25,8 @@ def run(
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
     # GroqFlow maintainers to keep this up to date with the latest version of release container
-    latest_trt_docker = "nvcr.io/nvidia/tensorrt:23.03-py3"
-    docker_name = "tensorrt23.03"
+    latest_trt_docker = f"nvcr.io/nvidia/tensorrt:{TRT_VERSION}"
+    docker_name = f"tensorrt{TRT_VERSION}"
 
     # docker run args:
     # "--gpus all" - use all gpus available
@@ -36,7 +39,9 @@ def run(
     # "--onnx=<path>" - path to the onnx model in the mounted file
     # "--fp16" - enable execution in fp16 mode on tensorrt
     # "--iterations=<int>" - number of iterations to run on tensorrt
-    docker_exec_args = f"trtexec --onnx={onnx_file} --fp16 --iterations={num_iterations}"
+    docker_exec_args = (
+        f"trtexec --onnx={onnx_file} --fp16 --iterations={num_iterations}"
+    )
 
     run_command = (
         f"sudo docker run --name {docker_name} {docker_run_args} {latest_trt_docker}"

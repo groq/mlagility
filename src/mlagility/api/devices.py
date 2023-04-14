@@ -14,7 +14,7 @@ ORT_EXECUTION_SCRIPT = "run_ort_model.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 SUPPORTED_DEVICES = {
     "x86": ["ort", "torch", "torch-compiled"],
-    "groq": ["groqflow"],
+    "groq": ["groq"],
     "nvidia": ["trt"],
 }
 DEFAULT_RUNTIME = 0

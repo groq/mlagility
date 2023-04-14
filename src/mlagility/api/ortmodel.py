@@ -12,6 +12,7 @@ class ORTModel:
         self.cache_dir = cache_dir
         self.build_name = build_name
         self.device_type = "x86"
+        self.runtime = "ort"
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
@@ -84,5 +85,7 @@ class ORTModel:
             throughput=self.throughput,
             device=self.device_name,
             device_type=self.device_type,
+            runtime=self.runtime,
+            runtime_version=self._get_stat("OnnxRuntime Version"),
             build_name=self.build_name,
         )

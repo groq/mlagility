@@ -3,6 +3,7 @@ import json
 import numpy as np
 import mlagility.api.devices as devices
 from mlagility.api.performance import MeasuredPerformance
+from mlagility.api.execute_trt import TRT_VERSION
 
 
 class TRTModel:
@@ -12,6 +13,7 @@ class TRTModel:
         self.cache_dir = cache_dir
         self.build_name = build_name
         self.device_type = "nvidia"
+        self.runtime = "trt"
 
     def benchmark(
         self, repetitions: int = 100, backend: str = "local"
@@ -83,5 +85,7 @@ class TRTModel:
             throughput=self.throughput,
             device=self.device_name,
             device_type=self.device_type,
+            runtime=self.runtime,
+            runtime_version=TRT_VERSION,
             build_name=self.build_name,
         )

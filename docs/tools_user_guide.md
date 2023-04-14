@@ -275,7 +275,7 @@ Usage:
 Each device type has its own default runtime, as indicated below.
 - Valid runtimes for `x86` device
   - `ort`: ONNX Runtime (default).
-  - `torch`: PyTorch eager execution.
+  - `torch`: PyTorch default execution (either eager or graph mode, depending on how your model has been written).
   - `torch-compiled`: PyTorch 2.x-style compiled graph execution.
 - Valid runtimes for `nvidia` device
   - `trt`: Nvidia TensorRT (default).

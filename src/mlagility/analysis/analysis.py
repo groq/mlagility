@@ -203,7 +203,7 @@ def call_benchit(
                 cache_dir=tracer_args.cache_dir,
                 build_name=build_name,
                 parent_key="performance",
-                key=perf.device,
+                key=f"{perf.device} ({perf.runtime} v{perf.runtime_version})",
                 value=vars(perf),
             )
 
