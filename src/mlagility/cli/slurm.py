@@ -68,7 +68,7 @@ def run_benchit(
     groq_assembler_flags: Optional[List[str]] = None,
     groq_num_chips: Optional[int] = None,
     groqview: Optional[bool] = None,
-    devices: Optional[List[str]] = None,
+    device: str = None,
     runtimes: Optional[List[str]] = None,
     max_depth: Optional[int] = None,
     analyze_only: Optional[bool] = None,
@@ -86,7 +86,7 @@ def run_benchit(
     assembler_flags_str = list_arg(groq_assembler_flags, "--groq-assembler-flags")
     num_chips_str = value_arg(groq_num_chips, "--groq-num-chips")
     groqview_str = bool_arg(groqview, "--groqview")
-    devices_str = list_arg(devices, "--devices")
+    device_str = device
     runtimes_str = list_arg(runtimes, "--runtimes")
     max_depth_str = value_arg(max_depth, "--max-depth")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
@@ -96,7 +96,7 @@ def run_benchit(
     args = (
         f"{op} {script} {cache_dir_str}{rebuild_str}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
-        f"{devices_str}{runtimes_str}{max_depth_str}{analyze_only_str}"
+        f"{device_str}{runtimes_str}{max_depth_str}{analyze_only_str}"
         f"{build_only_str}{lean_cache_str}"
     )
 

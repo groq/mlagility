@@ -84,7 +84,7 @@ def benchmark_script(
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     labels: List[str] = None,
     rebuild: Optional[str] = None,
-    devices: List[str] = None,
+    device: str = None,
     backend: str = "local",
     runtimes: List[str] = None,
     analyze_only: bool = False,
@@ -104,10 +104,10 @@ def benchmark_script(
 
     custom_sequence = load_sequence_from_file(sequence, use_slurm)
 
-    if devices is None:
-        devices = ["x86"]
+    if device is None:
+        device = "x86"
     if runtimes is None:
-        runtimes = [SUPPORTED_DEVICES["x86"][DEFAULT_RUNTIME]]
+        runtimes = [SUPPORTED_DEVICES[device][DEFAULT_RUNTIME]]
 
     # Force the user to specify a legal cache dir in NFS if they are using slurm
     if cache_dir == filesystem.DEFAULT_CACHE_DIR and use_slurm:
@@ -193,7 +193,7 @@ def benchmark_script(
         if os.environ.get("USING_SLURM") != "TRUE":
             db.add_script(filesystem.clean_script_name(script))
 
-        for runtime, device in zip(runtimes, devices):
+        for runtime in runtimes:
             if use_slurm:
                 slurm.run_benchit(
                     op="benchmark",
@@ -204,7 +204,7 @@ def benchmark_script(
                     groq_assembler_flags=groq_assembler_flags,
                     groq_num_chips=groq_num_chips,
                     groqview=groqview,
-                    devices=[device],
+                    device=device,
                     runtimes=[runtime],
                     max_depth=max_depth,
                     analyze_only=analyze_only,
@@ -260,7 +260,7 @@ def benchmark_files(
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     labels: List[str] = None,
     rebuild: Optional[str] = None,
-    devices: List[str] = None,
+    device: str = None,
     backend: str = "local",
     runtimes: List[str] = None,
     analyze_only: bool = False,
@@ -299,7 +299,7 @@ def benchmark_files(
             cache_dir=cache_dir,
             labels=labels,
             rebuild=rebuild,
-            devices=devices,
+            device=device,
             backend=backend,
             runtimes=runtimes,
             analyze_only=analyze_only,
@@ -329,7 +329,7 @@ def benchmark_files(
         else:
             onnx_sequence = load_sequence_from_file(sequence, use_slurm)
 
-        for runtime, device in zip(runtimes, devices):
+        for runtime in runtimes:
             benchmark_model(
                 model=onnx_file,
                 inputs=None,

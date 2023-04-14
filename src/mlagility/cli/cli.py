@@ -6,7 +6,7 @@ import mlagility.common.filesystem as filesystem
 import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_files
 from mlagility.version import __version__ as mlagility_version
-from mlagility.api.devices import SUPPORTED_DEVICES
+from mlagility.api.devices import SUPPORTED_DEVICES, DEFAULT_RUNTIME
 
 
 class MyParser(argparse.ArgumentParser):
@@ -49,7 +49,7 @@ def benchmark_command(args):
         cache_dir=args.cache_dir,
         labels=args.labels,
         rebuild=args.rebuild,
-        devices=args.devices,
+        device=args.device,
         backend=args.backend,
         runtimes=args.runtimes,
         analyze_only=args.analyze_only,
@@ -169,14 +169,14 @@ def main():
 
     benchmark_default_device = "x86"
     benchmark_parser.add_argument(
-        "--devices",
+        "--device",
         choices=SUPPORTED_DEVICES,
-        nargs="+",
-        dest="devices",
-        help="Types(s) of hardware devices to be used for the benchmark "
-        f'(defaults to ["{benchmark_default_device}"])',
+        nargs="?",
+        dest="device",
+        help="Type of hardware device to be used for the benchmark "
+        f'(defaults to "{benchmark_default_device}")',
         required=False,
-        default=[benchmark_default_device],
+        default=benchmark_default_device,
     )
 
     argparse_runtimes = benchmark_parser.add_argument(
@@ -184,7 +184,7 @@ def main():
         choices=sum(SUPPORTED_DEVICES.values(), []),
         nargs="+",
         dest="runtimes",
-        help="Runtime(s) for each of the selected devices",
+        help="Runtime(s) for the selected device",
         required=False,
         default=[],
     )
@@ -445,23 +445,18 @@ def main():
     if args.func == benchmark_command:
         # Validate runtime arg
         if args.runtimes:
-            if len(args.runtimes) != len(args.devices):
-                raise argparse.ArgumentError(
-                    argparse_runtimes, "The number of devices and runtimes must match"
-                )
-            for device, runtime in zip(args.devices, args.runtimes):
-                if runtime not in SUPPORTED_DEVICES[device]:
+            for runtime in args.runtimes:
+                if runtime not in SUPPORTED_DEVICES[args.device]:
                     raise argparse.ArgumentError(
                         argparse_runtimes,
                         (
-                            f"Runtime '{runtime}' is not valid for device '{device}'. "
-                            f"Expected one of the following: {SUPPORTED_DEVICES[device]}."
+                            f"Runtime '{runtime}' is not valid for device '{args.device}'. "
+                            f"Expected one of the following: {SUPPORTED_DEVICES[args.device]}."
                         ),
                     )
         # Assign default runtimes
         else:
-            for device in args.devices:
-                args.runtimes.append(SUPPORTED_DEVICES[device][0])
+            args.runtimes = [SUPPORTED_DEVICES[args.device][DEFAULT_RUNTIME]]
 
         # Ensure that the selected runtimes are supported by the backend
         if (
