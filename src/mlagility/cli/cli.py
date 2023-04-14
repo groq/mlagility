@@ -460,12 +460,12 @@ def main():
 
         # Ensure that the selected runtimes are supported by the backend
         if (
-            "torch" in args.runtimes or "torch-compiled" in args.runtimes
+            "torch-eager" in args.runtimes or "torch-compiled" in args.runtimes
         ) and args.backend == "remote":
             raise argparse.ArgumentError(
                 argparse_backend,
                 (
-                    "Remote backend is not available for 'torch' and 'torch-compiled' runtimes."
+                    "Remote backend is not available for 'torch-eager' and 'torch-compiled' runtimes."
                 ),
             )
     args.func(args)

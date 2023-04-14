@@ -8,11 +8,11 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime                                                                         | Runtime arg                | Specific Devices                              |
-| ----------- | ---------- | ------------------------------------------------------------------------------- | -------------------------- | --------------------------------------------- |
-| Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                                            | trt                        | Any Nvidia GPU supported by TensorRT          |
-| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch<sup>§</sup>, Pytoch 2.x Compiled<sup>*§</sup> | ort, torch, torch-compiled | Any Intel or AMD CPU supported by the runtime |
-| Groq        | groq       | GroqFlow                                                                        | groqflow                   | GroqChip1                                     |
+| Device Type | Device arg | Runtime                                                                               | Runtime arg                      | Specific Devices                              |
+| ----------- | ---------- | ------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                                                  | trt                              | Any Nvidia GPU supported by TensorRT          |
+| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch Eager<sup>§</sup>, Pytoch 2.x Compiled<sup>*§</sup> | ort, torch-eager, torch-compiled | Any Intel or AMD CPU supported by the runtime |
+| Groq        | groq       | GroqFlow                                                                              | groq                             | GroqChip1                                     |
 </span>
 
 <sup>†</sup> Requires TensorRT >= 8.5.2  
@@ -275,8 +275,8 @@ Usage:
 Each device type has its own default runtime, as indicated below.
 - Valid runtimes for `x86` device
   - `ort`: ONNX Runtime (default).
-  - `torch`: PyTorch default execution (either eager or graph mode, depending on how your model has been written).
-  - `torch-compiled`: PyTorch 2.x-style compiled graph execution.
+  - `torch-eager`: PyTorch eager execution.
+  - `torch-compiled`: PyTorch 2.x-style compiled graph execution using TorchInductor.
 - Valid runtimes for `nvidia` device
   - `trt`: Nvidia TensorRT (default).
 - Valid runtimes for `groq` device
@@ -286,7 +286,7 @@ This feature is also be available as an API argument:
 - `benchmark_script(runtimes=[...])`
 - `benchmark_model(runtime=...)`
 
-> _Note_: `torch` and `torch-compiled` are not available whe using the `remote` backend.
+> _Note_: `torch-eager` and `torch-compiled` are not available whe using the `remote` backend.
 
 # Additional Commands and Options
 

@@ -13,7 +13,7 @@ ORT_BENCHMARKING_SCRIPT = "setup_ort.py"
 ORT_EXECUTION_SCRIPT = "run_ort_model.py"
 TRT_BENCHMARKING_SCRIPT = "execute_trt.py"
 SUPPORTED_DEVICES = {
-    "x86": ["ort", "torch", "torch-compiled"],
+    "x86": ["ort", "torch-eager", "torch-compiled"],
     "groq": ["groq"],
     "nvidia": ["trt"],
 }

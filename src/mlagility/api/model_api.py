@@ -125,7 +125,7 @@ def benchmark_model(
                 )
                 perf = cpu_model.benchmark(backend=backend)
 
-        elif device == "x86" and runtime in ["torch", "torch-compiled"]:
+        elif device == "x86" and runtime in ["torch-eager", "torch-compiled"]:
 
             # Create cache folder with stats file
             # Although building with an empty sequence is possible, we don't want
