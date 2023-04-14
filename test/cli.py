@@ -800,7 +800,7 @@ class Testing(unittest.TestCase):
             "--device",
             "x86",
             "--runtime",
-            "torch",
+            "torch-eager",
         ]
         with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
