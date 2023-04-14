@@ -8,7 +8,7 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime                                                            | Device arg                 | Specific Devices                              |
+| Device Type | Device arg | Runtime                                                            | Runtime arg                | Specific Devices                              |
 | ----------- | ---------- | ------------------------------------------------------------------ | -------------------------- | --------------------------------------------- |
 | Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                               | trt                        | Any Nvidia GPU supported by TensorRT          |
 | x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch, Pytoch 2.x Compiled<sup>*</sup> | ort, torch, torch_compiled | Any Intel or AMD CPU supported by the runtime |
