@@ -443,7 +443,7 @@ def main():
 
     args = parser.parse_args()
     if args.func == benchmark_command:
-        # Validate runtime arg
+        # Validate runtimes arg
         if args.runtimes:
             for runtime in args.runtimes:
                 if runtime not in SUPPORTED_DEVICES[args.device]:

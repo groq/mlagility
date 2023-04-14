@@ -1,6 +1,6 @@
 import sys
 import os
-import time
+from timeit import default_timer as timer
 from statistics import mean
 from typing import Any, Dict, Optional, List
 import torch
@@ -158,9 +158,9 @@ def benchmark_model(
                 num_iterations = 100
                 per_iteration_latency = [0] * num_iterations
                 for idx in range(num_iterations):
-                    start_time = time.process_time()
+                    start_time = timer()
                     selected_model(**inputs)
-                    end_time = time.process_time()
+                    end_time = timer()
                     per_iteration_latency[idx] = end_time - start_time
 
                 # Calculate perf from per_iteration_latency
