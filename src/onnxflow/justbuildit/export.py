@@ -109,15 +109,17 @@ class ReceiveOnnxModel(stage.Stage):
 
         if opset < build.DEFAULT_ONNX_OPSET and opset >= build.MINIMUM_ONNX_OPSET:
             print(
-                " \n The received model has an opset {opset}. Though this opset is supported \
-                we recommend upgrading the model to opset {build.MINIMUM_ONNX_OPSET}"
+                (
+                    "The received model is using opset {opset}. Though this opset is supported "
+                    f"we recommend upgrading the model to opset {build.MINIMUM_ONNX_OPSET}"
+                )
             )
         elif opset < build.MINIMUM_ONNX_OPSET:
-            msg = f"""
-            The received model has an opset {opset}. Opset < 11 is not supported. Please
-            try upgrading the model to opset 13.
-            More information may be available in the log file at **{self.logfile_path}**
-            """
+            msg = (
+                f"The received model is using opset {opset}. Opset < {build.MINIMUM_ONNX_OPSET} "
+                "is not supported. Please try upgrading the model to opset 13. More information "
+                f"may be available in the log file at **{self.logfile_path}**"
+            )
             raise exp.StageError(msg)
 
         shutil.copy(state.model, state.base_onnx_file)
