@@ -2,6 +2,7 @@ import abc
 import sys
 import time
 import os
+import psutil
 from typing import List, Tuple
 from multiprocessing import Process
 import onnxflow.common.printing as printing
@@ -10,7 +11,8 @@ import onnxflow.common.build as build
 
 
 def _spinner(message):
-    while True:
+    parent_pid = os.getppid()
+    while psutil.pid_exists(parent_pid):
         for cursor in ["   ", ".  ", ".. ", "..."]:
             time.sleep(0.5)
             status = f"      {message}{cursor}\r"
