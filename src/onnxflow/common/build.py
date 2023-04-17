@@ -246,7 +246,7 @@ class State:
 
     # Member variable that helps the code know if State has called
     # __post_init__ yet
-    after_post_init: bool = False
+    save_when_setting_attribute: bool = False
 
     # All of the following are critical aspects of the build,
     # including properties of the tool and choices made
@@ -280,18 +280,18 @@ class State:
         if self.model is not None and self.model_type != ModelType.UNKNOWN:
             self.model_hash = hash_model(self.model, self.model_type)
 
-        self.after_post_init = True
+        self.save_when_setting_attribute = True
 
     def __setattr__(self, name, val):
         super().__setattr__(name, val)
 
         # Always automatically save the state.yaml whenever State is modified
         # But don't bother saving until after __post_init__ is done (indicated
-        # by the after_post_init flag)
+        # by the save_when_setting_attribute flag)
         # Note: This only works when elements of the state are set directly.
         # When an element of state.info gets set, for example, state needs
         # to be explicitly saved by calling state.save().
-        if self.after_post_init and name != "after_post_init":
+        if self.save_when_setting_attribute and name != "save_when_setting_attribute":
             self.save()
 
     @property
@@ -343,7 +343,7 @@ class State:
             for key, value in vars(self).items()
             if not key == "inputs"
             and not key == "model"
-            and not key == "after_post_init"
+            and not key == "save_when_setting_attribute"
         }
 
         # Special case for saving objects

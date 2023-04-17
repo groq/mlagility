@@ -424,10 +424,12 @@ def load_or_make_state(
 
             # Ensure the model and inputs are part of the state
             # This is useful  when loading models that still need to be built
+            state.save_when_setting_attribute = False
             if state.model is None:
                 state.model = model
             if state.inputs is None:
                 state.inputs = inputs
+            state.save_when_setting_attribute = True
 
             return state
 
