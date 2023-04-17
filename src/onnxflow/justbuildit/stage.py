@@ -2,9 +2,9 @@ import abc
 import sys
 import time
 import os
-import psutil
 from typing import List, Tuple
 from multiprocessing import Process
+import psutil
 import onnxflow.common.printing as printing
 import onnxflow.common.exceptions as exp
 import onnxflow.common.build as build
