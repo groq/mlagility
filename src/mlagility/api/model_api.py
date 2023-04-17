@@ -8,6 +8,7 @@ from packaging import version
 import numpy as np
 from onnxflow import build_model
 from onnxflow.justbuildit.stage import Sequence
+import onnxflow.common.exceptions as exp
 import onnxflow.common.printing as printing
 import onnxflow.common.build as build
 import onnxflow.justbuildit.ignition as ignition
@@ -130,7 +131,12 @@ def benchmark_model(
 
         elif device == "x86" and runtime in ["torch-eager", "torch-compiled"]:
 
-            # ENSURE THIS IS NOT AN ONNX MODEL
+            # Ensure we have the correct model type
+            model_type = ignition.identify_model_type(model)
+            if model_type != build.ModelType.PYTORCH:
+                raise exp.IntakeError(
+                    f"Only Pytorch models are valid when runtime is {runtime}"
+                )
 
             # Benchmarking using `torch-eager` and `torch-compiled` does not require
             # converting the model to ONNX. Here, we simply create a state in order to
@@ -146,7 +152,7 @@ def benchmark_model(
                     rebuild=rebuild,
                     cache_dir=cache_dir,
                     config=config,
-                    model_type=build.ModelType.PYTORCH,
+                    model_type=model_type,
                 )
                 state.save()
 

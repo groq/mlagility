@@ -775,21 +775,6 @@ class Testing(unittest.TestCase):
             with patch.object(sys, "argv", flatten(testargs)):
                 benchitcli()
 
-        # Benchmark with Onnx Runtime
-        testargs = [
-            "benchit",
-            "benchmark",
-            bash(f"{corpus_dir}/linear.py"),
-            "--cache-dir",
-            cache_dir,
-            "--device",
-            "x86",
-            "--runtime",
-            "ort",
-        ]
-        with patch.object(sys, "argv", flatten(testargs)):
-            benchitcli()
-
         # Benchmark with Pytorch
         testargs = [
             "benchit",
@@ -801,6 +786,21 @@ class Testing(unittest.TestCase):
             "x86",
             "--runtime",
             "torch-eager",
+        ]
+        with patch.object(sys, "argv", flatten(testargs)):
+            benchitcli()
+
+        # Benchmark with Onnx Runtime
+        testargs = [
+            "benchit",
+            "benchmark",
+            bash(f"{corpus_dir}/linear.py"),
+            "--cache-dir",
+            cache_dir,
+            "--device",
+            "x86",
+            "--runtime",
+            "ort",
         ]
         with patch.object(sys, "argv", flatten(testargs)):
             benchitcli()
