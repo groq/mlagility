@@ -9,11 +9,14 @@ import numpy as np
 from onnxflow import build_model
 from onnxflow.justbuildit.stage import Sequence
 import onnxflow.common.printing as printing
+import onnxflow.common.build as build
+import onnxflow.justbuildit.ignition as ignition
 from mlagility.api import trtmodel, ortmodel
 from mlagility.api.setup_ort import get_cpu_specs
 import mlagility.common.filesystem as filesystem
 from mlagility.api.performance import MeasuredPerformance
 from mlagility.api.devices import SUPPORTED_DEVICES, BenchmarkException
+
 
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
@@ -127,19 +130,27 @@ def benchmark_model(
 
         elif device == "x86" and runtime in ["torch-eager", "torch-compiled"]:
 
-            # Create cache folder with stats file
-            # Although building with an empty sequence is possible, we don't want
-            # the model to be rebuilt when other devices are used, causing the
-            # results inside of the stats file to be lost.
-            build_model(
-                model=model,
-                inputs=inputs,
-                build_name=build_name,
-                cache_dir=cache_dir,
-                rebuild=rebuild,
-                sequence=sequence,
-            )
+            # ENSURE THIS IS NOT AN ONNX MODEL
 
+            # Benchmarking using `torch-eager` and `torch-compiled` does not require
+            # converting the model to ONNX. Here, we simply create a state in order to
+            # have a place to store our results.
+            if not os.path.isfile(build.state_file(cache_dir, build_name)):
+                config = ignition.lock_config(
+                    build_name=build_name,
+                    sequence=sequence,
+                )
+                state = build.State(
+                    model=model,
+                    inputs=inputs,
+                    rebuild=rebuild,
+                    cache_dir=cache_dir,
+                    config=config,
+                    model_type=build.ModelType.PYTORCH,
+                )
+                state.save()
+
+            # Ensure we have the required version of Pytorch
             torch_version = str(torch.__version__)
             if runtime == "torch-compiled":
                 clean_torch_version = torch_version.split("+")[0]

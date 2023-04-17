@@ -395,7 +395,6 @@ def load_or_make_state(
                 )
 
                 printing.log_info(msg)
-                return state
             else:
                 cache_problems = cache_validation_func(
                     config=config,
@@ -422,9 +421,15 @@ def load_or_make_state(
                             "functionality or correctness). "
                         )
                         printing.log_warning(msg)
-                        return state
-                else:
-                    return state
+
+            # Ensure the model and inputs are part of the state
+            # This is useful  when loading models that still need to be built
+            if state.model is None:
+                state.model = model
+            if state.inputs is None:
+                state.inputs = inputs
+
+            return state
 
         else:
             # No state file found, so we have to build
