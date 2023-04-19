@@ -8,6 +8,10 @@ import argparse
 import subprocess
 import logging
 import json
+import re
+import sys
+import time
+import threading
 
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
@@ -114,6 +118,27 @@ def run(
     with open(errors_file, "w", encoding="utf-8") as e:
         e.writelines(decoded_error)
 
+def get_gpu_power():
+    try:
+        output = subprocess.check_output("nvidia-smi -q -d POWER".split())
+        output = output.decode("utf-8")
+        power_pattern = re.compile(r"Power Draw\s+:\s+(\d+\.\d+)\s+W")
+        power_draw = float(power_pattern.search(output).group(1))
+        return power_draw
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+def measure_power(sample_rate=0.01, duration=10):
+    start_time = time.time()
+    power_readings = []
+    while time.time() - start_time < duration:
+        power_draw = get_gpu_power()
+        power_readings.append(power_draw)
+        time.sleep(sample_rate)
+
+    average_power = sum(power_readings) / len(power_readings)
+    return power_readings, average_power
 
 if __name__ == "__main__":
     # Parse Inputs
@@ -145,6 +170,13 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    power_readings = []
+    average_power = 0
+
+    # Start power measurement in a separate thread
+    power_thread = threading.Thread(target=measure_power, args=(0.01, TIMEOUT))
+    power_thread.start()
+
     run(
         output_dir=args.output_dir,
         onnx_file=args.onnx_file,
@@ -152,3 +184,21 @@ if __name__ == "__main__":
         errors_file=args.errors_file,
         num_iterations=args.iterations,
     )
+
+    # Wait for power measurement to finish
+    power_thread.join()
+
+    # Calculate the average power consumption
+    average_power = sum(power_readings) / len(power_readings)
+
+    # Load existing GPU performance data
+    with open(args.outputs_file, "r", encoding="utf-8") as out_file:
+        gpu_performance = json.load(out_file)
+
+    # Add power readings and average power consumption to the dictionary
+    gpu_performance["Power readings (W)"] = power_readings
+    gpu_performance["Average power consumption (W)"] = round(average_power, 2)
+
+    # Save the updated GPU performance data
+    with open(args.outputs_file, "w", encoding="utf-8") as out_file:
+        json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
