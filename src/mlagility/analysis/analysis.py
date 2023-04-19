@@ -35,6 +35,7 @@ class TracerArgs:
     input: str
     device: str
     backend: str
+    runtime: str
     actions: List[Action]
     lean_cache: bool
     targets: List[str]
@@ -122,6 +123,7 @@ def call_benchit(
             inputs,
             device=tracer_args.device,
             backend=tracer_args.backend,
+            runtime=tracer_args.runtime,
             build_name=build_name,
             cache_dir=tracer_args.cache_dir,
             build_only=Action.BENCHMARK not in tracer_args.actions,
@@ -172,36 +174,45 @@ def call_benchit(
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
-        onnx_ops_counter = util.get_onnx_ops_list(build_state.converted_onnx_file)
-        onnx_model_info = util.populate_onnx_model_info(build_state.converted_onnx_file)
-        onnx_input_dimensions = util.onnx_input_dimensions(
-            build_state.converted_onnx_file
-        )
-        # Stats that we want to save into the build's mlagility_stats.yaml file
+
+        # ONNX stats that we want to save into the build's mlagility_stats.yaml file
         # so that they can be easily accessed by the report command later
-        filesystem.save_stat(tracer_args.cache_dir, build_name, "hash", model_info.hash)
-        filesystem.save_stat(
-            tracer_args.cache_dir, build_name, "parameters", model_info.params
-        )
-        filesystem.save_stat(
-            tracer_args.cache_dir, build_name, "onnx_ops_counter", onnx_ops_counter
-        )
-        filesystem.save_stat(
-            tracer_args.cache_dir, build_name, "onnx_model_information", onnx_model_info
-        )
-        filesystem.save_stat(
-            tracer_args.cache_dir,
-            build_name,
-            "onnx_input_dimensions",
-            onnx_input_dimensions,
-        )
+        if tracer_args.runtime not in ["torch-eager", "torch-compiled"]:
+            onnx_ops_counter = util.get_onnx_ops_list(build_state.converted_onnx_file)
+            onnx_model_info = util.populate_onnx_model_info(
+                build_state.converted_onnx_file
+            )
+            onnx_input_dimensions = util.onnx_input_dimensions(
+                build_state.converted_onnx_file
+            )
+            filesystem.save_stat(
+                tracer_args.cache_dir, build_name, "hash", model_info.hash
+            )
+            filesystem.save_stat(
+                tracer_args.cache_dir, build_name, "parameters", model_info.params
+            )
+            filesystem.save_stat(
+                tracer_args.cache_dir, build_name, "onnx_ops_counter", onnx_ops_counter
+            )
+            filesystem.save_stat(
+                tracer_args.cache_dir,
+                build_name,
+                "onnx_model_information",
+                onnx_model_info,
+            )
+            filesystem.save_stat(
+                tracer_args.cache_dir,
+                build_name,
+                "onnx_input_dimensions",
+                onnx_input_dimensions,
+            )
 
         if perf:
             filesystem.add_sub_stat(
                 cache_dir=tracer_args.cache_dir,
                 build_name=build_name,
                 parent_key="performance",
-                key=perf.device,
+                key=f"{perf.device} ({perf.runtime} v{perf.runtime_version})",
                 value=vars(perf),
             )
 

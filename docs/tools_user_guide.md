@@ -8,13 +8,18 @@ MLAgility's tools currently support the following combinations of runtimes and d
 
 <span id="devices-runtimes-table">
 
-| Device Type | Device arg | Runtime      | Specific Devices                                         |
-| ----------- | ---------- | ------------ | -------------------------------------------------------- |
-| Nvidia GPU  | nvidia     | TensorRT     | Any Nvidia GPU supported by TensorRT >= 8.5.2            |
-| x86 CPU     | x86        | ONNX Runtime | Any Intel or AMD CPU supported by ONNX Runtime >= 1.13.1 |
-| Groq        | groq       | GroqFlow     | GroqChip1                                                |
-
+| Device Type | Device arg | Runtime                                                                               | Runtime arg                      | Specific Devices                              |
+| ----------- | ---------- | ------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| Nvidia GPU  | nvidia     | TensorRT<sup>†</sup>                                                                  | trt                              | Any Nvidia GPU supported by TensorRT          |
+| x86 CPU     | x86        | ONNX Runtime<sup>‡</sup>, Pytorch Eager<sup>§</sup>, Pytoch 2.x Compiled<sup>*§</sup> | ort, torch-eager, torch-compiled | Any Intel or AMD CPU supported by the runtime |
+| Groq        | groq       | GroqFlow                                                                              | groq                             | GroqChip1                                     |
 </span>
+
+<sup>†</sup> Requires TensorRT >= 8.5.2  
+<sup>‡</sup> Requires ONNX Runtime >= 1.13.1  
+<sup>*</sup> Requires Pytorch >= 2.0.0  
+<sup>§</sup> Only available on `local` backend
+
 
 # Table of Contents
 
@@ -217,13 +222,11 @@ The following arguments are used to configure `benchit` and the APIs to target a
 
 ### Devices
 
-Specify a list of device types that will be used for benchmarking.
+Specify a device type that will be used for benchmarking.
 
 Usage:
-- `benchit benchmark INPUT_FILES --devices TYPE`
+- `benchit benchmark INPUT_FILES --device TYPE`
   - Benchmark the model(s) in `INPUT_FILES` on a locally installed device of type `TYPE` (eg, a locally installed Nvidia device).
-- `benchit benchmark INPUT_FILES --devices [TYPE ...]`
-  - Benchmark the model(s) in `INPUT_FILES` across all provided device types.
 
 Valid values of `TYPE` include:
 - `x86` (default): Intel and AMD x86 CPUs.
@@ -235,9 +238,8 @@ Valid values of `TYPE` include:
 >  - For example, if you specify `--device nvidia` on a machine with an Nvidia A100 40GB installed, then MLAgility will use that Nvidia A100 40GB device.
 
 Also available as API arguments: 
-- `benchmark_script(devices=[...])`
+- `benchmark_script(device=...)`
 - `benchmark_model(device=...)`.
-    - _Note_: A single call to `benchmark_model()` only supports benchmarking on one device at a time, so you must call the API once per device.
 
 > For a detailed example, see the [CLI Nvidia tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#nvidia-benchmarking).
 
@@ -257,34 +259,34 @@ Valid values:
 > _Note_: while `--backend remote` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
 >- Currently requires Okta SFT authentication, which not everyone will have.
 >- Not covered by our automatic testing yet.
+>- Not all runtimes may be supported when using the remote backend as discussed in the runtime section.
 
 Also available as API arguments:
 - `benchmark_script(backend=...)`
 - `benchmark_model(backend=...)`
 
-### Runtime (future feature)
+### Runtimes
 
-*Future feature, not yet implemented.* 
-
-Indicates which software runtime should be used for the benchmark (e.g., ONNX Runtime vs. TensorRT for a GPU benchmark).
+Indicates which software runtime(s) should be used for the benchmark (e.g., ONNX Runtime vs. TensorRT for a GPU benchmark).
 
 Usage:
 - `benchit benchmark INPUT_FILES --runtime SW`
 
-> _Note_: We will add support for user-selected runtimes in the future, when `benchit` supports multiple runtimes per device. At the time of this writing, there is a 1:1 mapping between all supported runtimes and devices, so there is no need for the `--runtime` argument yet.
+Each device type has its own default runtime, as indicated below.
+- Valid runtimes for `x86` device
+  - `ort`: ONNX Runtime (default).
+  - `torch-eager`: PyTorch eager execution.
+  - `torch-compiled`: PyTorch 2.x-style compiled graph execution using TorchInductor.
+- Valid runtimes for `nvidia` device
+  - `trt`: Nvidia TensorRT (default).
+- Valid runtimes for `groq` device
+  - `groq`: GroqFlow (default).
 
-Each device type has its own default runtime, as indicated below. Valid values include:
-- `ort`: ONNX Runtime (default for `x86` device type).
-- `trt`: Nvidia TensorRT (default for `nvidia` device type).
-- `groq`: GroqFlow (default for `groq` device type).
-- [future] `pytorch1`: PyTorch 1.x-style eager execution.
-- [future] `pytorch2`: PyTorch 2.x-style compiled graph execution.
-- [future] `ort-*`: Specific [ONNX Runtime execution providers]
-(#https://onnxruntime.ai/docs/execution-providers/)
-
-In the future this will also be available as API arguments: 
-- `benchmark_script(runtime=...)`
+This feature is also be available as an API argument: 
+- `benchmark_script(runtimes=[...])`
 - `benchmark_model(runtime=...)`
+
+> _Note_: `torch-eager` and `torch-compiled` are not available whe using the `remote` backend.
 
 # Additional Commands and Options
 
