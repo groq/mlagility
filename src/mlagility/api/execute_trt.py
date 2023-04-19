@@ -25,6 +25,8 @@ def run(
     outputs_file: str,
     errors_file: str,
     num_iterations: int,
+    start_event: threading.Event,
+    stop_event: threading.Event,
 ):
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
@@ -62,6 +64,9 @@ def run(
     except subprocess.CalledProcessError as e:
         logging.error(f"{run_command} failed with error code {e.returncode}: {e}")
 
+    # Start power measurement
+    start_event.set()
+
     # Execute the onnx model user trtexec inside the container
     run_trtexec = subprocess.Popen(exec_command.split(), stdout=subprocess.PIPE)
     try:
@@ -70,6 +75,9 @@ def run(
         logging.error(f"{exec_command} timed out!")
     except subprocess.CalledProcessError as e:
         logging.error(f"{exec_command}  failed with error code {e.returncode}: {e}")
+
+    # Stop power measurement
+    stop_event.set()
 
     # Stop the container
     stop_docker = subprocess.Popen(stop_command.split(), stdout=subprocess.PIPE)
@@ -129,9 +137,10 @@ def get_gpu_power():
         print(f"Error: {e}")
         sys.exit(1)
 
-def measure_power(power_readings, sample_rate=0.01, duration=10):
-    start_time = time.time()
-    while time.time() - start_time < duration:
+def measure_power(start_event, stop_event, power_readings, sample_rate=0.01):
+    start_event.wait()  # Wait for the start event to be set
+
+    while not stop_event.is_set():
         power_draw = get_gpu_power()
         power_readings.append(power_draw)
         time.sleep(sample_rate)
@@ -171,7 +180,9 @@ if __name__ == "__main__":
     average_power = 0
 
     # Start power measurement in a separate thread
-    power_thread = threading.Thread(target=measure_power, args=(power_readings, 0.01, TIMEOUT))
+    start_event = threading.Event()
+    stop_event = threading.Event()
+    power_thread = threading.Thread(target=measure_power, args=(start_event, stop_event, power_readings, 0.01))
     power_thread.start()
 
     run(
@@ -180,6 +191,8 @@ if __name__ == "__main__":
         outputs_file=args.outputs_file,
         errors_file=args.errors_file,
         num_iterations=args.iterations,
+        start_event=start_event,
+        stop_event=stop_event,
     )
 
     # Wait for power measurement to finish
