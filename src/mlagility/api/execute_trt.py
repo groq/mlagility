@@ -129,16 +129,13 @@ def get_gpu_power():
         print(f"Error: {e}")
         sys.exit(1)
 
-def measure_power(sample_rate=0.01, duration=10):
+def measure_power(power_readings, sample_rate=0.01, duration=10):
     start_time = time.time()
-    power_readings = []
     while time.time() - start_time < duration:
         power_draw = get_gpu_power()
         power_readings.append(power_draw)
         time.sleep(sample_rate)
 
-    average_power = sum(power_readings) / len(power_readings)
-    return power_readings, average_power
 
 if __name__ == "__main__":
     # Parse Inputs
@@ -174,7 +171,7 @@ if __name__ == "__main__":
     average_power = 0
 
     # Start power measurement in a separate thread
-    power_thread = threading.Thread(target=measure_power, args=(0.01, TIMEOUT))
+    power_thread = threading.Thread(target=measure_power, args=(power_readings, 0.01, TIMEOUT))
     power_thread.start()
 
     run(
@@ -189,7 +186,11 @@ if __name__ == "__main__":
     power_thread.join()
 
     # Calculate the average power consumption
-    average_power = sum(power_readings) / len(power_readings)
+    if len(power_readings) > 0:
+        average_power = sum(power_readings) / len(power_readings)
+    else:
+        average_power = None
+
 
     # Load existing GPU performance data
     with open(args.outputs_file, "r", encoding="utf-8") as out_file:
