@@ -204,13 +204,11 @@ if __name__ == "__main__":
     else:
         average_power = None
 
-
     # Load existing GPU performance data
     with open(args.outputs_file, "r", encoding="utf-8") as out_file:
         gpu_performance = json.load(out_file)
 
     # Add power readings and average power consumption to the dictionary
-    gpu_performance["Power readings (W)"] = power_readings
     gpu_performance["Average power consumption (W)"] = round(average_power, 2)
 
     # Save the updated GPU performance data
