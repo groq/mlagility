@@ -126,13 +126,15 @@ def run(
     with open(errors_file, "w", encoding="utf-8") as e:
         e.writelines(decoded_error)
 
-def get_gpu_power():
+def get_gpu_power_and_utilization():
     try:
-        output = subprocess.check_output("nvidia-smi -q -d POWER".split())
-        output = output.decode("utf-8")
-        power_pattern = re.compile(r"Power Draw\s+:\s+(\d+\.\d+)\s+W")
-        power_draw = float(power_pattern.search(output).group(1))
-        return power_draw
+        query = "nvidia-smi --query-gpu=utilization.gpu,power.draw --format=csv,noheader,nounits"
+        output = subprocess.check_output(query.split())
+        output = output.decode("utf-8").strip()
+
+        utilization, power_draw = output.split(', ')
+        return int(utilization), float(power_draw)
+
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -141,8 +143,8 @@ def measure_power(start_event, stop_event, power_readings, sample_rate=0.01):
     start_event.wait()  # Wait for the start event to be set
 
     while not stop_event.is_set():
-        power_draw = get_gpu_power()
-        power_readings.append(power_draw)
+        gpu_utilization, power_draw = get_gpu_power_and_utilization()
+        power_readings.append((gpu_utilization, power_draw))
         time.sleep(sample_rate)
 
 
