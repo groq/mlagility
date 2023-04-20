@@ -198,18 +198,28 @@ if __name__ == "__main__":
     # Wait for power measurement to finish
     power_thread.join()
 
-    # Calculate the average power consumption
+    # Calculate the average power consumption, average utilization, and peak power consumption
     if len(power_readings) > 0:
-        average_power = sum(power_readings) / len(power_readings)
+        average_power = sum([reading[1] for reading in power_readings]) / len(power_readings)
+        average_utilization = sum([reading[0] for reading in power_readings]) / len(power_readings)
+        peak_power = max([reading[1] for reading in power_readings])
     else:
         average_power = None
+        average_utilization = None
+        peak_power = None
 
     # Load existing GPU performance data
     with open(args.outputs_file, "r", encoding="utf-8") as out_file:
         gpu_performance = json.load(out_file)
 
-    # Add power readings and average power consumption to the dictionary
+    # Add average power consumption, average utilization, and peak power consumption to the dictionary
     gpu_performance["Average power consumption (W)"] = round(average_power, 2)
+    gpu_performance["Peak power consumption (W)"] = round(peak_power, 2)
+    gpu_performance["Average GPU utilization (%)"] = round(average_utilization, 2)
+
+    # Save the updated GPU performance data
+    with open(args.outputs_file, "w", encoding="utf-8") as out_file:
+        json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
 
     # Save the updated GPU performance data
     with open(args.outputs_file, "w", encoding="utf-8") as out_file:
