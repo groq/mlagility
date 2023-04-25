@@ -420,32 +420,41 @@ def main():
     )
 
     #######################################
-    # Subparser for the "locate" command
+    # Parser for the "cache location" command
     #######################################
 
-    locate_parser = subparsers.add_parser(
-        "locate",
-        help="Commands for locating objects in the filesystem",
-    )
-
-    locate_subparsers = locate_parser.add_subparsers(
-        title="locate",
-        help="Commands for locating objects in the filesystem",
-        required=True,
-        dest="locate_cmd",
-    )
-
-    locate_cache_parser = locate_subparsers.add_parser(
-        "cache",
+    cache_location_parser = cache_subparsers.add_parser(
+        "location",
         help="Print the location of the default build cache directory",
     )
-    locate_cache_parser.set_defaults(func=filesystem.print_cache_dir)
+    cache_location_parser.set_defaults(func=filesystem.print_cache_dir)
 
-    locate_models_parser = locate_subparsers.add_parser(
+    #######################################
+    # Subparser for the "models" command
+    #######################################
+
+    models_parser = subparsers.add_parser(
         "models",
+        help="Commands for managing the MLAgility benchmark's models",
+    )
+
+    """
+    Design note: the `models` command is simple right now, however some additional ideas
+        are documented in https://github.com/groq/mlagility/issues/247
+    """
+
+    models_subparsers = models_parser.add_subparsers(
+        title="models",
+        help="Commands for managing the MLAgility benchmark's models",
+        required=True,
+        dest="models_cmd",
+    )
+
+    models_location_parser = models_subparsers.add_parser(
+        "location",
         help="Print the location of the MLAgility models directory",
     )
-    locate_models_parser.set_defaults(func=filesystem.print_models_dir)
+    models_location_parser.set_defaults(func=filesystem.print_models_dir)
 
     #######################################
     # Parser for the "version" command
@@ -466,7 +475,7 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        if sys.argv[1] not in subparsers.choices.keys():
+        if sys.argv[1] not in subparsers.choices.keys() and "-h" not in sys.argv[1]:
             sys.argv.insert(1, "benchmark")
 
     args = parser.parse_args()

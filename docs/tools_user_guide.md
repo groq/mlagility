@@ -567,21 +567,21 @@ The `cache` commands help you manage the `mlagility cache` and get information a
 
 > _Note_: `cache report` is not available as an API.
 
-## Locate Commands
+### `cache location` Command
 
-The `locate` commands help you find MLAgility artifacts on the filesystem.
-
-### `locate cache` Command
-
-`benchit locate cache` prints out the location of the default cache directory.
+`benchit cache location` prints out the location of the default cache directory.
 
 > _Note_: Also available programmatically, with `mlagility.filesystem.DEFAULT_CACHE_DIR`
+
+## Models Commands
+
+The `models` commands help you work with the models in the MLAgility benchmark.
 
 ### `locate models` Command
 
-`benchit locate models` prints out the location of the models directory, which contains the [MLAgility benchmark](https://github.com/groq/mlagility/tree/main/models) with over 1000 models.
+`benchit models location` prints out the location of the models directory, which contains the [MLAgility benchmark](https://github.com/groq/mlagility/tree/main/models) with over 1000 models.
 
-> _Note_: Also available programmatically, with `mlagility.filesystem.DEFAULT_CACHE_DIR`
+> _Note_: Also available programmatically, with `mlagility.filesystem.MODELS_DIR`
 
 ## `version` Command
 

@@ -46,7 +46,14 @@ If you are planning to use the `mlagility` tools with the MLAgility benchmark, G
 
 The MLAgility benchmark's models are located at `mlagility_install_path/models`, which we refer to as `models/` in most of the guides.
 
-> _Note_: The `benchit locate models` command and `mlagility.common.filesystem.MODELS_DIR` are useful ways to locate the `models` directory. If you perform PyPI installation, we recommend that you also run `benchit locate models` to get the `models_directory` and then `export models=models_directory`. 
+> _Note_: The `benchit models location` command and `mlagility.common.filesystem.MODELS_DIR` are useful ways to locate the `models` directory. If you perform PyPI installation, we recommend that you take an additional step like this:
+
+```
+(mla) jfowers@jfowers:~/mlagility$ benchit models location
+
+Info: The MLAgility models directory is: ~/mlagility/models
+(mla) jfowers@jfowers:~/mlagility$ export models=~/mlagility/models
+```
 
 The `mlagility` package only requires the packages to run the MLAgility benchmarking tools. If you want to run the MLAgility benchmark itself, you will also have to install the benchmark's requirements. 
 
