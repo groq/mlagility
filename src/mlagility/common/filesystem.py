@@ -373,8 +373,10 @@ def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, val
 
     _save_stats(cache_dir, build_name, stats_dict)
 
-def print_cache_dir():
-    printing.log_info("The default cache directory is:", DEFAULT_CACHE_DIR)
 
-def print_models_dir():
-    printing.log_info("The MLAgility models directory is:", MODELS_DIR)
+def print_cache_dir(_=None):
+    printing.log_info(f"The default cache directory is: {DEFAULT_CACHE_DIR}")
+
+
+def print_models_dir(_=None):
+    printing.log_info(f"The MLAgility models directory is: {MODELS_DIR}")

@@ -442,7 +442,7 @@ def main():
     locate_cache_parser.set_defaults(func=filesystem.print_cache_dir)
 
     locate_models_parser = locate_subparsers.add_parser(
-        "cache",
+        "models",
         help="Print the location of the MLAgility models directory",
     )
     locate_models_parser.set_defaults(func=filesystem.print_models_dir)
