@@ -40,6 +40,7 @@ jobs:
         shell: bash -el {0}
         run: |
           pylint src/onnxflow --rcfile .pylintrc
+          pylint examples/onnxflow --rcfile .pylintrc
       - name: Test with unittest
         shell: bash -el {0}
         run: |
