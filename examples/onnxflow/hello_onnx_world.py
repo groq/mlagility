@@ -13,7 +13,6 @@
 import os
 import torch
 from onnxflow import build_model
-import onnxruntime as ort
 
 torch.manual_seed(0)
 
