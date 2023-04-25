@@ -63,6 +63,30 @@ def benchmark_model(
         if device == "groq":
             # pylint: disable=import-error
             from groqflow import groqit
+            import onnxflow.justbuildit.export as export
+            import onnxflow.justbuildit.stage as stage
+            import groqflow.justgroqit.export as gf_export
+            import groqflow.justgroqit.compile as gf_compile
+
+            # Set the GroqFlow sequence to execute Stages in the same order
+            # as build_model()
+
+            if sequence is None:
+                groqflow_sequence = stage.Sequence(
+                    "groqflow_sequence",
+                    "GroqFlow build",
+                    [
+                        export.ExportPytorchModel(),
+                        export.OptimizeOnnxModel(),
+                        export.ConvertOnnxToFp16(),
+                        gf_export.CheckOnnxCompatibility(),
+                        gf_compile.CompileOnnx(),
+                        gf_compile.Assemble(),
+                    ],
+                    enable_model_validation=True,
+                )
+            else:
+                groqflow_sequence = sequence
 
             gmodel = groqit(
                 model=model,
@@ -74,7 +98,7 @@ def benchmark_model(
                 assembler_flags=groq_assembler_flags,
                 num_chips=groq_num_chips,
                 groqview=groqview,
-                sequence=sequence,
+                sequence=groqflow_sequence,
             )
 
             if not build_only:
