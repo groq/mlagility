@@ -13,14 +13,49 @@ The tutorials are organized into a few chapters:
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
 
 In this tutorial you will learn things such as:
+- [How to benchmark BERT with one command](#just-benchmark-bert)
 - [A "hello world" example, which is the easiest way to get started](#hello-world)
 - [Benchmarking on Nvidia GPUs](#nvidia-benchmarking)
 - [Working with scripts that invoke more than one model](#multiple-models-per-script)
 - [Benchmarking an ONNX file](#onnx-benchmarking)
 
+# Just Benchmark BERT
+
+A fun way to get started with `benchit` is to simply benchmark the popular [BERT transformer model](https://huggingface.co/docs/transformers/model_doc/bert) with a single command:
+
+```
+benchit mlagility_install_path/models/transformers/bert.py
+```
+
+> _Note_: If you need to know the location of `mlagility_install_path/models` you can find it by running the command `benchit models location`.
+
+> _Note_: You will need to [install the MLAgility benchmark requirements](https://github.com/groq/mlagility/blob/main/docs/install.md#mlagility-benchmark-requirements), if you haven't already.
+
+This will produce a result that looks like this, which shows you the performance of BERT-Base on your CPU:
+
+```
+Models discovered during profiling:
+
+bert.py:
+        model (executed 1x)
+                Model Type:     Pytorch (torch.nn.Module)
+                Class:          BertModel (<class 'transformers.models.bert.modeling_bert.BertModel'>)
+                Location:       /home/jfowers/mlagility/models/transformers/bert.py, line 18
+                Parameters:     109,482,240 (208.8 MB)
+                Hash:           d59172a2
+                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz (ort v1.14.1)
+                                Mean Latency:   345.341 milliseconds (ms)
+                                Throughput:     2.9     inferences per second (IPS)
+```
+
+
 # Tutorials
 
-All of the tutorials assume that your current working directory is in the same location as this readme file (`examples/cli`).
+All of the following tutorials assume that your current working directory is in the same location as this readme file (`examples/cli`).
+
+We recommend the using [cloning install](https://github.com/groq/mlagility/blob/main/docs/install.md#cloning-install) for these tutorials because the cloning install makes it easier to find the files referenced within.
+
+However, if you used the [PyPI install](https://github.com/groq/mlagility/blob/main/docs/install.md#pypi-install), please prepend the `mlagility` install directory in front of all file paths in the tutorial (e.g., `models/transformers/bert.py` becomes `mlagility_install_path/models/transformers/bert.py`). 
 
 ## Hello World
 
