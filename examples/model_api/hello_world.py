@@ -56,7 +56,13 @@ def main():
 
     # Benchmark the model on the specified device and backend
     print(f"Benchmarking on {args.device} {args.backend}...")
-    benchmark_model(pytorch_model, inputs, build_name="hello_api_world", device=args.device, backend=args.backend)
+    benchmark_model(
+        pytorch_model,
+        inputs,
+        build_name="hello_api_world",
+        device=args.device,
+        backend=args.backend,
+    )
 
 
 if __name__ == "__main__":
