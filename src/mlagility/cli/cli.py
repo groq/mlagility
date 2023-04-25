@@ -420,6 +420,34 @@ def main():
     )
 
     #######################################
+    # Subparser for the "locate" command
+    #######################################
+
+    locate_parser = subparsers.add_parser(
+        "locate",
+        help="Commands for locating objects in the filesystem",
+    )
+
+    locate_subparsers = locate_parser.add_subparsers(
+        title="locate",
+        help="Commands for locating objects in the filesystem",
+        required=True,
+        dest="locate_cmd",
+    )
+
+    locate_cache_parser = locate_subparsers.add_parser(
+        "cache",
+        help="Print the location of the default build cache directory",
+    )
+    locate_cache_parser.set_defaults(func=filesystem.print_cache_dir)
+
+    locate_models_parser = locate_subparsers.add_parser(
+        "cache",
+        help="Print the location of the MLAgility models directory",
+    )
+    locate_models_parser.set_defaults(func=filesystem.print_models_dir)
+
+    #######################################
     # Parser for the "version" command
     #######################################
 

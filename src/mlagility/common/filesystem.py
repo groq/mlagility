@@ -22,6 +22,19 @@ else:
 CACHE_MARKER = ".mlacache"
 BUILD_MARKER = ".mlabuild"
 
+# Locate the models directory
+# This file is located in MLAGILITY_INSTALL/src/mlagility/common/
+# The models directory is located at MLAGILITY_INSTALL/models
+# This relative positioning is protected by the "test_000_models_dir" in test/unit.py
+MODELS_DIR = (
+    pathlib.Path(__file__)
+    .parent.resolve()
+    .parent.resolve()
+    .parent.resolve()
+    .parent.resolve()
+    / "models"
+)
+
 
 def clean_script_name(script_path: str) -> str:
     # Trim the ".py"
@@ -359,3 +372,9 @@ def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, val
     stats_dict[parent_key] = dict_to_update
 
     _save_stats(cache_dir, build_name, stats_dict)
+
+def print_cache_dir():
+    printing.log_info("The default cache directory is:", DEFAULT_CACHE_DIR)
+
+def print_models_dir():
+    printing.log_info("The MLAgility models directory is:", MODELS_DIR)
