@@ -53,10 +53,6 @@ bert.py:
 
 All of the following tutorials assume that your current working directory is in the same location as this readme file (`examples/cli`).
 
-We recommend the using [cloning install](https://github.com/groq/mlagility/blob/main/docs/install.md#cloning-install) for these tutorials because the cloning install makes it easier to find the files referenced within.
-
-However, if you used the [PyPI install](https://github.com/groq/mlagility/blob/main/docs/install.md#pypi-install), please prepend the `mlagility` install directory in front of all file paths in the tutorial (e.g., `models/transformers/bert.py` becomes `mlagility_install_path/models/transformers/bert.py`). 
-
 ## Hello World
 
 We can perform a basic invocation of `benchit` to benchmark a PyTorch model by simply running the following command:
