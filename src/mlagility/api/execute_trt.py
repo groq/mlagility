@@ -16,7 +16,7 @@ import threading
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
 
-TRT_VERSION = "23.03-py3"
+TRT_VERSION = "23.02-py3"
 
 
 def run(
@@ -126,18 +126,55 @@ def run(
     with open(errors_file, "w", encoding="utf-8") as e:
         e.writelines(decoded_error)
 
+
+'''
+In the average_power_and_utilization function, we eliminate the values below
+the idle_threshold at the beginning and end of the list because we want to 
+exclude the idle periods before and after the actual workload execution. By
+doing this, we can get a more accurate representation of the average power 
+consumption and GPU utilization during the execution of the workload.
+We set the Idle threshold to 3% utilization based on heuristics.
+'''
+IDLE_THRESHOLD = 3
+def average_power_and_utilization(power_readings):
+
+    if not power_readings:
+        return 0, 0
+
+    # Remove readings below the threshold from the beginning of the list
+    while power_readings and power_readings[0][0] <= IDLE_THRESHOLD:
+        power_readings.pop(0)
+
+    # Remove readings below the threshold from the end of the list
+    while power_readings and power_readings[-1][0] <= IDLE_THRESHOLD:
+        power_readings.pop()
+
+    if not power_readings:
+        return 0, 0
+
+    total_power = sum(power_draw for _, power_draw in power_readings)
+    total_utilization = sum(utilization for utilization, _ in power_readings)
+
+    average_power = total_power / len(power_readings)
+    average_utilization = total_utilization / len(power_readings)
+
+    return average_power, average_utilization
+
+
+
 def get_gpu_power_and_utilization():
     try:
         query = "nvidia-smi --query-gpu=utilization.gpu,power.draw --format=csv,noheader,nounits"
         output = subprocess.check_output(query.split())
         output = output.decode("utf-8").strip()
 
-        utilization, power_draw = output.split(', ')
+        utilization, power_draw = output.split(", ")
         return int(utilization), float(power_draw)
 
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+
 
 def measure_power(start_event, stop_event, power_readings, sample_rate=0.01):
     start_event.wait()  # Wait for the start event to be set
@@ -184,7 +221,9 @@ if __name__ == "__main__":
     # Start power measurement in a separate thread
     start_event = threading.Event()
     stop_event = threading.Event()
-    power_thread = threading.Thread(target=measure_power, args=(start_event, stop_event, power_readings, 0.01))
+    power_thread = threading.Thread(
+        target=measure_power, args=(start_event, stop_event, power_readings, 0.01)
+    )
     power_thread.start()
 
     run(
@@ -201,23 +240,18 @@ if __name__ == "__main__":
     power_thread.join()
 
     # Calculate the average power consumption, average utilization, and peak power consumption
-    if len(power_readings) > 0:
-        average_power = sum([reading[1] for reading in power_readings]) / len(power_readings)
-        average_utilization = sum([reading[0] for reading in power_readings]) / len(power_readings)
-        peak_power = max([reading[1] for reading in power_readings])
-    else:
-        average_power = None
-        average_utilization = None
-        peak_power = None
+    average_power, average_utilization = average_power_and_utilization(power_readings)
+    peak_power = max([reading[1] for reading in power_readings]) if power_readings else None
 
     # Load existing GPU performance data
     with open(args.outputs_file, "r", encoding="utf-8") as out_file:
         gpu_performance = json.load(out_file)
 
     # Add average power consumption, average utilization, and peak power consumption to the dictionary
-    gpu_performance["Average power consumption (W)"] = round(average_power, 2)
-    gpu_performance["Peak power consumption (W)"] = round(peak_power, 2)
-    gpu_performance["Average GPU utilization (%)"] = round(average_utilization, 2)
+    gpu_performance["Average power consumption (W)"] = round(average_power, 2) if average_power is not None else None
+    gpu_performance["Peak power consumption (W)"] = round(peak_power, 2) if peak_power is not None else None
+    gpu_performance["Average GPU utilization (%)"] = round(average_utilization, 2) if average_utilization is not None else None
+
 
     # Save the updated GPU performance data
     with open(args.outputs_file, "w", encoding="utf-8") as out_file:
