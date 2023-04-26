@@ -26,14 +26,7 @@ BUILD_MARKER = ".mlabuild"
 # This file is located in MLAGILITY_INSTALL/src/mlagility/common/
 # The models directory is located at MLAGILITY_INSTALL/models
 # This relative positioning is protected by the "test_000_models_dir" in test/unit.py
-MODELS_DIR = (
-    pathlib.Path(__file__)
-    .parent.resolve()
-    .parent.resolve()
-    .parent.resolve()
-    .parent.resolve()
-    / "models"
-)
+MODELS_DIR = pathlib.Path(__file__).parents[3] / "models"
 
 
 def clean_script_name(script_path: str) -> str:
