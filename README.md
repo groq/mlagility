@@ -12,9 +12,11 @@ MLAgility offers a complementary approach to MLPerf by examining the capability 
 
 ## Benchmarking Tool
 
-Our _benchit_ CLI allows you to benchmark Pytorch models without changing a single line of code. The demo below shows BERT-Base being benchmarked on both Nvidia A100 and Intel Xeon. For more information checkout out our [Tutorials](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) and [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md).
+Our _benchit_ CLI allows you to benchmark Pytorch models without changing a single line of code. The demo below shows BERT-Base being benchmarked on both Nvidia A100 and Intel Xeon. For more information, check out our [Tutorials](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md) and [Tools User Guide](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md).
 
 <img src="https://github.com/groq/mlagility/raw/main/docs/img/mlagility.gif"  width="800"/>
+
+You can reproduce this demo by trying out the [Just Benchmark BERT](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#just-benchmark-bert) tutorial.
 
 ## 1000+ Models
 
