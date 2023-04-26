@@ -186,7 +186,7 @@ def configure_remote(device: str) -> Tuple[str, str]:
     ip, username = load_remote_config(device)
 
     if not all((ip, username)):
-        if device == "groqchip":
+        if device == "groq":
             print(
                 (
                     "User is responsible for ensuring the remote server has the Groq "
@@ -234,7 +234,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
             "Dockerfile",
             ORT_EXECUTION_SCRIPT,
         ]
-    elif device_type == "groqchip":
+    elif device_type == "groq":
         # pylint: disable=import-error
         import groqflow.common.sdk_helpers as sdk
         import groqflow.common.exceptions as groq_exp
@@ -250,13 +250,13 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         files_to_transfer = ["execute.py"]
     else:
         raise ValueError(
-            "Only 'nvidia', 'x86', and 'groqchip' are supported."
+            "Only 'nvidia', 'x86', and 'groq' are supported."
             f"But received {device_type}"
         )
 
     # Transfer common files to host
     exec_command(client, f"mkdir {output_dir}", ignore_error=True)
-    if device_type == "groqchip":
+    if device_type == "groq":
         # pylint: disable=import-error
         from groqflow.groqmodel import groqmodel
 
@@ -332,10 +332,10 @@ def execute_groqchip_remotely(
     """
 
     # Ask the user for credentials if needed
-    _, hostname = configure_remote("groqchip")
+    _, hostname = configure_remote("groq")
 
     # Connect to remote machine and transfer common files
-    client = setup_connection("groqchip")
+    client = setup_connection("groq")
 
     # Transfer iop and inputs file
     if not os.path.exists(state.execution_inputs_file):
