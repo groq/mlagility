@@ -24,10 +24,9 @@ In this tutorial you will learn things such as:
 A fun way to get started with `benchit` is to simply benchmark the popular [BERT transformer model](https://huggingface.co/docs/transformers/model_doc/bert) with a single command:
 
 ```
-benchit mlagility_install_path/models/transformers/bert.py
+models=$(benchit models location --quiet)
+benchit $models/transformers/bert.py
 ```
-
-> _Note_: If you need to know the location of `mlagility_install_path/models` you can find it by running the command `benchit models location`.
 
 > _Note_: You will need to [install the MLAgility benchmark requirements](https://github.com/groq/mlagility/blob/main/docs/install.md#mlagility-benchmark-requirements), if you haven't already.
 
