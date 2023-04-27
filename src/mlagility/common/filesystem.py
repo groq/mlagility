@@ -4,6 +4,7 @@ import glob
 import pathlib
 import datetime
 from typing import Dict, List
+import importlib.util
 import yaml
 import onnxflow.common.printing as printing
 import onnxflow.common.cache as cache
@@ -23,10 +24,7 @@ CACHE_MARKER = ".mlacache"
 BUILD_MARKER = ".mlabuild"
 
 # Locate the models directory
-# This file is located in MLAGILITY_INSTALL/src/mlagility/common/
-# The models directory is located at MLAGILITY_INSTALL/models
-# This relative positioning is protected by the "test_000_models_dir" in test/unit.py
-MODELS_DIR = pathlib.Path(__file__).parents[3] / "models"
+MODELS_DIR = importlib.util.find_spec("mlagility_models").submodule_search_locations[0]
 
 
 def clean_script_name(script_path: str) -> str:
@@ -371,5 +369,8 @@ def print_cache_dir(_=None):
     printing.log_info(f"The default cache directory is: {DEFAULT_CACHE_DIR}")
 
 
-def print_models_dir(_=None):
-    printing.log_info(f"The MLAgility models directory is: {MODELS_DIR}")
+def print_models_dir(args=None):
+    if args.verbose:
+        printing.log_info(f"The MLAgility models directory is: {MODELS_DIR}")
+    else:
+        print(MODELS_DIR)
