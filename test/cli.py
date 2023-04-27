@@ -533,6 +533,12 @@ class Testing(unittest.TestCase):
                     "onnx_ops_counter"
                 ]
 
+                # Make sure the mlagility_stats has the expected ONNX opset
+                assert (
+                    stats_dict["onnx_model_information"]["opset"]
+                    == build.DEFAULT_ONNX_OPSET
+                ), stats_dict["onnx_model_information"]["opset"]
+
     def test_008_cli_version(self):
 
         # Get the version number
