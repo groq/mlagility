@@ -1,4 +1,5 @@
 from setuptools import setup
+import glob
 
 with open("src/mlagility/version.py", encoding="utf-8") as fp:
     version = fp.read().split('"')[1]
@@ -11,8 +12,27 @@ setup(
     author="Jeremy Fowers, Daniel Holanda, Ramakrishnan Sivakumar, Victoria Godsoe",
     author_email="jfowers@groq.com, dhnoronha@groq.com, rsivakumar@groq.com, vgodsoe@groq.com",
     license="MIT",
-    package_dir={"": "src"},
-    packages=["mlagility", "onnxflow"],
+    package_dir={"": "src", "mlagility_models": "models"},
+    packages=[
+        "mlagility",
+        "mlagility.analysis",
+        "mlagility.api",
+        "mlagility.cli",
+        "mlagility.common",
+        "onnxflow",
+        "onnxflow.common",
+        "onnxflow.justbuildit",
+        "onnxflow.model",
+        "mlagility_models",
+        "mlagility_models.diffusers",
+        "mlagility_models.graph_convolutions",
+        "mlagility_models.popular_on_huggingface",
+        "mlagility_models.selftest",
+        "mlagility_models.timm",
+        "mlagility_models.torch_hub",
+        "mlagility_models.torchvision",
+        "mlagility_models.transformers",
+    ],
     install_requires=[
         "invoke>=2.0.0",
         "onnx>=1.11.0",
@@ -46,4 +66,6 @@ setup(
     python_requires=">=3.8, <3.11",
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
+    include_package_data=True,
+    package_data={"mlagility.api": ["Dockerfile"]},
 )

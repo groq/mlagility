@@ -456,6 +456,14 @@ def main():
     )
     models_location_parser.set_defaults(func=filesystem.print_models_dir)
 
+    models_location_parser.add_argument(
+        "--quiet",
+        dest="verbose",
+        help="Command output will only include the directory path",
+        required=False,
+        action="store_false",
+    )
+
     #######################################
     # Parser for the "version" command
     #######################################
