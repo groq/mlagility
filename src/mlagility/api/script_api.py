@@ -78,7 +78,7 @@ def load_sequence_from_file(sequence: Union[str, stage.Sequence], use_slurm: boo
 
 
 def benchmark_script(
-    input_scripts: str = None,
+    input_scripts: List[str],
     use_slurm: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
@@ -90,7 +90,7 @@ def benchmark_script(
     analyze_only: bool = False,
     build_only: bool = False,
     resume: bool = False,
-    script_args: str = "",
+    script_args: Optional[str] = None,
     max_depth: int = 0,
     sequence: Union[str, stage.Sequence] = None,
     groq_compiler_flags: Optional[List[str]] = None,
