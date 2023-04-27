@@ -1,5 +1,4 @@
 from setuptools import setup
-import glob
 
 with open("src/mlagility/version.py", encoding="utf-8") as fp:
     version = fp.read().split('"')[1]
