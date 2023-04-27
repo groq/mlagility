@@ -127,15 +127,17 @@ def run(
         e.writelines(decoded_error)
 
 
-'''
+"""
 In the average_power_and_utilization function, we eliminate the values below
 the idle_threshold at the beginning and end of the list because we want to 
 exclude the idle periods before and after the actual workload execution. By
 doing this, we can get a more accurate representation of the average power 
 consumption and GPU utilization during the execution of the workload.
 We set the Idle threshold to 3% utilization based on heuristics.
-'''
+"""
 IDLE_THRESHOLD = 3
+
+
 def average_power_and_utilization(power_readings):
 
     if not power_readings:
@@ -159,7 +161,6 @@ def average_power_and_utilization(power_readings):
     average_utilization = total_utilization / len(power_readings)
 
     return average_power, average_utilization
-
 
 
 def get_gpu_power_and_utilization():
@@ -241,21 +242,24 @@ if __name__ == "__main__":
 
     # Calculate the average power consumption, average utilization, and peak power consumption
     average_power, average_utilization = average_power_and_utilization(power_readings)
-    peak_power = max([reading[1] for reading in power_readings]) if power_readings else None
+    peak_power = (
+        max([reading[1] for reading in power_readings]) if power_readings else None
+    )
 
     # Load existing GPU performance data
     with open(args.outputs_file, "r", encoding="utf-8") as out_file:
         gpu_performance = json.load(out_file)
 
     # Add average power consumption, average utilization, and peak power consumption to the dictionary
-    gpu_performance["Average power consumption (W)"] = round(average_power, 2) if average_power is not None else None
-    gpu_performance["Peak power consumption (W)"] = round(peak_power, 2) if peak_power is not None else None
-    gpu_performance["Average GPU utilization (%)"] = round(average_utilization, 2) if average_utilization is not None else None
-
-
-    # Save the updated GPU performance data
-    with open(args.outputs_file, "w", encoding="utf-8") as out_file:
-        json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
+    gpu_performance["Average power consumption (W)"] = (
+        round(average_power, 2) if average_power is not None else None
+    )
+    gpu_performance["Peak power consumption (W)"] = (
+        round(peak_power, 2) if peak_power is not None else None
+    )
+    gpu_performance["Average GPU utilization (%)"] = (
+        round(average_utilization, 2) if average_utilization is not None else None
+    )
 
     # Save the updated GPU performance data
     with open(args.outputs_file, "w", encoding="utf-8") as out_file:
