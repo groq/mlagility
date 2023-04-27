@@ -579,7 +579,9 @@ The `models` commands help you work with the models in the MLAgility benchmark.
 
 ### `locate models` Command
 
-`benchit models location` prints out the location of the models directory, which contains the [MLAgility benchmark](https://github.com/groq/mlagility/tree/main/models) with over 1000 models.
+`benchit models location` prints out the location of the models directory, which contains the [MLAgility benchmark](https://github.com/groq/mlagility/tree/main/models) with over 1000 models. It presents the following options:
+
+- `--quiet` Command output will only include the directory path
 
 > _Note_: Also available programmatically, with `mlagility.filesystem.MODELS_DIR`
 
