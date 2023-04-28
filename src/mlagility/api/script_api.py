@@ -270,7 +270,7 @@ def benchmark_files(
     analyze_only: bool = False,
     build_only: bool = False,
     resume: bool = False,
-    script_args: str = "",
+    script_args: Optional[str] = None,
     max_depth: int = 0,
     onnx_opset: int = build.DEFAULT_ONNX_OPSET,
     sequence: Union[str, stage.Sequence] = None,
