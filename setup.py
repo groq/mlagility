@@ -66,5 +66,8 @@ setup(
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     include_package_data=True,
-    package_data={"mlagility.api": ["Dockerfile"]},
+    package_data={
+        "mlagility.api": ["Dockerfile"],
+        "mlagility_models": ["requirements.txt", "readme.md"],
+    },
 )
