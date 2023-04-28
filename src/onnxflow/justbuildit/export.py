@@ -1,7 +1,6 @@
 import os
 import inspect
 import shutil
-import re
 import warnings
 import sys
 import copy
