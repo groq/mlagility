@@ -57,6 +57,7 @@ def benchmark_command(args):
         resume=args.resume,
         script_args=args.script_args,
         max_depth=args.max_depth,
+        onnx_opset=args.onnx_opset,
         sequence=args.sequence_file,
         groq_compiler_flags=args.groq_compiler_flags,
         groq_assembler_flags=args.groq_assembler_flags,
@@ -224,6 +225,14 @@ def main():
         type=int,
         default=0,
         help="Maximum depth to analyze within the model structure of the target script(s)",
+    )
+
+    benchmark_parser.add_argument(
+        "--onnx-opset",
+        dest="onnx_opset",
+        type=int,
+        default=build.DEFAULT_ONNX_OPSET,
+        help=f"ONNX opset used when creating ONNX files (default={build.DEFAULT_ONNX_OPSET})",
     )
 
     benchmark_parser.add_argument(

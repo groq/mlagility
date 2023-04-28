@@ -450,6 +450,19 @@ Also available as an API argument:
 
 > See the [Maximum Analysis Depth tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#maximum-analysis-depth) for a detailed example.
 
+### ONNX Opset
+
+ONNX opset to be used when creating ONNX files, for example when calling `torch.onnx.export`. 
+
+Usage:
+- `benchit benchmark INPUT_FILES --onnx-opset 16`
+
+Also available as API arguments:
+- `benchmark_script(onnx_opset=...)`
+- `benchmark_models(onnx_opset=...)`
+
+> _Note_: ONNX opset can also be set by an environment variable. The --onnx-opset argument takes precedence over the environment variable. See [MLAGILITY_ONNX_OPSET](#set-the-onnx-opset).
+
 ### Analyze Only
 
 Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) phase of the `benchmark` command.
@@ -625,4 +638,14 @@ However, you may want to see everything that is being printed to the terminal. Y
 
 ```
 export MLAGILITY_DEBUG=True
+```
+
+### Set the ONNX Opset
+
+By default, `benchit`, `benchmark_script()`, and `benchmark_model()` will use the default ONNX opset defined in `onnxflow.common.build.DEFAULT_ONNX_OPSET`. You can set a different default ONNX opset by setting the `MLAGILITY_ONNX_OPSET` environment variable.
+
+For example:
+
+```
+export MLAGILITY_ONNX_OPSET=16
 ```

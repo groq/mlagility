@@ -34,6 +34,7 @@ def benchmark_model(
     build_only: bool = False,
     lean_cache: bool = False,
     rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
+    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
     groq_num_chips: Optional[int] = None,
@@ -67,6 +68,13 @@ def benchmark_model(
             import onnxflow.justbuildit.stage as stage
             import groqflow.justgroqit.export as gf_export
             import groqflow.justgroqit.compile as gf_compile
+            import groqflow.common.build as gf_build
+
+            if onnx_opset != gf_build.DEFAULT_ONNX_OPSET:
+                raise ValueError(
+                    "ONNX opset for Groq builds must match GroqFlow's ONNX opset, "
+                    f"{gf_build.DEFAULT_ONNX_OPSET}, however onnx_opset is set to {onnx_opset}"
+                )
 
             # Set the GroqFlow sequence to execute Stages in the same order
             # as build_model()
@@ -125,6 +133,7 @@ def benchmark_model(
                 cache_dir=cache_dir,
                 rebuild=rebuild,
                 sequence=sequence,
+                onnx_opset=onnx_opset,
             )
 
             if not build_only:
@@ -143,6 +152,7 @@ def benchmark_model(
                 cache_dir=cache_dir,
                 rebuild=rebuild,
                 sequence=sequence,
+                onnx_opset=onnx_opset,
             )
 
             if not build_only:

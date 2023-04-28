@@ -86,8 +86,7 @@ class ReceiveOnnxModel(stage.Stage):
         state.inputs = dict(zip(dummy_input_names, dummy_inputs))
 
         model = onnx.load(state.model)
-        opset_str = str(model.opset_import)  # pylint: disable=no-member
-        opset = int(re.search(r"\d+", opset_str).group())
+        opset = getattr(model.opset_import[0], "version", None)
         input_shapes = [
             [d.dim_value for d in _input.type.tensor_type.shape.dim]
             for _input in model.graph.input  # pylint: disable=no-member
@@ -223,8 +222,6 @@ class ExportPytorchModel(stage.Stage):
             # Collect input names
             dummy_input_names = tuple(state.inputs.keys())
 
-        state.info.opset = build.DEFAULT_ONNX_OPSET
-
         # Send torch export warnings to stdout (and therefore the log file)
         # so that they don't fill up the command line
         default_warnings = warnings.showwarning
@@ -237,7 +234,7 @@ class ExportPytorchModel(stage.Stage):
             state.base_onnx_file,
             input_names=dummy_input_names,
             do_constant_folding=True,
-            opset_version=state.info.opset,
+            opset_version=state.config.onnx_opset,
             verbose=False,
         )
 
@@ -353,13 +350,11 @@ class ExportKerasModel(stage.Stage):
 
             input_specs.append(tf.TensorSpec(shape, dtype, name))
 
-        state.info.opset = build.DEFAULT_ONNX_OPSET
-
         # Export the model to ONNX
         tf2onnx.convert.from_keras(
             state.model,
             input_signature=input_specs,
-            opset=state.info.opset,
+            opset=state.config.onnx_opset,
             output_path=state.base_onnx_file,
         )
 

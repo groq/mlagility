@@ -17,6 +17,7 @@ def build_model(
     rebuild: Optional[str] = None,
     sequence: Optional[List[stage.Stage]] = None,
     quantization_samples: Collection = None,
+    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
 ) -> omodel.BaseModel:
 
     """Use build a model instance into an optimized ONNX file.
@@ -49,6 +50,7 @@ def build_model(
             that are different to the samples used in current build, the "rebuild"
             argument needs to be manually set to "always" in the current build
             in order to create a new ONNX file.
+        onnx_opset: ONNX opset to use during ONNX export.
     """
 
     # Support "~" in the cache_dir argument
@@ -59,6 +61,7 @@ def build_model(
     config = ignition.lock_config(
         build_name=build_name,
         sequence=sequence,
+        onnx_opset=onnx_opset,
     )
 
     # Analyze the user's model argument and lock in the model, inputs,
