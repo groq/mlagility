@@ -4,6 +4,7 @@ import types
 import importlib.machinery
 from typing import Tuple, List, Dict, Optional, Union
 import onnxflow.common.printing as printing
+import onnxflow.common.build as build
 import onnxflow.common.exceptions as exceptions
 import onnxflow.justbuildit.stage as stage
 import onnxflow.justbuildit.export as export
@@ -92,6 +93,7 @@ def benchmark_script(
     resume: bool = False,
     script_args: Optional[str] = None,
     max_depth: int = 0,
+    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
     sequence: Union[str, stage.Sequence] = None,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
@@ -207,6 +209,7 @@ def benchmark_script(
                     device=device,
                     runtimes=[runtime],
                     max_depth=max_depth,
+                    onnx_opset=onnx_opset,
                     analyze_only=analyze_only,
                     build_only=build_only,
                     lean_cache=lean_cache,
@@ -221,6 +224,7 @@ def benchmark_script(
                     lean_cache=lean_cache,
                     targets=targets,
                     max_depth=max_depth,
+                    onnx_opset=onnx_opset,
                     cache_dir=cache_dir,
                     rebuild=rebuild,
                     groq_compiler_flags=groq_compiler_flags,
@@ -268,6 +272,7 @@ def benchmark_files(
     resume: bool = False,
     script_args: Optional[str] = None,
     max_depth: int = 0,
+    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
     sequence: Union[str, stage.Sequence] = None,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
@@ -307,6 +312,7 @@ def benchmark_files(
             resume=resume,
             script_args=script_args,
             max_depth=max_depth,
+            onnx_opset=onnx_opset,
             sequence=sequence,
             groq_compiler_flags=groq_compiler_flags,
             groq_assembler_flags=groq_assembler_flags,
@@ -341,6 +347,7 @@ def benchmark_files(
                 build_only=build_only,
                 lean_cache=lean_cache,
                 rebuild=rebuild,
+                onnx_opset=onnx_opset,
                 groq_compiler_flags=groq_compiler_flags,
                 groq_assembler_flags=groq_assembler_flags,
                 groq_num_chips=groq_num_chips,

@@ -52,6 +52,8 @@ jobs:
           rm -rf ~/.cache/mlagility
           python examples/model_api/hello_world.py
           rm -rf ~/.cache/mlagility
+          python examples/script_api/onnx_opset.py --onnx-opset 15
+          rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py
           rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/max_depth.py --max-depth 1
