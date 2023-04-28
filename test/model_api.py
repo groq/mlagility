@@ -155,7 +155,6 @@ class Testing(unittest.TestCase):
             build_name=build_name,
             rebuild="always",
             cache_dir=cache_dir,
-            lean_cache=True,
             onnx_opset=user_opset,
         )
         state = get_build_state(cache_dir, build_name)

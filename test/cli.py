@@ -841,12 +841,14 @@ class Testing(unittest.TestCase):
             "--cache-dir",
             cache_dir,
             "--onnx-opset",
-            user_opset,
+            str(user_opset),
         ]
         with patch.object(sys, "argv", testargs):
             benchitcli()
 
-        assert_success_of_builds([test_script], None, check_perf=True, check_opset=user_opset)
+        assert_success_of_builds(
+            [test_script], None, check_perf=True, check_opset=user_opset
+        )
 
 
 if __name__ == "__main__":

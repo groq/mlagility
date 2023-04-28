@@ -27,7 +27,7 @@ UnionValidModelInstanceTypes = Union[
 ]
 
 if os.environ.get("MLAGILITY_ONNX_OPSET"):
-    DEFAULT_ONNX_OPSET = os.environ.get("MLAGILITY_ONNX_OPSET")
+    DEFAULT_ONNX_OPSET = int(os.environ.get("MLAGILITY_ONNX_OPSET"))
 else:
     DEFAULT_ONNX_OPSET = 14
 
