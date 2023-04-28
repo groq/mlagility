@@ -1,6 +1,7 @@
 import os
 import unittest
 import torch
+import onnx
 import tensorflow as tf
 import numpy as np
 import sklearn.ensemble
@@ -564,6 +565,28 @@ class Testing(unittest.TestCase):
         self.assertRaises(exp.StageError, illegal_onnx_opset)
         if os.path.exists("illegal_onnx_opset.onnx"):
             os.remove("illegal_onnx_opset.onnx")
+
+    def test_013_set_onnx_opset(self):
+        build_name = "full_compilation_pytorch_model"
+
+        user_opset = 15
+        assert user_opset != build.DEFAULT_ONNX_OPSET
+
+        omodel = build_model(
+            pytorch_model,
+            inputs,
+            build_name=build_name,
+            rebuild="always",
+            monitor=False,
+            cache_dir=cache_location,
+            onnx_opset=user_opset,
+        )
+
+        assert omodel.state.build_status == build.Status.SUCCESSFUL_BUILD
+
+        onnx_model = onnx.load(omodel.state.converted_onnx_file)
+        model_opset = getattr(onnx_model.opset_import[0], "version", None)
+        assert user_opset == model_opset
 
 
 if __name__ == "__main__":
