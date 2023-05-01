@@ -171,8 +171,18 @@ def call_benchit(
             sys.stdout = sys.stdout.terminal
         status.update(tracer_args.models_found)
 
+        if tracer_args.device == "groq":
+            import groqflow.common.build as groq_build
+
+            state_type = groq_build.State
+        else:
+            state_type = build.State
+        state_type = build.State
+
         build_state = build.load_state(
-            cache_dir=tracer_args.cache_dir, build_name=build_name
+            cache_dir=tracer_args.cache_dir,
+            build_name=build_name,
+            state_type=state_type,
         )
 
         # ONNX stats that we want to save into the build's mlagility_stats.yaml file
