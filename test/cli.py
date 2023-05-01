@@ -5,7 +5,6 @@ Tests focused on the command-level functionality of benchit CLI
 import os
 import glob
 import csv
-import time
 import argparse
 from typing import List, Tuple, Any, Union
 import unittest
@@ -16,6 +15,7 @@ from pathlib import Path
 import shutil
 from contextlib import redirect_stdout
 import yaml
+import onnx
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
 from mlagility.common import filesystem
@@ -194,6 +194,7 @@ def assert_success_of_builds(
     test_script_files: List[str],
     info_property: Tuple[str, Any] = None,
     check_perf: bool = False,
+    check_opset: int = None,
 ):
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
@@ -224,6 +225,11 @@ def assert_success_of_builds(
                     )
                     assert cpu_model.mean_latency > 0
                     assert cpu_model.throughput > 0
+
+                if check_opset:
+                    onnx_model = onnx.load(build_state.converted_onnx_file)
+                    model_opset = getattr(onnx_model.opset_import[0], "version", None)
+                    assert model_opset == check_opset
 
         assert script_build_found
 
@@ -819,6 +825,30 @@ class Testing(unittest.TestCase):
         with open(stats_file, "r", encoding="utf8") as stream:
             stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
         assert len(stats_dict["performance"]) == 2
+
+    def test_012_cli_onnx_opset(self):
+
+        # Test the first model in the corpus
+        test_script = list(test_scripts_dot_py.keys())[0]
+
+        user_opset = 15
+        assert user_opset != build.DEFAULT_ONNX_OPSET
+
+        testargs = [
+            "benchit",
+            "benchmark",
+            os.path.join(corpus_dir, test_script),
+            "--cache-dir",
+            cache_dir,
+            "--onnx-opset",
+            str(user_opset),
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert_success_of_builds(
+            [test_script], None, check_perf=True, check_opset=user_opset
+        )
 
 
 if __name__ == "__main__":

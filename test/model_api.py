@@ -3,6 +3,7 @@ import unittest
 import torch
 import shutil
 from pathlib import Path
+import onnx
 import onnxflow.justbuildit.stage as stage
 import onnxflow.common.cache as cache
 import onnxflow.justbuildit.export as export
@@ -135,6 +136,38 @@ class Testing(unittest.TestCase):
         )
         assert perf.mean_latency > 0
         assert perf.throughput > 0
+
+    def test_004_onnx_opset(self):
+        """
+        Make sure we can successfully benchmark a model with a user-defined ONNX opset
+        """
+
+        build_name = "onnx_opset"
+
+        user_opset = 15
+        assert user_opset != build.DEFAULT_ONNX_OPSET
+
+        perf = benchmark_model(
+            pytorch_model,
+            inputs,
+            device="x86",
+            backend="local",
+            build_name=build_name,
+            rebuild="always",
+            cache_dir=cache_dir,
+            onnx_opset=user_opset,
+        )
+        state = get_build_state(cache_dir, build_name)
+        assert state.build_status == build.Status.SUCCESSFUL_BUILD
+        assert os.path.isfile(
+            os.path.join(cache_dir, build_name, "x86_benchmark/outputs.json")
+        )
+        assert perf.mean_latency > 0
+        assert perf.throughput > 0
+
+        onnx_model = onnx.load(state.converted_onnx_file)
+        model_opset = getattr(onnx_model.opset_import[0], "version", None)
+        assert user_opset == model_opset
 
 
 if __name__ == "__main__":

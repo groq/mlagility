@@ -57,6 +57,7 @@ def benchmark_command(args):
         resume=args.resume,
         script_args=args.script_args,
         max_depth=args.max_depth,
+        onnx_opset=args.onnx_opset,
         sequence=args.sequence_file,
         groq_compiler_flags=args.groq_compiler_flags,
         groq_assembler_flags=args.groq_assembler_flags,
@@ -224,6 +225,14 @@ def main():
         type=int,
         default=0,
         help="Maximum depth to analyze within the model structure of the target script(s)",
+    )
+
+    benchmark_parser.add_argument(
+        "--onnx-opset",
+        dest="onnx_opset",
+        type=int,
+        default=build.DEFAULT_ONNX_OPSET,
+        help=f"ONNX opset used when creating ONNX files (default={build.DEFAULT_ONNX_OPSET})",
     )
 
     benchmark_parser.add_argument(
@@ -455,6 +464,14 @@ def main():
         help="Print the location of the MLAgility models directory",
     )
     models_location_parser.set_defaults(func=filesystem.print_models_dir)
+
+    models_location_parser.add_argument(
+        "--quiet",
+        dest="verbose",
+        help="Command output will only include the directory path",
+        required=False,
+        action="store_false",
+    )
 
     #######################################
     # Parser for the "version" command

@@ -26,7 +26,11 @@ UnionValidModelInstanceTypes = Union[
     sklearn.base.BaseEstimator,
 ]
 
-DEFAULT_ONNX_OPSET = 14
+if os.environ.get("MLAGILITY_ONNX_OPSET"):
+    DEFAULT_ONNX_OPSET = int(os.environ.get("MLAGILITY_ONNX_OPSET"))
+else:
+    DEFAULT_ONNX_OPSET = 14
+
 MINIMUM_ONNX_OPSET = 11
 
 DEFAULT_CACHE_DIR = os.getcwd()
@@ -198,6 +202,7 @@ class Config:
     build_name: str
     auto_name: bool
     sequence: List[str]
+    onnx_opset: int
 
 
 @dataclasses.dataclass
@@ -218,7 +223,6 @@ class Info:
     converted_onnx_exported: Optional[bool] = None
     quantized_onnx_exported: Optional[bool] = None
     skipped_stages: int = 0
-    opset: Optional[int] = DEFAULT_ONNX_OPSET
     all_build_stages: List[str] = dataclasses.field(default_factory=list)
     current_build_stage: str = None
     completed_build_stages: List[str] = dataclasses.field(default_factory=list)
@@ -308,28 +312,28 @@ class State:
     def base_onnx_file(self):
         return os.path.join(
             self.onnx_dir,
-            f"{self.config.build_name}-op{self.info.opset}-base.onnx",
+            f"{self.config.build_name}-op{self.config.onnx_opset}-base.onnx",
         )
 
     @property
     def opt_onnx_file(self):
         return os.path.join(
             self.onnx_dir,
-            f"{self.config.build_name}-op{self.info.opset}-opt.onnx",
+            f"{self.config.build_name}-op{self.config.onnx_opset}-opt.onnx",
         )
 
     @property
     def converted_onnx_file(self):
         return os.path.join(
             self.onnx_dir,
-            f"{self.config.build_name}-op{self.info.opset}-opt-f16.onnx",
+            f"{self.config.build_name}-op{self.config.onnx_opset}-opt-f16.onnx",
         )
 
     @property
     def quantized_onnx_file(self):
         return os.path.join(
             self.onnx_dir,
-            f"{self.config.build_name}-op{self.info.opset}-opt-quantized_int8.onnx",
+            f"{self.config.build_name}-op{self.config.onnx_opset}-opt-quantized_int8.onnx",
         )
 
     def prepare_file_system(self):

@@ -40,6 +40,7 @@ class TracerArgs:
     lean_cache: bool
     targets: List[str]
     max_depth: int
+    onnx_opset: int
     cache_dir: str
     rebuild: str
     groq_compiler_flags: List[str]
@@ -133,6 +134,7 @@ def call_benchit(
             groq_assembler_flags=tracer_args.groq_assembler_flags,
             groqview=tracer_args.groqview,
             sequence=tracer_args.sequence,
+            onnx_opset=tracer_args.onnx_opset,
         )
 
         if Action.BENCHMARK in tracer_args.actions:

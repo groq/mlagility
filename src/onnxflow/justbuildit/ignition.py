@@ -81,6 +81,7 @@ default_assembler_flags = [
 def lock_config(
     build_name: Optional[str] = None,
     sequence: stage.Sequence = None,
+    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
 ) -> build.Config:
 
     """
@@ -108,6 +109,7 @@ def lock_config(
         build_name=build_name,
         auto_name=auto_name,
         sequence=stage_names,
+        onnx_opset=onnx_opset,
     )
 
     return config
