@@ -1,13 +1,35 @@
+"""
+Utilities for spawning new benchit calls, in both local processes and on Slurm
+"""
+
 import os
 import subprocess
 import pathlib
 import time
 import getpass
 from typing import List, Optional
+from enum import Enum
 import mlagility.common.filesystem as filesystem
 
 
-def jobs_in_queue(job_name=None) -> List[str]:
+if os.environ.get("MLAGILITY_TIMEOUT_SECONDS"):
+    timeout_env_var = os.environ.get("MLAGILITY_TIMEOUT_SECONDS")
+    SECONDS_IN_A_DAY = 60 * 60 * 24
+    if timeout_env_var > SECONDS_IN_A_DAY:
+        raise ValueError(
+            f"Value of MLAGILITY_TIMEOUT_SECONDS must be less than 1 day, got {timeout_env_var}"
+        )
+    DEFAULT_TIMEOUT_SECONDS = float(timeout_env_var)
+else:
+    DEFAULT_TIMEOUT_SECONDS = 3600.0
+
+
+class Target(Enum):
+    SLURM = "slurm"
+    LOCAL_PROCESS = "local_process"
+
+
+def slurm_jobs_in_queue(job_name=None) -> List[str]:
     """Return the set of slurm jobs that are currently pending/running"""
     user = getpass.getuser()
     if job_name is None:
@@ -64,6 +86,7 @@ def run_benchit(
     script: str,
     cache_dir: str,
     device: str,
+    target: Target,
     rebuild: Optional[str] = None,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
@@ -78,9 +101,11 @@ def run_benchit(
     working_dir: str = os.getcwd(),
     ml_cache_dir: Optional[str] = os.environ.get("SLURM_ML_CACHE"),
     max_jobs: int = 50,
+    timeout: Optional[int] = DEFAULT_TIMEOUT_SECONDS,
 ):
 
     # Convert args to strings
+    device_str = value_arg(device, "--device")
     cache_dir_str = value_arg(cache_dir, "--cache-dir")
     rebuild_str = value_arg(rebuild, "--rebuild")
     compiler_flags_str = list_arg(groq_compiler_flags, "--groq-compiler-flags")
@@ -95,43 +120,57 @@ def run_benchit(
     lean_cache_str = bool_arg(lean_cache, "--lean-cache")
 
     args = (
-        f"{op} {script} --device {device} {cache_dir_str}{rebuild_str}"
+        f"{op} {script}{device_str}{cache_dir_str}{rebuild_str}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
         f"{runtimes_str}{max_depth_str}{onnx_opset_str}{analyze_only_str}"
         f"{build_only_str}{lean_cache_str}"
     )
 
-    # Remove the .py extension from the build name
-    job_name = filesystem.clean_script_name(script)
+    if target == Target.SLURM:
+        # Remove the .py extension from the build name
+        job_name = filesystem.clean_script_name(script)
 
-    while len(jobs_in_queue()) >= max_jobs:
-        print(
-            f"Waiting: Your number of jobs running ({len(jobs_in_queue())}) "
-            "matches or exceeds the maximum "
-            f"concurrent jobs allowed ({max_jobs}). The jobs in queue are: {jobs_in_queue()}"
+        # Put the timeout into format days-hh:mm:ss
+        hh_mm_ss = time.strftime("%H:%M:%S", time.gmtime(timeout))
+        slurm_format_timeout = f"00-{hh_mm_ss}"
+
+        while len(slurm_jobs_in_queue()) >= max_jobs:
+            print(
+                f"Waiting: Your number of jobs running ({len(slurm_jobs_in_queue())}) "
+                "matches or exceeds the maximum "
+                f"concurrent jobs allowed ({max_jobs}). The jobs in queue are: {slurm_jobs_in_queue()}"
+            )
+            time.sleep(5)
+
+        shell_script = os.path.join(
+            pathlib.Path(__file__).parent.resolve(), "run_slurm.sh"
         )
-        time.sleep(5)
 
-    shell_script = os.path.join(pathlib.Path(__file__).parent.resolve(), "run_slurm.sh")
+        slurm_command = ["sbatch", "-c", "1"]
+        if os.environ.get("MLAGILITY_SLURM_USE_DEFAULT_MEMORY") != "True":
+            slurm_command.append("--mem=128000")
+        slurm_command.extend(
+            [
+                f"--time={slurm_format_timeout}",
+                f"--job-name={job_name}",
+                shell_script,
+                "benchit",
+                args,
+                working_dir,
+            ]
+        )
+        if ml_cache_dir is not None:
+            slurm_command.append(ml_cache_dir)
 
-    slurm_command = ["sbatch", "-c", "1"]
-    if os.environ.get("MLAGILITY_SLURM_USE_DEFAULT_MEMORY") != "True":
-        slurm_command.append("--mem=128000")
-    slurm_command.extend(
-        [
-            "--time=00-02:00:00",  # days-hh:mm:ss"
-            f"--job-name={job_name}",
-            shell_script,
-            "benchit",
-            args,
-            working_dir,
-        ]
-    )
-    if ml_cache_dir is not None:
-        slurm_command.append(ml_cache_dir)
-
-    print(f"Submitting job {job_name} to Slurm")
-    subprocess.check_call(slurm_command)
+        print(f"Submitting job {job_name} to Slurm")
+        subprocess.check_call(slurm_command)
+    elif target == Target.LOCAL_PROCESS:
+        command = ["benchit"]
+        command.extend(args.split(" "))
+        print(command)
+        subprocess.check_call(command, stderr=subprocess.STDOUT, timeout=timeout)
+    else:
+        raise ValueError(f"Unsupported value for target: {target}.")
 
 
 def update_database_builds(cache_dir, input_scripts):
