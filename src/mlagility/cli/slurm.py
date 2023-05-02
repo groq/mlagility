@@ -63,14 +63,15 @@ def run_benchit(
     op: str,
     script: str,
     cache_dir: str,
+    device: str,
     rebuild: Optional[str] = None,
     groq_compiler_flags: Optional[List[str]] = None,
     groq_assembler_flags: Optional[List[str]] = None,
     groq_num_chips: Optional[int] = None,
     groqview: Optional[bool] = None,
-    device: str = None,
     runtimes: Optional[List[str]] = None,
     max_depth: Optional[int] = None,
+    onnx_opset: Optional[int] = None,
     analyze_only: Optional[bool] = None,
     build_only: Optional[bool] = None,
     lean_cache: Optional[bool] = None,
@@ -86,17 +87,17 @@ def run_benchit(
     assembler_flags_str = list_arg(groq_assembler_flags, "--groq-assembler-flags")
     num_chips_str = value_arg(groq_num_chips, "--groq-num-chips")
     groqview_str = bool_arg(groqview, "--groqview")
-    device_str = device
     runtimes_str = list_arg(runtimes, "--runtimes")
     max_depth_str = value_arg(max_depth, "--max-depth")
+    onnx_opset_str = value_arg(onnx_opset, "--onnx-opset")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
     build_only_str = bool_arg(build_only, "--build-only")
     lean_cache_str = bool_arg(lean_cache, "--lean-cache")
 
     args = (
-        f"{op} {script} {cache_dir_str}{rebuild_str}"
+        f"{op} {script} --device {device} {cache_dir_str}{rebuild_str}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
-        f"{device_str}{runtimes_str}{max_depth_str}{analyze_only_str}"
+        f"{runtimes_str}{max_depth_str}{onnx_opset_str}{analyze_only_str}"
         f"{build_only_str}{lean_cache_str}"
     )
 

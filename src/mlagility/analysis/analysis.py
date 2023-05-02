@@ -40,6 +40,7 @@ class TracerArgs:
     lean_cache: bool
     targets: List[str]
     max_depth: int
+    onnx_opset: int
     cache_dir: str
     rebuild: str
     groq_compiler_flags: List[str]
@@ -133,6 +134,7 @@ def call_benchit(
             groq_assembler_flags=tracer_args.groq_assembler_flags,
             groqview=tracer_args.groqview,
             sequence=tracer_args.sequence,
+            onnx_opset=tracer_args.onnx_opset,
         )
 
         if Action.BENCHMARK in tracer_args.actions:
@@ -171,8 +173,17 @@ def call_benchit(
             sys.stdout = sys.stdout.terminal
         status.update(tracer_args.models_found)
 
+        if tracer_args.device == "groq":
+            import groqflow.common.build as groq_build
+
+            state_type = groq_build.State
+        else:
+            state_type = build.State
+
         build_state = build.load_state(
-            cache_dir=tracer_args.cache_dir, build_name=build_name
+            cache_dir=tracer_args.cache_dir,
+            build_name=build_name,
+            state_type=state_type,
         )
 
         # ONNX stats that we want to save into the build's mlagility_stats.yaml file

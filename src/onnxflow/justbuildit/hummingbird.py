@@ -121,7 +121,6 @@ class ConvertHummingbirdModel(stage.Stage):
             """
             raise exp.StageError(msg)
 
-        state.info.opset = build.DEFAULT_ONNX_OPSET
         # TODO: By default the strategy will be chosen wih Hummingbird's logic.
         # Ideally, this would also be a parameter.
         tree_implementation_strategy = "gemm"  # or "tree_trav" or "perf_tree_trav"
@@ -142,7 +141,7 @@ class ConvertHummingbirdModel(stage.Stage):
             )
 
         extra_config = {
-            "onnx_target_opset": state.info.opset,
+            "onnx_target_opset": state.config.onnx_opset,
             "tree_implementation": tree_implementation_strategy,
         }
 

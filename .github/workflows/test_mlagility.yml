@@ -40,6 +40,7 @@ jobs:
         shell: bash -el {0}
         run: |
           pylint src/mlagility --rcfile .pylintrc
+          pylint examples --rcfile .pylintrc --ignore-paths examples/onnxflow --disable E0401,E0611
       - name: Test with unittest
         shell: bash -el {0}
         run: |
@@ -50,6 +51,8 @@ jobs:
           # mlagility examples
           rm -rf ~/.cache/mlagility
           python examples/model_api/hello_world.py
+          rm -rf ~/.cache/mlagility
+          python examples/script_api/onnx_opset.py --onnx-opset 15
           rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py
           rm -rf ~/.cache/mlagility

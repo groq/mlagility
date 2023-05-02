@@ -90,7 +90,7 @@ def populate_onnx_model_info(onnx_model) -> Dict:
     result_dict.update(
         {
             "ir_version": getattr(model, "ir_version", None),
-            "opset": getattr(model.opset_import[-1], "version", None),
+            "opset": getattr(model.opset_import[0], "version", None),
             "size on disk (KiB)": round(
                 model.SerializeToString().__sizeof__() / 1024, 4
             ),

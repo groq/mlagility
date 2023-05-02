@@ -57,6 +57,7 @@ def benchmark_command(args):
         resume=args.resume,
         script_args=args.script_args,
         max_depth=args.max_depth,
+        onnx_opset=args.onnx_opset,
         sequence=args.sequence_file,
         groq_compiler_flags=args.groq_compiler_flags,
         groq_assembler_flags=args.groq_assembler_flags,
@@ -224,6 +225,14 @@ def main():
         type=int,
         default=0,
         help="Maximum depth to analyze within the model structure of the target script(s)",
+    )
+
+    benchmark_parser.add_argument(
+        "--onnx-opset",
+        dest="onnx_opset",
+        type=int,
+        default=build.DEFAULT_ONNX_OPSET,
+        help=f"ONNX opset used when creating ONNX files (default={build.DEFAULT_ONNX_OPSET})",
     )
 
     benchmark_parser.add_argument(
@@ -420,6 +429,51 @@ def main():
     )
 
     #######################################
+    # Parser for the "cache location" command
+    #######################################
+
+    cache_location_parser = cache_subparsers.add_parser(
+        "location",
+        help="Print the location of the default build cache directory",
+    )
+    cache_location_parser.set_defaults(func=filesystem.print_cache_dir)
+
+    #######################################
+    # Subparser for the "models" command
+    #######################################
+
+    models_parser = subparsers.add_parser(
+        "models",
+        help="Commands for managing the MLAgility benchmark's models",
+    )
+
+    """
+    Design note: the `models` command is simple right now, however some additional ideas
+        are documented in https://github.com/groq/mlagility/issues/247
+    """
+
+    models_subparsers = models_parser.add_subparsers(
+        title="models",
+        help="Commands for managing the MLAgility benchmark's models",
+        required=True,
+        dest="models_cmd",
+    )
+
+    models_location_parser = models_subparsers.add_parser(
+        "location",
+        help="Print the location of the MLAgility models directory",
+    )
+    models_location_parser.set_defaults(func=filesystem.print_models_dir)
+
+    models_location_parser.add_argument(
+        "--quiet",
+        dest="verbose",
+        help="Command output will only include the directory path",
+        required=False,
+        action="store_false",
+    )
+
+    #######################################
     # Parser for the "version" command
     #######################################
 
@@ -438,7 +492,7 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        if sys.argv[1] not in subparsers.choices.keys():
+        if sys.argv[1] not in subparsers.choices.keys() and "-h" not in sys.argv[1]:
             sys.argv.insert(1, "benchmark")
 
     args = parser.parse_args()

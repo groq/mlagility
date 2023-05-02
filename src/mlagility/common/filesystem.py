@@ -4,6 +4,7 @@ import glob
 import pathlib
 import datetime
 from typing import Dict, List
+import importlib.util
 import yaml
 import onnxflow.common.printing as printing
 import onnxflow.common.cache as cache
@@ -21,6 +22,9 @@ else:
 
 CACHE_MARKER = ".mlacache"
 BUILD_MARKER = ".mlabuild"
+
+# Locate the models directory
+MODELS_DIR = importlib.util.find_spec("mlagility_models").submodule_search_locations[0]
 
 
 def clean_script_name(script_path: str) -> str:
@@ -359,3 +363,14 @@ def add_sub_stat(cache_dir: str, build_name: str, parent_key: str, key: str, val
     stats_dict[parent_key] = dict_to_update
 
     _save_stats(cache_dir, build_name, stats_dict)
+
+
+def print_cache_dir(_=None):
+    printing.log_info(f"The default cache directory is: {DEFAULT_CACHE_DIR}")
+
+
+def print_models_dir(args=None):
+    if args.verbose:
+        printing.log_info(f"The MLAgility models directory is: {MODELS_DIR}")
+    else:
+        print(MODELS_DIR)

@@ -18,7 +18,19 @@ conda create -n mla python=3.8
 conda activate mla
 ```
 
-And then clone and install `mlagility`:
+From here you have two options, installing from PyPI or cloning.
+
+### PyPI Install
+
+The easiest way to get started:
+
+```
+pip install mlagility
+```
+
+### Cloning Install
+
+To clone and install `mlagility`:
 
 ```
 git clone https://github.com/groq/mlagility.git
@@ -26,11 +38,24 @@ cd mlagility
 pip install -e .
 ```
 
-> _Note_: If you are planning to use the `mlagility` tools with the MLAgility benchmark, Groq, or Slurm please see the corresponding sections below.
+### Additional Steps
+
+If you are planning to use the `mlagility` tools with the MLAgility benchmark, Groq, or Slurm please see the corresponding sections below.
 
 ## MLAgility Benchmark Requirements
 
-The `mlagility` package only requires the packages to run the MLAgility benchmarking tools. If you want to run the MLAgility benchmark, you will also have to install the benchmark's requirements. We 
+The MLAgility benchmark's models are located at `mlagility_install_path/models`, which we refer to as `models/` in most of the guides.
+
+> _Note_: The `benchit models location` command and `mlagility.common.filesystem.MODELS_DIR` are useful ways to locate the `models` directory. If you perform PyPI installation, we recommend that you take an additional step like this:
+
+```
+(mla) jfowers@jfowers:~/mlagility$ benchit models location
+
+Info: The MLAgility models directory is: ~/mlagility/models
+(mla) jfowers@jfowers:~/mlagility$ export models=~/mlagility/models
+```
+
+The `mlagility` package only requires the packages to run the MLAgility benchmarking tools. If you want to run the MLAgility benchmark itself, you will also have to install the benchmark's requirements. 
 
 In your `miniconda` environment:
 
