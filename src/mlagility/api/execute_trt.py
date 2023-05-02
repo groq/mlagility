@@ -8,6 +8,8 @@ import argparse
 import subprocess
 import logging
 import json
+import time
+import threading
 
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
@@ -21,6 +23,8 @@ def run(
     outputs_file: str,
     errors_file: str,
     num_iterations: int,
+    start_event: threading.Event,
+    stop_event: threading.Event,
 ):
     # Latest docker image can be found here:
     # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
@@ -58,6 +62,9 @@ def run(
     except subprocess.CalledProcessError as e:
         logging.error(f"{run_command} failed with error code {e.returncode}: {e}")
 
+    # Start power measurement
+    start_event.set()
+
     # Execute the onnx model user trtexec inside the container
     run_trtexec = subprocess.Popen(exec_command.split(), stdout=subprocess.PIPE)
     try:
@@ -66,6 +73,9 @@ def run(
         logging.error(f"{exec_command} timed out!")
     except subprocess.CalledProcessError as e:
         logging.error(f"{exec_command}  failed with error code {e.returncode}: {e}")
+
+    # Stop power measurement
+    stop_event.set()
 
     # Stop the container
     stop_docker = subprocess.Popen(stop_command.split(), stdout=subprocess.PIPE)
@@ -115,6 +125,64 @@ def run(
         e.writelines(decoded_error)
 
 
+class NvidiaSmiError(Exception):
+    """An exception class for errors related to nvidia-smi."""
+    pass
+
+"""
+In the average_power_and_utilization function, we eliminate the values below
+the idle_threshold at the beginning and end of the list because we want to 
+exclude the idle periods before and after the actual workload execution. By
+doing this, we can get a more accurate representation of the average power 
+consumption and GPU utilization during the execution of the workload.
+We set the Idle threshold to 3% utilization based on heuristics.
+"""
+IDLE_THRESHOLD = 3
+
+def average_power_and_utilization(power_readings):
+
+    if not power_readings:
+        return 0, 0
+
+    # Remove readings below the threshold from the beginning of the list
+    while power_readings and power_readings[0][0] <= IDLE_THRESHOLD:
+        power_readings.pop(0)
+
+    # Remove readings below the threshold from the end of the list
+    while power_readings and power_readings[-1][0] <= IDLE_THRESHOLD:
+        power_readings.pop()
+
+    if not power_readings:
+        return 0, 0
+
+    average_power = sum(power_draw for _, power_draw in power_readings) / len(power_readings)
+    average_utilization = sum(utilization for utilization, _ in power_readings) / len(power_readings)
+
+    return average_power, average_utilization
+
+
+def get_gpu_power_and_utilization():
+    try:
+        query = "nvidia-smi --query-gpu=utilization.gpu,power.draw --format=csv,noheader,nounits"
+        output = subprocess.check_output(query.split())
+        output = output.decode("utf-8").strip()
+
+        utilization, power_draw = output.split(", ")
+        return int(utilization), float(power_draw)
+
+    except subprocess.CalledProcessError as e:
+        raise NvidiaSmiError(f"nvidia-smi failed with return code {e.returncode}")
+
+
+def measure_power(start_event, stop_event, power_readings, sample_rate=0.01):
+    start_event.wait()  # Wait for the start event to be set
+
+    while not stop_event.is_set():
+        gpu_utilization, power_draw = get_gpu_power_and_utilization()
+        power_readings.append((gpu_utilization, power_draw))
+        time.sleep(sample_rate)
+
+
 if __name__ == "__main__":
     # Parse Inputs
     parser = argparse.ArgumentParser(description="Execute models built by benchit")
@@ -145,10 +213,51 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    power_readings = []
+    average_power = 0
+
+    # Start power measurement in a separate thread
+    start_event = threading.Event()
+    stop_event = threading.Event()
+    power_thread = threading.Thread(
+        target=measure_power, args=(start_event, stop_event, power_readings, 0.01)
+    )
+    power_thread.start()
+
     run(
         output_dir=args.output_dir,
         onnx_file=args.onnx_file,
         outputs_file=args.outputs_file,
         errors_file=args.errors_file,
         num_iterations=args.iterations,
+        start_event=start_event,
+        stop_event=stop_event,
     )
+
+    # Wait for power measurement to finish
+    power_thread.join()
+
+    # Calculate the average power consumption, average utilization, and peak power consumption
+    average_power, average_utilization = average_power_and_utilization(power_readings)
+    peak_power = (
+        max([reading[1] for reading in power_readings]) if power_readings else None
+    )
+
+    # Load existing GPU performance data
+    with open(args.outputs_file, "r", encoding="utf-8") as out_file:
+        gpu_performance = json.load(out_file)
+
+    # Add average power consumption, average utilization, and peak power consumption to the dictionary
+    gpu_performance["Average power consumption (W)"] = (
+        round(average_power, 2) if average_power is not None else None
+    )
+    gpu_performance["Peak power consumption (W)"] = (
+        round(peak_power, 2) if peak_power is not None else None
+    )
+    gpu_performance["Average GPU utilization (%)"] = (
+        round(average_utilization, 2) if average_utilization is not None else None
+    )
+
+    # Save the updated GPU performance data
+    with open(args.outputs_file, "w", encoding="utf-8") as out_file:
+        json.dump(gpu_performance, out_file, ensure_ascii=False, indent=4)
