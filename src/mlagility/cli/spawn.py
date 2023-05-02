@@ -168,7 +168,13 @@ def run_benchit(
         command = ["benchit"]
         command.extend(args.split(" "))
         printing.log_info(f"Starting process with command: {' '.join(command)}")
-        subprocess.check_call(command, stderr=subprocess.STDOUT, timeout=timeout)
+        try:
+            subprocess.check_call(command, stderr=subprocess.STDOUT, timeout=timeout)
+        except subprocess.CalledProcessError as e:
+            printing.log_error(
+                "Process was terminated with the following error. "
+                f"benchit will move on to the next input script. {e}"
+            )
     else:
         raise ValueError(f"Unsupported value for target: {target}.")
 
