@@ -10,7 +10,7 @@ import getpass
 from typing import List, Optional
 from enum import Enum
 import mlagility.common.filesystem as filesystem
-
+import onnxflow.common.printing as printing
 
 if os.environ.get("MLAGILITY_TIMEOUT_SECONDS"):
     timeout_env_var = os.environ.get("MLAGILITY_TIMEOUT_SECONDS")
@@ -167,7 +167,7 @@ def run_benchit(
     elif target == Target.LOCAL_PROCESS:
         command = ["benchit"]
         command.extend(args.split(" "))
-        print(command)
+        printing.log_info(f"Starting process with command: {' '.join(command)}")
         subprocess.check_call(command, stderr=subprocess.STDOUT, timeout=timeout)
     else:
         raise ValueError(f"Unsupported value for target: {target}.")
