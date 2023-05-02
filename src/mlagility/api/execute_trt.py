@@ -8,15 +8,13 @@ import argparse
 import subprocess
 import logging
 import json
-import re
-import sys
 import time
 import threading
 
 # Set a 15 minutes timeout for all docker commands
 TIMEOUT = 900
 
-TRT_VERSION = "23.02-py3"
+TRT_VERSION = "23.03-py3"
 
 
 def run(
@@ -127,6 +125,10 @@ def run(
         e.writelines(decoded_error)
 
 
+class NvidiaSmiError(Exception):
+    """An exception class for errors related to nvidia-smi."""
+    pass
+
 """
 In the average_power_and_utilization function, we eliminate the values below
 the idle_threshold at the beginning and end of the list because we want to 
@@ -136,7 +138,6 @@ consumption and GPU utilization during the execution of the workload.
 We set the Idle threshold to 3% utilization based on heuristics.
 """
 IDLE_THRESHOLD = 3
-
 
 def average_power_and_utilization(power_readings):
 
@@ -154,11 +155,8 @@ def average_power_and_utilization(power_readings):
     if not power_readings:
         return 0, 0
 
-    total_power = sum(power_draw for _, power_draw in power_readings)
-    total_utilization = sum(utilization for utilization, _ in power_readings)
-
-    average_power = total_power / len(power_readings)
-    average_utilization = total_utilization / len(power_readings)
+    average_power = sum(power_draw for _, power_draw in power_readings) / len(power_readings)
+    average_utilization = sum(utilization for utilization, _ in power_readings) / len(power_readings)
 
     return average_power, average_utilization
 
@@ -172,9 +170,8 @@ def get_gpu_power_and_utilization():
         utilization, power_draw = output.split(", ")
         return int(utilization), float(power_draw)
 
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        raise NvidiaSmiError(f"nvidia-smi failed with return code {e.returncode}")
 
 
 def measure_power(start_event, stop_event, power_readings, sample_rate=0.01):
