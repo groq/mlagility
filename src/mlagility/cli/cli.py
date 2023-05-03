@@ -45,6 +45,7 @@ def benchmark_command(args):
     benchmark_files(
         input_files=args.input_files,
         use_slurm=args.use_slurm,
+        process_isolation=args.process_isolation,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
         labels=args.labels,
@@ -103,10 +104,19 @@ def main():
         help="One or more script (.py) or ONNX (.onnx) files to be benchmarked",
     )
 
-    benchmark_parser.add_argument(
+    slurm_or_processes_group = benchmark_parser.add_mutually_exclusive_group()
+
+    slurm_or_processes_group.add_argument(
         "--use-slurm",
         dest="use_slurm",
         help="Execute on Slurm instead of using local compute resources",
+        action="store_true",
+    )
+
+    slurm_or_processes_group.add_argument(
+        "--process-isolation",
+        dest="process_isolation",
+        help="Isolate evaluating each input into a separate process",
         action="store_true",
     )
 
