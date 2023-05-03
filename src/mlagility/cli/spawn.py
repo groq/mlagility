@@ -176,16 +176,7 @@ def run_benchit(
                 f"benchit will move on to the next input.\n{e}"
             )
 
-            if "No usable temporary directory found" in e.output:
-                printing.log_info(
-                    "It is possible that you have run out of disk space. "
-                    "We recommend running `df -h` to check. "
-                    "If you need to reduce the amount of disk space consumed by `mlagility`:\n"
-                    "\t- You can run `benchit cache clean` to remove build artifacts from your cache.\n"
-                    "\t- You can run benchit or benchmark_script() with the --lean-cache or lean_cache"
-                    "arguments, respectively."
-                )
-            if "Signals.SIGKILL: 9" in e.output:
+            if "Signals.SIGKILL: 9" in str(e):
                 printing.log_info(
                     "It is possible your computer ran out of memory while attempting to evaluate "
                     f"{script}. You can check this by repeating the experiment while using `top` "
