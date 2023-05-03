@@ -170,11 +170,21 @@ def run_benchit(
         printing.log_info(f"Starting process with command: {' '.join(command)}")
         try:
             subprocess.check_call(command, stderr=subprocess.STDOUT, timeout=timeout)
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             printing.log_error(
                 "Process was terminated with the following error. "
-                f"benchit will move on to the next input script. {e}"
+                f"benchit will move on to the next input.\n{e}"
             )
+
+            if "No usable temporary directory found" in e:
+                printing.log_info(
+                    "It is possible that you have run out of disk space. "
+                    "We recommend running `df -h` to check. "
+                    "If you need to reduce the amount of disk space consumed by `mlagility`:\n"
+                    "\t- You can run `benchit cache clean` to remove build artifacts from your cache.\n"
+                    "\t- You can run benchit or benchmark_script() with the --lean-cache or lean_cache"
+                    "arguments, respectively."
+                )
     else:
         raise ValueError(f"Unsupported value for target: {target}.")
 
