@@ -172,7 +172,7 @@ def run_benchit(
             subprocess.check_call(command, stderr=subprocess.STDOUT, timeout=timeout)
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             printing.log_error(
-                "Process was terminated with the following error. "
+                "Process was terminated with the error shown below. "
                 f"benchit will move on to the next input.\n{e}"
             )
 
