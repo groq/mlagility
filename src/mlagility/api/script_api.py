@@ -8,7 +8,7 @@ import onnxflow.common.build as build
 import onnxflow.common.exceptions as exceptions
 import onnxflow.justbuildit.stage as stage
 import onnxflow.justbuildit.export as export
-import mlagility.cli.slurm as slurm
+import mlagility.cli.spawn as spawn
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels_library
 from mlagility.api.model_api import benchmark_model
@@ -43,20 +43,24 @@ def decode_input_script(input: str) -> Tuple[str, List[str], str]:
     return script_path, targets, encoded_input
 
 
-def load_sequence_from_file(sequence: Union[str, stage.Sequence], use_slurm: bool):
+def load_sequence_from_file(
+    sequence: Union[str, stage.Sequence],
+    use_slurm: bool,
+    process_isolation: bool,
+):
     """
     Import the sequence file to get a custom sequence, if the user provided
     one. Sequence instances are passed through this function as long as
-    the user is not in Slurm mode.
+    the user is not going to spawn a new process (indicated by `use_slurm` or `process_isolation`).
     """
 
     if sequence is not None:
-        if use_slurm:
-            # The slurm node will need to load a sequence file
+        if use_slurm or process_isolation:
+            # The spawned process will need to load a sequence file
             if not isinstance(sequence, str):
                 raise ValueError(
                     "The 'sequence' arg must be a str (path to a sequence file) "
-                    "when use_slurm=True."
+                    "when use_slurm=True or process_isolation=True."
                 )
             custom_sequence = sequence
         elif isinstance(sequence, str):
@@ -81,6 +85,7 @@ def load_sequence_from_file(sequence: Union[str, stage.Sequence], use_slurm: boo
 def benchmark_script(
     input_scripts: List[str],
     use_slurm: bool = False,
+    process_isolation: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     labels: List[str] = None,
@@ -104,7 +109,7 @@ def benchmark_script(
     # Make sure the cache directory exists
     filesystem.make_cache_dir(cache_dir)
 
-    custom_sequence = load_sequence_from_file(sequence, use_slurm)
+    custom_sequence = load_sequence_from_file(sequence, use_slurm, process_isolation)
 
     if device is None:
         device = "x86"
@@ -163,7 +168,7 @@ def benchmark_script(
                 "Slurm only works with local benchmarking, set the `backend` "
                 "argument to 'local'."
             )
-        jobs = slurm.jobs_in_queue()
+        jobs = spawn.slurm_jobs_in_queue()
         if len(jobs) > 0:
             printing.log_warning(f"There are already slurm jobs in your queue: {jobs}")
             printing.log_info(
@@ -196,12 +201,28 @@ def benchmark_script(
             db.add_script(filesystem.clean_script_name(script))
 
         for runtime in runtimes:
-            if use_slurm:
-                slurm.run_benchit(
+            if use_slurm or process_isolation:
+                # Decode args into spawn.Target
+                if use_slurm and process_isolation:
+                    raise ValueError(
+                        "use_slurm and process_isolation are mutually exclusive, but both are True"
+                    )
+                elif use_slurm:
+                    target = spawn.Target.SLURM
+                elif process_isolation:
+                    target = spawn.Target.LOCAL_PROCESS
+                else:
+                    raise ValueError(
+                        "This code path requires use_slurm or use_process to be True, "
+                        "but both are False"
+                    )
+
+                spawn.run_benchit(
                     op="benchmark",
                     script=encoded_input,
                     cache_dir=cache_dir,
                     rebuild=rebuild,
+                    target=target,
                     groq_compiler_flags=groq_compiler_flags,
                     groq_assembler_flags=groq_assembler_flags,
                     groq_num_chips=groq_num_chips,
@@ -245,14 +266,14 @@ def benchmark_script(
 
     # Wait until all the Slurm jobs are done
     if use_slurm:
-        while len(slurm.jobs_in_queue()) != 0:
+        while len(spawn.slurm_jobs_in_queue()) != 0:
             print(
-                f"Waiting: {len(slurm.jobs_in_queue())} "
-                f"jobs left in queue: {slurm.jobs_in_queue()}"
+                f"Waiting: {len(spawn.slurm_jobs_in_queue())} "
+                f"jobs left in queue: {spawn.slurm_jobs_in_queue()}"
             )
             time.sleep(5)
 
-        slurm.update_database_builds(cache_dir, input_scripts)
+        spawn.update_database_builds(cache_dir, input_scripts)
 
     printing.log_success("The 'benchmark' command is complete.")
 
@@ -260,6 +281,7 @@ def benchmark_script(
 def benchmark_files(
     input_files: str = None,
     use_slurm: bool = False,
+    process_isolation: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     labels: List[str] = None,
@@ -300,6 +322,7 @@ def benchmark_files(
         benchmark_script(
             input_scripts=python_scripts,
             use_slurm=use_slurm,
+            process_isolation=process_isolation,
             lean_cache=lean_cache,
             cache_dir=cache_dir,
             labels=labels,
@@ -333,7 +356,9 @@ def benchmark_files(
                 enable_model_validation=True,
             )
         else:
-            onnx_sequence = load_sequence_from_file(sequence, use_slurm)
+            onnx_sequence = load_sequence_from_file(
+                sequence, use_slurm, process_isolation
+            )
 
         for runtime in runtimes:
             benchmark_model(
