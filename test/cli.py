@@ -850,6 +850,24 @@ class Testing(unittest.TestCase):
             [test_script], None, check_perf=True, check_opset=user_opset
         )
 
+    def test_013_cli_process_isolation(self):
+
+        # Test the first model in the corpus
+        test_script = list(test_scripts_dot_py.keys())[0]
+
+        testargs = [
+            "benchit",
+            "benchmark",
+            os.path.join(corpus_dir, test_script),
+            "--cache-dir",
+            cache_dir,
+            "--process-isolation",
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert_success_of_builds([test_script], None, check_perf=True)
+
 
 if __name__ == "__main__":
     unittest.main()
