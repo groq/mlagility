@@ -12,7 +12,7 @@ Please file any bugs or feature requests you have as an [Issue](https://github.c
 
 ## Pull Requests
 
-Contribute code by creating a pull request (PR). You will have to sign a standard [CLA](https://github.com/groq/mlagility/blob/main/cla.md) before you can merge the PR. Your PR will be reviewed by one of the [repo maintainers](https://github.com/groq/mlagility/blob/main/CODEOWNERS).
+Contribute code by creating a pull request (PR). Your PR will be reviewed by one of the [repo maintainers](https://github.com/groq/mlagility/blob/main/CODEOWNERS).
 
 Please have a discussion with the team before making major changes. The best way to start such a discussion is to file an [Issue](https://github.com/groq/mlagility/issues) and seek a response from one of the [repo maintainers](https://github.com/groq/mlagility/blob/main/CODEOWNERS).
 
