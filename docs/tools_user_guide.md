@@ -352,7 +352,7 @@ Additionally, you can leverage labels (see [Labels](#labels)) to filter which mo
 
 ### Use Slurm
 
-Execute the build(s) on Slurm instead of using local compute resources.
+Execute the build(s) and benchmark(s) on Slurm instead of using local compute resources. Each input runs in its own Slurm job.
 
 Usage:
 - `benchit benchmark INPUT_FILES --use-slurm`
@@ -365,9 +365,25 @@ Available as an API argument:
 
 > _Note_: Requires setting up Slurm as shown [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 
-> _Note_: while `--use-slurm` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. The limitations are:
->  - Currently requires Slurm to be configured the same way that it is configured at Groq, which not everyone will have.
->  - Not covered by our automatic testing yet.
+> _Note_: while `--use-slurm` is implemented, and we use it for our own purposes, it has some limitations and we do not recommend using it. Currently, `benchit` requires Slurm to be configured the same way that it is configured at Groq, which not everyone will have. Please contact the developers by [filing an issue](https://github.com/groq/mlagility/issues/new) if you need Slurm support for your project.
+
+> _Note_: Slurm mode applies a timeout to each job, and will cancel the job move if the timeout is exceeded. See [Set the Timeout](#set-the-timeout)
+
+### Process Isolation
+
+Evaluate each `benchit` input in its own isolated subprocess. This option allows the main process to continue on to the next input if the current input fails for any reason (e.g., a bug in the input script, the operating system running out of memory, incompatibility between a model and the selected benchmarking runtime, etc.). 
+
+Usage:
+- `benchit benchmark INPUT_FILES --process-isolation`
+
+Also available as an API argument:
+- `benchmark_script(process_isolation=True/False)` (default False)
+
+> _Note_: Process isolation mode applies a timeout to each subprocess, and will move on to the next input if the timeout is exceeded. See [Set the Timeout](#set-the-timeout)
+
+> _Note_: Process isolation mode is mutually exclusive with:
+> - [Slurm mode](#use-slurm).
+> - Passing a `Sequence` instance to `benchmark_script()` (sequence files are still allowed, see [Sequence File](#sequence-file)).
 
 ### Cache Directory
 
@@ -649,3 +665,17 @@ For example:
 ```
 export MLAGILITY_ONNX_OPSET=16
 ```
+
+### Set the Timeout
+
+`benchit` and `benchmark_script()` apply a timeout, `mlagility.cli.spawn.DEFAULT_TIMEOUT_SECONDS`, when evaluating each input script when in [Slurm](#use-slurm) or [process isolation](#process-isolation) modes. If the timeout is exceeded, evaluation of the current input script is terminated and the program moves on to the next input script.
+
+This timeout can be overridden by setting the `MLAGILITY_TIMEOUT_SECONDS` environment variable. 
+
+For example:
+
+```
+export MLAGILITY_TIMEOUT_SECONDS=1800
+```
+
+would set the timeout to 1800 seconds (30 minutes).
