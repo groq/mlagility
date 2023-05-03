@@ -45,7 +45,7 @@ def benchmark_command(args):
     benchmark_files(
         input_files=args.input_files,
         use_slurm=args.use_slurm,
-        use_processes=args.use_processes,
+        process_isolation=args.process_isolation,
         lean_cache=args.lean_cache,
         cache_dir=args.cache_dir,
         labels=args.labels,
@@ -114,9 +114,9 @@ def main():
     )
 
     slurm_or_processes_group.add_argument(
-        "--use-processes",
-        dest="use_processes",
-        help="Isolate evaluating each input script into a separate process",
+        "--process-isolation",
+        dest="process_isolation",
+        help="Isolate evaluating each input into a separate process",
         action="store_true",
     )
 

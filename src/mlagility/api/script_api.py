@@ -46,21 +46,21 @@ def decode_input_script(input: str) -> Tuple[str, List[str], str]:
 def load_sequence_from_file(
     sequence: Union[str, stage.Sequence],
     use_slurm: bool,
-    use_processes: bool,
+    process_isolation: bool,
 ):
     """
     Import the sequence file to get a custom sequence, if the user provided
     one. Sequence instances are passed through this function as long as
-    the user is not going to spawn a new process (indicated by `use_slurm` or `use_processes`).
+    the user is not going to spawn a new process (indicated by `use_slurm` or `process_isolation`).
     """
 
     if sequence is not None:
-        if use_slurm or use_processes:
+        if use_slurm or process_isolation:
             # The spawned process will need to load a sequence file
             if not isinstance(sequence, str):
                 raise ValueError(
                     "The 'sequence' arg must be a str (path to a sequence file) "
-                    "when use_slurm=True or use_processes=True."
+                    "when use_slurm=True or process_isolation=True."
                 )
             custom_sequence = sequence
         elif isinstance(sequence, str):
@@ -85,7 +85,7 @@ def load_sequence_from_file(
 def benchmark_script(
     input_scripts: List[str],
     use_slurm: bool = False,
-    use_processes: bool = False,
+    process_isolation: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     labels: List[str] = None,
@@ -109,7 +109,7 @@ def benchmark_script(
     # Make sure the cache directory exists
     filesystem.make_cache_dir(cache_dir)
 
-    custom_sequence = load_sequence_from_file(sequence,use_slurm,use_processes)
+    custom_sequence = load_sequence_from_file(sequence, use_slurm, process_isolation)
 
     if device is None:
         device = "x86"
@@ -201,15 +201,15 @@ def benchmark_script(
             db.add_script(filesystem.clean_script_name(script))
 
         for runtime in runtimes:
-            if use_slurm or use_processes:
+            if use_slurm or process_isolation:
                 # Decode args into spawn.Target
-                if use_slurm and use_processes:
+                if use_slurm and process_isolation:
                     raise ValueError(
-                        "use_slurm and use_processes are mutually exclusive, but both are True"
+                        "use_slurm and process_isolation are mutually exclusive, but both are True"
                     )
                 elif use_slurm:
                     target = spawn.Target.SLURM
-                elif use_processes:
+                elif process_isolation:
                     target = spawn.Target.LOCAL_PROCESS
                 else:
                     raise ValueError(
@@ -281,7 +281,7 @@ def benchmark_script(
 def benchmark_files(
     input_files: str = None,
     use_slurm: bool = False,
-    use_processes: bool = False,
+    process_isolation: bool = False,
     lean_cache: bool = False,
     cache_dir: str = filesystem.DEFAULT_CACHE_DIR,
     labels: List[str] = None,
@@ -322,7 +322,7 @@ def benchmark_files(
         benchmark_script(
             input_scripts=python_scripts,
             use_slurm=use_slurm,
-            use_processes=use_processes,
+            process_isolation=process_isolation,
             lean_cache=lean_cache,
             cache_dir=cache_dir,
             labels=labels,
@@ -356,7 +356,9 @@ def benchmark_files(
                 enable_model_validation=True,
             )
         else:
-            onnx_sequence = load_sequence_from_file(sequence, use_slurm, use_processes)
+            onnx_sequence = load_sequence_from_file(
+                sequence, use_slurm, process_isolation
+            )
 
         for runtime in runtimes:
             benchmark_model(
