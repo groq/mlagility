@@ -80,7 +80,6 @@ def call_benchit(
     """
     Calls the benchit function from within the model forward function
     """
-
     # Update status to "computing"
     model_info.status_message = "Computing..."
     model_info.status_message_color = printing.Colors.OKBLUE
@@ -122,7 +121,7 @@ def call_benchit(
 
     perf = None
     try:
-        if True:  # model_info.model_type == build.ModelType.PYTORCH_COMPILED:
+        if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
             model_info.status_message = "Skipping model compiled using torch.compile(). Benchit requires models to be in eager mode."
             model_info.status_message_color = printing.Colors.WARNING
         elif Action.BENCHMARK in tracer_args.actions:
@@ -189,7 +188,7 @@ def call_benchit(
 
         if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
             return
-        return
+
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir,
             build_name=build_name,
@@ -346,9 +345,18 @@ def explore_frame(
             inside_class, torch.nn.Module
         ) or tf_helpers.is_keras_subclass(inside_class)
 
-    if not hasattr(local_var, "forward_instrumented") and not inside_nn_subclass:
+    if not inside_nn_subclass:
 
-        if model_type in [build.ModelType.PYTORCH, build.ModelType.PYTORCH_COMPILED]:
+        if hasattr(local_var, "forward_instrumented"):
+
+            # Update stored model type if needed
+            if model_type == build.ModelType.PYTORCH_COMPILED:
+                tracer_args.models_found[
+                    local_var.benchit_hash
+                ].model_type = build.ModelType.PYTORCH_COMPILED
+            return
+
+        if model_type == build.ModelType.PYTORCH:
 
             # Avoid instrumenting models before they have been fully loaded
             if util.count_parameters(local_var, model_type) == 0:
@@ -364,6 +372,7 @@ def explore_frame(
             # This is only possible on Pytorch, since each layer of a torch.nn.module
             # is also a torch.nn.module.
             model_hash = get_model_hash(local_var, model_type)
+            local_var.benchit_hash = model_hash
             if depth < tracer_args.max_depth:
                 recursive_search(
                     frame, event, local_var, depth, model_hash, tracer_args
@@ -424,19 +433,17 @@ def explore_frame(
                 )
             model_hash = get_model_hash(local_var, model_type)
             model_info = tracer_args.models_found[model_hash]
+
             model_info.exec_time = model_info.exec_time + end_time - start_time
 
             model_info.executed = model_info.executed + 1
 
             # Call groqit if this is the first time the model is being executed
             # and this model has been selected by the user
-            print(hasattr(local_var, "dynamo_ctx"), file=sys.stderr)
-            print("*****************************", file=sys.stderr)
             if (
                 model_info.executed == 1
                 and model_info.is_target
                 and (model_info.build_model)
-                and not hasattr(local_var, "dynamo_ctx")
             ):
                 call_benchit(
                     model_inputs=[args, kwargs],
@@ -460,7 +467,7 @@ def explore_frame(
         forward_spy.__signature__ = inspect.signature(old_forward)
 
         # Use modified forward/call function
-        if model_type in [build.ModelType.PYTORCH, build.ModelType.PYTORCH_COMPILED]:
+        if model_type == build.ModelType.PYTORCH:
             local_var.forward = forward_spy
         elif model_type == build.ModelType.KERAS:
             local_var.call = forward_spy

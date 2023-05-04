@@ -93,7 +93,7 @@ def hash_model(model, model_type: ModelType, hash_params: bool = True):
                 "hash_model received str model that doesn't correspond to a file"
             )
 
-    elif model_type == ModelType.PYTORCH:
+    elif model_type in [ModelType.PYTORCH, ModelType.PYTORCH_COMPILED]:
         # Convert model parameters and topology to string
         hashable_params = {}
         for name, param in model.named_parameters():
