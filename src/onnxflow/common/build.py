@@ -46,6 +46,7 @@ class Backend(enum.Enum):
 
 class ModelType(enum.Enum):
     PYTORCH = "pytorch"
+    PYTORCH_COMPILED = "pytorch_compiled"
     KERAS = "keras"
     ONNX_FILE = "onnx_file"
     HUMMINGBIRD = "hummingbird"
