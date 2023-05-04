@@ -295,6 +295,10 @@ def explore_frame(
     is called.
     """
 
+    # Exit frame exploration if Python is shutting down
+    if not bool(sys.modules):
+        return
+
     # Skip all variables that are not a subclass of torch.nn.Module/tf.keras.Model
     # Note: try block used since dead weakreferences fail when checking subclass
     try:
