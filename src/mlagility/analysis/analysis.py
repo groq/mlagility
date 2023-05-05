@@ -124,7 +124,7 @@ def call_benchit(
         if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
             model_info.status_message = "Skipping model compiled using torch.compile(). Benchit requires models to be in eager mode."
             model_info.status_message_color = printing.Colors.WARNING
-        elif Action.BENCHMARK in tracer_args.actions:
+        else:
             perf = benchmark_model(
                 model_info.model,
                 inputs,
@@ -142,13 +142,13 @@ def call_benchit(
                 sequence=tracer_args.sequence,
                 onnx_opset=tracer_args.onnx_opset,
             )
-
-            model_info.status_message = "Model successfully benchmarked!"
-            model_info.performance = perf
-            model_info.status_message_color = printing.Colors.OKGREEN
-        else:
-            model_info.status_message = "Model successfully built!"
-            model_info.status_message_color = printing.Colors.OKGREEN
+            if Action.BENCHMARK in tracer_args.actions:
+                model_info.status_message = "Model successfully benchmarked!"
+                model_info.performance = perf
+                model_info.status_message_color = printing.Colors.OKGREEN
+            else:
+                model_info.status_message = "Model successfully built!"
+                model_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.StageError:
         build_state = build.load_state(
@@ -346,9 +346,7 @@ def explore_frame(
         ) or tf_helpers.is_keras_subclass(inside_class)
 
     if not inside_nn_subclass:
-
         if hasattr(local_var, "forward_instrumented"):
-
             # Update stored model type if needed
             if model_type == build.ModelType.PYTORCH_COMPILED:
                 tracer_args.models_found[
@@ -357,7 +355,6 @@ def explore_frame(
             return
 
         if model_type == build.ModelType.PYTORCH:
-
             # Avoid instrumenting models before they have been fully loaded
             if util.count_parameters(local_var, model_type) == 0:
                 return
@@ -402,7 +399,6 @@ def explore_frame(
         local_var.old_forward = old_forward
 
         def forward_spy(*args, **kwargs):
-
             tracer = sys.getprofile()
             if tracer is not None:
                 # Turn tracing off while the model is being executed for speed
