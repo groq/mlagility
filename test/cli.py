@@ -267,7 +267,7 @@ def assert_success_of_builds(
 
         assert script_build_found
 
-    # Returns a list of all builds found
+    # Returns the total number of builds found
     return builds_found
 
 
