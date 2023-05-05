@@ -848,7 +848,7 @@ class Testing(unittest.TestCase):
             stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
         assert len(stats_dict["performance"]) == 2
 
-    def test_012_cli_onnx_opset(self):
+    def test_016_cli_onnx_opset(self):
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -871,7 +871,7 @@ class Testing(unittest.TestCase):
             [test_script], None, check_perf=True, check_opset=user_opset
         )
 
-    def test_013_cli_process_isolation(self):
+    def test_017_cli_process_isolation(self):
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -888,7 +888,7 @@ class Testing(unittest.TestCase):
 
         assert_success_of_builds([test_script], None, check_perf=True)
 
-    def test_014_skip_compiled(self):
+    def test_018_skip_compiled(self):
         test_script = "compiled.py"
         testargs = [
             "benchit",
