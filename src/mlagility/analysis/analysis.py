@@ -347,7 +347,8 @@ def explore_frame(
 
     if not inside_nn_subclass:
         if hasattr(local_var, "forward_instrumented"):
-            # Update stored model type if needed
+            # A previously-found model might have been compiled
+            # Update that information if needed
             if model_type == build.ModelType.PYTORCH_COMPILED:
                 tracer_args.models_found[
                     local_var.benchit_hash
@@ -429,7 +430,6 @@ def explore_frame(
                 )
             model_hash = get_model_hash(local_var, model_type)
             model_info = tracer_args.models_found[model_hash]
-
             model_info.exec_time = model_info.exec_time + end_time - start_time
 
             model_info.executed = model_info.executed + 1
