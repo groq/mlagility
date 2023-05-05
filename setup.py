@@ -45,7 +45,7 @@ setup(
         "protobuf>=3.17.3,<3.21",
         "pyyaml>=5.4",
         "typeguard>=2.3.13",
-        "packaging>=21.3",
+        "packaging>=20.9",
     ],
     extras_require={
         "tensorflow": [
