@@ -80,6 +80,7 @@ def call_benchit(
     """
     Calls the benchit function from within the model forward function
     """
+
     # Update status to "computing"
     model_info.status_message = "Computing..."
     model_info.status_message_color = printing.Colors.OKBLUE
@@ -122,7 +123,11 @@ def call_benchit(
     perf = None
     try:
         if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
-            model_info.status_message = "Skipping model compiled using torch.compile(). Benchit requires models to be in eager mode."
+            model_info.status_message = (
+                "Skipping model compiled using torch.compile(). "
+                "benchit requires models to be in eager mode "
+                "(regardless of what runtime you have selected)."
+            )
             model_info.status_message_color = printing.Colors.WARNING
         else:
             perf = benchmark_model(
