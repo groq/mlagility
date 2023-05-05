@@ -119,6 +119,7 @@ output = model(**inputs)
 """,
 }
 
+
 example_sequence_file = "example_sequence.py"
 
 extras_dot_py = {
@@ -136,7 +137,38 @@ def get_sequence():
         ],
         enable_model_validation=True,
     )
-    """
+    """,
+    "compiled.py": """
+# labels: name::linear author::selftest test_group::selftest
+import torch
+
+torch.manual_seed(0)
+
+
+class LinearTestModel(torch.nn.Module):
+    def __init__(self, input_features, output_features):
+        super(LinearTestModel, self).__init__()
+        self.fc = torch.nn.Linear(input_features, output_features)
+
+    def forward(self, x):
+        output = self.fc(x)
+        return output
+
+
+input_features = 10
+output_features = 10
+
+# Compiled model
+model = LinearTestModel(input_features, output_features)
+model = torch.compile(model)
+inputs = {"x": torch.rand(input_features)}
+model(**inputs)
+
+# Non-compiled model
+model2 = LinearTestModel(input_features * 2, output_features)
+inputs2 = {"x": torch.rand(input_features * 2)}
+model2(**inputs2)
+""",
 }
 
 # Create a test directory and make it the CWD
@@ -195,13 +227,14 @@ def assert_success_of_builds(
     info_property: Tuple[str, Any] = None,
     check_perf: bool = False,
     check_opset: int = None,
-):
+) -> int:
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
     # TODO: simplify this code when
     # https://github.com/groq/mlagility/issues/16
     # is done
     builds = cache.get_all(cache_dir)
+    builds_found = 0
 
     for test_script in test_script_files:
         test_script_name = strip_dot_py(test_script)
@@ -212,6 +245,7 @@ def assert_success_of_builds(
                 build_state = build.load_state(state_path=build_state_file)
                 assert build_state.build_status == build.Status.SUCCESSFUL_BUILD
                 script_build_found = True
+                builds_found += 1
 
                 if info_property is not None:
                     assert (
@@ -233,6 +267,9 @@ def assert_success_of_builds(
 
         assert script_build_found
 
+    # Returns the total number of builds found
+    return builds_found
+
 
 class Testing(unittest.TestCase):
     def setUp(self) -> None:
@@ -241,7 +278,6 @@ class Testing(unittest.TestCase):
         return super().setUp()
 
     def test_001_cli_single(self):
-
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -259,7 +295,6 @@ class Testing(unittest.TestCase):
         assert_success_of_builds([test_script])
 
     def test_002_search_multiple(self):
-
         # Test the first model in the corpus
         test_scripts = list(test_scripts_dot_py.keys())
 
@@ -278,7 +313,6 @@ class Testing(unittest.TestCase):
         assert_success_of_builds([test_scripts[0], test_scripts[1]])
 
     def test_003_cli_build_dir(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_single
@@ -299,7 +333,6 @@ class Testing(unittest.TestCase):
         assert_success_of_builds(test_scripts)
 
     def test_004_cli_report(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_corpus
@@ -380,7 +413,6 @@ class Testing(unittest.TestCase):
         ), f"onnx_converted must be True, got {linear_summary['onnx_converted']}"
 
     def test_005_cli_list(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_corpus
@@ -414,7 +446,6 @@ class Testing(unittest.TestCase):
             assert script_name in f.getvalue()
 
     def test_006_cli_delete(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_corpus
@@ -477,7 +508,6 @@ class Testing(unittest.TestCase):
             assert script_name not in f.getvalue()
 
     def test_007_cli_stats(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_corpus
@@ -546,7 +576,6 @@ class Testing(unittest.TestCase):
                 ), stats_dict["onnx_model_information"]["opset"]
 
     def test_008_cli_version(self):
-
         # Get the version number
         with redirect_stdout(io.StringIO()) as f:
             testargs = [
@@ -560,7 +589,6 @@ class Testing(unittest.TestCase):
         assert len(f.getvalue().split(".")) == 3
 
     def test_009_cli_benchit_args(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_single
@@ -590,7 +618,6 @@ class Testing(unittest.TestCase):
         assert_success_of_builds([test_script])
 
     def test_010_cli_sequence(self):
-
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -612,7 +639,6 @@ class Testing(unittest.TestCase):
         )
 
     def test_011_cli_benchmark(self):
-
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -629,7 +655,6 @@ class Testing(unittest.TestCase):
         assert_success_of_builds([test_script], None, check_perf=True)
 
     def test_012_cli_resume(self):
-
         # NOTE: this is not a unit test, it relies on other command
         # If this test is failing, make sure the following tests are passing:
         # - test_cli_single
@@ -673,7 +698,6 @@ class Testing(unittest.TestCase):
     # TODO: Investigate why this test is non-deterministically failing
     @unittest.skip("Flaky test")
     def test_013_cli_labels(self):
-
         # Only build models labels with test_group::a
         testargs = [
             "benchit",
@@ -726,7 +750,6 @@ class Testing(unittest.TestCase):
     # coincidence (whether or not Groq HW is installed) to function.
     @unittest.skip("Needs re-implementation")
     def test_014_report_on_failed_build(self):
-
         # Run benchit on groq device (will fail since the HW is not available)
         testargs = [
             "benchit",
@@ -770,7 +793,6 @@ class Testing(unittest.TestCase):
         assert summary[0]["hash"] == "d5b1df11", "Wrong hash found in report"
 
     def test_015_runtimes(self):
-
         # Attempt to benchmark using an invalid runtime
         with self.assertRaises(argparse.ArgumentError):
             testargs = [
@@ -826,8 +848,7 @@ class Testing(unittest.TestCase):
             stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
         assert len(stats_dict["performance"]) == 2
 
-    def test_012_cli_onnx_opset(self):
-
+    def test_016_cli_onnx_opset(self):
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -850,8 +871,7 @@ class Testing(unittest.TestCase):
             [test_script], None, check_perf=True, check_opset=user_opset
         )
 
-    def test_013_cli_process_isolation(self):
-
+    def test_017_cli_process_isolation(self):
         # Test the first model in the corpus
         test_script = list(test_scripts_dot_py.keys())[0]
 
@@ -867,6 +887,24 @@ class Testing(unittest.TestCase):
             benchitcli()
 
         assert_success_of_builds([test_script], None, check_perf=True)
+
+    def test_018_skip_compiled(self):
+        test_script = "compiled.py"
+        testargs = [
+            "benchit",
+            "benchmark",
+            os.path.join(extras_dir, test_script),
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        builds_found = assert_success_of_builds([test_script])
+
+        # Compile.py contains two Pytorch models.
+        # One of those is compiled and should be skipped.
+        assert builds_found == 1
 
 
 if __name__ == "__main__":

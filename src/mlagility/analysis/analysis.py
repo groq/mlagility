@@ -97,7 +97,10 @@ def call_benchit(
 
     # Convert all positional arguments into keyword arguments
     if args != ():
-        if model_info.model_type == build.ModelType.PYTORCH:
+        if model_info.model_type in [
+            build.ModelType.PYTORCH,
+            build.ModelType.PYTORCH_COMPILED,
+        ]:
             forward_function = model_info.model.forward
         elif model_info.model_type == build.ModelType.KERAS:
             forward_function = model_info.model.call
@@ -119,30 +122,38 @@ def call_benchit(
 
     perf = None
     try:
-        perf = benchmark_model(
-            model_info.model,
-            inputs,
-            device=tracer_args.device,
-            backend=tracer_args.backend,
-            runtime=tracer_args.runtime,
-            build_name=build_name,
-            cache_dir=tracer_args.cache_dir,
-            build_only=Action.BENCHMARK not in tracer_args.actions,
-            lean_cache=tracer_args.lean_cache,
-            groq_num_chips=tracer_args.groq_num_chips,
-            groq_compiler_flags=tracer_args.groq_compiler_flags,
-            groq_assembler_flags=tracer_args.groq_assembler_flags,
-            groqview=tracer_args.groqview,
-            sequence=tracer_args.sequence,
-            onnx_opset=tracer_args.onnx_opset,
-        )
-
-        if Action.BENCHMARK in tracer_args.actions:
-            model_info.status_message = "Model successfully benchmarked!"
-            model_info.performance = perf
+        if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
+            model_info.status_message = (
+                "Skipping model compiled using torch.compile(). "
+                "benchit requires models to be in eager mode "
+                "(regardless of what runtime you have selected)."
+            )
+            model_info.status_message_color = printing.Colors.WARNING
         else:
-            model_info.status_message = "Model successfully built!"
-        model_info.status_message_color = printing.Colors.OKGREEN
+            perf = benchmark_model(
+                model_info.model,
+                inputs,
+                device=tracer_args.device,
+                backend=tracer_args.backend,
+                runtime=tracer_args.runtime,
+                build_name=build_name,
+                cache_dir=tracer_args.cache_dir,
+                build_only=Action.BENCHMARK not in tracer_args.actions,
+                lean_cache=tracer_args.lean_cache,
+                groq_num_chips=tracer_args.groq_num_chips,
+                groq_compiler_flags=tracer_args.groq_compiler_flags,
+                groq_assembler_flags=tracer_args.groq_assembler_flags,
+                groqview=tracer_args.groqview,
+                sequence=tracer_args.sequence,
+                onnx_opset=tracer_args.onnx_opset,
+            )
+            if Action.BENCHMARK in tracer_args.actions:
+                model_info.status_message = "Model successfully benchmarked!"
+                model_info.performance = perf
+                model_info.status_message_color = printing.Colors.OKGREEN
+            else:
+                model_info.status_message = "Model successfully built!"
+                model_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.StageError:
         build_state = build.load_state(
@@ -179,6 +190,9 @@ def call_benchit(
             state_type = groq_build.State
         else:
             state_type = build.State
+
+        if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
+            return
 
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir,
@@ -305,7 +319,10 @@ def explore_frame(
         if issubclass(type(local_var), torch.nn.Module):
             if type(local_var) in tracer_args.torch_activations:
                 return
-            model_type = build.ModelType.PYTORCH
+            if "dynamo_ctx" in local_var.__dict__:
+                model_type = build.ModelType.PYTORCH_COMPILED
+            else:
+                model_type = build.ModelType.PYTORCH
         elif tf_helpers.is_keras_subclass(type(local_var)):
             model_type = build.ModelType.KERAS
         else:
@@ -333,10 +350,17 @@ def explore_frame(
             inside_class, torch.nn.Module
         ) or tf_helpers.is_keras_subclass(inside_class)
 
-    if not hasattr(local_var, "forward_instrumented") and not inside_nn_subclass:
+    if not inside_nn_subclass:
+        if hasattr(local_var, "forward_instrumented"):
+            # A previously-found model might have been compiled
+            # Update that information if needed
+            if model_type == build.ModelType.PYTORCH_COMPILED:
+                tracer_args.models_found[
+                    local_var.benchit_hash
+                ].model_type = build.ModelType.PYTORCH_COMPILED
+            return
 
         if model_type == build.ModelType.PYTORCH:
-
             # Avoid instrumenting models before they have been fully loaded
             if util.count_parameters(local_var, model_type) == 0:
                 return
@@ -351,6 +375,7 @@ def explore_frame(
             # This is only possible on Pytorch, since each layer of a torch.nn.module
             # is also a torch.nn.module.
             model_hash = get_model_hash(local_var, model_type)
+            local_var.benchit_hash = model_hash
             if depth < tracer_args.max_depth:
                 recursive_search(
                     frame, event, local_var, depth, model_hash, tracer_args
@@ -380,7 +405,6 @@ def explore_frame(
         local_var.old_forward = old_forward
 
         def forward_spy(*args, **kwargs):
-
             tracer = sys.getprofile()
             if tracer is not None:
                 # Turn tracing off while the model is being executed for speed
