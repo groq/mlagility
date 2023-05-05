@@ -11,7 +11,7 @@ torch_geometric>=2.3.0
 transformers>=4.21.0
 pytorch-pretrained-biggan>=0.1.1
 timm>=0.6.7
-diffusers>=0.2.4
+diffusers>=0.2.4, <=0.12
 requests
 Pillow
 nltk
