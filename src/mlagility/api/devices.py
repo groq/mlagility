@@ -225,7 +225,7 @@ def setup_remote_host(client, device_type: str, output_dir: str) -> None:
         files_to_transfer = [TRT_BENCHMARKING_SCRIPT]
     elif device_type == "x86":
         # Check if x86_64 CPU is available remotely
-        stdout, exit_code = exec_command(client, "uname -i")
+        stdout, exit_code = exec_command(client, "uname -m")
         if stdout != "x86_64" or exit_code == 1:
             msg = "Only x86_64 CPUs are supported at this time for benchmarking"
             raise exp.ModelRuntimeError(msg)
@@ -272,7 +272,7 @@ def setup_local_host(device_type: str, output_dir: str) -> None:
     if device_type == "x86":
         # Check if x86_64 CPU is available locally
         check_device = subprocess.run(
-            ["uname", "-i"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+            ["uname", "-m"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
         )
         stdout = check_device.stdout.decode().strip()
         if stdout != "x86_64" or check_device.returncode == 1:
