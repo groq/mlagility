@@ -1,6 +1,8 @@
 import os
 import argparse
 import subprocess
+import random
+import time
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
@@ -14,6 +16,9 @@ PASSWORD = "donthackmla"
 SSH_PATH = "~/.ssh/mla_key.pub"
 SSH_PRIVATE_PATH = "~/.ssh/mla_key.pem"
 
+def benchit_prefix(args: str) -> str:
+    return f"miniconda3/bin/conda run -n mla benchit {args}"
+
 def auth():
     # Acquire a credential object using CLI-based authentication.
     credential = AzureCliCredential()
@@ -22,6 +27,7 @@ def auth():
     subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
 
     return credential, subscription_id
+
 
 class VM:
     """
@@ -37,26 +43,47 @@ class VM:
         self.NIC_NAME = f"{name}-nic"
 
         self.credential, self.subscription_id = auth()
-        self.resource_client = ResourceManagementClient(self.credential, self.subscription_id)
-        self.compute_client = ComputeManagementClient(self.credential, self.subscription_id)
-        self.network_client = NetworkManagementClient(self.credential, self.subscription_id)
+        self.resource_client = ResourceManagementClient(
+            self.credential, self.subscription_id
+        )
+        self.compute_client = ComputeManagementClient(
+            self.credential, self.subscription_id
+        )
+        self.network_client = NetworkManagementClient(
+            self.credential, self.subscription_id
+        )
 
+        self.async_process = None
         self.async_command = None
+
+        self._ip = None
 
     @property
     def ip_address(self):
-        return self.network_client.public_ip_addresses.get(RESOURCE_GROUP, self.IP_NAME).ip_address
+        if not self._ip:
+            self._ip = self.network_client.public_ip_addresses.get(
+                RESOURCE_GROUP, self.IP_NAME
+            ).ip_address
+
+        return self._ip
 
     def add_to_known_hosts(self):
-        ip = self.ip_address
-        print(f"Adding {self.VM_NAME} ({ip}) to known hosts file")
-        known_host = subprocess.check_output(["ssh-keyscan","-H", ip]).decode(encoding="utf-8")
+        print(f"Adding {self.VM_NAME} ({self.ip_address}) to known hosts file")
+        known_host = subprocess.check_output(
+            ["ssh-keyscan", "-H", self.ip_address]
+        ).decode(encoding="utf-8")
         known_hosts_file = os.path.expanduser("~/.ssh/known_hosts")
         with open(known_hosts_file, "a") as f:
             f.write(known_host)
 
     def info(self):
-        status = self.compute_client.virtual_machines.get(RESOURCE_GROUP, self.VM_NAME, expand='instanceView').instance_view.statuses[1].display_status
+        status = (
+            self.compute_client.virtual_machines.get(
+                RESOURCE_GROUP, self.VM_NAME, expand="instanceView"
+            )
+            .instance_view.statuses[1]
+            .display_status
+        )
         print(f"{self.VM_NAME} ({self.ip_address}): {status}")
 
     def create(self):
@@ -134,8 +161,8 @@ class VM:
                     }
                 ],
                 "network_security_group": {
-                    "id": '/subscriptions/f9f04fac-965a-4f5e-b4b8-a3ec406a9047/resourceGroups/mla-resource/providers/Microsoft.Network/networkSecurityGroups/mlacentralnsg718'
-                }
+                    "id": "/subscriptions/f9f04fac-965a-4f5e-b4b8-a3ec406a9047/resourceGroups/mla-resource/providers/Microsoft.Network/networkSecurityGroups/mlacentralnsg718"
+                },
             },
         )
 
@@ -171,8 +198,8 @@ class VM:
                                     "key_data": ssh_key,
                                 }
                             ]
-                        }
-                    }
+                        },
+                    },
                 },
                 "network_profile": {
                     "network_interfaces": [
@@ -188,42 +215,66 @@ class VM:
 
         print(f"Provisioned virtual machine {vm_result.name}")
 
+        # Give the VM a little time to open up to SSH
+        time.sleep(1)
         self.add_to_known_hosts()
 
     def delete(self):
         print("Deleting VM", self.VM_NAME)
         # NOTE: we call result() to make sure the delete operation finishes before we move on to the next one
-        self.compute_client.virtual_machines.begin_delete(resource_group_name=RESOURCE_GROUP, vm_name=self.VM_NAME).result()
+        self.compute_client.virtual_machines.begin_delete(
+            resource_group_name=RESOURCE_GROUP, vm_name=self.VM_NAME
+        ).result()
 
         print("Deleting nic", self.NIC_NAME)
-        self.network_client.network_interfaces.begin_delete(RESOURCE_GROUP, self.NIC_NAME).result()
+        self.network_client.network_interfaces.begin_delete(
+            RESOURCE_GROUP, self.NIC_NAME
+        ).result()
         print("Deleting ip", self.IP_NAME)
-        self.network_client.public_ip_addresses.begin_delete(RESOURCE_GROUP, self.IP_NAME).result()
+        self.network_client.public_ip_addresses.begin_delete(
+            RESOURCE_GROUP, self.IP_NAME
+        ).result()
         print("Deleting subnet", self.SUBNET_NAME)
-        self.network_client.subnets.begin_delete(RESOURCE_GROUP, self.VNET_NAME, self.SUBNET_NAME).result()
+        self.network_client.subnets.begin_delete(
+            RESOURCE_GROUP, self.VNET_NAME, self.SUBNET_NAME
+        ).result()
         print("Deleting vnet", self.VNET_NAME)
-        self.network_client.virtual_networks.begin_delete(RESOURCE_GROUP, self.VNET_NAME).result()
+        self.network_client.virtual_networks.begin_delete(
+            RESOURCE_GROUP, self.VNET_NAME
+        ).result()
 
     def stop(self):
         print("Stopping VM", self.VM_NAME)
-        self.compute_client.virtual_machines.begin_deallocate(RESOURCE_GROUP, self.VM_NAME)
+        self.compute_client.virtual_machines.begin_deallocate(
+            RESOURCE_GROUP, self.VM_NAME
+        )
 
     def start(self):
         print("Starting VM", self.VM_NAME)
         self.compute_client.virtual_machines.begin_start(RESOURCE_GROUP, self.VM_NAME)
 
-    def send_file(self, ip, file):
-        command = f"scp -i {SSH_PRIVATE_PATH} {file} {USERNAME}@{ip}:~/."
+    def send_file(self, file):
+        command = f"scp -i {SSH_PRIVATE_PATH} {file} {USERNAME}@{self.ip_address}:~/."
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
-    def run_command(self, ip, command):
-        full_command = f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{ip} {command}"
+    def get_file(self, remote_file, local_dir, local_file_name):
+        os.makedirs(local_dir, exist_ok=True)
+        command = f"scp -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address}:{remote_file} {local_dir}/{local_file_name}"
+        print(f"Running command on {self.VM_NAME}: {command}")
+        subprocess.run(command.split(" "), check=True)
+
+    def run_command(self, command):
+        full_command = (
+            f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
+        )
         print(f"Running command on {self.VM_NAME}: {full_command}")
         subprocess.run(full_command.split(" "), check=True)
 
-    def check_command(self, ip, command, success_term):
-        full_command = f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{ip} {command}"
+    def check_command(self, command, success_term):
+        full_command = (
+            f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
+        )
         print(f"Running command on {self.VM_NAME}: {full_command}")
         result = subprocess.check_output(full_command.split(" ")).decode()
         if success_term in result:
@@ -231,30 +282,53 @@ class VM:
         else:
             print("Error! Success term not in result", result)
 
-    def run_async_command(self, ip, command):
-        full_command = f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{ip} {command}"
+    def run_async_command(self, command):
+        full_command = (
+            f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
+        )
         print(f"Running async command on {self.VM_NAME}: {full_command}")
-        self.async_command = subprocess.Popen(full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.async_process = subprocess.Popen(
+            full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        self.async_command = full_command
+
+    def poll_async_command(self):
+        """
+        Checks whether an async command has finished
+        If the command has finished, resets self.async_process and returns the output
+        Otherwise, returns None
+        """
+        if self.async_process.poll():
+            out, errs = self.async_process.communicate()
+            self.async_process = None
+            print(f"{self.VM_NAME} finished job: {self.async_command}")
+            return out, errs
+        else:
+            return None
 
     def finish_aysnc_command(self):
-        out, errs = self.async_command.communicate()
+        """
+        Waits for an async command to finish and then prints the result
+        """
+        out, errs = self.async_process.communicate()
+        print(f"{self.VM_NAME} finished job: {self.async_command}")
         print(out.decode())
         print(errs.decode())
 
+        self.async_process = None
+
         return out, errs
-    
+
     def begin_setup(self):
-        ip = self.ip_address
-        
-        self.send_file(ip, "setup_part_1.sh")
-        self.send_file(ip, "setup_part_2.sh")
-        self.run_async_command(ip, "bash setup_part_1.sh")
+        self.send_file("setup_part_1.sh")
+        self.send_file("setup_part_2.sh")
+        self.run_async_command("bash setup_part_1.sh")
 
     def setup_part_2(self):
         print(f"\n\nSETUP PART 1 RESULT FOR {self.VM_NAME}:\n\n")
         self.finish_aysnc_command()
-        
-        self.run_async_command(self.ip_address, "bash setup_part_2.sh")
+
+        self.run_async_command("bash setup_part_2.sh")
 
     def finish_setup(self):
         print(f"\n\nSETUP FINAL RESULT FOR {self.VM_NAME}:\n\n")
@@ -266,36 +340,59 @@ class VM:
         self.finish_setup()
 
     def hello_world(self):
-        self.check_command(self.ip_address, "miniconda3/bin/conda run -n mla benchit mlagility/models/selftest/linear.py", "Successfully benchmarked")
+        self.check_command(
+            benchit_prefix("mlagility/models/selftest/linear.py"),
+            "Successfully benchmarked",
+        )
+
+    def wipe_models_cache(self):
+        # NOTE: this method needs to be kept up-to-date with MLAgility's corpus
+        # such that it deletes all cached model files on disk. Otherwise the
+        # VM disks will fill up.
+        command = "rm -rf .cache/huggingface .cache/torch-hub"
+        self.run_command(command)
+
 
 class Cluster:
     """
     Handle for controlling a cluster of VMs
     """
-    
+
     def __init__(self, name: str, retrieve: bool, size: int = None):
         self.size = size
         self.name = name
         self.vm_prefix = f"{self.name}-vm-"
 
         self.credential, self.subscription_id = auth()
-        self.resource_client = ResourceManagementClient(self.credential, self.subscription_id)
-        self.compute_client = ComputeManagementClient(self.credential, self.subscription_id)
-        self.network_client = NetworkManagementClient(self.credential, self.subscription_id)
+        self.resource_client = ResourceManagementClient(
+            self.credential, self.subscription_id
+        )
+        self.compute_client = ComputeManagementClient(
+            self.credential, self.subscription_id
+        )
+        self.network_client = NetworkManagementClient(
+            self.credential, self.subscription_id
+        )
 
         if retrieve:
-            resource_group_vms = self.compute_client.virtual_machines.list(RESOURCE_GROUP)
-            self.vms = [VM(vm.name) for vm in resource_group_vms if vm.name.startswith(self.vm_prefix)]
+            resource_group_vms = self.compute_client.virtual_machines.list(
+                RESOURCE_GROUP
+            )
+            self.vms = [
+                VM(vm.name)
+                for vm in resource_group_vms
+                if vm.name.startswith(self.vm_prefix)
+            ]
         else:
             if size is None:
                 raise ValueError("size must be set when retrieve=False")
-            
+
             self.vms = [VM(f"{self.vm_prefix}{i}") for i in range(size)]
-    
+
     def info(self):
         for vm in self.vms:
             vm.info()
-    
+
     def create(self):
         for vm in self.vms:
             vm.create()
@@ -333,80 +430,119 @@ class Cluster:
         for vm in self.vms:
             vm.hello_world()
 
+    def run_async_command(self, command):
+        """
+        Run the same async command on all VMs in the cluster, then
+        wait for all VMs to finish
+        """
+
+        for vm in self.vms:
+            vm.run_async_command(command)
+
+        for vm in self.vms:
+            vm.finish_aysnc_command()
 
 
+class Job:
+    def __init__(self, input_files: str):
+        self.input_files = input_files
+        # TODO: create more jobs based on permutations such as
+        # device type, batch size, data type, etc.
+        self.jobs = [
+            benchit_prefix(f"{input} --lean-cache")
+            for input in self.input_files
+        ]
 
+        print(self.jobs)
 
+    def run(self, cluster: Cluster, dry_run: bool):
+        i = 0
+        job = self.jobs.pop(0)
+        while len(self.jobs) > 0:
+            job_assigned = False
 
+            # Attempt to assign job to cluster
+            for vm in cluster.vms:
+                if not vm.async_process:
+                    if not dry_run:
+                        vm.run_async_command(job)
+
+                    else:
+                        vm.async_process = True
+                        vm.async_command = job
+
+                    job_assigned = True
+                    print(f"Job {job} assigned to {vm.VM_NAME}")
+                    break
+
+            # Check if any VMs are done with their last job
+            for vm in cluster.vms:
+                if vm.async_process is not None:
+                    if not dry_run:
+                        if vm.poll_async_command():
+                            vm.wipe_models_cache()
+                    else:
+                        # Use random chance to determine if a VM is available
+                        # This helps make sure we don't use use vm[0] for all jobs
+                        if random.randint(0, 99) > 80:
+                            vm.async_process = False
+                            print(f"{vm.VM_NAME} finished job: {vm.async_command}")
+                            time.sleep(1)
+
+            # Get a new job if this job was assigned
+            if job_assigned and len(self.jobs) > 0:
+                job = self.jobs.pop(0)
+
+        # Generate reports
+        cluster.run_async_command(benchit_prefix("report"))
+        
+        # Gather reports
+        for vm in cluster.vms:
+            vm.get_file(".cache/mlagility/report.csv", vm.VM_NAME, "report.csv")
 
 
 def main():
     # Define the argument parser
-    parser = argparse.ArgumentParser(
-        description="Manage MLAgility Azure VMs"
-    )
+    parser = argparse.ArgumentParser(description="Manage MLAgility Azure VMs")
 
-    parser.add_argument(
-        "--get",
-        help="Retrieve existing VM(s)",
-        action="store_true"
-    )
+    parser.add_argument("--get", help="Retrieve existing VM(s)", action="store_true")
 
     # Add the arguments
+    parser.add_argument("--create", help="Create VM(s)", action="store_true")
+
+    parser.add_argument("--info", help="Get info about VM(s)", action="store_true")
+
+    parser.add_argument("--delete", help="Delete VM(s)", action="store_true")
+
+    parser.add_argument("--stop", help="Stop VM(s)", action="store_true")
+
+    parser.add_argument("--start", help="Start VM(s)", action="store_true")
+
+    parser.add_argument("--setup", help="Set up VM(s)", action="store_true")
+
+    parser.add_argument("--cluster", help="Work with a cluster", action="store_true")
+
     parser.add_argument(
-        "--create",
-        help="Create VM(s)",
-        action="store_true"
+        "--size", help="Size of VM cluster", type=int, required=False, default=None
     )
 
     parser.add_argument(
-        "--info",
-        help="Get info about VM(s)",
-        action="store_true"
+        "--hello-world", help="Run hello world on the VM(s)", action="store_true"
+    )
+
+    parser.add_argument("--run", help="Run a job", action="store_true")
+
+    parser.add_argument(
+        "--input-files",
+        "-f",
+        help="Path to input files for job",
+        nargs="*",
     )
 
     parser.add_argument(
-        "--delete",
-        help="Delete VM(s)",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--stop",
-        help="Stop VM(s)",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--start",
-        help="Start VM(s)",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--setup",
-        help="Set up VM(s)",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--cluster",
-        help="Work with a cluster",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--size",
-        help="Size of VM cluster",
-        type=int,
-        required=False,
-        default=None
-    )
-
-    parser.add_argument(
-        "--hello-world",
-        help="Run hello world on the VM(s)",
-        action="store_true"
+        "--dry-run",
+        help="Dry run for the --run command",
+        action="store_true",
     )
 
     # Parse the arguments
@@ -440,6 +576,11 @@ def main():
 
     if args.hello_world:
         handle.hello_world()
+
+    if args.run:
+        job = Job(args.input_files)
+        job.run(handle, args.dry_run)
+
 
 if __name__ == "__main__":
     main()
