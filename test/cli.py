@@ -910,7 +910,7 @@ class Testing(unittest.TestCase):
     def test_019_invalid_file_type(self):
         # Ensure that we get an error when running benchit with invalid input_files
         with self.assertRaises(exceptions.ArgError):
-            testargs = ["benchit", "awgawfaw"]
+            testargs = ["benchit", "gobbledegook"]
             with patch.object(sys, "argv", flatten(testargs)):
                 benchitcli()
 
