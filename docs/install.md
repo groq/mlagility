@@ -2,6 +2,10 @@
 
 The following describes how to install MlAgility.
 
+## Operating System Requirements
+
+MLAgility is tested using `ubuntu-latest`, which currently defaults to Ubuntu 20.04. However, MLAgility is also expected to work on other recent versions of Ubuntu (e.g. 18.04, 22.04), and other flavors of Linux (e.g. CentOS).
+
 ## Installing mlagility
 
 We recommend that you install [miniconda](https://docs.conda.io/en/latest/miniconda.html) like this:

@@ -42,10 +42,10 @@ setup(
         "onnxruntime>=1.10.0",
         "paramiko==2.11.0",
         "torch>=1.12.1",
-        "protobuf>=3.17.3",
+        "protobuf>=3.17.3,<3.21",
         "pyyaml>=5.4",
         "typeguard>=2.3.13",
-        "packaging>=21.3",
+        "packaging>=20.9",
     ],
     extras_require={
         "tensorflow": [
