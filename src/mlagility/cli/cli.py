@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import onnxflow.common.build as build
+import onnxflow.common.exceptions as exceptions
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_files
@@ -96,7 +97,9 @@ def main():
     def check_extension(choices, file_name, parser):
         _, extension = os.path.splitext(file_name)
         if extension[1:].lower() not in choices:
-            parser.error(f"input_files must end with .py or .onnx (got '{file_name}')")
+            raise exceptions.ArgError(
+                f"input_files must end with .py or .onnx (got '{file_name}')"
+            )
         return file_name
 
     benchmark_parser = subparsers.add_parser(

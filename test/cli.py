@@ -22,6 +22,7 @@ from mlagility.common import filesystem
 import mlagility.api.ortmodel as ortmodel
 import onnxflow.common.build as build
 import onnxflow.common.cache as cache
+import onnxflow.common.exceptions as exceptions
 
 
 # We generate a corpus on to the filesystem during the test
@@ -905,6 +906,13 @@ class Testing(unittest.TestCase):
         # Compile.py contains two Pytorch models.
         # One of those is compiled and should be skipped.
         assert builds_found == 1
+
+    def test_019_invalid_file_type(self):
+        # Ensure that we get an error when running benchit with invalid input_files
+        with self.assertRaises(exceptions.ArgError):
+            testargs = ["benchit", "awgawfaw"]
+            with patch.object(sys, "argv", flatten(testargs)):
+                benchitcli()
 
 
 if __name__ == "__main__":
