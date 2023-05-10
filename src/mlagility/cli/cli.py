@@ -94,8 +94,8 @@ def main():
     # Parser for the "benchmark" command
     #######################################
 
-    def check_extension(choices, file_name, parser):
-        _, extension = os.path.splitext(file_name)
+    def check_extension(choices, file_name):
+        _, extension = os.path.splitext(file_name.split("::")[0])
         if extension[1:].lower() not in choices:
             raise exceptions.ArgError(
                 f"input_files must end with .py or .onnx (got '{file_name}')"
@@ -111,7 +111,7 @@ def main():
         "input_files",
         nargs="+",
         help="One or more script (.py) or ONNX (.onnx) files to be benchmarked",
-        type=lambda file: check_extension(("py", "onnx"), file, benchmark_parser),
+        type=lambda file: check_extension(("py", "onnx"), file),
     )
 
     slurm_or_processes_group = benchmark_parser.add_mutually_exclusive_group()
