@@ -1,7 +1,7 @@
 import os
 import argparse
 import subprocess
-import random
+import shutil
 import time
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
@@ -16,8 +16,14 @@ PASSWORD = "donthackmla"
 SSH_PATH = "~/.ssh/mla_key.pub"
 SSH_PRIVATE_PATH = "~/.ssh/mla_key.pem"
 
+
 def benchit_prefix(args: str) -> str:
     return f"miniconda3/bin/conda run -n mla benchit {args}"
+
+
+def local_command(command: str):
+    subprocess.run(command, check=True, shell=True)
+
 
 def auth():
     # Acquire a credential object using CLI-based authentication.
@@ -216,7 +222,7 @@ class VM:
         print(f"Provisioned virtual machine {vm_result.name}")
 
         # Give the VM a little time to open up to SSH
-        time.sleep(1)
+        time.sleep(15)
         self.add_to_known_hosts()
 
     def delete(self):
@@ -264,6 +270,15 @@ class VM:
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
+    def get_dir(self, remote_dir, local_destination):
+        # NOTE: removes anything currently at local_destination!
+        shutil.rmtree(local_destination)
+
+        os.makedirs(local_destination)
+        command = f"scp -r -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address}:{remote_dir} {local_destination}"
+        print(f"Running command on {self.VM_NAME}: {command}")
+        subprocess.run(command.split(" "), check=True)
+
     def run_command(self, command):
         full_command = (
             f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
@@ -292,16 +307,22 @@ class VM:
         )
         self.async_command = full_command
 
-    def poll_async_command(self):
+    def poll_async_command(self, verbosity: str = "low"):
         """
         Checks whether an async command has finished
         If the command has finished, resets self.async_process and returns the output
         Otherwise, returns None
         """
-        if self.async_process.poll():
+
+        if self.async_process.poll() is not None:
             out, errs = self.async_process.communicate()
             self.async_process = None
-            print(f"{self.VM_NAME} finished job: {self.async_command}")
+            if verbosity == "low" or verbosity == "high":
+                print(f"{self.VM_NAME} finished job: {self.async_command}")
+
+            if verbosity == "high":
+                print(out.decode())
+                print(errs.decode())
             return out, errs
         else:
             return None
@@ -344,12 +365,19 @@ class VM:
             benchit_prefix("mlagility/models/selftest/linear.py"),
             "Successfully benchmarked",
         )
+        self.check_command(
+            benchit_prefix("cache clean --all"), "Removed the build artifacts"
+        )
 
     def wipe_models_cache(self):
         # NOTE: this method needs to be kept up-to-date with MLAgility's corpus
         # such that it deletes all cached model files on disk. Otherwise the
         # VM disks will fill up.
         command = "rm -rf .cache/huggingface .cache/torch-hub"
+        self.run_command(command)
+
+    def wipe_mlagility_cache(self):
+        command = benchit_prefix("cache delete --all")
         self.run_command(command)
 
 
@@ -442,6 +470,10 @@ class Cluster:
         for vm in self.vms:
             vm.finish_aysnc_command()
 
+    def wipe_mlagility_cache(self):
+        for vm in self.vms:
+            vm.wipe_mlagility_cache()
+
 
 class Job:
     def __init__(self, input_files: str):
@@ -449,56 +481,56 @@ class Job:
         # TODO: create more jobs based on permutations such as
         # device type, batch size, data type, etc.
         self.jobs = [
-            benchit_prefix(f"{input} --lean-cache")
+            benchit_prefix(f"mlagility{input[2:]} --lean-cache")
             for input in self.input_files
         ]
 
         print(self.jobs)
 
-    def run(self, cluster: Cluster, dry_run: bool):
-        i = 0
+    def run(self, cluster: Cluster):
         job = self.jobs.pop(0)
-        while len(self.jobs) > 0:
+        busy = True
+        while job is not None or busy == True:
             job_assigned = False
 
             # Attempt to assign job to cluster
-            for vm in cluster.vms:
-                if not vm.async_process:
-                    if not dry_run:
+            if job is not None:
+                for vm in cluster.vms:
+                    if vm.async_process is None:
                         vm.run_async_command(job)
-
-                    else:
-                        vm.async_process = True
-                        vm.async_command = job
-
-                    job_assigned = True
-                    print(f"Job {job} assigned to {vm.VM_NAME}")
-                    break
+                        job_assigned = True
+                        print(f"Job {job} assigned to {vm.VM_NAME}")
+                        break
 
             # Check if any VMs are done with their last job
             for vm in cluster.vms:
                 if vm.async_process is not None:
-                    if not dry_run:
-                        if vm.poll_async_command():
-                            vm.wipe_models_cache()
-                    else:
-                        # Use random chance to determine if a VM is available
-                        # This helps make sure we don't use use vm[0] for all jobs
-                        if random.randint(0, 99) > 80:
-                            vm.async_process = False
-                            print(f"{vm.VM_NAME} finished job: {vm.async_command}")
-                            time.sleep(1)
+                    print("Polling VM", vm.VM_NAME)
+                    if vm.poll_async_command():
+                        vm.wipe_models_cache()
+
+                    time.sleep(1)
 
             # Get a new job if this job was assigned
             if job_assigned and len(self.jobs) > 0:
                 job = self.jobs.pop(0)
+            elif job_assigned and len(self.jobs) == 0:
+                job = None
 
-        # Generate reports
-        cluster.run_async_command(benchit_prefix("report"))
-        
-        # Gather reports
+            # Determine whether the cluster is busy or not
+            busy = False
+            for vm in cluster.vms:
+                if vm.async_process is not None:
+                    busy = True
+
+        # Gather cache directories
         for vm in cluster.vms:
-            vm.get_file(".cache/mlagility/report.csv", vm.VM_NAME, "report.csv")
+            vm.get_dir(".cache/mlagility", vm.VM_NAME)
+
+        # Create report
+        local_command(
+            f"conda run -n mla benchit cache report -d {cluster.name}*/mlagility"
+        )
 
 
 def main():
@@ -540,9 +572,7 @@ def main():
     )
 
     parser.add_argument(
-        "--dry-run",
-        help="Dry run for the --run command",
-        action="store_true",
+        "--wipe-mla-cache", help="Wipe the mlagility cache", action="store_true"
     )
 
     # Parse the arguments
@@ -579,7 +609,10 @@ def main():
 
     if args.run:
         job = Job(args.input_files)
-        job.run(handle, args.dry_run)
+        job.run(handle)
+
+    if args.wipe_mla_cache:
+        handle.wipe_mlagility_cache()
 
 
 if __name__ == "__main__":
