@@ -95,7 +95,6 @@ def main():
 
     def check_extension(choices, file_name, parser):
         _, extension = os.path.splitext(file_name)
-        print(extension)
         if extension[1:].lower() not in choices:
             parser.error(f"input_files must end with .py or .onnx (got '{file_name}')")
         return file_name
