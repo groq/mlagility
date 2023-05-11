@@ -5,15 +5,10 @@
 from diffusers import StableDiffusionPipeline
 import torch
 
-
-pipe = StableDiffusionPipeline.from_pretrained(
-    "CompVis/stable-diffusion-v1-4",
-    use_auth_token="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",
-)
+pipe = StableDiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-1")
 
 model = pipe.vae.decoder
 inputs = {"z": torch.ones([1, 4, 64, 64], dtype=torch.float)}
-
 
 # Call model
 model(**inputs)
