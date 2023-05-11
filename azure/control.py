@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import shutil
 import time
+from typing import List
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
@@ -15,6 +16,44 @@ USERNAME = "azureuser"
 PASSWORD = "donthackmla"
 SSH_PATH = "~/.ssh/mla_key.pub"
 SSH_PRIVATE_PATH = "~/.ssh/mla_key.pem"
+
+device_to_image_reference = {
+    "nvidia": {
+        "publisher": "Nvidia",
+        "offer": "pytorch_from_nvidia",
+        "sku": "ngc-pytorch-version-22-10-0_gen2",
+        "version": "22.10.0",
+    },
+    "cpu": {
+        "publisher": "canonical",
+        "offer": "0001-com-ubuntu-server-focal",
+        "sku": "20_04-lts-gen2",
+        "version": "latest",
+    },
+}
+
+hardware_to_device = {
+    "t4": "nvidia",
+    "icelake": "cpu",
+    "cpu-small": "cpu",
+}
+
+hardware_to_vm_size = {
+    "t4": "Standard_NC4as_T4_v3",  # Nvidia T4 with 4 EPYC vCPUs
+    "icelake": "Standard_D16ds_v5",  # 16-core Xeon IceLake
+    "cpu-small": "Standard_E2s_v3",  # 2-core Xeon (unknown generation)
+}
+
+vm_size_to_hardware = {v: k for k, v in hardware_to_vm_size.items()}
+
+device_to_plan = {
+    "nvidia": {
+        "name": "ngc-pytorch-version-22-10-0_gen2",
+        "product": "pytorch_from_nvidia",
+        "publisher": "nvidia",
+    },
+    "cpu": None,
+}
 
 
 def benchit_prefix(args: str) -> str:
@@ -40,7 +79,7 @@ class VM:
     Handle for controlling an individual VM
     """
 
-    def __init__(self, name):
+    def __init__(self, name, retrieve: bool = True, hardware=None):
         self.VM_NAME = name
         self.VNET_NAME = f"{name}-vnet"
         self.SUBNET_NAME = f"{name}-subnet"
@@ -64,6 +103,17 @@ class VM:
 
         self._ip = None
 
+        if retrieve:
+            vm_size, _ = self.info(verbosity="none")
+            self.hardware = vm_size_to_hardware[vm_size]
+        else:
+            if hardware is None:
+                raise ValueError("hardware must be specified when creating VM")
+
+            self.hardware = hardware
+
+        self.device = hardware_to_device[self.hardware]
+
     @property
     def ip_address(self):
         if not self._ip:
@@ -82,15 +132,18 @@ class VM:
         with open(known_hosts_file, "a") as f:
             f.write(known_host)
 
-    def info(self):
-        status = (
-            self.compute_client.virtual_machines.get(
-                RESOURCE_GROUP, self.VM_NAME, expand="instanceView"
-            )
-            .instance_view.statuses[1]
-            .display_status
+    def info(self, verbosity="high"):
+        vm_info = self.compute_client.virtual_machines.get(
+            RESOURCE_GROUP, self.VM_NAME, expand="instanceView"
         )
-        print(f"{self.VM_NAME} ({self.ip_address}): {status}")
+
+        status = vm_info.instance_view.statuses[1].display_status
+        size = vm_info.hardware_profile.vm_size
+
+        if verbosity == "high":
+            print(f"{self.VM_NAME} ({size}, {self.ip_address}): {status}")
+
+        return size, status
 
     def create(self):
         group_list = self.resource_client.resource_groups.list()
@@ -177,53 +230,53 @@ class VM:
         with open(os.path.expanduser(SSH_PATH)) as keyfile:
             ssh_key = keyfile.read()
 
+        vm_spec = {
+            "location": LOCATION,
+            "storage_profile": {
+                "image_reference": device_to_image_reference[self.device],
+                "os_disk": {
+                    "disk_size_gb": 64,
+                    "create_option": "FromImage",
+                },
+            },
+            "hardware_profile": {"vm_size": hardware_to_vm_size[self.hardware]},
+            "os_profile": {
+                "computer_name": self.VM_NAME,
+                "admin_username": USERNAME,
+                "admin_password": PASSWORD,
+                "linux_configuration": {
+                    "disable_password_authentication": True,
+                    "ssh": {
+                        "public_keys": [
+                            {
+                                "path": f"/home/{USERNAME}/.ssh/authorized_keys",
+                                "key_data": ssh_key,
+                            }
+                        ]
+                    },
+                },
+            },
+            "network_profile": {
+                "network_interfaces": [
+                    {
+                        "id": nic_result.id,
+                    }
+                ]
+            },
+        }
+
+        if device_to_plan[self.device]:
+            vm_spec["plan"] = device_to_plan[self.device]
+
         poller = self.compute_client.virtual_machines.begin_create_or_update(
             RESOURCE_GROUP,
             self.VM_NAME,
-            {
-                "location": LOCATION,
-                "storage_profile": {
-                    "image_reference": {
-                        "publisher": "Canonical",
-                        "offer": "0001-com-ubuntu-server-jammy",
-                        "sku": "22_04-lts-gen2",
-                        "version": "latest",
-                    }
-                },
-                "hardware_profile": {"vm_size": "Standard_E2s_v3"},
-                "os_profile": {
-                    "computer_name": self.VM_NAME,
-                    "admin_username": USERNAME,
-                    "admin_password": PASSWORD,
-                    "linux_configuration": {
-                        "disable_password_authentication": True,
-                        "ssh": {
-                            "public_keys": [
-                                {
-                                    "path": f"/home/{USERNAME}/.ssh/authorized_keys",
-                                    "key_data": ssh_key,
-                                }
-                            ]
-                        },
-                    },
-                },
-                "network_profile": {
-                    "network_interfaces": [
-                        {
-                            "id": nic_result.id,
-                        }
-                    ]
-                },
-            },
+            vm_spec,
         )
 
         vm_result = poller.result()
 
         print(f"Provisioned virtual machine {vm_result.name}")
-
-        # Give the VM a little time to open up to SSH
-        time.sleep(15)
-        self.add_to_known_hosts()
 
     def delete(self):
         print("Deleting VM", self.VM_NAME)
@@ -295,7 +348,7 @@ class VM:
         if success_term in result:
             print(f"\n\nSuccess on {self.VM_NAME}!\n\n")
         else:
-            print("Error! Success term not in result", result)
+            raise Exception("Error! Success term not in result")
 
     def run_async_command(self, command):
         full_command = (
@@ -341,6 +394,30 @@ class VM:
         return out, errs
 
     def begin_setup(self):
+        # Add the VM IP to known hosts, and retry a few times before giving up
+        known_host_success = False
+        timeout = 300  # seconds
+        sleep_amount = 15  # seconds
+        assert timeout % sleep_amount == 0
+
+        while not known_host_success and timeout > 0:
+            try:
+                self.add_to_known_hosts()
+                known_host_success = True
+            except subprocess.CalledProcessError as e:
+                timeout = timeout - sleep_amount
+                if timeout > 0:
+                    print(
+                        "Adding to known hosts failed, which means the VM is probably "
+                        f"not ready yet. Re-attempting, timeout remaining is {timeout}"
+                    )
+                else:
+                    print(
+                        "Adding to known hosts failed and the timeout has elapsed. Exiting."
+                    )
+                    raise e
+                time.sleep(sleep_amount)
+
         self.send_file("setup_part_1.sh")
         self.send_file("setup_part_2.sh")
         self.run_async_command("bash setup_part_1.sh")
@@ -360,14 +437,12 @@ class VM:
         self.setup_part_2()
         self.finish_setup()
 
-    def hello_world(self):
+    def selftest(self):
         self.check_command(
             benchit_prefix("mlagility/models/selftest/linear.py"),
             "Successfully benchmarked",
         )
-        self.check_command(
-            benchit_prefix("cache clean --all"), "Removed the build artifacts"
-        )
+        self.wipe_mlagility_cache()
 
     def wipe_models_cache(self):
         # NOTE: this method needs to be kept up-to-date with MLAgility's corpus
@@ -381,15 +456,25 @@ class VM:
         self.run_command(command)
 
 
+def vm_prefix(name: str) -> str:
+    return f"{name}-vm-"
+
+
 class Cluster:
     """
     Handle for controlling a cluster of VMs
     """
 
-    def __init__(self, name: str, retrieve: bool, size: int = None):
+    def __init__(
+        self,
+        name: str,
+        retrieve: bool,
+        size: int = None,
+        hardware: str = "cpu-small",
+    ):
         self.size = size
         self.name = name
-        self.vm_prefix = f"{self.name}-vm-"
+        self.hardware = hardware
 
         self.credential, self.subscription_id = auth()
         self.resource_client = ResourceManagementClient(
@@ -402,20 +487,32 @@ class Cluster:
             self.credential, self.subscription_id
         )
 
+        self.vms = None
+
+        self.populate_vms(retrieve)
+
+    def populate_vms(self, retrieve: bool):
         if retrieve:
             resource_group_vms = self.compute_client.virtual_machines.list(
                 RESOURCE_GROUP
             )
             self.vms = [
-                VM(vm.name)
+                VM(vm.name, retrieve=True)
                 for vm in resource_group_vms
-                if vm.name.startswith(self.vm_prefix)
+                if vm.name.startswith(vm_prefix(self.name))
             ]
         else:
-            if size is None:
+            if self.size is None:
                 raise ValueError("size must be set when retrieve=False")
 
-            self.vms = [VM(f"{self.vm_prefix}{i}") for i in range(size)]
+            self.vms = [
+                VM(
+                    name=f"{vm_prefix(self.name)}{i}",
+                    retrieve=False,
+                    hardware=self.hardware,
+                )
+                for i in range(self.size)
+            ]
 
     def info(self):
         for vm in self.vms:
@@ -454,9 +551,9 @@ class Cluster:
         for vm in self.vms:
             vm.stop()
 
-    def hello_world(self):
+    def selftest(self):
         for vm in self.vms:
-            vm.hello_world()
+            vm.selftest()
 
     def run_async_command(self, command):
         """
@@ -475,11 +572,64 @@ class Cluster:
             vm.wipe_mlagility_cache()
 
 
+def cluster_prefix(name, hardware):
+    return f"{name}-{hardware}"
+
+
+class SuperCluster(Cluster):
+    """
+    Handle for controller a cluster of clusters of VMs
+
+    Note that most methods, including init, are inherited from Cluster. Only
+    a few methods need to be overloaded to enable cluster-of-cluster support.
+    """
+
+    def populate_vms(self, retrieve: bool):
+        if retrieve:
+            self.vms = [
+                Cluster(
+                    name=cluster_prefix(self.name, hardware),
+                    retrieve=True,
+                    size=None,
+                    hardware=hardware,
+                )
+                for hardware in self.hardware
+            ]
+
+        else:
+            if self.size is None:
+                raise ValueError("size must be set when retrieve=False")
+
+            self.vms = [
+                Cluster(
+                    name=cluster_prefix(self.name, hardware),
+                    retrieve=False,
+                    size=self.size,
+                    hardware=hardware,
+                )
+                for hardware in self.hardware
+            ]
+
+    def run_async_command(self, command):
+        """
+        Run the same async command on all VMs in the cluster, then
+        wait for all VMs to finish
+        """
+
+        for cluster in self.vms:
+            for vm in cluster:
+                vm.run_async_command(command)
+
+        for cluster in self.vms:
+            for vm in cluster:
+                vm.finish_aysnc_command()
+
+
 class Job:
     def __init__(self, input_files: str):
         self.input_files = input_files
         # TODO: create more jobs based on permutations such as
-        # device type, batch size, data type, etc.
+        # hardware type, batch size, data type, etc.
         self.jobs = [
             benchit_prefix(f"mlagility{input[2:]} --lean-cache")
             for input in self.input_files
@@ -559,7 +709,19 @@ def main():
     )
 
     parser.add_argument(
-        "--hello-world", help="Run hello world on the VM(s)", action="store_true"
+        "--name", help="Name of VM/cluster", required=False, default="mla-cluster"
+    )
+
+    parser.add_argument(
+        "--hardware",
+        help="Hardware devices for VM cluster",
+        required=False,
+        nargs="+",
+        default=["cpu-small"],
+    )
+
+    parser.add_argument(
+        "--selftest", help="Run hello world on the VM(s)", action="store_true"
     )
 
     parser.add_argument("--run", help="Run a job", action="store_true")
@@ -579,12 +741,45 @@ def main():
     args = parser.parse_args()
 
     if args.cluster:
-        if args.get:
-            handle = Cluster("mla-cluster", True)
+        if len(args.hardware) > 1:
+            if args.get:
+                handle = SuperCluster(
+                    args.name,
+                    retrieve=True,
+                    size=None,
+                    hardware=args.hardware,
+                )
+            else:
+                handle = SuperCluster(
+                    args.name,
+                    retrieve=False,
+                    size=args.size,
+                    hardware=args.hardware,
+                )
         else:
-            handle = Cluster("mla-cluster", False, args.size)
+            if args.get:
+                handle = Cluster(
+                    args.name,
+                    retrieve=True,
+                    size=None,
+                    hardware=args.hardware[0],
+                )
+            else:
+                handle = Cluster(
+                    args.name,
+                    retrieve=False,
+                    size=args.size,
+                    hardware=args.hardware[0],
+                )
     else:
-        handle = VM("ExampleVM")
+        if len(args.hardware) > 1:
+            raise ValueError(
+                "Length of hardware arg must be 1 if --cluster is not used"
+            )
+        if args.get:
+            handle = VM(args.name, retrieve=True)
+        else:
+            handle = VM(args.name, False, args.hardware[0])
 
     if args.info:
         handle.info()
@@ -604,8 +799,8 @@ def main():
     if args.start:
         handle.start()
 
-    if args.hello_world:
-        handle.hello_world()
+    if args.selftest:
+        handle.selftest()
 
     if args.run:
         job = Job(args.input_files)
