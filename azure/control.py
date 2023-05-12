@@ -3,7 +3,6 @@ import argparse
 import subprocess
 import shutil
 import time
-from typing import List
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
@@ -72,6 +71,142 @@ def auth():
     subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
 
     return credential, subscription_id
+
+
+def create_network_security_group(
+    network_client: NetworkManagementClient, name_prefix: str
+):
+    nsg_name = f"{name_prefix}-nsg"
+
+    # Create Security Rules
+    # NOTE: These are a copy of the default security rules every VM gets
+    # in Azure portal. May want to customize eventually.
+    poller = network_client.security_rules.begin_create_or_update(
+        RESOURCE_GROUP,
+        nsg_name,
+        f"{name_prefix}-JupyterHub",
+        security_rule_parameters={
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "8000",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 1020,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+        },
+    )
+
+    jupyter_rule = poller.result()
+
+    poller = network_client.security_rules.begin_create_or_update(
+        RESOURCE_GROUP,
+        nsg_name,
+        f"{name_prefix}-RStudio_Server",
+        security_rule_parameters={
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "8787",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 1030,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": []
+        },
+    )
+
+    rstudio_rule = poller.result()
+
+    poller = network_client.security_rules.begin_create_or_update(
+        RESOURCE_GROUP,
+        nsg_name,
+        f"{name_prefix}-SSH",
+        security_rule_parameters={
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "22",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 1010,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": []
+        },
+    )
+
+    ssh_rule = poller.result()
+
+    # Create security group
+
+    poller = network_client.network_security_groups.begin_create_or_update(
+        RESOURCE_GROUP,
+        nsg_name,
+        parameters = {
+            "securityRules" = [
+                jupyter_rule,
+                rstudio_rule,
+                ssh_rule,
+            ]
+        }
+    )
+
+    nsg = poller.result()
+
+    return nsg
+
+
+def create_vnet_and_subnet(
+    network_client: NetworkManagementClient, vnet_name, subnet_name
+):
+    # Step 2: provision a virtual network
+
+    # A virtual machine requires a network interface client (NIC). A NIC
+    # requires a virtual network and subnet along with an IP address.
+    # Therefore we must provision these downstream components first, then
+    # provision the NIC, after which we can provision the VM.
+
+    poller = network_client.virtual_networks.begin_create_or_update(
+        RESOURCE_GROUP,
+        vnet_name,
+        {
+            "location": LOCATION,
+            "address_space": {"address_prefixes": ["10.0.0.0/16"]},
+        },
+    )
+
+    vnet_result = poller.result()
+
+    print(
+        f"Provisioned virtual network {vnet_result.name} with address \
+    prefixes {vnet_result.address_space.address_prefixes}"
+    )
+
+    # Step 3: Provision the subnet and wait for completion
+    poller = network_client.subnets.begin_create_or_update(
+        RESOURCE_GROUP,
+        vnet_name,
+        subnet_name,
+        {"address_prefix": "10.0.0.0/24"},
+    )
+    subnet_result = poller.result()
+
+    print(
+        f"Provisioned virtual subnet {subnet_result.name} with address \
+    prefix {subnet_result.address_prefix}"
+    )
+
+    return vnet_result, subnet_result
 
 
 class VM:
@@ -150,41 +285,8 @@ class VM:
         resource_group_names = [item.name for item in group_list]
         assert RESOURCE_GROUP in resource_group_names
 
-        # Step 2: provision a virtual network
-
-        # A virtual machine requires a network interface client (NIC). A NIC
-        # requires a virtual network and subnet along with an IP address.
-        # Therefore we must provision these downstream components first, then
-        # provision the NIC, after which we can provision the VM.
-
-        poller = self.network_client.virtual_networks.begin_create_or_update(
-            RESOURCE_GROUP,
-            self.VNET_NAME,
-            {
-                "location": LOCATION,
-                "address_space": {"address_prefixes": ["10.0.0.0/16"]},
-            },
-        )
-
-        vnet_result = poller.result()
-
-        print(
-            f"Provisioned virtual network {vnet_result.name} with address \
-        prefixes {vnet_result.address_space.address_prefixes}"
-        )
-
-        # Step 3: Provision the subnet and wait for completion
-        poller = self.network_client.subnets.begin_create_or_update(
-            RESOURCE_GROUP,
-            self.VNET_NAME,
-            self.SUBNET_NAME,
-            {"address_prefix": "10.0.0.0/24"},
-        )
-        subnet_result = poller.result()
-
-        print(
-            f"Provisioned virtual subnet {subnet_result.name} with address \
-        prefix {subnet_result.address_prefix}"
+        vnet_result, subnet_result = create_vnet_and_subnet(
+            self.network_client, self.VNET_NAME, self.SUBNET_NAME
         )
 
         # Step 4: Provision an IP address and wait for completion
@@ -237,6 +339,7 @@ class VM:
                 "os_disk": {
                     "disk_size_gb": 64,
                     "create_option": "FromImage",
+                    "deleteOption": "Delete",
                 },
             },
             "hardware_profile": {"vm_size": hardware_to_vm_size[self.hardware]},
@@ -325,12 +428,26 @@ class VM:
 
     def get_dir(self, remote_dir, local_destination):
         # NOTE: removes anything currently at local_destination!
-        shutil.rmtree(local_destination)
+        if os.path.isdir(local_destination):
+            shutil.rmtree(local_destination)
 
         os.makedirs(local_destination)
-        command = f"scp -r -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address}:{remote_dir} {local_destination}"
+
+        # Tar the remote directory to make the transfer faster
+        cache_tar_filename = "cache.tar.gz"
+        self.run_command(f"tar -czvf {cache_tar_filename} {remote_dir}")
+
+        # Copy the tar file
+        command = f"scp -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address}:{cache_tar_filename} {local_destination}"
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
+
+        # Untar
+        local_cache_tar_path = os.path.join(local_destination, cache_tar_filename)
+        local_command(f"tar -xzvf {local_cache_tar_path} -C {local_destination}")
+
+        # Clean up the tar file
+        local_command(f"rm {local_cache_tar_path}")
 
     def run_command(self, command):
         full_command = (
@@ -571,6 +688,63 @@ class Cluster:
         for vm in self.vms:
             vm.wipe_mlagility_cache()
 
+    def run(self, input_files: str):
+        # TODO: create more jobs based on permutations such as
+        # hardware type, batch size, data type, etc.
+        jobs = [
+            benchit_prefix(f"mlagility{input[2:]} --lean-cache")
+            for input in input_files
+        ]
+
+        print(jobs)
+
+        job = jobs.pop(0)
+        busy = True
+        while job is not None or busy == True:
+            job_assigned = False
+
+            # Attempt to assign job to cluster
+            if job is not None:
+                for vm in self.vms:
+                    if vm.async_process is None:
+                        vm.run_async_command(job)
+                        job_assigned = True
+                        print(f"Job {job} assigned to {vm.VM_NAME}")
+                        break
+
+            # Check if any VMs are done with their last job
+            for vm in self.vms:
+                if vm.async_process is not None:
+                    print("Polling VM", vm.VM_NAME)
+                    if vm.poll_async_command():
+                        vm.wipe_models_cache()
+
+                    time.sleep(1)
+
+            # Get a new job if this job was assigned
+            if job_assigned and len(self.jobs) > 0:
+                job = jobs.pop(0)
+            elif job_assigned and len(self.jobs) == 0:
+                job = None
+
+            # Determine whether the cluster is busy or not
+            busy = False
+            for vm in self.vms:
+                if vm.async_process is not None:
+                    busy = True
+
+        result_dir = "result"
+
+        # Gather cache directories
+        for vm in self.vms:
+            vm_result_dir = os.path.join(result_dir, vm.VM_NAME)
+            vm.get_dir(".cache/mlagility", vm_result_dir)
+
+        # Create report
+        local_command(
+            f"conda run -n mla benchit cache report -d {result_dir}/{self.name}*/.cache/mlagility -r result"
+        )
+
 
 def cluster_prefix(name, hardware):
     return f"{name}-{hardware}"
@@ -625,106 +799,67 @@ class SuperCluster(Cluster):
                 vm.finish_aysnc_command()
 
 
-class Job:
-    def __init__(self, input_files: str):
-        self.input_files = input_files
-        # TODO: create more jobs based on permutations such as
-        # hardware type, batch size, data type, etc.
-        self.jobs = [
-            benchit_prefix(f"mlagility{input[2:]} --lean-cache")
-            for input in self.input_files
-        ]
-
-        print(self.jobs)
-
-    def run(self, cluster: Cluster):
-        job = self.jobs.pop(0)
-        busy = True
-        while job is not None or busy == True:
-            job_assigned = False
-
-            # Attempt to assign job to cluster
-            if job is not None:
-                for vm in cluster.vms:
-                    if vm.async_process is None:
-                        vm.run_async_command(job)
-                        job_assigned = True
-                        print(f"Job {job} assigned to {vm.VM_NAME}")
-                        break
-
-            # Check if any VMs are done with their last job
-            for vm in cluster.vms:
-                if vm.async_process is not None:
-                    print("Polling VM", vm.VM_NAME)
-                    if vm.poll_async_command():
-                        vm.wipe_models_cache()
-
-                    time.sleep(1)
-
-            # Get a new job if this job was assigned
-            if job_assigned and len(self.jobs) > 0:
-                job = self.jobs.pop(0)
-            elif job_assigned and len(self.jobs) == 0:
-                job = None
-
-            # Determine whether the cluster is busy or not
-            busy = False
-            for vm in cluster.vms:
-                if vm.async_process is not None:
-                    busy = True
-
-        # Gather cache directories
-        for vm in cluster.vms:
-            vm.get_dir(".cache/mlagility", vm.VM_NAME)
-
-        # Create report
-        local_command(
-            f"conda run -n mla benchit cache report -d {cluster.name}*/mlagility"
-        )
-
-
 def main():
     # Define the argument parser
     parser = argparse.ArgumentParser(description="Manage MLAgility Azure VMs")
 
-    parser.add_argument("--get", help="Retrieve existing VM(s)", action="store_true")
-
-    # Add the arguments
-    parser.add_argument("--create", help="Create VM(s)", action="store_true")
-
-    parser.add_argument("--info", help="Get info about VM(s)", action="store_true")
-
-    parser.add_argument("--delete", help="Delete VM(s)", action="store_true")
-
-    parser.add_argument("--stop", help="Stop VM(s)", action="store_true")
-
-    parser.add_argument("--start", help="Start VM(s)", action="store_true")
-
-    parser.add_argument("--setup", help="Set up VM(s)", action="store_true")
-
-    parser.add_argument("--cluster", help="Work with a cluster", action="store_true")
-
     parser.add_argument(
-        "--size", help="Size of VM cluster", type=int, required=False, default=None
+        "commands",
+        nargs="+",
+        choices=[
+            "create",
+            "setup",
+            "start",
+            "info",
+            "selftest",
+            "run",
+            "wipe-mla-cache",
+            "stop",
+            "delete",
+        ],
+        help="Execute one or more commands on Azure. "
+        "If you issue multiple commands, they will run in the order provided.",
     )
 
     parser.add_argument(
-        "--name", help="Name of VM/cluster", required=False, default="mla-cluster"
+        "--cluster",
+        "-c",
+        help="Work with a cluster",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--get",
+        "-g",
+        help="Retrieve existing VM(s)",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--size",
+        "-s",
+        help="Size of VM cluster",
+        type=int,
+        required=False,
+        default=None,
+    )
+
+    parser.add_argument(
+        "--name",
+        "-n",
+        help="Name of VM/cluster",
+        required=False,
+        default="mla-cluster",
     )
 
     parser.add_argument(
         "--hardware",
+        "-d",
         help="Hardware devices for VM cluster",
         required=False,
         nargs="+",
         default=["cpu-small"],
     )
-
-    parser.add_argument(
-        "--selftest", help="Run hello world on the VM(s)", action="store_true"
-    )
-
-    parser.add_argument("--run", help="Run a job", action="store_true")
 
     parser.add_argument(
         "--input-files",
@@ -733,13 +868,10 @@ def main():
         nargs="*",
     )
 
-    parser.add_argument(
-        "--wipe-mla-cache", help="Wipe the mlagility cache", action="store_true"
-    )
-
     # Parse the arguments
     args = parser.parse_args()
 
+    # Create a handle to a VM, Cluster of VMs, or SuperCluster (cluster of clusters)
     if args.cluster:
         if len(args.hardware) > 1:
             if args.get:
@@ -781,33 +913,26 @@ def main():
         else:
             handle = VM(args.name, False, args.hardware[0])
 
-    if args.info:
-        handle.info()
+    command_to_function = {
+        "create": handle.create,
+        "setup": handle.setup,
+        "start": handle.start,
+        "info": handle.info,
+        "selftest": handle.selftest,
+        "wipe-mla-cache": handle.wipe_mlagility_cache,
+        "stop": handle.stop,
+        "delete": handle.delete,
+    }
 
-    if args.create:
-        handle.create()
-
-    if args.delete:
-        handle.delete()
-
-    if args.setup:
-        handle.setup()
-
-    if args.stop:
-        handle.stop()
-
-    if args.start:
-        handle.start()
-
-    if args.selftest:
-        handle.selftest()
+    for command in args.commands:
+        if command == "run":
+            # Special case because it takes an argument
+            handle.run(args.input_files)
+        else:
+            command_to_function[command]()
 
     if args.run:
-        job = Job(args.input_files)
-        job.run(handle)
-
-    if args.wipe_mla_cache:
-        handle.wipe_mlagility_cache()
+        handle.run(args.input_files)
 
 
 if __name__ == "__main__":
