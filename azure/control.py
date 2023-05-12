@@ -722,9 +722,9 @@ class Cluster:
                     time.sleep(1)
 
             # Get a new job if this job was assigned
-            if job_assigned and len(self.jobs) > 0:
+            if job_assigned and len(jobs) > 0:
                 job = jobs.pop(0)
-            elif job_assigned and len(self.jobs) == 0:
+            elif job_assigned and len(jobs) == 0:
                 job = None
 
             # Determine whether the cluster is busy or not
