@@ -119,7 +119,7 @@ def create_network_security_group(
             "sourcePortRanges": [],
             "destinationPortRanges": [],
             "sourceAddressPrefixes": [],
-            "destinationAddressPrefixes": []
+            "destinationAddressPrefixes": [],
         },
     )
 
@@ -141,7 +141,7 @@ def create_network_security_group(
             "sourcePortRanges": [],
             "destinationPortRanges": [],
             "sourceAddressPrefixes": [],
-            "destinationAddressPrefixes": []
+            "destinationAddressPrefixes": [],
         },
     )
 
@@ -152,13 +152,13 @@ def create_network_security_group(
     poller = network_client.network_security_groups.begin_create_or_update(
         RESOURCE_GROUP,
         nsg_name,
-        parameters = {
-            "securityRules" = [
+        parameters={
+            "securityRules": [
                 jupyter_rule,
                 rstudio_rule,
                 ssh_rule,
             ]
-        }
+        },
     )
 
     nsg = poller.result()
