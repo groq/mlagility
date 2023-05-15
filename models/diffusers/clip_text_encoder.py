@@ -5,15 +5,10 @@
 from diffusers import StableDiffusionPipeline
 import torch
 
-
-pipe = StableDiffusionPipeline.from_pretrained(
-    "CompVis/stable-diffusion-v1-4",
-    use_auth_token="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",
-)
+pipe = StableDiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-1")
 
 model = pipe.text_encoder
 inputs = {"input_ids": torch.ones([1, 77], dtype=torch.int)}
-
 
 # Call model
 model(**inputs)
