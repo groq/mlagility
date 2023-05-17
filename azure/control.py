@@ -3,27 +3,27 @@ import argparse
 import subprocess
 import shutil
 import time
+from typing import Optional
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
-LOCATION = "eastus"
-RESOURCE_GROUP = "mla-resource"
-VM_NAME = "ExampleVM"
+if os.environ.get("MLAGILITY_AZURE_LOCATION"):
+    LOCATION = os.environ.get("MLAGILITY_AZURE_LOCATION")
+else:
+    LOCATION = "eastus"
+
 USERNAME = "azureuser"
-PASSWORD = "donthackmla"
-SSH_PATH = "~/.ssh/mla_key.pub"
-SSH_PRIVATE_PATH = "~/.ssh/mla_key.pem"
 
 device_to_image_reference = {
     "nvidia": {
-        "publisher": "Nvidia",
-        "offer": "pytorch_from_nvidia",
-        "sku": "ngc-pytorch-version-22-10-0_gen2",
-        "version": "22.10.0",
+        "publisher": "nvidia",
+        "offer": "ngc_azure_17_11",
+        "sku": "ngc-base-version-23_03_0_gen2",
+        "version": "latest",
     },
-    "cpu": {
+    "x86": {
         "publisher": "canonical",
         "offer": "0001-com-ubuntu-server-focal",
         "sku": "20_04-lts-gen2",
@@ -33,8 +33,8 @@ device_to_image_reference = {
 
 hardware_to_device = {
     "t4": "nvidia",
-    "icelake": "cpu",
-    "cpu-small": "cpu",
+    "icelake": "x86",
+    "cpu-small": "x86",
 }
 
 hardware_to_vm_size = {
@@ -47,11 +47,11 @@ vm_size_to_hardware = {v: k for k, v in hardware_to_vm_size.items()}
 
 device_to_plan = {
     "nvidia": {
-        "name": "ngc-pytorch-version-22-10-0_gen2",
-        "product": "pytorch_from_nvidia",
+        "name": "ngc-base-version-23_03_0_gen2",
+        "product": "ngc_azure_17_11",
         "publisher": "nvidia",
     },
-    "cpu": None,
+    "x86": None,
 }
 
 
@@ -61,6 +61,32 @@ def benchit_prefix(args: str) -> str:
 
 def local_command(command: str):
     subprocess.run(command, check=True, shell=True)
+
+
+def get_ssh_keys():
+    if os.environ.get("MLAGILITY_AZURE_SSH_BASEPATH"):
+        SSH_KEY_NAME = os.environ.get("MLAGILITY_AZURE_SSH_BASEPATH")
+        SSH_PUBLIC_KEY = f"{SSH_KEY_NAME}.pub"
+        SSH_PRIVATE_KEY = f"{SSH_KEY_NAME}.pem"
+        if not os.path.exists(SSH_PUBLIC_KEY):
+            raise ValueError(
+                f"{SSH_PUBLIC_KEY} must be the location of a .pub SSH key. You"
+                "can change the base path where the .pub file is expected by changing "
+                "the MLAGILITY_AZURE_SSH_BASEPATH environment variable."
+            )
+        if not os.path.exists(SSH_PRIVATE_KEY):
+            raise ValueError(
+                f"{SSH_PRIVATE_KEY} must be the location of a .pem SSH key. You"
+                "can change the base path where the .pem file is expected by changing "
+                "the MLAGILITY_AZURE_SSH_BASEPATH environment variable."
+            )
+    else:
+        raise ValueError(
+            "Environment variable MLAGILITY_AZURE_SSH_BASEPATH "
+            "must be set to access VM(s)."
+        )
+
+    return SSH_PUBLIC_KEY, SSH_PRIVATE_KEY
 
 
 def auth():
@@ -73,18 +99,43 @@ def auth():
     return credential, subscription_id
 
 
+def create_resource_group(resource_client: ResourceManagementClient, rg_name: str):
+    # Step 1: Provision a resource group
+
+    # Provision the resource group.
+    rg_result = resource_client.resource_groups.create_or_update(
+        rg_name, {"location": LOCATION}
+    )
+
+    print(
+        f"Provisioned resource group {rg_result.name} in the \
+    {rg_result.location} region"
+    )
+
+    return rg_result
+
+
 def create_network_security_group(
-    network_client: NetworkManagementClient, name_prefix: str
+    network_client: NetworkManagementClient, nsg_name: str, rg_name: str
 ):
-    nsg_name = f"{name_prefix}-nsg"
+
+    poller = network_client.network_security_groups.begin_create_or_update(
+        rg_name,
+        nsg_name,
+        {
+            "location": LOCATION,
+        },
+    )
+
+    _ = poller.result()
 
     # Create Security Rules
     # NOTE: These are a copy of the default security rules every VM gets
     # in Azure portal. May want to customize eventually.
     poller = network_client.security_rules.begin_create_or_update(
-        RESOURCE_GROUP,
+        rg_name,
         nsg_name,
-        f"{name_prefix}-JupyterHub",
+        f"{nsg_name}-JupyterHub",
         security_rule_parameters={
             "protocol": "TCP",
             "sourcePortRange": "*",
@@ -104,9 +155,9 @@ def create_network_security_group(
     jupyter_rule = poller.result()
 
     poller = network_client.security_rules.begin_create_or_update(
-        RESOURCE_GROUP,
+        rg_name,
         nsg_name,
-        f"{name_prefix}-RStudio_Server",
+        f"{nsg_name}-RStudio_Server",
         security_rule_parameters={
             "protocol": "TCP",
             "sourcePortRange": "*",
@@ -126,9 +177,9 @@ def create_network_security_group(
     rstudio_rule = poller.result()
 
     poller = network_client.security_rules.begin_create_or_update(
-        RESOURCE_GROUP,
+        rg_name,
         nsg_name,
-        f"{name_prefix}-SSH",
+        f"{nsg_name}-SSH",
         security_rule_parameters={
             "protocol": "TCP",
             "sourcePortRange": "*",
@@ -147,17 +198,18 @@ def create_network_security_group(
 
     ssh_rule = poller.result()
 
-    # Create security group
+    # Update security group with rules
 
     poller = network_client.network_security_groups.begin_create_or_update(
-        RESOURCE_GROUP,
+        rg_name,
         nsg_name,
         parameters={
+            "location": LOCATION,
             "securityRules": [
                 jupyter_rule,
                 rstudio_rule,
                 ssh_rule,
-            ]
+            ],
         },
     )
 
@@ -166,10 +218,15 @@ def create_network_security_group(
     return nsg
 
 
-def create_vnet_and_subnet(
-    network_client: NetworkManagementClient, vnet_name, subnet_name
+def create_vnet_subnet_nsg(
+    network_client: NetworkManagementClient,
+    vnet_name: str,
+    subnet_name: str,
+    nsg_name: str,
+    rg_name: str,
 ):
-    # Step 2: provision a virtual network
+
+    nsg_result = create_network_security_group(network_client, nsg_name, rg_name)
 
     # A virtual machine requires a network interface client (NIC). A NIC
     # requires a virtual network and subnet along with an IP address.
@@ -177,7 +234,7 @@ def create_vnet_and_subnet(
     # provision the NIC, after which we can provision the VM.
 
     poller = network_client.virtual_networks.begin_create_or_update(
-        RESOURCE_GROUP,
+        rg_name,
         vnet_name,
         {
             "location": LOCATION,
@@ -194,7 +251,7 @@ def create_vnet_and_subnet(
 
     # Step 3: Provision the subnet and wait for completion
     poller = network_client.subnets.begin_create_or_update(
-        RESOURCE_GROUP,
+        rg_name,
         vnet_name,
         subnet_name,
         {"address_prefix": "10.0.0.0/24"},
@@ -206,7 +263,7 @@ def create_vnet_and_subnet(
     prefix {subnet_result.address_prefix}"
     )
 
-    return vnet_result, subnet_result
+    return vnet_result, subnet_result, nsg_result
 
 
 class VM:
@@ -214,10 +271,39 @@ class VM:
     Handle for controlling an individual VM
     """
 
-    def __init__(self, name, retrieve: bool = True, hardware=None):
-        self.VM_NAME = name
-        self.VNET_NAME = f"{name}-vnet"
-        self.SUBNET_NAME = f"{name}-subnet"
+    def __init__(
+        self,
+        name,
+        retrieve: bool = True,
+        hardware: Optional[str] = None,
+        rg_name: Optional[str] = None,
+        nsg_name: Optional[str] = None,
+        vnet_name: Optional[str] = None,
+        subnet_name: Optional[str] = None,
+    ):
+        # The names for the resource group, vnet, subnet, and nsg may be
+        # set by a Cluster that are instantiating this VM
+        if rg_name is None:
+            self.RG_NAME = f"{name}-rg"
+        else:
+            self.RG_NAME = rg_name
+
+        if vnet_name is None:
+            self.VNET_NAME = f"{name}-vnet"
+        else:
+            self.VNET_NAME = vnet_name
+
+        if subnet_name is None:
+            self.SUBNET_NAME = f"{name}-subnet"
+        else:
+            self.SUBNET_NAME = subnet_name
+
+        if nsg_name is None:
+            self.NSG_NAME = f"{name}-nsg"
+        else:
+            self.NSG_NAME = nsg_name
+
+        self.VM_NAME = f"{name}"
         self.IP_NAME = f"{name}-ip"
         self.IP_CONFIG_NAME = f"{name}-ip-config"
         self.NIC_NAME = f"{name}-nic"
@@ -238,6 +324,8 @@ class VM:
 
         self._ip = None
 
+        self.public_key, self.private_key = get_ssh_keys()
+
         if retrieve:
             vm_size, _ = self.info(verbosity="none")
             self.hardware = vm_size_to_hardware[vm_size]
@@ -253,7 +341,7 @@ class VM:
     def ip_address(self):
         if not self._ip:
             self._ip = self.network_client.public_ip_addresses.get(
-                RESOURCE_GROUP, self.IP_NAME
+                self.RG_NAME, self.IP_NAME
             ).ip_address
 
         return self._ip
@@ -269,7 +357,7 @@ class VM:
 
     def info(self, verbosity="high"):
         vm_info = self.compute_client.virtual_machines.get(
-            RESOURCE_GROUP, self.VM_NAME, expand="instanceView"
+            self.RG_NAME, self.VM_NAME, expand="instanceView"
         )
 
         status = vm_info.instance_view.statuses[1].display_status
@@ -280,18 +368,59 @@ class VM:
 
         return size, status
 
-    def create(self):
-        group_list = self.resource_client.resource_groups.list()
-        resource_group_names = [item.name for item in group_list]
-        assert RESOURCE_GROUP in resource_group_names
+    def create(
+        self,
+        create_shared_resources: bool = True,
+        subnet_result=None,
+        nsg_result=None,
+    ):
 
-        vnet_result, subnet_result = create_vnet_and_subnet(
-            self.network_client, self.VNET_NAME, self.SUBNET_NAME
-        )
+        """
+        Set create_shared_resources = False if this VM is part of a cluster,
+        since those shared resources will be created at the cluster level.
+        """
+
+        if os.environ.get("MLAGILITY_AZURE_PASSWORD"):
+            PASSWORD = os.environ.get("MLAGILITY_AZURE_PASSWORD")
+        else:
+            raise ValueError(
+                "You must set the MLAGILITY_AZURE_PASSWORD environment variable "
+                "to create VM(s). This will be the admin password for the VM(s)."
+            )
+
+        if create_shared_resources:
+            create_resource_group(self.resource_client, self.RG_NAME)
+
+            _, subnet_result, nsg_result = create_vnet_subnet_nsg(
+                self.network_client,
+                self.VNET_NAME,
+                self.SUBNET_NAME,
+                self.NSG_NAME,
+                self.RG_NAME,
+            )
+        else:
+
+            # Check and make sure the shared resources exist
+            group_list = self.resource_client.resource_groups.list()
+            resource_group_names = [item.name for item in group_list]
+
+            if self.RG_NAME not in resource_group_names:
+                raise ValueError(
+                    f"Attempted to retrieve a resource group {self.RG_NAME} that "
+                    "is not part of your Azure subscription. Found resource "
+                    f"groups: {resource_group_names}"
+                )
+
+            if subnet_result is None or nsg_result is None:
+                raise ValueError(
+                    "Attempted to call VM.create with create_shared_resources=False, however "
+                    f"subnet_result is {subnet_result} and nsg_result is {nsg_result}."
+                    "Both are required to be populated (ie, not None)."
+                )
 
         # Step 4: Provision an IP address and wait for completion
         poller = self.network_client.public_ip_addresses.begin_create_or_update(
-            RESOURCE_GROUP,
+            self.RG_NAME,
             self.IP_NAME,
             {
                 "location": LOCATION,
@@ -310,7 +439,7 @@ class VM:
 
         # Step 5: Provision the network interface client
         poller = self.network_client.network_interfaces.begin_create_or_update(
-            RESOURCE_GROUP,
+            self.RG_NAME,
             self.NIC_NAME,
             {
                 "location": LOCATION,
@@ -321,15 +450,15 @@ class VM:
                         "public_ip_address": {"id": ip_address_result.id},
                     }
                 ],
-                "network_security_group": {
-                    "id": "/subscriptions/f9f04fac-965a-4f5e-b4b8-a3ec406a9047/resourceGroups/mla-resource/providers/Microsoft.Network/networkSecurityGroups/mlacentralnsg718"
-                },
+                "network_security_group": {"id": nsg_result.id},
             },
         )
 
         nic_result = poller.result()
 
-        with open(os.path.expanduser(SSH_PATH)) as keyfile:
+        with open(
+            os.path.expanduser(self.public_key), mode="r", encoding="utf-8"
+        ) as keyfile:
             ssh_key = keyfile.read()
 
         vm_spec = {
@@ -337,7 +466,7 @@ class VM:
             "storage_profile": {
                 "image_reference": device_to_image_reference[self.device],
                 "os_disk": {
-                    "disk_size_gb": 64,
+                    # "disk_size_gb": 64,
                     "create_option": "FromImage",
                     "deleteOption": "Delete",
                 },
@@ -372,7 +501,7 @@ class VM:
             vm_spec["plan"] = device_to_plan[self.device]
 
         poller = self.compute_client.virtual_machines.begin_create_or_update(
-            RESOURCE_GROUP,
+            self.RG_NAME,
             self.VM_NAME,
             vm_spec,
         )
@@ -382,47 +511,56 @@ class VM:
         print(f"Provisioned virtual machine {vm_result.name}")
 
     def delete(self):
+        """
+        Deletes the resources associated with a specific VM. Note: this may leave behind
+        a resource group and other artifacts, so generally it is a good idea to go to
+        portal.azure.com and finish cleaning up there.
+
+        We don't delete the resource group when deleting a single VM since we don't want
+        to make assumptions about what else is in that resource group.
+        """
+
         print("Deleting VM", self.VM_NAME)
         # NOTE: we call result() to make sure the delete operation finishes before we move on to the next one
         self.compute_client.virtual_machines.begin_delete(
-            resource_group_name=RESOURCE_GROUP, vm_name=self.VM_NAME
+            resource_group_name=self.RG_NAME, vm_name=self.VM_NAME
         ).result()
 
         print("Deleting nic", self.NIC_NAME)
         self.network_client.network_interfaces.begin_delete(
-            RESOURCE_GROUP, self.NIC_NAME
+            self.RG_NAME, self.NIC_NAME
         ).result()
         print("Deleting ip", self.IP_NAME)
         self.network_client.public_ip_addresses.begin_delete(
-            RESOURCE_GROUP, self.IP_NAME
+            self.RG_NAME, self.IP_NAME
         ).result()
         print("Deleting subnet", self.SUBNET_NAME)
         self.network_client.subnets.begin_delete(
-            RESOURCE_GROUP, self.VNET_NAME, self.SUBNET_NAME
+            self.RG_NAME, self.VNET_NAME, self.SUBNET_NAME
         ).result()
         print("Deleting vnet", self.VNET_NAME)
         self.network_client.virtual_networks.begin_delete(
-            RESOURCE_GROUP, self.VNET_NAME
+            self.RG_NAME, self.VNET_NAME
         ).result()
 
     def stop(self):
         print("Stopping VM", self.VM_NAME)
         self.compute_client.virtual_machines.begin_deallocate(
-            RESOURCE_GROUP, self.VM_NAME
+            self.RG_NAME, self.VM_NAME
         )
 
     def start(self):
         print("Starting VM", self.VM_NAME)
-        self.compute_client.virtual_machines.begin_start(RESOURCE_GROUP, self.VM_NAME)
+        self.compute_client.virtual_machines.begin_start(self.RG_NAME, self.VM_NAME)
 
     def send_file(self, file):
-        command = f"scp -i {SSH_PRIVATE_PATH} {file} {USERNAME}@{self.ip_address}:~/."
+        command = f"scp -i {self.private_key} {file} {USERNAME}@{self.ip_address}:~/."
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
     def get_file(self, remote_file, local_dir, local_file_name):
         os.makedirs(local_dir, exist_ok=True)
-        command = f"scp -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address}:{remote_file} {local_dir}/{local_file_name}"
+        command = f"scp -i {self.private_key} {USERNAME}@{self.ip_address}:{remote_file} {local_dir}/{local_file_name}"
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
@@ -438,7 +576,7 @@ class VM:
         self.run_command(f"tar -czvf {cache_tar_filename} {remote_dir}")
 
         # Copy the tar file
-        command = f"scp -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address}:{cache_tar_filename} {local_destination}"
+        command = f"scp -i {self.private_key} {USERNAME}@{self.ip_address}:{cache_tar_filename} {local_destination}"
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
@@ -451,14 +589,14 @@ class VM:
 
     def run_command(self, command):
         full_command = (
-            f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
+            f"ssh -i {self.private_key} {USERNAME}@{self.ip_address} {command}"
         )
         print(f"Running command on {self.VM_NAME}: {full_command}")
         subprocess.run(full_command.split(" "), check=True)
 
     def check_command(self, command, success_term):
         full_command = (
-            f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
+            f"ssh -i {self.private_key} {USERNAME}@{self.ip_address} {command}"
         )
         print(f"Running command on {self.VM_NAME}: {full_command}")
         result = subprocess.check_output(full_command.split(" ")).decode()
@@ -469,7 +607,7 @@ class VM:
 
     def run_async_command(self, command):
         full_command = (
-            f"ssh -i {SSH_PRIVATE_PATH} {USERNAME}@{self.ip_address} {command}"
+            f"ssh -i {self.private_key} {USERNAME}@{self.ip_address} {command}"
         )
         print(f"Running async command on {self.VM_NAME}: {full_command}")
         self.async_process = subprocess.Popen(
@@ -556,7 +694,9 @@ class VM:
 
     def selftest(self):
         self.check_command(
-            benchit_prefix("mlagility/models/selftest/linear.py"),
+            benchit_prefix(
+                f"mlagility/models/selftest/linear.py --device {self.device}"
+            ),
             "Successfully benchmarked",
         )
         self.wipe_mlagility_cache()
@@ -573,10 +713,6 @@ class VM:
         self.run_command(command)
 
 
-def vm_prefix(name: str) -> str:
-    return f"{name}-vm-"
-
-
 class Cluster:
     """
     Handle for controlling a cluster of VMs
@@ -586,12 +722,42 @@ class Cluster:
         self,
         name: str,
         retrieve: bool,
-        size: int = None,
+        size: Optional[int] = None,
         hardware: str = "cpu-small",
+        rg_name: Optional[str] = None,
+        nsg_name: Optional[str] = None,
+        vnet_name: Optional[str] = None,
+        subnet_name: Optional[str] = None,
     ):
+        # The names for the resource group, vnet, subnet, and nsg may be
+        # set by a SuperCluster that are instantiating this Cluster
+        if rg_name is None:
+            self.RG_NAME = f"{name}-rg"
+        else:
+            self.RG_NAME = rg_name
+
+        if vnet_name is None:
+            self.VNET_NAME = f"{name}-vnet"
+        else:
+            self.VNET_NAME = vnet_name
+
+        if subnet_name is None:
+            self.SUBNET_NAME = f"{name}-subnet"
+        else:
+            self.SUBNET_NAME = subnet_name
+
+        if nsg_name is None:
+            self.NSG_NAME = f"{name}-nsg"
+        else:
+            self.NSG_NAME = nsg_name
+
         self.size = size
         self.name = name
         self.hardware = hardware
+
+        self.vnet = None
+        self.subnet = None
+        self.nsg = None
 
         self.credential, self.subscription_id = auth()
         self.resource_client = ResourceManagementClient(
@@ -610,13 +776,18 @@ class Cluster:
 
     def populate_vms(self, retrieve: bool):
         if retrieve:
-            resource_group_vms = self.compute_client.virtual_machines.list(
-                RESOURCE_GROUP
-            )
+            resource_group_vms = self.compute_client.virtual_machines.list(self.RG_NAME)
             self.vms = [
-                VM(vm.name, retrieve=True)
+                VM(
+                    vm.name,
+                    retrieve=True,
+                    rg_name=self.RG_NAME,
+                    nsg_name=self.NSG_NAME,
+                    vnet_name=self.VNET_NAME,
+                    subnet_name=self.SUBNET_NAME,
+                )
                 for vm in resource_group_vms
-                if vm.name.startswith(vm_prefix(self.name))
+                if vm.name.startswith(self.name)
             ]
         else:
             if self.size is None:
@@ -624,9 +795,13 @@ class Cluster:
 
             self.vms = [
                 VM(
-                    name=f"{vm_prefix(self.name)}{i}",
+                    name=f"{self.name}-{i}",
                     retrieve=False,
                     hardware=self.hardware,
+                    rg_name=self.RG_NAME,
+                    nsg_name=self.NSG_NAME,
+                    vnet_name=self.VNET_NAME,
+                    subnet_name=self.SUBNET_NAME,
                 )
                 for i in range(self.size)
             ]
@@ -635,13 +810,45 @@ class Cluster:
         for vm in self.vms:
             vm.info()
 
-    def create(self):
+    def create(
+        self, create_shared_resources: bool = True, subnet_result=None, nsg_result=None
+    ):
+        if create_shared_resources:
+            create_resource_group(self.resource_client, self.RG_NAME)
+            self.vnet, self.subnet, self.nsg = create_vnet_subnet_nsg(
+                self.network_client,
+                self.VNET_NAME,
+                self.SUBNET_NAME,
+                self.NSG_NAME,
+                self.RG_NAME,
+            )
+        else:
+            if subnet_result is None or nsg_result is None:
+                raise ValueError(
+                    "Attempted to call Cluster.create with create_shared_resources=False, however "
+                    f"subnet_result is {subnet_result} and nsg_result is {nsg_result}."
+                    "Both are required to be populated (ie, not None)."
+                )
+
+            self.subnet = subnet_result
+            self.nsg = nsg_result
+
         for vm in self.vms:
-            vm.create()
+            vm.create(
+                create_shared_resources=False,
+                subnet_result=self.subnet,
+                nsg_result=self.nsg,
+            )
 
     def delete(self):
-        for vm in self.vms:
-            vm.delete()
+        """
+        Delete the resource group for the cluster, which deletes all VMs, NICs,
+        subnet, vnet, NSG, etc. associated with the cluster as well.
+        """
+
+        poller = self.resource_client.resource_groups.begin_delete(self.RG_NAME)
+        poller.result()
+        print(f"Deleted resource group {self.RG_NAME}")
 
     def begin_setup(self):
         for vm in self.vms:
@@ -690,9 +897,11 @@ class Cluster:
 
     def run(self, input_files: str):
         # TODO: create more jobs based on permutations such as
-        # hardware type, batch size, data type, etc.
+        # batch size, data type, etc.
+        device_type = hardware_to_device[self.hardware]
+
         jobs = [
-            benchit_prefix(f"mlagility{input[2:]} --lean-cache")
+            benchit_prefix(f"mlagility{input[2:]} --lean-cache --device {device_type}")
             for input in input_files
         ]
 
@@ -700,7 +909,7 @@ class Cluster:
 
         job = jobs.pop(0)
         busy = True
-        while job is not None or busy == True:
+        while job is not None or busy is True:
             job_assigned = False
 
             # Attempt to assign job to cluster
@@ -760,29 +969,26 @@ class SuperCluster(Cluster):
 
     def populate_vms(self, retrieve: bool):
         if retrieve:
-            self.vms = [
-                Cluster(
-                    name=cluster_prefix(self.name, hardware),
-                    retrieve=True,
-                    size=None,
-                    hardware=hardware,
-                )
-                for hardware in self.hardware
-            ]
-
+            size = None
         else:
             if self.size is None:
                 raise ValueError("size must be set when retrieve=False")
 
-            self.vms = [
-                Cluster(
-                    name=cluster_prefix(self.name, hardware),
-                    retrieve=False,
-                    size=self.size,
-                    hardware=hardware,
-                )
-                for hardware in self.hardware
-            ]
+            size = self.size
+
+        self.vms = [
+            Cluster(
+                name=cluster_prefix(self.name, hardware),
+                retrieve=retrieve,
+                size=size,
+                hardware=hardware,
+                rg_name=self.RG_NAME,
+                nsg_name=self.NSG_NAME,
+                vnet_name=self.VNET_NAME,
+                subnet_name=self.SUBNET_NAME,
+            )
+            for hardware in self.hardware
+        ]
 
     def run_async_command(self, command):
         """
@@ -829,13 +1035,6 @@ def main():
     )
 
     parser.add_argument(
-        "--get",
-        "-g",
-        help="Retrieve existing VM(s)",
-        action="store_true",
-    )
-
-    parser.add_argument(
         "--size",
         "-s",
         help="Size of VM cluster",
@@ -847,9 +1046,9 @@ def main():
     parser.add_argument(
         "--name",
         "-n",
-        help="Name of VM/cluster",
+        help="Name that will prefix all the of resources. name-rg, name-vm, name-nic, etc.",
         required=False,
-        default="mla-cluster",
+        default="mla",
     )
 
     parser.add_argument(
@@ -871,47 +1070,33 @@ def main():
     # Parse the arguments
     args = parser.parse_args()
 
+    # If "create" is one of the commands then we will create the VM(s) from scratch
+    # and then use them for the duration of the session. If "create" is not one of the
+    # commands we will attempt to retrieve VM(s) that already exist.
+    retrieve = "create" not in args.commands
+
     # Create a handle to a VM, Cluster of VMs, or SuperCluster (cluster of clusters)
     if args.cluster:
         if len(args.hardware) > 1:
-            if args.get:
-                handle = SuperCluster(
-                    args.name,
-                    retrieve=True,
-                    size=None,
-                    hardware=args.hardware,
-                )
-            else:
-                handle = SuperCluster(
-                    args.name,
-                    retrieve=False,
-                    size=args.size,
-                    hardware=args.hardware,
-                )
+            handle = SuperCluster(
+                args.name,
+                retrieve=retrieve,
+                size=args.size,
+                hardware=args.hardware,
+            )
         else:
-            if args.get:
-                handle = Cluster(
-                    args.name,
-                    retrieve=True,
-                    size=None,
-                    hardware=args.hardware[0],
-                )
-            else:
-                handle = Cluster(
-                    args.name,
-                    retrieve=False,
-                    size=args.size,
-                    hardware=args.hardware[0],
-                )
+            handle = Cluster(
+                args.name,
+                retrieve=retrieve,
+                size=args.size,
+                hardware=args.hardware[0],
+            )
     else:
         if len(args.hardware) > 1:
             raise ValueError(
                 "Length of hardware arg must be 1 if --cluster is not used"
             )
-        if args.get:
-            handle = VM(args.name, retrieve=True)
-        else:
-            handle = VM(args.name, False, args.hardware[0])
+        handle = VM(args.name, retrieve, args.hardware[0])
 
     command_to_function = {
         "create": handle.create,
@@ -927,12 +1112,15 @@ def main():
     for command in args.commands:
         if command == "run":
             # Special case because it takes an argument
-            handle.run(args.input_files)
+            if isinstance(handle, SuperCluster) or isinstance(handle, VM):
+                raise ValueError(
+                    "The run command is only implemented for Clusters "
+                    "(not VMs or clusters of Clusters)"
+                )
+            else:
+                handle.run(args.input_files)
         else:
             command_to_function[command]()
-
-    if args.run:
-        handle.run(args.input_files)
 
 
 if __name__ == "__main__":
