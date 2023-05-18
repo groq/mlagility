@@ -3,7 +3,6 @@
 [![MLAgility tests](https://github.com/groq/mlagility/actions/workflows/test_mlagility.yml/badge.svg)](https://github.com/groq/mlagility/tree/main/test "Check out our tests")
 [![onnxflow tests](https://github.com/groq/mlagility/actions/workflows/test_onnxflow.yml/badge.svg)](https://github.com/groq/mlagility/tree/main/test "Check out our tests")
 [![MLAgility GPU tests](https://github.com/groq/mlagility/actions/workflows/test_gpu_mlagility.yml/badge.svg)](https://github.com/groq/mlagility/tree/main/test "Check out our tests")
-
 [![OS - Linux](https://img.shields.io/badge/OS-Linux-blue?logo=linux&logoColor=white)](https://github.com/groq/mlagility/blob/main/docs/install.md "Check out our instructions")
 [![Made with Python](https://img.shields.io/badge/Python-3.8,3.10-blue?logo=python&logoColor=white)](https://github.com/groq/mlagility/blob/main/docs/install.md "Check out our instructions")
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/groq/mlagility/blob/main/LICENSE "Check out our license")
