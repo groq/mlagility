@@ -3,7 +3,7 @@ import argparse
 import subprocess
 import shutil
 import time
-from typing import Optional
+from typing import Optional, Callable
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
@@ -322,6 +322,8 @@ class VM:
         self.async_process = None
         self.async_command = None
 
+        self.async_poller = None
+
         self._ip = None
 
         self.public_key, self.private_key = get_ssh_keys()
@@ -549,9 +551,38 @@ class VM:
             self.RG_NAME, self.VM_NAME
         )
 
-    def start(self):
+    def begin_start(self):
+        """
+        Asynchronously start the VM (useful for starting many VMs in parallel)
+        """
+
         print("Starting VM", self.VM_NAME)
-        self.compute_client.virtual_machines.begin_start(self.RG_NAME, self.VM_NAME)
+        self.async_poller = self.compute_client.virtual_machines.begin_start(
+            self.RG_NAME, self.VM_NAME
+        )
+
+    def finish_azure_api(self):
+        """
+        Sync an in-progress Azure API
+        """
+
+        if self.async_poller is None:
+            raise ValueError(
+                "finish_azure_api() called while no asynchronous Azure API is in progress "
+                "for VM",
+                self.VM_NAME,
+            )
+
+        self.async_poller.result()
+        self.async_poller = None
+
+    def start(self):
+        """
+        Synchronously start the VM
+        """
+        self.begin_start()
+        self.finish_azure_api()
+        self.wait_ssh()
 
     def send_file(self, file):
         command = f"scp -i {self.private_key} {file} {USERNAME}@{self.ip_address}:~/."
@@ -635,43 +666,75 @@ class VM:
         else:
             return None
 
-    def finish_aysnc_command(self):
+    def finish_async_command(
+        self, check_output: Optional[str] = None, verbosity: str = "low"
+    ):
         """
         Waits for an async command to finish and then prints the result
         """
         out, errs = self.async_process.communicate()
+        out = out.decode()
+        errs = errs.decode()
+
         print(f"{self.VM_NAME} finished job: {self.async_command}")
-        print(out.decode())
-        print(errs.decode())
+
+        if verbosity == "high":
+            print(out)
+            print(errs)
+
+        if check_output is not None:
+            if check_output not in out:
+                raise ValueError(f"Error! Success term not in result: {out}")
+            else:
+                print("Success!")
 
         self.async_process = None
 
         return out, errs
 
-    def begin_setup(self):
+    def retry_method(
+        self,
+        method: Callable,
+        task_description: str,
+        timeout_seconds=300,
+        sleep_amount_seconds=15,
+    ):
+        """
+        Run a function, and if it doesn't work then retry until a timeout runs out
+        """
+
         # Add the VM IP to known hosts, and retry a few times before giving up
         known_host_success = False
-        timeout = 300  # seconds
-        sleep_amount = 15  # seconds
-        assert timeout % sleep_amount == 0
 
-        while not known_host_success and timeout > 0:
+        if timeout_seconds % sleep_amount_seconds != 0:
+            raise ValueError(
+                f"sleep_amount_seconds ({sleep_amount_seconds}) must divide "
+                f"evenly into timeout_seconds ({timeout_seconds})"
+            )
+
+        timeout_remaining = timeout_seconds
+
+        while not known_host_success and timeout_remaining > 0:
             try:
-                self.add_to_known_hosts()
+                method()
                 known_host_success = True
             except subprocess.CalledProcessError as e:
-                timeout = timeout - sleep_amount
-                if timeout > 0:
+                timeout_remaining = timeout_remaining - sleep_amount_seconds
+                if timeout_remaining > 0:
                     print(
-                        "Adding to known hosts failed, which means the VM is probably "
-                        f"not ready yet. Re-attempting, timeout remaining is {timeout}"
+                        f"{task_description} failed. "
+                        f"Re-attempting, timeout remaining is {timeout_remaining}"
                     )
                 else:
                     print(
-                        "Adding to known hosts failed and the timeout has elapsed. Exiting."
+                        f"{task_description} failed and the timeout has elapsed. Exiting."
                     )
                     raise e
-                time.sleep(sleep_amount)
+                time.sleep(sleep_amount_seconds)
+
+    def begin_setup(self):
+        # Add the VM IP to known hosts, and retry a few times before giving up
+        self.retry_method(self.add_to_known_hosts, "Adding to known hosts")
 
         self.send_file("setup_part_1.sh")
         self.send_file("setup_part_2.sh")
@@ -679,27 +742,43 @@ class VM:
 
     def setup_part_2(self):
         print(f"\n\nSETUP PART 1 RESULT FOR {self.VM_NAME}:\n\n")
-        self.finish_aysnc_command()
+        self.finish_async_command(verbosity="high")
 
         self.run_async_command("bash setup_part_2.sh")
 
     def finish_setup(self):
         print(f"\n\nSETUP FINAL RESULT FOR {self.VM_NAME}:\n\n")
-        self.finish_aysnc_command()
+        self.finish_async_command(verbosity="high")
 
     def setup(self):
         self.begin_setup()
         self.setup_part_2()
         self.finish_setup()
 
-    def selftest(self):
-        self.check_command(
+    def ssh_hello_world(self):
+        self.run_command("echo hello world")
+
+    def wait_ssh(self):
+        """
+        Wait until the VM is available for SSH connection
+        """
+
+        self.retry_method(self.ssh_hello_world, "Checking SSH availability")
+
+    def begin_selftest(self):
+        self.run_async_command(
             benchit_prefix(
                 f"mlagility/models/selftest/linear.py --device {self.device}"
-            ),
-            "Successfully benchmarked",
+            )
         )
+
+    def finish_selftest(self):
+        self.finish_async_command(check_output="Successfully benchmarked")
         self.wipe_mlagility_cache()
+
+    def selftest(self):
+        self.begin_selftest()
+        self.finish_async_command()
 
     def wipe_models_cache(self):
         # NOTE: this method needs to be kept up-to-date with MLAgility's corpus
@@ -869,7 +948,13 @@ class Cluster:
 
     def start(self):
         for vm in self.vms:
-            vm.start()
+            vm.begin_start()
+
+        for vm in self.vms:
+            vm.finish_azure_api()
+
+        for vm in self.vms:
+            vm.wait_ssh()
 
     def stop(self):
         for vm in self.vms:
@@ -877,7 +962,10 @@ class Cluster:
 
     def selftest(self):
         for vm in self.vms:
-            vm.selftest()
+            vm.begin_selftest()
+
+        for vm in self.vms:
+            vm.finish_selftest()
 
     def run_async_command(self, command):
         """
@@ -889,7 +977,7 @@ class Cluster:
             vm.run_async_command(command)
 
         for vm in self.vms:
-            vm.finish_aysnc_command()
+            vm.finish_async_command()
 
     def wipe_mlagility_cache(self):
         for vm in self.vms:
@@ -1002,7 +1090,7 @@ class SuperCluster(Cluster):
 
         for cluster in self.vms:
             for vm in cluster:
-                vm.finish_aysnc_command()
+                vm.finish_async_command()
 
 
 def main():
