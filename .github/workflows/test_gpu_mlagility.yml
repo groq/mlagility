@@ -4,16 +4,18 @@
 name: Test MLAgility Using Self-Hosted Azure GPU
 
 on:
+  # Triggers the workflow when changes are pushed to the repository
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  # Allows users to manually trigger the workflow using the GitHub UI
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   start_vm:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,6 +26,7 @@ jobs:
       - name: Turn on Azure VM
         run: |
           az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
+          az vm wait --name morecuda --resource-group morecuda_group --custom "instanceView.statuses[?code=='PowerState/deallocated']" --interval 30
           az vm start --name morecuda --resource-group morecuda_group
           az vm wait --created --name morecuda --resource-group morecuda_group
           az vm run-command invoke --name morecuda --resource-group morecuda_group --command-id RunShellScript --scripts 'export RUNNER_ALLOW_RUNASROOT="1" && export HOME="/home/azureuser" && bash /home/azureuser/actions-runner/run.sh &'
