@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::convnext author::transformers
+# labels: test_group::mlagility name::convnext author::transformers task::Computer_Vision
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::electra author::transformers
+# labels: test_group::mlagility name::electra author::transformers task::Natural_Language_Processing
 from mlagility.parser import parse
 import transformers
 import torch

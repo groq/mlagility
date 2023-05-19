@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::minilmv2 author::transformers
+# labels: test_group::mlagility name::minilmv2 author::transformers task::Natural_Language_Processing
 """https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2"""
 from mlagility.parser import parse
 import torch

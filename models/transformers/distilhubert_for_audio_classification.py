@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::distilhubert_for_audio_classification author::transformers
+# labels: test_group::mlagility name::distilhubert_for_audio_classification author::transformers task::Audio
 """https://huggingface.co/anton-l/distilhubert-ft-common-language"""
 from mlagility.parser import parse
 import transformers

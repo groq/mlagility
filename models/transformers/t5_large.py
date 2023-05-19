@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::t5_large author::huggingface_pytorch
+# labels: test_group::mlagility name::t5_large author::huggingface_pytorch task::MultiModal
 from mlagility.parser import parse
 import transformers
 import torch

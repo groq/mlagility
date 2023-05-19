@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::xglm author::huggingface_pytorch
+# labels: test_group::mlagility name::xglm author::huggingface_pytorch task::Graph_Machine_Learning
 from mlagility.parser import parse
 import transformers
 import torch

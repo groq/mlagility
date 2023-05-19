@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mobilevit_xx_small_for_semantic_segmentation author::transformers
+# labels: test_group::mlagility name::mobilevit_xx_small_for_semantic_segmentation author::transformers task::Computer_Vision
 """https://huggingface.co/apple/mobilevit-xx-small"""
 from mlagility.parser import parse
 import transformers

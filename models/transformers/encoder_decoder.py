@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::encoder_decoder author::transformers
+# labels: test_group::mlagility name::encoder_decoder author::transformers task::MultiModal
 from mlagility.parser import parse
 import transformers
 import torch

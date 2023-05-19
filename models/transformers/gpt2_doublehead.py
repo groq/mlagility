@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::gpt2_doublehead author::transformers
+# labels: test_group::mlagility name::gpt2_doublehead author::transformers task::Generative_AI
 from mlagility.parser import parse
 import transformers
 import torch

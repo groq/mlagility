@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::hubert author::transformers
+# labels: test_group::mlagility name::hubert author::transformers task::Audio
 from mlagility.parser import parse
 import transformers
 import torch

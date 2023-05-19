@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::data2vecaudio author::transformers
+# labels: test_group::mlagility name::data2vecaudio author::transformers task::Audio
 from mlagility.parser import parse
 import transformers
 import torch

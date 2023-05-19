@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::bert author::transformers
+# labels: test_group::mlagility name::bert author::transformers task::Natural_Language_Processing
 """
 https://huggingface.co/docs/transformers/v4.26.1/en/model_doc/bert#overview
 """

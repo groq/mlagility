@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::yolos_tiny_for_object_detection author::huggingface_pytorch
+# labels: test_group::mlagility name::yolos_tiny_for_object_detection author::huggingface_pytorch task::Computer_Vision
 """https://huggingface.co/hustvl/yolos-tiny"""
 from mlagility.parser import parse
 import transformers
