@@ -14,10 +14,6 @@ import onnxflow.common.build as build
 import onnxflow.common.cache as cache
 from cli import assert_success_of_builds, flatten, bash, strip_dot_py
 
-# We generate a corpus on to the filesystem during the test
-# to get around how weird bake tests are when it comes to
-# filesystem access
-
 test_scripts_dot_py = {
     "linear.py": """# labels: name::linear author::benchit license::mit test_group::a
 import torch
