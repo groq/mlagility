@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::ssdlite320_mobilenet_v3_large author::torchvision
+# labels: test_group::mlagility name::ssdlite320_mobilenet_v3_large author::torchvision task::Computer_Vision
 """
 https://pytorch.org/vision/stable/models/ssdlite.html
 """

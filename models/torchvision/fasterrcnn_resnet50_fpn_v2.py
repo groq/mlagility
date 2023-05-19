@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::fasterrcnn_resnet50_fpn_v2 author::torchvision
+# labels: test_group::mlagility name::fasterrcnn_resnet50_fpn_v2 author::torchvision task::Computer_Vision
 """
 https://pytorch.org/vision/stable/models/faster_rcnn.html
 """

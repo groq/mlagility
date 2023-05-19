@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::maskrcnn_resnet50_fpn author::torchvision
+# labels: test_group::mlagility name::maskrcnn_resnet50_fpn author::torchvision task::Computer_Vision
 """
 https://pytorch.org/vision/stable/models/mask_rcnn.html
 """
