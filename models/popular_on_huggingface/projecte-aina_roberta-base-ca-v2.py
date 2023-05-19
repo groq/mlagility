@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::projecte-aina name::roberta-base-ca-v2 downloads::229 license::apache-2.0 task::Fill-Mask
+# labels: test_group::monthly author::projecte-aina name::roberta-base-ca-v2 downloads::229 license::apache-2.0 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import AutoModelForMaskedLM
 from transformers import AutoTokenizer, FillMaskPipeline
 from pprint import pprint

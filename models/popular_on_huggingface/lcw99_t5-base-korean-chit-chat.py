@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::lcw99 name::t5-base-korean-chit-chat downloads::243 task::Text2Text_Generation
+# labels: test_group::monthly author::lcw99 name::t5-base-korean-chit-chat downloads::243 task::Natural_Language_Processing sub_task::Text2Text_Generation
 
 from transformers import AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer, MT5ForConditionalGeneration
 from transformers import AutoTokenizer, T5TokenizerFast

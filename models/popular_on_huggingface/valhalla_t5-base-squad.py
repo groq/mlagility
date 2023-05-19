@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::valhalla name::t5-base-squad downloads::99,402 task::Text2Text_Generation
+# labels: test_group::monthly author::valhalla name::t5-base-squad downloads::99,402 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("valhalla/t5-base-squad")

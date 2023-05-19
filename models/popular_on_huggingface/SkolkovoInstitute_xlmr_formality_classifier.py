@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::SkolkovoInstitute name::xlmr_formality_classifier downloads::302 task::Text_Classification
+# labels: test_group::monthly author::SkolkovoInstitute name::xlmr_formality_classifier downloads::302 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import XLMRobertaTokenizerFast, XLMRobertaForSequenceClassification
 
 # load tokenizer and model weights

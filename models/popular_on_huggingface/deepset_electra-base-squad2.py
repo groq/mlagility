@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::deepset name::electra-base-squad2 downloads::60,435 license::cc-by-4.0 task::Question_Answering
+# labels: test_group::monthly author::deepset name::electra-base-squad2 downloads::60,435 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
 model_name = "deepset/electra-base-squad2"

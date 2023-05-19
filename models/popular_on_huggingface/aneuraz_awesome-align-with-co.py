@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::aneuraz name::awesome-align-with-co downloads::290 license::bsd-3-clause task::Fill-Mask
+# labels: test_group::monthly author::aneuraz name::awesome-align-with-co downloads::290 license::bsd-3-clause task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import AutoModel, AutoTokenizer
 import itertools
 import torch

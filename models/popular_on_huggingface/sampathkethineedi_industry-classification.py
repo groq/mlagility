@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::sampathkethineedi name::industry-classification downloads::7,659 task::Text_Classification
+# labels: test_group::monthly author::sampathkethineedi name::industry-classification downloads::7,659 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 tokenizer = AutoTokenizer.from_pretrained("sampathkethineedi/industry-classification")  

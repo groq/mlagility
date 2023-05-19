@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Sahajtomar name::German_Zeroshot downloads::20,169 task::Zero-Shot_Classification
+# labels: test_group::monthly author::Sahajtomar name::German_Zeroshot downloads::20,169 task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 from transformers import pipeline
 classifier = pipeline("zero-shot-classification",
                       model="Sahajtomar/German_Zeroshot")

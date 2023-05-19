@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::KoichiYasuoka name::bert-base-japanese-upos downloads::284 license::cc-by-sa-4.0 task::Token_Classification
+# labels: test_group::monthly author::KoichiYasuoka name::bert-base-japanese-upos downloads::284 license::cc-by-sa-4.0 task::Natural_Language_Processing sub_task::Token_Classification
 import torch
 from transformers import AutoTokenizer,AutoModelForTokenClassification
 tokenizer=AutoTokenizer.from_pretrained("KoichiYasuoka/bert-base-japanese-upos")

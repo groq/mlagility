@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::google name::roberta2roberta_L-24_bbc downloads::322 license::apache-2.0 task::Summarization
+# labels: test_group::monthly author::google name::roberta2roberta_L-24_bbc downloads::322 license::apache-2.0 task::Natural_Language_Processing sub_task::Summarization
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 tokenizer = AutoTokenizer.from_pretrained("google/roberta2roberta_L-24_bbc")

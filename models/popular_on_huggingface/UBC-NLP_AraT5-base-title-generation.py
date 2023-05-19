@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::UBC-NLP name::AraT5-base-title-generation downloads::387 task::Text2Text_Generation
+# labels: test_group::monthly author::UBC-NLP name::AraT5-base-title-generation downloads::387 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 tokenizer = AutoTokenizer.from_pretrained("UBC-NLP/AraT5-base-title-generation")  
 model = AutoModelForSeq2SeqLM.from_pretrained("UBC-NLP/AraT5-base-title-generation")

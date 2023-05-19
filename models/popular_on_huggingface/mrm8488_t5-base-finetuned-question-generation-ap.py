@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::t5-base-finetuned-question-generation-ap downloads::882,467 task::Text2Text_Generation
+# labels: test_group::monthly author::mrm8488 name::t5-base-finetuned-question-generation-ap downloads::882,467 task::Natural_Language_Processing sub_task::Text2Text_Generation
 # Tip: By now, install transformers from source
 
 from transformers import AutoModelWithLMHead, AutoTokenizer

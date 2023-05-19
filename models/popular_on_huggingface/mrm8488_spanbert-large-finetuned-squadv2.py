@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::spanbert-large-finetuned-squadv2 task::unknown downloads::389
+# labels: test_group::monthly author::mrm8488 name::spanbert-large-finetuned-squadv2 sub_task::unknown downloads::389
 from transformers import pipeline
 
 qa_pipeline = pipeline(

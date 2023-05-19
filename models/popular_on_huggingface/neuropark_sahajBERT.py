@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::neuropark name::sahajBERT downloads::341 license::apache-2.0 task::Fill-Mask
+# labels: test_group::monthly author::neuropark name::sahajBERT downloads::341 license::apache-2.0 task::Natural_Language_Processing sub_task::Fill-Mask
 
 from transformers import AlbertForMaskedLM, FillMaskPipeline, PreTrainedTokenizerFast
 

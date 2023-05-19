@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cardiffnlp name::twitter-roberta-base-irony downloads::59,396 task::Text_Classification
+# labels: test_group::monthly author::cardiffnlp name::twitter-roberta-base-irony downloads::59,396 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoModelForSequenceClassification
 from transformers import TFAutoModelForSequenceClassification
 from transformers import AutoTokenizer

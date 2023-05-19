@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::sberbank-ai name::sbert_large_nlu_ru downloads::2,295 task::Feature_Extraction
+# labels: test_group::monthly author::sberbank-ai name::sbert_large_nlu_ru downloads::2,295 task::Multimodal sub_task::Feature_Extraction
 from transformers import AutoTokenizer, AutoModel
 import torch
 

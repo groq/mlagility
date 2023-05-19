@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::gerulata name::slovakbert downloads::1,284 license::mit task::Fill-Mask
+# labels: test_group::monthly author::gerulata name::slovakbert downloads::1,284 license::mit task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import pipeline
 unmasker = pipeline('fill-mask', model='gerulata/slovakbert')
 unmasker("Deti sa <mask> na ihrisku.")

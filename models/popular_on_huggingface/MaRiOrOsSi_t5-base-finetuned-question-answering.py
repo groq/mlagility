@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MaRiOrOsSi name::t5-base-finetuned-question-answering downloads::845 task::Text2Text_Generation
+# labels: test_group::monthly author::MaRiOrOsSi name::t5-base-finetuned-question-answering downloads::845 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from  transformers  import  AutoTokenizer, AutoModelWithLMHead, pipeline
 
 model_name = "MaRiOrOsSi/t5-base-finetuned-question-answering"

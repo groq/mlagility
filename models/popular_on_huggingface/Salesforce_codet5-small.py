@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Salesforce name::codet5-small downloads::19,456 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly author::Salesforce name::codet5-small downloads::19,456 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import RobertaTokenizer, T5ForConditionalGeneration
 
 tokenizer = RobertaTokenizer.from_pretrained('Salesforce/codet5-small')

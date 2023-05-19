@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nateraw name::vit-age-classifier downloads::3,230 task::Image_Classification
+# labels: test_group::monthly author::nateraw name::vit-age-classifier downloads::3,230 task::Computer_Vision sub_task::Image_Classification
 import requests
 from PIL import Image
 from io import BytesIO

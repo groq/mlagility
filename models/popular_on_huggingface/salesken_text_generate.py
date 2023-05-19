@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::salesken name::text_generate downloads::205 task::Text_Generation
+# labels: test_group::monthly author::salesken name::text_generate downloads::205 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelWithLMHead
 import torch
 if torch.cuda.is_available():

@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::bert2bert_L-24_wmt_de_en downloads::1,524 license::apache-2.0 task::Translation
+# labels: test_group::monthly,daily author::google name::bert2bert_L-24_wmt_de_en downloads::1,524 license::apache-2.0 task::Natural_Language_Processing sub_task::Translation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 tokenizer = AutoTokenizer.from_pretrained("google/bert2bert_L-24_wmt_de_en", pad_token="<pad>", eos_token="</s>", bos_token="<s>")

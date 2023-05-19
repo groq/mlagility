@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::microsoft name::codebert-base-mlm downloads::273,375 task::Fill-Mask
+# labels: test_group::monthly,daily author::microsoft name::codebert-base-mlm downloads::273,375 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import RobertaTokenizer, RobertaForMaskedLM, pipeline
 
 model = RobertaForMaskedLM.from_pretrained('microsoft/codebert-base-mlm')

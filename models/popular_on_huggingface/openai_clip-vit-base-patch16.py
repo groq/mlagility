@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::openai name::clip-vit-base-patch16 downloads::70,786 task::Zero-Shot_Image_Classification
+# labels: test_group::monthly,daily author::openai name::clip-vit-base-patch16 downloads::70,786 task::Computer_Vision sub_task::Zero-Shot_Image_Classification
 from PIL import Image
 import requests
 from transformers import CLIPProcessor, CLIPModel

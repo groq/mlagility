@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::mobilebert-uncased task::unknown downloads::48,600 license::apache-2.0
+# labels: test_group::monthly,daily author::google name::mobilebert-uncased sub_task::unknown downloads::48,600 license::apache-2.0
 from transformers import pipeline
 
 fill_mask = pipeline(

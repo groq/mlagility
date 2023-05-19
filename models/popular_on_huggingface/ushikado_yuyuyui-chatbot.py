@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ushikado name::yuyuyui-chatbot downloads::483 task::Text_Generation
+# labels: test_group::monthly author::ushikado name::yuyuyui-chatbot downloads::483 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import T5Tokenizer, AutoModelForCausalLM
 
 tokenizer = T5Tokenizer.from_pretrained("ushikado/yuyuyui-chatbot")

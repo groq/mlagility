@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::intfloat name::simlm-msmarco-reranker downloads::2,245 task::Text_Classification
+# labels: test_group::monthly author::intfloat name::simlm-msmarco-reranker downloads::2,245 task::Natural_Language_Processing sub_task::Text_Classification
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, BatchEncoding, PreTrainedTokenizerFast
 from transformers.modeling_outputs import SequenceClassifierOutput

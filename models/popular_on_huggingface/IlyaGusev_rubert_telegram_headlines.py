@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::IlyaGusev name::rubert_telegram_headlines downloads::227 license::apache-2.0 task::Summarization
+# labels: test_group::monthly author::IlyaGusev name::rubert_telegram_headlines downloads::227 license::apache-2.0 task::Natural_Language_Processing sub_task::Summarization
 from transformers import AutoTokenizer, EncoderDecoderModel
 
 model_name = "IlyaGusev/rubert_telegram_headlines"

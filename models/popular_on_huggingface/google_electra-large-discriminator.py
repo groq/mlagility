@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::electra-large-discriminator task::unknown downloads::46,237 license::apache-2.0
+# labels: test_group::monthly,daily author::google name::electra-large-discriminator sub_task::unknown downloads::46,237 license::apache-2.0
 from transformers import ElectraForPreTraining, ElectraTokenizerFast
 import torch
 

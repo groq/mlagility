@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::blinoff name::roberta-base-russian-v0 downloads::330 task::Fill-Mask
+# labels: test_group::monthly author::blinoff name::roberta-base-russian-v0 downloads::330 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import pipeline
 from transformers import RobertaTokenizerFast
 

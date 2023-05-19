@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flax-sentence-embeddings name::all_datasets_v4_MiniLM-L6 downloads::8,563 task::Sentence_Similarity
+# labels: test_group::monthly author::flax-sentence-embeddings name::all_datasets_v4_MiniLM-L6 downloads::8,563 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer('flax-sentence-embeddings/all_datasets_v4_MiniLM-L6')

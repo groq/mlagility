@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::convnext-small-224 downloads::1,084 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly,daily author::facebook name::convnext-small-224 downloads::1,084 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import ConvNextFeatureExtractor, ConvNextForImageClassification
 import torch
 from datasets import load_dataset

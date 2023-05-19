@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cointegrated name::rut5-small downloads::444 license::mit task::Text2Text_Generation
+# labels: test_group::monthly author::cointegrated name::rut5-small downloads::444 license::mit task::Natural_Language_Processing sub_task::Text2Text_Generation
 # !pip install transformers sentencepiece
 import torch
 from transformers import T5ForConditionalGeneration, T5Tokenizer

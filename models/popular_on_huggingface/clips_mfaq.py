@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::clips name::mfaq downloads::428,140 license::apache-2.0 task::Sentence_Similarity
+# labels: test_group::monthly author::clips name::mfaq downloads::428,140 license::apache-2.0 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer
 
 question = "<Q>How many models can I host on HuggingFace?"

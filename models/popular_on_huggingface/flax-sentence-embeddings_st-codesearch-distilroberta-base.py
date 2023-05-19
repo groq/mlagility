@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flax-sentence-embeddings name::st-codesearch-distilroberta-base downloads::853 task::Sentence_Similarity
+# labels: test_group::monthly author::flax-sentence-embeddings name::st-codesearch-distilroberta-base downloads::853 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer, util
 
 

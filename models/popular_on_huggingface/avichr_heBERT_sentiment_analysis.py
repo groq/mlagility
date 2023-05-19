@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::avichr name::heBERT_sentiment_analysis downloads::2,393 task::Text_Classification
+# labels: test_group::monthly author::avichr name::heBERT_sentiment_analysis downloads::2,393 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, AutoModel
 tokenizer = AutoTokenizer.from_pretrained("avichr/heBERT")
 model = AutoModel.from_pretrained("avichr/heBERT")

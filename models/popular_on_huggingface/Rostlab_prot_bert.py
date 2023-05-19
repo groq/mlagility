@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Rostlab name::prot_bert downloads::332,524 task::Fill-Mask
+# labels: test_group::monthly author::Rostlab name::prot_bert downloads::332,524 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import BertForMaskedLM, BertTokenizer, pipeline
 tokenizer = BertTokenizer.from_pretrained("Rostlab/prot_bert", do_lower_case=False )
 model = BertForMaskedLM.from_pretrained("Rostlab/prot_bert")

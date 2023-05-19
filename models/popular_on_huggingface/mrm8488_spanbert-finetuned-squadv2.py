@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::spanbert-finetuned-squadv2 downloads::1,981 task::Question_Answering
+# labels: test_group::monthly author::mrm8488 name::spanbert-finetuned-squadv2 downloads::1,981 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 qa_pipeline = pipeline(

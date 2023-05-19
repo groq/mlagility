@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::soheeyang name::rdr-question_encoder-single-nq-base downloads::1,236 task::Feature_Extraction
+# labels: test_group::monthly author::soheeyang name::rdr-question_encoder-single-nq-base downloads::1,236 task::Multimodal sub_task::Feature_Extraction
 from transformers import DPRQuestionEncoder, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("soheeyang/rdr-question_encoder-single-trivia-base")

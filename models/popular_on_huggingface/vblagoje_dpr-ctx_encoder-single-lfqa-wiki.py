@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::vblagoje name::dpr-ctx_encoder-single-lfqa-wiki task::unknown downloads::8,721 license::mit
+# labels: test_group::monthly author::vblagoje name::dpr-ctx_encoder-single-lfqa-wiki sub_task::unknown downloads::8,721 license::mit
 from transformers import DPRContextEncoder, DPRContextEncoderTokenizer
 
 tokenizer = DPRContextEncoderTokenizer.from_pretrained("vblagoje/dpr-ctx_encoder-single-lfqa-wiki")

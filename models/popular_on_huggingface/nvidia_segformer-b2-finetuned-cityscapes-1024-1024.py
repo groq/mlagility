@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nvidia name::segformer-b2-finetuned-cityscapes-1024-1024 downloads::372 license::other task::Image_Segmentation
+# labels: test_group::monthly author::nvidia name::segformer-b2-finetuned-cityscapes-1024-1024 downloads::372 license::other task::Computer_Vision sub_task::Image_Segmentation
 from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
 from PIL import Image
 import requests

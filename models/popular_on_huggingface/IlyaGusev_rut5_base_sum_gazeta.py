@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::IlyaGusev name::rut5_base_sum_gazeta downloads::469 license::apache-2.0 task::Summarization
+# labels: test_group::monthly author::IlyaGusev name::rut5_base_sum_gazeta downloads::469 license::apache-2.0 task::Natural_Language_Processing sub_task::Summarization
 from transformers import AutoTokenizer, T5ForConditionalGeneration
 
 model_name = "IlyaGusev/rut5_base_sum_gazeta"

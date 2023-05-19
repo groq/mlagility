@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::CompVis name::ldm-text2im-large-256 downloads::2,736 license::apache-2.0 task::Text-to-Image
+# labels: test_group::monthly,daily author::CompVis name::ldm-text2im-large-256 downloads::2,736 license::apache-2.0 task::Multimodal sub_task::Text-to-Image
 # !pip install diffusers transformers
 from diffusers import DiffusionPipeline
 

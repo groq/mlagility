@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::NeuML name::bert-small-cord19qa downloads::491 task::Question_Answering
+# labels: test_group::monthly author::NeuML name::bert-small-cord19qa downloads::491 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 qa = pipeline(

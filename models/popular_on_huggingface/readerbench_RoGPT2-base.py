@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::readerbench name::RoGPT2-base downloads::871 task::Text_Generation
+# labels: test_group::monthly author::readerbench name::RoGPT2-base downloads::871 task::Natural_Language_Processing sub_task::Text_Generation
 # TensorFlow
 from transformers import AutoTokenizer, TFAutoModelForCausalLM
 

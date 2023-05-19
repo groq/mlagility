@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nvidia name::segformer-b1-finetuned-ade-512-512 downloads::1,246 license::other task::Image_Segmentation
+# labels: test_group::monthly author::nvidia name::segformer-b1-finetuned-ade-512-512 downloads::1,246 license::other task::Computer_Vision sub_task::Image_Segmentation
 from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
 from PIL import Image
 import requests

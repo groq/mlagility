@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::pin name::senda downloads::27,194 license::cc-by-4.0 task::Text_Classification
+# labels: test_group::monthly author::pin name::senda downloads::27,194 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 tokenizer = AutoTokenizer.from_pretrained("pin/senda")
 model = AutoModelForSequenceClassification.from_pretrained("pin/senda")

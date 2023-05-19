@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Narrativa name::bsc_roberta2roberta_shared-spanish-finetuned-mlsum-summarization downloads::313 task::Summarization
+# labels: test_group::monthly author::Narrativa name::bsc_roberta2roberta_shared-spanish-finetuned-mlsum-summarization downloads::313 task::Natural_Language_Processing sub_task::Summarization
 import torch
 from transformers import RobertaTokenizerFast, EncoderDecoderModel
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nkoh01 name::MSRoberta downloads::705 task::Fill-Mask
+# labels: test_group::monthly author::nkoh01 name::MSRoberta downloads::705 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import pipeline,AutoModelForMaskedLM,AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained("nkoh01/MSRoberta")
 model = AutoModelForMaskedLM.from_pretrained("nkoh01/MSRoberta")

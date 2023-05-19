@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::microsoft name::xprophetnet-large-wiki100-cased downloads::540 task::Text2Text_Generation
+# labels: test_group::monthly,daily author::microsoft name::xprophetnet-large-wiki100-cased downloads::540 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import XLMProphetNetForConditionalGeneration, XLMProphetNetTokenizer
 
 model = XLMProphetNetForConditionalGeneration.from_pretrained("microsoft/xprophetnet-large-wiki100-cased")

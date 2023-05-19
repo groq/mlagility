@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::tugstugi name::bert-large-mongolian-uncased downloads::648 task::Fill-Mask
+# labels: test_group::monthly author::tugstugi name::bert-large-mongolian-uncased downloads::648 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import pipeline, AutoTokenizer, AutoModelForMaskedLM
 
 tokenizer = AutoTokenizer.from_pretrained('tugstugi/bert-large-mongolian-uncased', use_fast=False)

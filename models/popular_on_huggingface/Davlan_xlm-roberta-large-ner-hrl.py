@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Davlan name::xlm-roberta-large-ner-hrl downloads::1,442 task::Token_Classification
+# labels: test_group::monthly author::Davlan name::xlm-roberta-large-ner-hrl downloads::1,442 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 tokenizer = AutoTokenizer.from_pretrained("Davlan/xlm-roberta-large-ner-hrl")

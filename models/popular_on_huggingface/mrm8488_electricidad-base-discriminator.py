@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::electricidad-base-discriminator task::unknown downloads::656
+# labels: test_group::monthly author::mrm8488 name::electricidad-base-discriminator sub_task::unknown downloads::656
 from transformers import ElectraForPreTraining, ElectraTokenizerFast
 import torch
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::bert-spanish-cased-finetuned-ner downloads::253,145 task::Token_Classification
+# labels: test_group::monthly author::mrm8488 name::bert-spanish-cased-finetuned-ner downloads::253,145 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import pipeline
 
 nlp_ner = pipeline(

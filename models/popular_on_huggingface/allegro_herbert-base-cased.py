@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::allegro name::herbert-base-cased downloads::16,580 license::cc-by-4.0 task::Feature_Extraction
+# labels: test_group::monthly author::allegro name::herbert-base-cased downloads::16,580 license::cc-by-4.0 task::Multimodal sub_task::Feature_Extraction
 from transformers import AutoTokenizer, AutoModel
 
 tokenizer = AutoTokenizer.from_pretrained("allegro/herbert-base-cased")

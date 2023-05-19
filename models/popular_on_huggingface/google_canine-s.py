@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::canine-s downloads::10,734 license::apache-2.0 task::Feature_Extraction
+# labels: test_group::monthly,daily author::google name::canine-s downloads::10,734 license::apache-2.0 task::Multimodal sub_task::Feature_Extraction
 from transformers import CanineTokenizer, CanineModel
 
 model = CanineModel.from_pretrained('google/canine-s')

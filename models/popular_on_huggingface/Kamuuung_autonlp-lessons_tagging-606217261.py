@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Kamuuung name::autonlp-lessons_tagging-606217261 downloads::292 task::Text_Classification
+# labels: test_group::monthly author::Kamuuung name::autonlp-lessons_tagging-606217261 downloads::292 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 model = AutoModelForSequenceClassification.from_pretrained("Kamuuung/autonlp-lessons_tagging-606217261", use_auth_token=True)

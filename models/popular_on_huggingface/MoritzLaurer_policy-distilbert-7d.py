@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MoritzLaurer name::policy-distilbert-7d downloads::188 task::Text_Classification
+# labels: test_group::monthly author::MoritzLaurer name::policy-distilbert-7d downloads::188 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 

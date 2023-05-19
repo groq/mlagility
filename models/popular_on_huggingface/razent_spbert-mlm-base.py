@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::razent name::spbert-mlm-base downloads::310 task::Question_Answering
+# labels: test_group::monthly author::razent name::spbert-mlm-base downloads::310 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoTokenizer, AutoModel
 tokenizer = AutoTokenizer.from_pretrained('razent/spbert-mlm-base')
 model = AutoModel.from_pretrained("razent/spbert-mlm-base")

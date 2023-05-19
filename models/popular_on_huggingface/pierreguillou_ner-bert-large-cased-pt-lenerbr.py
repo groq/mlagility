@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::pierreguillou name::ner-bert-large-cased-pt-lenerbr downloads::449 task::Token_Classification
+# labels: test_group::monthly author::pierreguillou name::ner-bert-large-cased-pt-lenerbr downloads::449 task::Natural_Language_Processing sub_task::Token_Classification
 # install pytorch: check https://pytorch.org/
 # !pip install transformers 
 from transformers import AutoModelForTokenClassification, AutoTokenizer

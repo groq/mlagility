@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::teven name::all_bs320_vanilla downloads::426 task::Sentence_Similarity
+# labels: test_group::monthly author::teven name::all_bs320_vanilla downloads::426 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer
 sentences = ["This is an example sentence", "Each sentence is converted"]
 

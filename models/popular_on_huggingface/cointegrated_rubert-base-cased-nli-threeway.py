@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cointegrated name::rubert-base-cased-nli-threeway downloads::2,865 task::Zero-Shot_Classification
+# labels: test_group::monthly author::cointegrated name::rubert-base-cased-nli-threeway downloads::2,865 task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 # !pip install transformers sentencepiece --quiet
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification

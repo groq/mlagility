@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::aware-ai name::bart-squadv2 downloads::306 task::Question_Answering
+# labels: test_group::monthly author::aware-ai name::bart-squadv2 downloads::306 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import BartTokenizer, BartForQuestionAnswering
 import torch
 

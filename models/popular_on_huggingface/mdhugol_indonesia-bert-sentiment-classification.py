@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mdhugol name::indonesia-bert-sentiment-classification downloads::3,468 task::Text_Classification
+# labels: test_group::monthly author::mdhugol name::indonesia-bert-sentiment-classification downloads::3,468 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 

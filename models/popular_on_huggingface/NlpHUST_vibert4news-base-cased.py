@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::NlpHUST name::vibert4news-base-cased downloads::633 task::Fill-Mask
+# labels: test_group::monthly author::NlpHUST name::vibert4news-base-cased downloads::633 task::Natural_Language_Processing sub_task::Fill-Mask
 import torch
 from transformers import BertTokenizer,BertModel
 tokenizer= BertTokenizer.from_pretrained("NlpHUST/vibert4news-base-cased")

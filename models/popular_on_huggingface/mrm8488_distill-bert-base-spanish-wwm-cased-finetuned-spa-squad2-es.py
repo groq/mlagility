@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es downloads::5,415 task::Question_Answering
+# labels: test_group::monthly author::mrm8488 name::distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es downloads::5,415 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import *
 
 # Important!: By now the QA pipeline is not compatible with fast tokenizer, but they are working on it. So that pass the object to the tokenizer {"use_fast": False} as in the following example:

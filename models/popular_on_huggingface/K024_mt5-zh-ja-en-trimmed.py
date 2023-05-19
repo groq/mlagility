@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::K024 name::mt5-zh-ja-en-trimmed downloads::36,651 license::cc-by-nc-sa-4.0 task::Translation
+# labels: test_group::monthly author::K024 name::mt5-zh-ja-en-trimmed downloads::36,651 license::cc-by-nc-sa-4.0 task::Natural_Language_Processing sub_task::Translation
 from transformers import (
   T5Tokenizer,
   MT5ForConditionalGeneration,

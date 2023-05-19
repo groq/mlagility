@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flax-sentence-embeddings name::stackoverflow_mpnet-base downloads::2,520 task::Sentence_Similarity
+# labels: test_group::monthly author::flax-sentence-embeddings name::stackoverflow_mpnet-base downloads::2,520 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer('flax-sentence-embeddings/stackoverflow_mpnet-base')

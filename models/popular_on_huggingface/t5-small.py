@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::huggingface name::t5-small downloads::2,296,353 license::apache-2.0 task::Translation
+# labels: test_group::monthly author::huggingface name::t5-small downloads::2,296,353 license::apache-2.0 task::Natural_Language_Processing sub_task::Translation
 from transformers import T5Tokenizer, T5Model
 
 tokenizer = T5Tokenizer.from_pretrained("t5-small")

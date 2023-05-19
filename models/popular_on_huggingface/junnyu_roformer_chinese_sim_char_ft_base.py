@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::junnyu name::roformer_chinese_sim_char_ft_base downloads::412 task::Text_Generation
+# labels: test_group::monthly author::junnyu name::roformer_chinese_sim_char_ft_base downloads::412 task::Natural_Language_Processing sub_task::Text_Generation
 import torch
 import numpy as np
 from roformer import RoFormerForCausalLM, RoFormerConfig

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::yiyanghkust name::finbert-esg downloads::2,795 task::Text_Classification
+# labels: test_group::monthly author::yiyanghkust name::finbert-esg downloads::2,795 task::Natural_Language_Processing sub_task::Text_Classification
 # tested in transformers==4.18.0 
 from transformers import BertTokenizer, BertForSequenceClassification, pipeline
 

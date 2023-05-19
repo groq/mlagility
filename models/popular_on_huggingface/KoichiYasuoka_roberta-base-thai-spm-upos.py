@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::KoichiYasuoka name::roberta-base-thai-spm-upos downloads::728 license::apache-2.0 task::Token_Classification
+# labels: test_group::monthly author::KoichiYasuoka name::roberta-base-thai-spm-upos downloads::728 license::apache-2.0 task::Natural_Language_Processing sub_task::Token_Classification
 import torch
 from transformers import AutoTokenizer,AutoModelForTokenClassification
 tokenizer=AutoTokenizer.from_pretrained("KoichiYasuoka/roberta-base-thai-spm-upos")

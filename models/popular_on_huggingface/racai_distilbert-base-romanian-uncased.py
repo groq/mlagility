@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::racai name::distilbert-base-romanian-uncased task::unknown downloads::389 license::mit
+# labels: test_group::monthly author::racai name::distilbert-base-romanian-uncased sub_task::unknown downloads::389 license::mit
 from transformers import AutoTokenizer, AutoModel
 
 # load the tokenizer and the model

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::melll-uff name::bertweetbr downloads::249 license::apache-2.0 task::Fill-Mask
+# labels: test_group::monthly author::melll-uff name::bertweetbr downloads::249 license::apache-2.0 task::Natural_Language_Processing sub_task::Fill-Mask
 import torch
 from transformers import AutoModel, AutoTokenizer 
 

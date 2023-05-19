@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::microsoft name::prophetnet-large-uncased downloads::5,629 task::Text2Text_Generation
+# labels: test_group::monthly,daily author::microsoft name::prophetnet-large-uncased downloads::5,629 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import ProphetNetForConditionalGeneration, ProphetNetTokenizer
 
 model = ProphetNetForConditionalGeneration.from_pretrained("microsoft/prophetnet-large-uncased")

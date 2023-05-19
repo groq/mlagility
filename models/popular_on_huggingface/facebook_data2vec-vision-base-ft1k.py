@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::data2vec-vision-base-ft1k downloads::896 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly,daily author::facebook name::data2vec-vision-base-ft1k downloads::896 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import BeitFeatureExtractor, Data2VecVisionForImageClassification
 from PIL import Image
 import requests

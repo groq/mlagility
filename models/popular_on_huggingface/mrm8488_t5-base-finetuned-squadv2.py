@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::t5-base-finetuned-squadv2 downloads::215 task::Text2Text_Generation
+# labels: test_group::monthly author::mrm8488 name::t5-base-finetuned-squadv2 downloads::215 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("mrm8488/t5-base-finetuned-squadv2")

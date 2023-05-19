@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::SkolkovoInstitute name::russian_toxicity_classifier downloads::4,336 task::Text_Classification
+# labels: test_group::monthly author::SkolkovoInstitute name::russian_toxicity_classifier downloads::4,336 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import BertTokenizer, BertForSequenceClassification
 
 # load tokenizer and model weights

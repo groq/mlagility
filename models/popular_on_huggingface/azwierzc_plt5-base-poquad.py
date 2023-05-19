@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::azwierzc name::plt5-base-poquad downloads::283 license::gpl-3.0 task::Text2Text_Generation
+# labels: test_group::monthly author::azwierzc name::plt5-base-poquad downloads::283 license::gpl-3.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 import torch
 from transformers import AutoTokenizer, T5ForConditionalGeneration
 

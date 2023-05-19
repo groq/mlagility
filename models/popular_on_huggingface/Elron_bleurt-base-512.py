@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Elron name::bleurt-base-512 downloads::243 task::Text_Classification
+# labels: test_group::monthly author::Elron name::bleurt-base-512 downloads::243 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import torch
 

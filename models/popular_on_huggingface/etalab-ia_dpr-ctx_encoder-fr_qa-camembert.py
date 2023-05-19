@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::etalab-ia name::dpr-ctx_encoder-fr_qa-camembert task::unknown downloads::2,213
+# labels: test_group::monthly author::etalab-ia name::dpr-ctx_encoder-fr_qa-camembert sub_task::unknown downloads::2,213
 from transformers import AutoTokenizer, AutoModel
 query = "Salut, mon chien est-il mignon ?"
 tokenizer = AutoTokenizer.from_pretrained("etalab-ia/dpr-ctx_encoder-fr_qa-camembert",  do_lower_case=True)

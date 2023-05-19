@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::fabiochiu name::t5-base-tag-generation downloads::189 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly author::fabiochiu name::t5-base-tag-generation downloads::189 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import nltk
 nltk.download('punkt')

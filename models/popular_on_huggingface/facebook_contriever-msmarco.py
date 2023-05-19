@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::contriever-msmarco downloads::640,510 task::Feature_Extraction
+# labels: test_group::monthly,daily author::facebook name::contriever-msmarco downloads::640,510 task::Multimodal sub_task::Feature_Extraction
 import torch
 from transformers import AutoTokenizer, AutoModel
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::huggingface name::transfo-xl-wt103 downloads::21,107 task::Text_Generation
+# labels: test_group::monthly author::huggingface name::transfo-xl-wt103 downloads::21,107 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import TransfoXLTokenizer, TransfoXLModel
 import torch
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::wanyu name::IteraTeR-ROBERTA-Intention-Classifier downloads::290 task::Text_Classification
+# labels: test_group::monthly author::wanyu name::IteraTeR-ROBERTA-Intention-Classifier downloads::290 task::Natural_Language_Processing sub_task::Text_Classification
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 

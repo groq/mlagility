@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Wikidepia name::IndoT5-base-paraphrase downloads::2,254 task::Text2Text_Generation
+# labels: test_group::monthly author::Wikidepia name::IndoT5-base-paraphrase downloads::2,254 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 tokenizer = AutoTokenizer.from_pretrained("Wikidepia/IndoT5-base-paraphrase")  

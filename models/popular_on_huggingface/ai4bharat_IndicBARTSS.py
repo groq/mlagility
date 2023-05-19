@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ai4bharat name::IndicBARTSS downloads::3,651 task::Text2Text_Generation
+# labels: test_group::monthly author::ai4bharat name::IndicBARTSS downloads::3,651 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import MBartForConditionalGeneration, AutoModelForSeq2SeqLM
 from transformers import AlbertTokenizer, AutoTokenizer
 

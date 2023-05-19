@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::NlpHUST name::t5-en-vi-small downloads::874 task::Text2Text_Generation
+# labels: test_group::monthly author::NlpHUST name::t5-en-vi-small downloads::874 task::Natural_Language_Processing sub_task::Text2Text_Generation
 import torch
 
 from transformers import T5ForConditionalGeneration, T5Tokenizer

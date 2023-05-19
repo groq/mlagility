@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ml4pubmed name::BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext_pub_section downloads::356 task::Text_Classification
+# labels: test_group::monthly author::ml4pubmed name::BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext_pub_section downloads::356 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 
 model_tag = "ml4pubmed/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext_pub_section"

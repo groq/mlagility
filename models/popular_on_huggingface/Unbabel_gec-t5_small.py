@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Unbabel name::gec-t5_small downloads::389 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly author::Unbabel name::gec-t5_small downloads::389 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 model = T5ForConditionalGeneration.from_pretrained("Unbabel/gec-t5_small")

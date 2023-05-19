@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Salesforce name::codegen-350M-mono downloads::20,252 license::bsd-3-clause task::Text_Generation
+# labels: test_group::monthly author::Salesforce name::codegen-350M-mono downloads::20,252 license::bsd-3-clause task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelForCausalLM
 tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen-350M-mono")
 model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-350M-mono")

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::allegro name::herbert-klej-cased-v1 task::unknown downloads::1,312
+# labels: test_group::monthly author::allegro name::herbert-klej-cased-v1 sub_task::unknown downloads::1,312
 from transformers import XLMTokenizer, RobertaModel
 
 tokenizer = XLMTokenizer.from_pretrained("allegro/herbert-klej-cased-tokenizer-v1")

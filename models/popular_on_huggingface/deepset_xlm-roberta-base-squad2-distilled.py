@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::deepset name::xlm-roberta-base-squad2-distilled downloads::1,673 license::mit task::Question_Answering
+# labels: test_group::monthly author::deepset name::xlm-roberta-base-squad2-distilled downloads::1,673 license::mit task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
 model_name = "deepset/xlm-roberta-base-squad2-distilled"

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::KES name::TEC-English downloads::7,358 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly author::KES name::TEC-English downloads::7,358 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 tokenizer = AutoTokenizer.from_pretrained("KES/TEC-English")
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::doc2query name::all-t5-base-v1 downloads::525 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly author::doc2query name::all-t5-base-v1 downloads::525 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 model_name = 'doc2query/all-t5-base-v1'

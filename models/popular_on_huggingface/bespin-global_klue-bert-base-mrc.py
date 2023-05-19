@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::bespin-global name::klue-bert-base-mrc downloads::1,844 license::cc-by-nc-4.0 task::Question_Answering
+# labels: test_group::monthly author::bespin-global name::klue-bert-base-mrc downloads::1,844 license::cc-by-nc-4.0 task::Natural_Language_Processing sub_task::Question_Answering
 # Load Transformers library
 import torch
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer

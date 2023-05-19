@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Sehong name::t5-large-QuestionGeneration downloads::405 license::mit task::Text2Text_Generation
+# labels: test_group::monthly author::Sehong name::t5-large-QuestionGeneration downloads::405 license::mit task::Natural_Language_Processing sub_task::Text2Text_Generation
 import torch
 from transformers import PreTrainedTokenizerFast
 from transformers import T5ForConditionalGeneration

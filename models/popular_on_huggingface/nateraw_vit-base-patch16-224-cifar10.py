@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nateraw name::vit-base-patch16-224-cifar10 downloads::738 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly author::nateraw name::vit-base-patch16-224-cifar10 downloads::738 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import ViTFeatureExtractor, ViTForImageClassification
 from PIL import Image
 import requests

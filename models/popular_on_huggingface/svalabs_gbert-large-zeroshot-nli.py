@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::svalabs name::gbert-large-zeroshot-nli downloads::1,288 task::Zero-Shot_Classification
+# labels: test_group::monthly author::svalabs name::gbert-large-zeroshot-nli downloads::1,288 task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 
 from transformers import pipeline
 

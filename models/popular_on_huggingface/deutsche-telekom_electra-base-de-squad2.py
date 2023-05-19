@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::deutsche-telekom name::electra-base-de-squad2 downloads::217 license::mit task::Question_Answering
+# labels: test_group::monthly author::deutsche-telekom name::electra-base-de-squad2 downloads::217 license::mit task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 qa_pipeline = pipeline(

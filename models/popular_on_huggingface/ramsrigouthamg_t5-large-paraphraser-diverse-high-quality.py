@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ramsrigouthamg name::t5-large-paraphraser-diverse-high-quality downloads::69,043 task::Text2Text_Generation
+# labels: test_group::monthly author::ramsrigouthamg name::t5-large-paraphraser-diverse-high-quality downloads::69,043 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 model = AutoModelForSeq2SeqLM.from_pretrained("ramsrigouthamg/t5-large-paraphraser-diverse-high-quality")

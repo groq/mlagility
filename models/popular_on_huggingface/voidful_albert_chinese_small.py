@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::voidful name::albert_chinese_small downloads::1,489 task::Fill-Mask
+# labels: test_group::monthly author::voidful name::albert_chinese_small downloads::1,489 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import AutoTokenizer, AlbertForMaskedLM
 import torch
 from torch.nn.functional import softmax

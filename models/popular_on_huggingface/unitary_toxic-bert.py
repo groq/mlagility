@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::unitary name::toxic-bert downloads::2,386,857 task::Text_Classification
+# labels: test_group::monthly author::unitary name::toxic-bert downloads::2,386,857 task::Natural_Language_Processing sub_task::Text_Classification
 
 from detoxify import Detoxify
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::hustvl name::yolos-base downloads::1,372 license::apache-2.0 task::Object_Detection
+# labels: test_group::monthly author::hustvl name::yolos-base downloads::1,372 license::apache-2.0 task::Computer_Vision sub_task::Object_Detection
 from transformers import YolosFeatureExtractor, YolosForObjectDetection
 from PIL import Image
 import requests

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::navteca name::roberta-base-squad2 downloads::906 license::mit task::Question_Answering
+# labels: test_group::monthly author::navteca name::roberta-base-squad2 downloads::906 license::mit task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
 # Load model & tokenizer

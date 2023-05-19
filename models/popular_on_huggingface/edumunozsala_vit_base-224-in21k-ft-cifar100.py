@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::edumunozsala name::vit_base-224-in21k-ft-cifar100 downloads::242 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly author::edumunozsala name::vit_base-224-in21k-ft-cifar100 downloads::242 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import ViTFeatureExtractor, ViTModel
 from PIL import Image
 import requests

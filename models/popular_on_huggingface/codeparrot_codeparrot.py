@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::codeparrot name::codeparrot downloads::632 task::Text_Generation
+# labels: test_group::monthly author::codeparrot name::codeparrot downloads::632 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelWithLMHead
   
 tokenizer = AutoTokenizer.from_pretrained("codeparrot/codeparrot")

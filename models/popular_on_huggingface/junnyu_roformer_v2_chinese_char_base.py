@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::junnyu name::roformer_v2_chinese_char_base downloads::1,403 task::Fill-Mask
+# labels: test_group::monthly author::junnyu name::roformer_v2_chinese_char_base downloads::1,403 task::Natural_Language_Processing sub_task::Fill-Mask
 import torch
 import tensorflow as tf
 from transformers import BertTokenizer

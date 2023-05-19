@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::soleimanian name::financial-roberta-large-sentiment downloads::261 license::apache-2.0 task::Text_Classification
+# labels: test_group::monthly author::soleimanian name::financial-roberta-large-sentiment downloads::261 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Classification
 
 from transformers import pipeline
 sentiment_analysis = pipeline("sentiment-analysis",model="soleimanian/financial-roberta-large-sentiment")

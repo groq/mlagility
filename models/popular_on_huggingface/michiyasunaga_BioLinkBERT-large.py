@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::michiyasunaga name::BioLinkBERT-large downloads::1,016 license::apache-2.0 task::Text_Classification
+# labels: test_group::monthly author::michiyasunaga name::BioLinkBERT-large downloads::1,016 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, AutoModel
 tokenizer = AutoTokenizer.from_pretrained('michiyasunaga/BioLinkBERT-large')
 model = AutoModel.from_pretrained('michiyasunaga/BioLinkBERT-large')

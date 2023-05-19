@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cmarkea name::distilcamembert-base-qa downloads::2,400 license::cc-by-nc-sa-3.0 task::Question_Answering
+# labels: test_group::monthly author::cmarkea name::distilcamembert-base-qa downloads::2,400 license::cc-by-nc-sa-3.0 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 qa_engine = pipeline(

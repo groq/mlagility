@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::neuraly name::bert-base-italian-cased-sentiment downloads::1,736 license::mit task::Text_Classification
+# labels: test_group::monthly author::neuraly name::bert-base-italian-cased-sentiment downloads::1,736 license::mit task::Natural_Language_Processing sub_task::Text_Classification
 import torch
 from torch import nn  
 from transformers import AutoTokenizer, AutoModelForSequenceClassification

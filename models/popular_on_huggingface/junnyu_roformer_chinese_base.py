@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::junnyu name::roformer_chinese_base downloads::3,143 task::Fill-Mask
+# labels: test_group::monthly author::junnyu name::roformer_chinese_base downloads::3,143 task::Natural_Language_Processing sub_task::Fill-Mask
 import torch
 from transformers import RoFormerForMaskedLM, RoFormerTokenizer
 

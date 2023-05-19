@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::apple name::mobilevit-small downloads::2,156 license::other task::Image_Classification
+# labels: test_group::monthly,daily author::apple name::mobilevit-small downloads::2,156 license::other task::Computer_Vision sub_task::Image_Classification
 from transformers import MobileViTFeatureExtractor, MobileViTForImageClassification
 from PIL import Image
 import requests

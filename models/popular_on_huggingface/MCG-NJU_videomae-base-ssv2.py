@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MCG-NJU name::videomae-base-ssv2 task::unknown downloads::249 license::cc-by-nc-4.0
+# labels: test_group::monthly author::MCG-NJU name::videomae-base-ssv2 sub_task::unknown downloads::249 license::cc-by-nc-4.0
 from transformers import VideoMAEFeatureExtractor, VideoMAEForPreTraining
 import numpy as np
 import torch

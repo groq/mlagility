@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::salesken name::natural_rephrase downloads::203 license::apache-2.0 task::Text_Generation
+# labels: test_group::monthly author::salesken name::natural_rephrase downloads::203 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelWithLMHead
 tokenizer = AutoTokenizer.from_pretrained("salesken/natural_rephrase")
 model = AutoModelWithLMHead.from_pretrained("salesken/natural_rephrase")

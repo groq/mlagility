@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::d4data name::biomedical-ner-all downloads::14,428 license::apache-2.0 task::Token_Classification
+# labels: test_group::monthly author::d4data name::biomedical-ner-all downloads::14,428 license::apache-2.0 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import pipeline
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 

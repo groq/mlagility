@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::StevenLimcorn name::indonesian-roberta-base-emotion-classifier downloads::251 license::mit task::Text_Classification
+# labels: test_group::monthly author::StevenLimcorn name::indonesian-roberta-base-emotion-classifier downloads::251 license::mit task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 pretrained_name = "StevenLimcorn/indonesian-roberta-base-emotion-classifier"
 nlp = pipeline(

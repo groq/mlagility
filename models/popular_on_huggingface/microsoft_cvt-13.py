@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::microsoft name::cvt-13 downloads::7,775 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly,daily author::microsoft name::cvt-13 downloads::7,775 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import AutoFeatureExtractor, CvtForImageClassification
 from PIL import Image
 import requests

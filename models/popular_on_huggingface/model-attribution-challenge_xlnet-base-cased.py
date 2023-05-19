@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::model-attribution-challenge name::xlnet-base-cased downloads::1,003 license::mit task::Text_Generation
+# labels: test_group::monthly author::model-attribution-challenge name::xlnet-base-cased downloads::1,003 license::mit task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import XLNetTokenizer, XLNetModel
 
 tokenizer = XLNetTokenizer.from_pretrained('xlnet-base-cased')

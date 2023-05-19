@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::NlpHUST name::gpt2-vietnamese downloads::775 task::Text_Generation
+# labels: test_group::monthly author::NlpHUST name::gpt2-vietnamese downloads::775 task::Natural_Language_Processing sub_task::Text_Generation
 import torch
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 

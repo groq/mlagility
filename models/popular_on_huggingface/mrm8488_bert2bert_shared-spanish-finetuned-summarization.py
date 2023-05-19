@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::bert2bert_shared-spanish-finetuned-summarization downloads::1,386 task::Summarization
+# labels: test_group::monthly author::mrm8488 name::bert2bert_shared-spanish-finetuned-summarization downloads::1,386 task::Natural_Language_Processing sub_task::Summarization
 import torch
 from transformers import BertTokenizerFast, EncoderDecoderModel
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

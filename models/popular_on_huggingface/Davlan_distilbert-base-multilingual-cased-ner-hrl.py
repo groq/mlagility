@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Davlan name::distilbert-base-multilingual-cased-ner-hrl downloads::1,544 task::Token_Classification
+# labels: test_group::monthly author::Davlan name::distilbert-base-multilingual-cased-ner-hrl downloads::1,544 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 tokenizer = AutoTokenizer.from_pretrained("Davlan/distilbert-base-multilingual-cased-ner-hrl")

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::fran-martinez name::scibert_scivocab_cased_ner_jnlpba downloads::10,836 task::Token_Classification
+# labels: test_group::monthly author::fran-martinez name::scibert_scivocab_cased_ner_jnlpba downloads::10,836 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import pipeline
 
 text = "Mouse thymus was used as a source of glucocorticoid receptor from normal CS lymphocytes."

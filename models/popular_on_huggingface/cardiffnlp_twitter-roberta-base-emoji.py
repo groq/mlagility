@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cardiffnlp name::twitter-roberta-base-emoji downloads::1,452 task::Text_Classification
+# labels: test_group::monthly author::cardiffnlp name::twitter-roberta-base-emoji downloads::1,452 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoModelForSequenceClassification
 from transformers import TFAutoModelForSequenceClassification
 from transformers import AutoTokenizer

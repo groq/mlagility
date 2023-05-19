@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::mbart-large-50 downloads::750,716 license::mit task::Text2Text_Generation
+# labels: test_group::monthly,daily author::facebook name::mbart-large-50 downloads::750,716 license::mit task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 
 model = MBartForConditionalGeneration.from_pretrained("facebook/mbart-large-50")

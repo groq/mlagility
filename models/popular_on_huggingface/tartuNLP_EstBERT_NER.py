@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::tartuNLP name::EstBERT_NER downloads::884 license::cc-by-4.0 task::Token_Classification
+# labels: test_group::monthly author::tartuNLP name::EstBERT_NER downloads::884 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import BertTokenizer, BertForTokenClassification
 from transformers import pipeline
 

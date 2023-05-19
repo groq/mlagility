@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Salesforce name::mixqg-base downloads::920 task::Text2Text_Generation
+# labels: test_group::monthly author::Salesforce name::mixqg-base downloads::920 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import pipeline
 
 nlp = pipeline("text2text-generation", model='Salesforce/mixqg-base', tokenizer='Salesforce/mixqg-base')

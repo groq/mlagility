@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::sagorsarker name::codeswitch-hineng-lid-lince downloads::310 license::mit task::Token_Classification
+# labels: test_group::monthly author::sagorsarker name::codeswitch-hineng-lid-lince downloads::310 license::mit task::Natural_Language_Processing sub_task::Token_Classification
 
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 

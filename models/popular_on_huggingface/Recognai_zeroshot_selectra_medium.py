@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Recognai name::zeroshot_selectra_medium downloads::716 license::apache-2.0 task::Zero-Shot_Classification
+# labels: test_group::monthly author::Recognai name::zeroshot_selectra_medium downloads::716 license::apache-2.0 task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 from transformers import pipeline
 classifier = pipeline("zero-shot-classification", 
                        model="Recognai/zeroshot_selectra_medium")

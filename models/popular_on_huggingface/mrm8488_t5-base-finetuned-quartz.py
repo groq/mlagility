@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::t5-base-finetuned-quartz downloads::254 task::Question_Answering
+# labels: test_group::monthly author::mrm8488 name::t5-base-finetuned-quartz downloads::254 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("mrm8488/t5-base-finetuned-quartz")

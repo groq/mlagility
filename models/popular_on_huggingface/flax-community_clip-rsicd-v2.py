@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flax-community name::clip-rsicd-v2 downloads::439 task::Zero-Shot_Image_Classification
+# labels: test_group::monthly author::flax-community name::clip-rsicd-v2 downloads::439 task::Computer_Vision sub_task::Zero-Shot_Image_Classification
 from PIL import Image
 import requests
 

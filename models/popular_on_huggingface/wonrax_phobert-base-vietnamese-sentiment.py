@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::wonrax name::phobert-base-vietnamese-sentiment downloads::281 license::mit task::Text_Classification
+# labels: test_group::monthly author::wonrax name::phobert-base-vietnamese-sentiment downloads::281 license::mit task::Natural_Language_Processing sub_task::Text_Classification
 import torch
 from transformers import RobertaForSequenceClassification, AutoTokenizer
 

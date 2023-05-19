@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::dangvantuan name::sentence-camembert-large downloads::13,347 license::apache-2.0 task::Sentence_Similarity
+# labels: test_group::monthly author::dangvantuan name::sentence-camembert-large downloads::13,347 license::apache-2.0 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer
 model =  SentenceTransformer("dangvantuan/sentence-camembert-large")
 

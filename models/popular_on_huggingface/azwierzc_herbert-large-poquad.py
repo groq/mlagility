@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::azwierzc name::herbert-large-poquad downloads::283 license::gpl-3.0 task::Question_Answering
+# labels: test_group::monthly author::azwierzc name::herbert-large-poquad downloads::283 license::gpl-3.0 task::Natural_Language_Processing sub_task::Question_Answering
 import transformers
 from transformers import pipeline
 

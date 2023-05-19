@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::malteos name::scincl downloads::198 license::mit task::Feature_Extraction
+# labels: test_group::monthly author::malteos name::scincl downloads::198 license::mit task::Multimodal sub_task::Feature_Extraction
 from transformers import AutoTokenizer, AutoModel
 
 # load model and tokenizer
