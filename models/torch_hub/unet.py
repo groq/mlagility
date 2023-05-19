@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::unet author::torch_hub
+# labels: test_group::mlagility name::unet author::torch_hub task::Computer_Vision
 """https://pytorch.org/hub/mateuszbuda_brain-segmentation-pytorch_unet/"""
 from mlagility.parser import parse
 import torch

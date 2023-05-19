@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mobilenet_v3_small author::torch_hub
+# labels: test_group::mlagility name::mobilenet_v3_small author::torch_hub task::Computer_Vision
 from mlagility.parser import parse
 import torch
 

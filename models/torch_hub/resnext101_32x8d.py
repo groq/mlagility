@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::resnext101_32x8d author::torch_hub
+# labels: test_group::mlagility name::resnext101_32x8d author::torch_hub task::Computer_Vision
 """
 https://github.com/pytorch/hub/blob/master/pytorch_vision_resnext.md
 """

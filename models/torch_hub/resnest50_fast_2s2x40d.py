@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::resnest50_fast_2s2x40d author::torch_hub
+# labels: test_group::mlagility name::resnest50_fast_2s2x40d author::torch_hub task::Computer_Vision
 """
 https://github.com/pytorch/hub/blob/master/pytorch_vision_resnest.md
 """
