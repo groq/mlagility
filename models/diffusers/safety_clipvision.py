@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::safety_clipvision author::diffusers
+# labels: test_group::mlagility name::safety_clipvision author::diffusers task::Generative_AI
 # https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 # Use Stable Diffusion to instantiate the Safety ClipVision model, then return the model
 

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::unet_2d_condition author::diffusers
+# labels: test_group::mlagility name::unet_2d_condition author::diffusers task::Computer_Vision
 # https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 # Use Stable Diffusion to instantiate the unet, then return the unet
 
