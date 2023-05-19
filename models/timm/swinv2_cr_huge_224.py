@@ -1,4 +1,4 @@
-# labels: name::swinv2_cr_huge_224 author::timm task::computer_vision
+# labels: name::swinv2_cr_huge_224 author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse
