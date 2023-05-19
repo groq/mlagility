@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::egconv author::graph_convolutions
+# labels: test_group::mlagility name::egconv author::graph_convolutions task::Graph_Machine_Learning
 """
 Efficient Graph Convolution from the `"Adaptive Filters and
 Aggregator Fusion for Efficient Graph Convolutions"

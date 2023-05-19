@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::filmconv author::graph_convolutions
+# labels: test_group::mlagility name::filmconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The FiLM graph convolutional operator from the `"GNN-FiLM:
 Graph Neural Networks with Feature-wise Linear Modulation"

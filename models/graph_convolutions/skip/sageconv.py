@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::sageconv author::graph_convolutions
+# labels: test_group::mlagility name::sageconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The GraphSAGE operator from the `"Inductive Representation Learning on Large Graphs"
 <https://arxiv.org/abs/1706.02216>`_ paper

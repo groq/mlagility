@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::gineconv author::graph_convolutions
+# labels: test_group::mlagility name::gineconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The modified :class:`GINConv` operator from the
 `"Strategies for Pre-training Graph Neural Networks"

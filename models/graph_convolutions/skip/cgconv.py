@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::cgconv author::graph_convolutions
+# labels: test_group::mlagility name::cgconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The crystal graph convolutional operator from the `"Crystal Graph Convolutional Neural Networks
 for an Accurate and Interpretable Prediction of Material Properties"

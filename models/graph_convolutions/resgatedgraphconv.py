@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::resgatedgraphconv author::graph_convolutions
+# labels: test_group::mlagility name::resgatedgraphconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The residual gated graph convolutional operator from the `"Residual Gated Graph ConvNets"
 <https://arxiv.org/abs/1711.07553>`_ paper

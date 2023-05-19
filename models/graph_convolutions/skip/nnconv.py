@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::nnconv author::graph_convolutions
+# labels: test_group::mlagility name::nnconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The continuous kernel-based convolutional operator from the
 `"Neural Message Passing for Quantum Chemistry"

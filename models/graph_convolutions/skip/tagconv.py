@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::tagconv author::graph_convolutions
+# labels: test_group::mlagility name::tagconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The topology adaptive graph convolutional networks operator from the
 `"Topology Adaptive Graph Convolutional Networks"

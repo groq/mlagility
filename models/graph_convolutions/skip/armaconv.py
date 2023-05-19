@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::armaconv author::graph_convolutions
+# labels: test_group::mlagility name::armaconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The ARMA graph convolutional operator from the `"Graph Neural Networks with Convolutional
 ARMA Filters"

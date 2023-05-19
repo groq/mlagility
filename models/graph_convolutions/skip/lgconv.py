@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::lgconv author::graph_convolutions
+# labels: test_group::mlagility name::lgconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The Light Graph Convolution (LGC) operator from the
 `"LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation"

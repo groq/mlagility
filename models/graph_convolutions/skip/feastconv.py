@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::feastconv author::graph_convolutions
+# labels: test_group::mlagility name::feastconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The (translation-invariant) feature-steered convolutional operator from the
 `"FeaStNet: Feature-Steered Graph Convolutions for 3D Shape Analysis"

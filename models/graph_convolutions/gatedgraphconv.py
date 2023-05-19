@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::gatedgraphconv author::graph_convolutions
+# labels: test_group::mlagility name::gatedgraphconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The gated graph convolution operator from the `"Gated Graph Sequence Neural Networks"
 <https://arxiv.org/abs/1511.05493>`_ paper

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::appnp author::graph_convolutions
+# labels: test_group::mlagility name::appnp author::graph_convolutions task::Graph_Machine_Learning
 """
 The approximate personalized propagation of neural predictions layer from the
 `"Predict then Propagate: Graph Neural Networks meet Personalized PageRank"

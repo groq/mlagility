@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::generalconv author::graph_convolutions
+# labels: test_group::mlagility name::generalconv author::graph_convolutions task::Graph_Machine_Learning
 """
 A general GNN layer adapted from the `"Design Space for Graph Neural Networks"
 <https://arxiv.org/abs/2011.08843>`_ paper.
