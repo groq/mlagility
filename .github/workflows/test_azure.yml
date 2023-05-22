@@ -39,6 +39,9 @@ jobs:
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.AZURE_SSH_PRIVATE_KEY }}"
 
+          mkdir ~/.ssh
+          touch ~/.ssh/known_hosts
+
           python src/mlagility/cli/cloud/control.py create setup selftest info stop --name github-test-azure-single --hardware cpu-small
 
           python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small
