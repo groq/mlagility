@@ -17,15 +17,22 @@ permissions:
 
 jobs:
   build_and_test:
-    timeout-minutes: 10
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          activate-environment: mla
+          python-version: "3.8"
       - name: Install dependencies
+        shell: bash -el {0}
         run: |
           sudo apt-get update
           sudo apt-get install -y azure-cli
           python -m pip install --upgrade pip
+          pip install -e .
           pip install -r src/mlagility/cli/cloud/requirements.txt
       - name: Run tests
         env:
@@ -33,6 +40,7 @@ jobs:
           MLAGILITY_AZURE_PUBLIC_KEY: ${{ secrets.AZURE_SSH_PUBLIC_KEY }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           MLAGILITY_AZURE_PASSWORD: ${{ secrets.MLAGILITY_AZURE_PASSWORD }}
+        shell: bash -el {0}
         run: |
           az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
 
