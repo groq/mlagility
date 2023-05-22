@@ -39,8 +39,10 @@ jobs:
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.AZURE_SSH_PRIVATE_KEY }}"
 
-          python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure --size 2 --hardware cpu-small
-          python src/mlagility/cli/cloud/control.py start run --cluster --name github-test-azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
+          python src/mlagility/cli/cloud/control.py create setup selftest info stop --name github-test-azure-single --hardware cpu-small
+
+          python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small
+          python src/mlagility/cli/cloud/control.py start start run --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small --input-files models/selftest/*.py
   clean_up:
     needs: build_and_test
     if: always()
@@ -54,4 +56,4 @@ jobs:
       - name: Delete resource group
         run: |
           az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
-          az group delete --name github-test-azure --yes
+          az group delete --name github-test-azure-cluster --yes
