@@ -53,7 +53,7 @@ setup(
             "tf2onnx>=1.12.0",
         ],
         "groq": [
-            "groqflow==2.5.2",
+            "groqflow==3.0.2",
         ],
     },
     classifiers=[],

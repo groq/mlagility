@@ -1,7 +1,9 @@
 import argparse
 import os
 import sys
+from difflib import get_close_matches
 import onnxflow.common.build as build
+import onnxflow.common.exceptions as exceptions
 import mlagility.common.filesystem as filesystem
 import mlagility.cli.report as report
 from mlagility.api.script_api import benchmark_files
@@ -93,6 +95,14 @@ def main():
     # Parser for the "benchmark" command
     #######################################
 
+    def check_extension(choices, file_name):
+        _, extension = os.path.splitext(file_name.split("::")[0])
+        if extension[1:].lower() not in choices:
+            raise exceptions.ArgError(
+                f"input_files must end with .py or .onnx (got '{file_name}')"
+            )
+        return file_name
+
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Benchmark the performance of one or more models"
     )
@@ -102,6 +112,7 @@ def main():
         "input_files",
         nargs="+",
         help="One or more script (.py) or ONNX (.onnx) files to be benchmarked",
+        type=lambda file: check_extension(("py", "onnx"), file),
     )
 
     slurm_or_processes_group = benchmark_parser.add_mutually_exclusive_group()
@@ -502,8 +513,25 @@ def main():
     # we alter argv to insert the command for them.
 
     if len(sys.argv) > 1:
-        if sys.argv[1] not in subparsers.choices.keys() and "-h" not in sys.argv[1]:
-            sys.argv.insert(1, "benchmark")
+        first_arg = sys.argv[1]
+        if first_arg not in subparsers.choices.keys() and "-h" not in first_arg:
+            if "." in first_arg:
+                sys.argv.insert(1, "benchmark")
+            else:
+                # Check how close we are from each of the valid options
+                valid_options = list(subparsers.choices.keys())
+                close_matches = get_close_matches(first_arg, valid_options)
+
+                error_msg = f"Unexpected positional argument `benchit {first_arg}`. "
+                if close_matches:
+                    error_msg += f"Did you mean `benchit {close_matches[0]}`?"
+                else:
+                    error_msg += (
+                        "The first positional argument must either be "
+                        "an input file with the .py or .onnx file extension or "
+                        f"one of the following commands: {valid_options}."
+                    )
+                raise exceptions.ArgError(error_msg)
 
     args = parser.parse_args()
     if args.func == benchmark_command:

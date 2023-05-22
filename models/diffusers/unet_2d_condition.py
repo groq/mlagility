@@ -5,23 +5,17 @@
 from diffusers import StableDiffusionPipeline
 import torch
 
-
-pipe = StableDiffusionPipeline.from_pretrained(
-    "CompVis/stable-diffusion-v1-4",
-    use_auth_token="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",
-)
-
+pipe = StableDiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-1")
 model = pipe.unet
 
-latent_model_shape = [2, 4, 64, 64]
-text_embeddings_shape = [2, 77, 768]
+latent_model_shape = [2, 4, 94, 94]
+text_embeddings_shape = [2, 77, 1024]
 
 inputs = {
     "sample": torch.ones(latent_model_shape, dtype=torch.float),
     "timestep": 1,
     "encoder_hidden_states": torch.ones(text_embeddings_shape, dtype=torch.float),
 }
-
 
 # Call model
 model(**inputs)
