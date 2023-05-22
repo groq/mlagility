@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::fnet-base sub_task::unknown downloads::178,925 license::apache-2.0
+# labels: test_group::monthly,daily author::google name::fnet-base task::Natural_Language_Processing downloads::178,925 license::apache-2.0
 from transformers import FNetForMaskedLM, FNetTokenizer, pipeline
 tokenizer = FNetTokenizer.from_pretrained("google/fnet-base")
 model = FNetForMaskedLM.from_pretrained("google/fnet-base")

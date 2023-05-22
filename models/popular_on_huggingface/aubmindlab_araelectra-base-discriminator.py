@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::aubmindlab name::araelectra-base-discriminator sub_task::unknown downloads::1,266
+# labels: test_group::monthly author::aubmindlab name::araelectra-base-discriminator task::Natural_Language_Processing downloads::1,266
 from transformers import ElectraForPreTraining, ElectraTokenizerFast
 import torch
 

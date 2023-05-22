@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MCG-NJU name::videomae-base-finetuned-kinetics sub_task::unknown downloads::1,449 license::cc-by-nc-4.0
+# labels: test_group::monthly author::MCG-NJU name::videomae-base-finetuned-kinetics task::Computer_Vision downloads::1,449 license::cc-by-nc-4.0
 from transformers import VideoMAEFeatureExtractor, VideoMAEForVideoClassification
 import numpy as np
 import torch

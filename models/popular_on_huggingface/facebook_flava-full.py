@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::flava-full sub_task::unknown downloads::5,282 license::bsd-3-clause
+# labels: test_group::monthly,daily author::facebook name::flava-full task::MultiModal downloads::5,282 license::bsd-3-clause
 from PIL import Image
 import requests
 

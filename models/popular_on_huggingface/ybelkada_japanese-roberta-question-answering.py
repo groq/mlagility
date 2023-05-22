@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ybelkada name::japanese-roberta-question-answering sub_task::unknown downloads::337 license::cc-by-sa-3.0
+# labels: test_group::monthly author::ybelkada name::japanese-roberta-question-answering task::Natural_Language_Processing downloads::337 license::cc-by-sa-3.0
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 question = 'アレクサンダー・グラハム・ベルは、どこで生まれたの?'
 context = 'アレクサンダー・グラハム・ベルは、スコットランド生まれの科学者、発明家、工学者である。世界初の>実用的電話の発明で知られている。'

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::tuhailong name::SimCSE-bert-base sub_task::unknown downloads::214
+# labels: test_group::monthly author::tuhailong name::SimCSE-bert-base task::Natural_Language_Processing downloads::214
 from transformers import AutoTokenizer, AutoModel
 model = AutoModel.from_pretrained("tuhailong/SimCSE-bert-base")
 tokenizer = AutoTokenizer.from_pretrained("tuhailong/SimCSE-bert-base")

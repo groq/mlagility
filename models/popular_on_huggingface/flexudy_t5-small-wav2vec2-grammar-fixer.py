@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flexudy name::t5-small-wav2vec2-grammar-fixer sub_task::unknown downloads::486
+# labels: test_group::monthly author::flexudy name::t5-small-wav2vec2-grammar-fixer task::Natural_Language_Processing downloads::486
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 model_name = "flexudy/t5-small-wav2vec2-grammar-fixer"

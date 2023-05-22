@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::soheeyang name::rdr-ctx_encoder-single-nq-base sub_task::unknown downloads::1,110
+# labels: test_group::monthly author::soheeyang name::rdr-ctx_encoder-single-nq-base task::Natural_Language_Processing downloads::1,110
 from transformers import DPRContextEncoder, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("soheeyang/rdr-ctx_encoder-single-nq-base")

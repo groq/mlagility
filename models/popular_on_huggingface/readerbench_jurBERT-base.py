@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::readerbench name::jurBERT-base sub_task::unknown downloads::1,296
+# labels: test_group::monthly author::readerbench name::jurBERT-base task::Natural_Language_Processing downloads::1,296
 # tensorflow
 from transformers import AutoModel, AutoTokenizer, TFAutoModel
 tokenizer = AutoTokenizer.from_pretrained("readerbench/jurBERT-base")

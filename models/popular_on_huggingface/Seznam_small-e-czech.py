@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Seznam name::small-e-czech sub_task::unknown downloads::8,270 license::cc-by-4.0
+# labels: test_group::monthly author::Seznam name::small-e-czech task::Natural_Language_Processing downloads::8,270 license::cc-by-4.0
 from transformers import ElectraForPreTraining, ElectraTokenizerFast
 import torch
 

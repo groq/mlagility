@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::digitalepidemiologylab name::covid-twitter-bert sub_task::unknown downloads::331,544 license::mit
+# labels: test_group::monthly author::digitalepidemiologylab name::covid-twitter-bert task::Natural_Language_Processing downloads::331,544 license::mit
 from transformers import pipeline
 import json
 

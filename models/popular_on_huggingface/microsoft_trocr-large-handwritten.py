@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::microsoft name::trocr-large-handwritten sub_task::unknown downloads::1,876
+# labels: test_group::monthly,daily author::microsoft name::trocr-large-handwritten task::MultiModal downloads::1,876
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
 import requests
