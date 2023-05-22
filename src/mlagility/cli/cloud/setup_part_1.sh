@@ -3,12 +3,6 @@
 MYUSER=azureuser
 MYHOME=/home/$MYUSER
 
-# Install NFS
-
-# sudo apt-get -y update
-# sudo apt-get -y install nfs-common
-# sudo mkdir -p /mount/mlagilitystorage/mla-share
-
 # Install Docker
 
 sudo apt-get update
@@ -37,14 +31,6 @@ sudo service docker start
 # bashrc
 
 echo 'export MLAGILITY_DEBUG=True' >> $MYHOME/.bashrc
-# echo 'export ML_CACHE=/mount/mlagilitystorage/mla-share/ml-cache' >> $MYHOME/.bashrc
-# echo 'export HF_DATASETS_CACHE="$ML_CACHE""/huggingface"' >> $MYHOME/.bashrc
-# echo 'export TRANSFORMERS_CACHE="$ML_CACHE""/huggingface"' >> $MYHOME/.bashrc
-# echo 'export HF_HOME="$ML_CACHE""/huggingface"' >> $MYHOME/.bashrc
-# echo 'export XDG_CACHE_HOME="$ML_CACHE""/huggingface"' >> $MYHOME/.bashrc
-# echo 'export TORCH_HOME="$ML_CACHE""/torch-hub"' >> $MYHOME/.bashrc
-# echo 'export TORCH_HUB="$ML_CACHE""/torch-hub"' >> $MYHOME/.bashrc
-# echo 'sudo mount -t nfs mlagilitystorage.file.core.windows.net:/mlagilitystorage/mla-share /mount/mlagilitystorage/mla-share -o vers=4,minorversion=1,sec=sys' >> $MYHOME/.bashrc
 
 # conda
 
