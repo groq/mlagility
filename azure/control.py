@@ -4,6 +4,7 @@ import subprocess
 import shutil
 import time
 from typing import Optional, Callable
+import concurrent.futures
 from azure.identity import AzureCliCredential
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.network import NetworkManagementClient
@@ -35,12 +36,14 @@ hardware_to_device = {
     "t4": "nvidia",
     "icelake": "x86",
     "cpu-small": "x86",
+    "cpu-big-ram": "x86",
 }
 
 hardware_to_vm_size = {
     "t4": "Standard_NC4as_T4_v3",  # Nvidia T4 with 4 EPYC vCPUs
-    "icelake": "Standard_D16ds_v5",  # 16-core Xeon IceLake
-    "cpu-small": "Standard_E2s_v3",  # 2-core Xeon (unknown generation)
+    "icelake": "Standard_D16ds_v5",  # 16-core Xeon IceLake with 64 GB RAM
+    "cpu-small": "Standard_E2s_v3",  # 2-core Xeon (unknown generation) with 16 GB RAM
+    "cpu-big-ram": "Standard_E16-4s_v3",  # 4-core Xeon with 128 GB RAM
 }
 
 vm_size_to_hardware = {v: k for k, v in hardware_to_vm_size.items()}
@@ -266,15 +269,17 @@ def create_vnet_subnet_nsg(
     return vnet_result, subnet_result, nsg_result
 
 
-class VM:
+class Device:
     """
-    Handle for controlling an individual VM
+    Base class for handling an individual device (VM). Can be inherited
+    to provide more advanced functionality, for example a Cluster (device
+    comprised of many sub-devices).
     """
 
     def __init__(
         self,
         name,
-        retrieve: bool = True,
+        retrieve: bool,
         hardware: Optional[str] = None,
         rg_name: Optional[str] = None,
         nsg_name: Optional[str] = None,
@@ -282,7 +287,7 @@ class VM:
         subnet_name: Optional[str] = None,
     ):
         # The names for the resource group, vnet, subnet, and nsg may be
-        # set by a Cluster that are instantiating this VM
+        # set by a Cluster that are instantiating this Device
         if rg_name is None:
             self.RG_NAME = f"{name}-rg"
         else:
@@ -322,22 +327,27 @@ class VM:
         self.async_process = None
         self.async_command = None
 
-        self.async_poller = None
-
         self._ip = None
 
         self.public_key, self.private_key = get_ssh_keys()
 
+        self.hardware = hardware
+        self.device = hardware_to_device[self.hardware]
+
+        self.populate_devices(retrieve)
+
+    def populate_devices(self, retrieve: bool):
+
         if retrieve:
             vm_size, _ = self.info(verbosity="none")
-            self.hardware = vm_size_to_hardware[vm_size]
-        else:
-            if hardware is None:
-                raise ValueError("hardware must be specified when creating VM")
-
-            self.hardware = hardware
-
-        self.device = hardware_to_device[self.hardware]
+            vm_hardware = vm_size_to_hardware[vm_size]
+            if self.hardware is not None and vm_hardware != self.hardware:
+                raise ValueError(
+                    f"Device initialized with hardware {self.hardware} but "
+                    f"VM {self.VM_NAME} has hardware {vm_hardware}."
+                )
+            else:
+                self.hardware = vm_hardware
 
     @property
     def ip_address(self):
@@ -369,6 +379,15 @@ class VM:
             print(f"{self.VM_NAME} ({size}, {self.ip_address}): {status}")
 
         return size, status
+
+    def setup(self):
+        # Add the VM IP to known hosts, and retry a few times before giving up
+        self.retry_method(self.add_to_known_hosts, "Adding to known hosts")
+
+        self.send_file("setup_part_1.sh")
+        self.send_file("setup_part_2.sh")
+        self.run_command("bash setup_part_1.sh")
+        self.run_command("bash setup_part_2.sh")
 
     def create(
         self,
@@ -457,6 +476,7 @@ class VM:
         )
 
         nic_result = poller.result()
+        print("Provisioned NIC", nic_result.name)
 
         with open(
             os.path.expanduser(self.public_key), mode="r", encoding="utf-8"
@@ -468,7 +488,6 @@ class VM:
             "storage_profile": {
                 "image_reference": device_to_image_reference[self.device],
                 "os_disk": {
-                    # "disk_size_gb": 64,
                     "create_option": "FromImage",
                     "deleteOption": "Delete",
                 },
@@ -509,7 +528,6 @@ class VM:
         )
 
         vm_result = poller.result()
-
         print(f"Provisioned virtual machine {vm_result.name}")
 
     def delete(self):
@@ -547,41 +565,17 @@ class VM:
 
     def stop(self):
         print("Stopping VM", self.VM_NAME)
-        self.compute_client.virtual_machines.begin_deallocate(
+        poller = self.compute_client.virtual_machines.begin_deallocate(
             self.RG_NAME, self.VM_NAME
         )
-
-    def begin_start(self):
-        """
-        Asynchronously start the VM (useful for starting many VMs in parallel)
-        """
-
-        print("Starting VM", self.VM_NAME)
-        self.async_poller = self.compute_client.virtual_machines.begin_start(
-            self.RG_NAME, self.VM_NAME
-        )
-
-    def finish_azure_api(self):
-        """
-        Sync an in-progress Azure API
-        """
-
-        if self.async_poller is None:
-            raise ValueError(
-                "finish_azure_api() called while no asynchronous Azure API is in progress "
-                "for VM",
-                self.VM_NAME,
-            )
-
-        self.async_poller.result()
-        self.async_poller = None
+        poller.result()
 
     def start(self):
-        """
-        Synchronously start the VM
-        """
-        self.begin_start()
-        self.finish_azure_api()
+        print("Starting VM", self.VM_NAME)
+        poller = self.compute_client.virtual_machines.begin_start(
+            self.RG_NAME, self.VM_NAME
+        )
+        poller.result()
         self.wait_ssh()
 
     def send_file(self, file):
@@ -703,8 +697,7 @@ class VM:
         Run a function, and if it doesn't work then retry until a timeout runs out
         """
 
-        # Add the VM IP to known hosts, and retry a few times before giving up
-        known_host_success = False
+        success_achieved = False
 
         if timeout_seconds % sleep_amount_seconds != 0:
             raise ValueError(
@@ -714,10 +707,10 @@ class VM:
 
         timeout_remaining = timeout_seconds
 
-        while not known_host_success and timeout_remaining > 0:
+        while not success_achieved and timeout_remaining > 0:
             try:
                 method()
-                known_host_success = True
+                success_achieved = True
             except subprocess.CalledProcessError as e:
                 timeout_remaining = timeout_remaining - sleep_amount_seconds
                 if timeout_remaining > 0:
@@ -732,29 +725,6 @@ class VM:
                     raise e
                 time.sleep(sleep_amount_seconds)
 
-    def begin_setup(self):
-        # Add the VM IP to known hosts, and retry a few times before giving up
-        self.retry_method(self.add_to_known_hosts, "Adding to known hosts")
-
-        self.send_file("setup_part_1.sh")
-        self.send_file("setup_part_2.sh")
-        self.run_async_command("bash setup_part_1.sh")
-
-    def setup_part_2(self):
-        print(f"\n\nSETUP PART 1 RESULT FOR {self.VM_NAME}:\n\n")
-        self.finish_async_command(verbosity="high")
-
-        self.run_async_command("bash setup_part_2.sh")
-
-    def finish_setup(self):
-        print(f"\n\nSETUP FINAL RESULT FOR {self.VM_NAME}:\n\n")
-        self.finish_async_command(verbosity="high")
-
-    def setup(self):
-        self.begin_setup()
-        self.setup_part_2()
-        self.finish_setup()
-
     def ssh_hello_world(self):
         self.run_command("echo hello world")
 
@@ -765,20 +735,14 @@ class VM:
 
         self.retry_method(self.ssh_hello_world, "Checking SSH availability")
 
-    def begin_selftest(self):
-        self.run_async_command(
+    def selftest(self):
+        self.check_command(
             benchit_prefix(
                 f"mlagility/models/selftest/linear.py --device {self.device}"
-            )
+            ),
+            "Successfully benchmarked",
         )
-
-    def finish_selftest(self):
-        self.finish_async_command(check_output="Successfully benchmarked")
         self.wipe_mlagility_cache()
-
-    def selftest(self):
-        self.begin_selftest()
-        self.finish_async_command()
 
     def wipe_models_cache(self):
         # NOTE: this method needs to be kept up-to-date with MLAgility's corpus
@@ -792,7 +756,7 @@ class VM:
         self.run_command(command)
 
 
-class Cluster:
+class Cluster(Device):
     """
     Handle for controlling a cluster of VMs
     """
@@ -808,58 +772,35 @@ class Cluster:
         vnet_name: Optional[str] = None,
         subnet_name: Optional[str] = None,
     ):
-        # The names for the resource group, vnet, subnet, and nsg may be
-        # set by a SuperCluster that are instantiating this Cluster
-        if rg_name is None:
-            self.RG_NAME = f"{name}-rg"
-        else:
-            self.RG_NAME = rg_name
-
-        if vnet_name is None:
-            self.VNET_NAME = f"{name}-vnet"
-        else:
-            self.VNET_NAME = vnet_name
-
-        if subnet_name is None:
-            self.SUBNET_NAME = f"{name}-subnet"
-        else:
-            self.SUBNET_NAME = subnet_name
-
-        if nsg_name is None:
-            self.NSG_NAME = f"{name}-nsg"
-        else:
-            self.NSG_NAME = nsg_name
 
         self.size = size
         self.name = name
-        self.hardware = hardware
 
         self.vnet = None
         self.subnet = None
         self.nsg = None
 
-        self.credential, self.subscription_id = auth()
-        self.resource_client = ResourceManagementClient(
-            self.credential, self.subscription_id
-        )
-        self.compute_client = ComputeManagementClient(
-            self.credential, self.subscription_id
-        )
-        self.network_client = NetworkManagementClient(
-            self.credential, self.subscription_id
+        # self.devices will be populated with a list of sub-devices (e.g., VMs)
+        self.devices = None
+
+        super().__init__(
+            name=name,
+            retrieve=retrieve,
+            hardware=hardware,
+            rg_name=rg_name,
+            nsg_name=nsg_name,
+            vnet_name=vnet_name,
+            subnet_name=subnet_name,
         )
 
-        self.vms = None
-
-        self.populate_vms(retrieve)
-
-    def populate_vms(self, retrieve: bool):
+    def populate_devices(self, retrieve: bool):
         if retrieve:
             resource_group_vms = self.compute_client.virtual_machines.list(self.RG_NAME)
-            self.vms = [
-                VM(
+            self.devices = [
+                Device(
                     vm.name,
                     retrieve=True,
+                    hardware=self.hardware,
                     rg_name=self.RG_NAME,
                     nsg_name=self.NSG_NAME,
                     vnet_name=self.VNET_NAME,
@@ -872,8 +813,8 @@ class Cluster:
             if self.size is None:
                 raise ValueError("size must be set when retrieve=False")
 
-            self.vms = [
-                VM(
+            self.devices = [
+                Device(
                     name=f"{self.name}-{i}",
                     retrieve=False,
                     hardware=self.hardware,
@@ -885,9 +826,24 @@ class Cluster:
                 for i in range(self.size)
             ]
 
-    def info(self):
-        for vm in self.vms:
-            vm.info()
+    def parallelize(self, method: Callable, **kwargs):
+        """
+        Run a method on all VMs in parallel
+        """
+        method_name = method.__name__
+        futures = []
+        with concurrent.futures.ThreadPoolExecutor(self.size) as executor:
+            for device in self.devices:
+                method_ref = getattr(device, method_name)
+                if kwargs is None:
+                    futures.append(executor.submit(method_ref))
+                else:
+                    futures.append(executor.submit(method_ref, **kwargs))
+
+            concurrent.futures.wait(futures)
+
+    def info(self, verbosity: str = "high"):
+        self.parallelize(super().info, verbosity=verbosity)
 
     def create(
         self, create_shared_resources: bool = True, subnet_result=None, nsg_result=None
@@ -912,12 +868,12 @@ class Cluster:
             self.subnet = subnet_result
             self.nsg = nsg_result
 
-        for vm in self.vms:
-            vm.create(
-                create_shared_resources=False,
-                subnet_result=self.subnet,
-                nsg_result=self.nsg,
-            )
+        self.parallelize(
+            super().create,
+            create_shared_resources=False,
+            subnet_result=self.subnet,
+            nsg_result=self.nsg,
+        )
 
     def delete(self):
         """
@@ -929,59 +885,20 @@ class Cluster:
         poller.result()
         print(f"Deleted resource group {self.RG_NAME}")
 
-    def begin_setup(self):
-        for vm in self.vms:
-            vm.begin_setup()
-
-    def setup_part_2(self):
-        for vm in self.vms:
-            vm.setup_part_2()
-
-    def finish_setup(self):
-        for vm in self.vms:
-            vm.finish_setup()
-
     def setup(self):
-        self.begin_setup()
-        self.setup_part_2()
-        self.finish_setup()
+        self.parallelize(super().setup)
 
     def start(self):
-        for vm in self.vms:
-            vm.begin_start()
-
-        for vm in self.vms:
-            vm.finish_azure_api()
-
-        for vm in self.vms:
-            vm.wait_ssh()
+        self.parallelize(super().start)
 
     def stop(self):
-        for vm in self.vms:
-            vm.stop()
+        self.parallelize(super().stop)
 
     def selftest(self):
-        for vm in self.vms:
-            vm.begin_selftest()
-
-        for vm in self.vms:
-            vm.finish_selftest()
-
-    def run_async_command(self, command):
-        """
-        Run the same async command on all VMs in the cluster, then
-        wait for all VMs to finish
-        """
-
-        for vm in self.vms:
-            vm.run_async_command(command)
-
-        for vm in self.vms:
-            vm.finish_async_command()
+        self.parallelize(super().selftest)
 
     def wipe_mlagility_cache(self):
-        for vm in self.vms:
-            vm.wipe_mlagility_cache()
+        self.parallelize(super().wipe_mlagility_cache)
 
     def run(self, input_files: str):
         # TODO: create more jobs based on permutations such as
@@ -1002,7 +919,7 @@ class Cluster:
 
             # Attempt to assign job to cluster
             if job is not None:
-                for vm in self.vms:
+                for vm in self.devices:
                     if vm.async_process is None:
                         vm.run_async_command(job)
                         job_assigned = True
@@ -1010,30 +927,31 @@ class Cluster:
                         break
 
             # Check if any VMs are done with their last job
-            for vm in self.vms:
+            for vm in self.devices:
                 if vm.async_process is not None:
                     print("Polling VM", vm.VM_NAME)
                     if vm.poll_async_command():
                         vm.wipe_models_cache()
 
-                    time.sleep(1)
-
             # Get a new job if this job was assigned
             if job_assigned and len(jobs) > 0:
+                print("Jobs remaining", len(jobs))
                 job = jobs.pop(0)
             elif job_assigned and len(jobs) == 0:
                 job = None
 
             # Determine whether the cluster is busy or not
             busy = False
-            for vm in self.vms:
+            for vm in self.devices:
                 if vm.async_process is not None:
                     busy = True
+
+            time.sleep(1)
 
         result_dir = "result"
 
         # Gather cache directories
-        for vm in self.vms:
+        for vm in self.devices:
             vm_result_dir = os.path.join(result_dir, vm.VM_NAME)
             vm.get_dir(".cache/mlagility", vm_result_dir)
 
@@ -1055,7 +973,7 @@ class SuperCluster(Cluster):
     a few methods need to be overloaded to enable cluster-of-cluster support.
     """
 
-    def populate_vms(self, retrieve: bool):
+    def populate_devices(self, retrieve: bool):
         if retrieve:
             size = None
         else:
@@ -1064,7 +982,7 @@ class SuperCluster(Cluster):
 
             size = self.size
 
-        self.vms = [
+        self.devices = [
             Cluster(
                 name=cluster_prefix(self.name, hardware),
                 retrieve=retrieve,
@@ -1078,22 +996,14 @@ class SuperCluster(Cluster):
             for hardware in self.hardware
         ]
 
-    def run_async_command(self, command):
-        """
-        Run the same async command on all VMs in the cluster, then
-        wait for all VMs to finish
-        """
-
-        for cluster in self.vms:
-            for vm in cluster:
-                vm.run_async_command(command)
-
-        for cluster in self.vms:
-            for vm in cluster:
-                vm.finish_async_command()
+    def run(self, input_files: str):
+        self.parallelize(super().run, input_files=input_files)
 
 
 def main():
+
+    start_time = time.time()
+
     # Define the argument parser
     parser = argparse.ArgumentParser(description="Manage MLAgility Azure VMs")
 
@@ -1184,7 +1094,7 @@ def main():
             raise ValueError(
                 "Length of hardware arg must be 1 if --cluster is not used"
             )
-        handle = VM(args.name, retrieve, args.hardware[0])
+        handle = Device(args.name, retrieve, args.hardware[0])
 
     command_to_function = {
         "create": handle.create,
@@ -1199,16 +1109,14 @@ def main():
 
     for command in args.commands:
         if command == "run":
-            # Special case because it takes an argument
-            if isinstance(handle, SuperCluster) or isinstance(handle, VM):
-                raise ValueError(
-                    "The run command is only implemented for Clusters "
-                    "(not VMs or clusters of Clusters)"
-                )
-            else:
-                handle.run(args.input_files)
+            handle.run(args.input_files)
         else:
             command_to_function[command]()
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    print("Time elapsed (seconds):", total_time)
 
 
 if __name__ == "__main__":
