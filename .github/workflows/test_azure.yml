@@ -42,10 +42,12 @@ jobs:
           mkdir ~/.ssh
           touch ~/.ssh/known_hosts
 
-          python src/mlagility/cli/cloud/control.py create setup selftest info stop --name github-test-azure-single --hardware cpu-small
+          cd src/mlagility/cli/cloud
 
-          python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small
-          python src/mlagility/cli/cloud/control.py start start run --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small --input-files models/selftest/*.py
+          python control.py create setup selftest info stop --name github-test-azure-single --hardware cpu-small
+
+          python control.py create setup selftest info stop --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small
+          python control.py start start run --cluster --name github-test-azure-cluster --size 2 --hardware cpu-small --input-files models/selftest/*.py
   clean_up:
     needs: build_and_test
     if: always()
