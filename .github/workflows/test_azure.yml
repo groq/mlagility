@@ -16,7 +16,22 @@ permissions:
   contents: read
 
 jobs:
+  install_cli:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install az cli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y azure-cli
+      - name: Turn on Azure VM
+        run: |
+          az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
   build:
+    needs: install_cli
+    timeout-minutes: 10
+    if: ${{ needs.install_cli.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,6 +47,24 @@ jobs:
           pip install -r src/mlagility/cli/cloud/requirements.txt
       - name: Run tests
         shell: bash -el {0}
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github_test_azure --size 2 --hardware cpu-small
-          python src/mlagility/cli/cloud/control.py start run delete --cluster --name github_test_azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.AZURE_PRIVATE_KEY }}"
+
+          python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure --size 2 --hardware cpu-small
+          python src/mlagility/cli/cloud/control.py start run delete --cluster --name github-test-azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
+  clena_up:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install az cli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y azure-cli
+      - name: Delete resource group
+        run: |
+          az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
+          az group delete --name github_test_azure
