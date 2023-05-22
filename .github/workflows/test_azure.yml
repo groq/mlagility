@@ -64,4 +64,4 @@ jobs:
       - name: Delete resource group
         run: |
           az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
-          az group delete --name github_test_azure
+          az group delete --name github-test-azure --yes
