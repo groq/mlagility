@@ -16,27 +16,15 @@ permissions:
   contents: read
 
 jobs:
-  install_cli:
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install az cli
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y azure-cli
-      - name: Log in to CLI
-        run: |
-          az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
   build_and_test:
-    needs: install_cli
     timeout-minutes: 10
-    if: ${{ needs.install_cli.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y azure-cli
           python -m pip install --upgrade pip
           pip install -r src/mlagility/cli/cloud/requirements.txt
       - name: Run tests
@@ -46,11 +34,13 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           MLAGILITY_AZURE_PASSWORD: ${{ secrets.MLAGILITY_AZURE_PASSWORD }}
         run: |
+          az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
+
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.AZURE_SSH_PRIVATE_KEY }}"
 
           python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure --size 2 --hardware cpu-small
-          python src/mlagility/cli/cloud/control.py start run delete --cluster --name github-test-azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
+          python src/mlagility/cli/cloud/control.py start run --cluster --name github-test-azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
   clean_up:
     needs: build_and_test
     if: always()
