@@ -1,3 +1,7 @@
+"""
+WARNING: this is a work-in-progress tool. We do not recommend using it yet.
+"""
+
 import os
 import argparse
 import subprocess
@@ -579,13 +583,13 @@ class Device:
         self.wait_ssh()
 
     def send_file(self, file):
-        command = f"scp -i {self.private_key} {file} {USERNAME}@{self.ip_address}:~/."
+        command = f"scp {file} {USERNAME}@{self.ip_address}:~/."
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
     def get_file(self, remote_file, local_dir, local_file_name):
         os.makedirs(local_dir, exist_ok=True)
-        command = f"scp -i {self.private_key} {USERNAME}@{self.ip_address}:{remote_file} {local_dir}/{local_file_name}"
+        command = f"scp {USERNAME}@{self.ip_address}:{remote_file} {local_dir}/{local_file_name}"
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
@@ -601,7 +605,9 @@ class Device:
         self.run_command(f"tar -czvf {cache_tar_filename} {remote_dir}")
 
         # Copy the tar file
-        command = f"scp -i {self.private_key} {USERNAME}@{self.ip_address}:{cache_tar_filename} {local_destination}"
+        command = (
+            f"scp {USERNAME}@{self.ip_address}:{cache_tar_filename} {local_destination}"
+        )
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
@@ -613,16 +619,12 @@ class Device:
         local_command(f"rm {local_cache_tar_path}")
 
     def run_command(self, command):
-        full_command = (
-            f"ssh -i {self.private_key} {USERNAME}@{self.ip_address} {command}"
-        )
+        full_command = f"ssh {USERNAME}@{self.ip_address} {command}"
         print(f"Running command on {self.VM_NAME}: {full_command}")
         subprocess.run(full_command.split(" "), check=True)
 
     def check_command(self, command, success_term):
-        full_command = (
-            f"ssh -i {self.private_key} {USERNAME}@{self.ip_address} {command}"
-        )
+        full_command = f"ssh {USERNAME}@{self.ip_address} {command}"
         print(f"Running command on {self.VM_NAME}: {full_command}")
         result = subprocess.check_output(full_command.split(" ")).decode()
         if success_term in result:
@@ -631,9 +633,7 @@ class Device:
             raise Exception("Error! Success term not in result")
 
     def run_async_command(self, command):
-        full_command = (
-            f"ssh -i {self.private_key} {USERNAME}@{self.ip_address} {command}"
-        )
+        full_command = f"ssh {USERNAME}@{self.ip_address} {command}"
         print(f"Running async command on {self.VM_NAME}: {full_command}")
         self.async_process = subprocess.Popen(
             full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -719,9 +719,7 @@ class Device:
                         f"Re-attempting, timeout remaining is {timeout_remaining}"
                     )
                 else:
-                    print(
-                        f"{task_description} failed and the timeout has elapsed. Exiting."
-                    )
+                    print(f"{task_description} failed and the timeout has elapsed.")
                     raise e
                 time.sleep(sleep_amount_seconds)
 
@@ -826,6 +824,18 @@ class Cluster(Device):
                 for i in range(self.size)
             ]
 
+    def check_vms_exist(self):
+        resource_group_vm_names = [
+            vm.name for vm in self.compute_client.virtual_machines.list(self.RG_NAME)
+        ]
+        for vm in self.devices:
+            if vm.VM_NAME not in resource_group_vm_names:
+                raise ValueError(
+                    f"VM {vm.VM_NAME} expected to be in group {self.RG_NAME}, "
+                    "but was not found. We suggest checking to see if you are out "
+                    f"of quota for {hardware_to_vm_size[vm.hardware]}."
+                )
+
     def parallelize(self, method: Callable, **kwargs):
         """
         Run a method on all VMs in parallel
@@ -874,6 +884,9 @@ class Cluster(Device):
             subnet_result=self.subnet,
             nsg_result=self.nsg,
         )
+
+        # We need to check that all of the VMs exist since creation sometimes fails silently
+        self.check_vms_exist()
 
     def delete(self):
         """
