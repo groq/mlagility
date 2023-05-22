@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::thanathorn name::mt5-cpe-kmutt-thai-sentence-sum downloads::744 task::Summarization
+# labels: test_group::monthly author::thanathorn name::mt5-cpe-kmutt-thai-sentence-sum downloads::744 task::Natural_Language_Processing sub_task::Summarization
 from simpletransformers.t5 import T5Model, T5Args
 from torch import cuda
 

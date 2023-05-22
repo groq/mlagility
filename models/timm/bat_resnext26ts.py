@@ -1,4 +1,4 @@
-# labels: name::bat_resnext26ts author::timm task::computer_vision
+# labels: name::bat_resnext26ts author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

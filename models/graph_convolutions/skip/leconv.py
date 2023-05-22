@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::leconv author::graph_convolutions
+# labels: test_group::mlagility name::leconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The local extremum graph neural network operator from the
 `"ASAP: Adaptive Structure Aware Pooling for Learning Hierarchical Graph Representations"

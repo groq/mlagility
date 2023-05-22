@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::ginconv author::graph_convolutions
+# labels: test_group::mlagility name::ginconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The graph isomorphism operator from the “How Powerful are Graph Neural Networks?”
 https://arxiv.org/abs/1810.00826

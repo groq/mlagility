@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::fcos_resnet50_fpn author::torchvision
+# labels: test_group::mlagility name::fcos_resnet50_fpn author::torchvision task::Computer_Vision
 """
 https://pytorch.org/vision/stable/models/fcos.html
 """

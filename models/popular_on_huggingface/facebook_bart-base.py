@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::bart-base downloads::4,287,565 license::apache-2.0 task::Feature_Extraction
+# labels: test_group::monthly,daily author::facebook name::bart-base downloads::4,287,565 license::apache-2.0 task::Multimodal sub_task::Feature_Extraction
 from transformers import BartTokenizer, BartModel
 
 tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')

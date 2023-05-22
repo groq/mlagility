@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::ssd300_vgg16 author::torchvision
+# labels: test_group::mlagility name::ssd300_vgg16 author::torchvision task::Computer_Vision
 """
 https://pytorch.org/vision/stable/models/ssd.html
 """

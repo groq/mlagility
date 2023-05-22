@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::savasy name::bert-base-turkish-sentiment-cased downloads::2,311 task::Text_Classification
+# labels: test_group::monthly author::savasy name::bert-base-turkish-sentiment-cased downloads::2,311 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 model = AutoModelForSequenceClassification.from_pretrained("savasy/bert-base-turkish-sentiment-cased")

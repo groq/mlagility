@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flexudy name::t5-base-multi-sentence-doctor downloads::206,333 task::Text2Text_Generation
+# labels: test_group::monthly author::flexudy name::t5-base-multi-sentence-doctor downloads::206,333 task::Natural_Language_Processing sub_task::Text2Text_Generation
 
 from transformers import AutoTokenizer, AutoModelWithLMHead
 

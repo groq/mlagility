@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::huggingface name::distilbert-base-uncased-finetuned-sst-2-english downloads::2,161,565 license::apache-2.0 task::Text_Classification
+# labels: test_group::monthly author::huggingface name::distilbert-base-uncased-finetuned-sst-2-english downloads::2,161,565 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Classification
 import torch
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
 

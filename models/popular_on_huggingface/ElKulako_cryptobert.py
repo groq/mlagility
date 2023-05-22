@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ElKulako name::cryptobert downloads::740 task::Text_Classification
+# labels: test_group::monthly author::ElKulako name::cryptobert downloads::740 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import TextClassificationPipeline, AutoModelForSequenceClassification, AutoTokenizer
 model_name = "ElKulako/cryptobert"
 tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)

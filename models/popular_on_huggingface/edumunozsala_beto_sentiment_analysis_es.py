@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::edumunozsala name::beto_sentiment_analysis_es downloads::204 license::apache-2.0 task::Text_Classification
+# labels: test_group::monthly author::edumunozsala name::beto_sentiment_analysis_es downloads::204 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Classification
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 

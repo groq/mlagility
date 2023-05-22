@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::NbAiLab name::nb-bert-base-ner downloads::188 license::cc-by-4.0 task::Token_Classification
+# labels: test_group::monthly author::NbAiLab name::nb-bert-base-ner downloads::188 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::owlvit-base-patch32 downloads::10,221 license::apache-2.0 task::Object_Detection
+# labels: test_group::monthly,daily author::google name::owlvit-base-patch32 downloads::10,221 license::apache-2.0 task::Computer_Vision sub_task::Object_Detection
 import requests
 from PIL import Image
 import torch

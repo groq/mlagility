@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::splinter author::huggingface_pytorch
+# labels: test_group::mlagility name::splinter author::huggingface_pytorch task::Natural_Language_Processing
 from mlagility.parser import parse
 import transformers
 import torch

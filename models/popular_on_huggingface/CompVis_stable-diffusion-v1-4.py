@@ -1,4 +1,4 @@
-# labels: test_group::hot_at_groq,monthly,daily author::CompVis name::stable-diffusion-v1-4 downloads::933,179 license::creativeml-openrail-m task::Text-to-Image
+# labels: test_group::hot_at_groq,monthly,daily author::CompVis name::stable-diffusion-v1-4 downloads::933,179 license::creativeml-openrail-m task::Multimodal sub_task::Text-to-Image
 import torch
 from torch import autocast
 from diffusers import StableDiffusionPipeline

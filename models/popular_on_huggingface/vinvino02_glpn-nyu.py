@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::vinvino02 name::glpn-nyu task::unknown downloads::752 license::apache-2.0
+# labels: test_group::monthly author::vinvino02 name::glpn-nyu task::Computer_Vision downloads::752 license::apache-2.0
 from transformers import GLPNFeatureExtractor, GLPNForDepthEstimation
 import torch
 import numpy as np

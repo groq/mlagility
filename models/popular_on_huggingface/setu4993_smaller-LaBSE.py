@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::setu4993 name::smaller-LaBSE downloads::1,111 license::apache-2.0 task::Feature_Extraction
+# labels: test_group::monthly author::setu4993 name::smaller-LaBSE downloads::1,111 license::apache-2.0 task::Multimodal sub_task::Feature_Extraction
 import torch
 from transformers import BertModel, BertTokenizerFast
 

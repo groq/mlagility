@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::mealv2_efficientnet_b0 author::torch_hub
+# labels: test_group::mlagility name::mealv2_efficientnet_b0 author::torch_hub task::Computer_Vision
 """
 https://github.com/pytorch/hub/blob/master/pytorch_vision_meal_v2.md
 """

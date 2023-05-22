@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::TinyBERT-spanish-uncased-finetuned-ner downloads::1,131 task::Token_Classification
+# labels: test_group::monthly author::mrm8488 name::TinyBERT-spanish-uncased-finetuned-ner downloads::1,131 task::Natural_Language_Processing sub_task::Token_Classification
 import torch
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 

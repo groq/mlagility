@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::unicamp-dl name::translation-pt-en-t5 downloads::666 task::Translation
+# labels: test_group::monthly author::unicamp-dl name::translation-pt-en-t5 downloads::666 task::Natural_Language_Processing sub_task::Translation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
   
 tokenizer = AutoTokenizer.from_pretrained("unicamp-dl/translation-pt-en-t5")

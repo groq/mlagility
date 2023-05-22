@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::uer name::roberta-base-chinese-extractive-qa downloads::4,469 task::Question_Answering
+# labels: test_group::monthly author::uer name::roberta-base-chinese-extractive-qa downloads::4,469 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoModelForQuestionAnswering,AutoTokenizer,pipeline
 model = AutoModelForQuestionAnswering.from_pretrained('uer/roberta-base-chinese-extractive-qa')
 tokenizer = AutoTokenizer.from_pretrained('uer/roberta-base-chinese-extractive-qa')

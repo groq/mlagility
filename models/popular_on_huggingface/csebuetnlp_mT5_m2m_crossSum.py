@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::csebuetnlp name::mT5_m2m_crossSum downloads::623 task::Summarization
+# labels: test_group::monthly author::csebuetnlp name::mT5_m2m_crossSum downloads::623 task::Natural_Language_Processing sub_task::Summarization
 import re
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 

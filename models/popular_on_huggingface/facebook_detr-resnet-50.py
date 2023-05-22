@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::facebook name::detr-resnet-50 downloads::61,308 license::apache-2.0 task::Object_Detection
+# labels: test_group::monthly author::facebook name::detr-resnet-50 downloads::61,308 license::apache-2.0 task::Computer_Vision sub_task::Object_Detection
 from transformers import DetrFeatureExtractor, DetrForObjectDetection
 import torch
 from PIL import Image

@@ -1,4 +1,4 @@
-# labels: name::seresnextaa101d_32x8d author::timm task::computer_vision
+# labels: name::seresnextaa101d_32x8d author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

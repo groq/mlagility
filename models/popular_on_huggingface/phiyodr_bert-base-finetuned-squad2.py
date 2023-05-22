@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::phiyodr name::bert-base-finetuned-squad2 downloads::2,083 task::Question_Answering
+# labels: test_group::monthly author::phiyodr name::bert-base-finetuned-squad2 downloads::2,083 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers.pipelines import pipeline
 
 model_name = "phiyodr/bert-base-finetuned-squad2"

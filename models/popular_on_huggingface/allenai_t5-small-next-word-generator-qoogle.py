@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::allenai name::t5-small-next-word-generator-qoogle downloads::216 task::Text2Text_Generation
+# labels: test_group::monthly author::allenai name::t5-small-next-word-generator-qoogle downloads::216 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import T5Config, T5ForConditionalGeneration, T5Tokenizer
 
 model_name = "allenai/t5-small-next-word-generator-qoogle"

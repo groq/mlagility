@@ -1,4 +1,4 @@
-# labels: name::legacy_seresnet50 author::timm task::computer_vision
+# labels: name::legacy_seresnet50 author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

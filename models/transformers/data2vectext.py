@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::data2vectext author::transformers
+# labels: test_group::mlagility name::data2vectext author::transformers task::Natural_Language_Processing
 from mlagility.parser import parse
 import transformers
 import torch

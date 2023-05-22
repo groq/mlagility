@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Salesforce name::codet5-large-ntp-py downloads::462 license::bsd-3-clause task::Text2Text_Generation
+# labels: test_group::monthly author::Salesforce name::codet5-large-ntp-py downloads::462 license::bsd-3-clause task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, T5ForConditionalGeneration
 tokenizer = AutoTokenizer.from_pretrained("Salesforce/codet5-large-ntp-py")
 model = T5ForConditionalGeneration.from_pretrained("Salesforce/codet5-large-ntp-py")

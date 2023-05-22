@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::openai name::clip-vit-large-patch14 downloads::11,601,851 task::Zero-Shot_Image_Classification
+# labels: test_group::monthly,daily author::openai name::clip-vit-large-patch14 downloads::11,601,851 task::Computer_Vision sub_task::Zero-Shot_Image_Classification
 from PIL import Image
 import requests
 

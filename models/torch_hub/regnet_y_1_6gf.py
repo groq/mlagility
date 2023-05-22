@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::regnet_y_1_6gf author::torch_hub
+# labels: test_group::mlagility name::regnet_y_1_6gf author::torch_hub task::Computer_Vision
 from mlagility.parser import parse
 import torch
 

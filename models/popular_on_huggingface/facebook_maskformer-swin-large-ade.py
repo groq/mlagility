@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::facebook name::maskformer-swin-large-ade downloads::201 license::apache-2.0 task::Image_Segmentation
+# labels: test_group::monthly author::facebook name::maskformer-swin-large-ade downloads::201 license::apache-2.0 task::Computer_Vision sub_task::Image_Segmentation
 from transformers import MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation
 from PIL import Image
 import requests

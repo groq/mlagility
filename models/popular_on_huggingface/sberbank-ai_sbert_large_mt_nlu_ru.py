@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::sberbank-ai name::sbert_large_mt_nlu_ru downloads::1,926 task::Feature_Extraction
+# labels: test_group::monthly author::sberbank-ai name::sbert_large_mt_nlu_ru downloads::1,926 task::Multimodal sub_task::Feature_Extraction
 from transformers import AutoTokenizer, AutoModel
 import torch
 #Mean Pooling - Take attention mask into account for correct averaging

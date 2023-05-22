@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::johngiorgi name::declutr-small downloads::1,619 license::apache-2.0 task::Sentence_Similarity
+# labels: test_group::monthly author::johngiorgi name::declutr-small downloads::1,619 license::apache-2.0 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from scipy.spatial.distance import cosine
 from sentence_transformers import SentenceTransformer
 

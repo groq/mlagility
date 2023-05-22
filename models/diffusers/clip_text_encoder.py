@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::clip_text_encoder author::diffusers
+# labels: test_group::mlagility name::clip_text_encoder author::diffusers task::MultiModal
 # https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 # Use Stable Diffusion to instantiate the CLIP text embedding model, then return the model
 

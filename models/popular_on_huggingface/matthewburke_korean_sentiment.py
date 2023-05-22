@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::matthewburke name::korean_sentiment downloads::270 task::Text_Classification
+# labels: test_group::monthly author::matthewburke name::korean_sentiment downloads::270 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 classifier = pipeline("text-classification", model="matthewburke/korean_sentiment")
 custom_tweet = "영화 재밌다."

@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::segformer author::huggingface_pytorch
+# labels: test_group::mlagility name::segformer author::huggingface_pytorch task::Computer_Vision
 from mlagility.parser import parse
 import transformers
 import torch

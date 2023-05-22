@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cardiffnlp name::tweet-topic-21-multi downloads::1,102 task::Text_Classification
+# labels: test_group::monthly author::cardiffnlp name::tweet-topic-21-multi downloads::1,102 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoModelForSequenceClassification, TFAutoModelForSequenceClassification
 from transformers import AutoTokenizer
 import numpy as np

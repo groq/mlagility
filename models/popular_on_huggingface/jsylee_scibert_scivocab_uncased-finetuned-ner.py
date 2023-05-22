@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::jsylee name::scibert_scivocab_uncased-finetuned-ner downloads::645 task::Token_Classification
+# labels: test_group::monthly author::jsylee name::scibert_scivocab_uncased-finetuned-ner downloads::645 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import (AutoModelForTokenClassification, 
                           AutoTokenizer, 
                           pipeline,

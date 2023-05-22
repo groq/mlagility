@@ -1,4 +1,4 @@
-# labels: name::nfnet_f6 author::timm task::computer_vision
+# labels: name::nfnet_f6 author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

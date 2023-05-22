@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::vit-large-patch16-384 downloads::684 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly,daily author::google name::vit-large-patch16-384 downloads::684 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import ViTFeatureExtractor, ViTForImageClassification
 from PIL import Image
 import requests

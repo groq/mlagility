@@ -1,4 +1,4 @@
-# labels: name::xcit_small_12_p8_224_dist author::timm task::computer_vision
+# labels: name::xcit_small_12_p8_224_dist author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

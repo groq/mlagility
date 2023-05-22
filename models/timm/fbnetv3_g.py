@@ -1,4 +1,4 @@
-# labels: name::fbnetv3_g author::timm task::computer_vision
+# labels: name::fbnetv3_g author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

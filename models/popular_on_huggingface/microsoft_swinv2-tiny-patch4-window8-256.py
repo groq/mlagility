@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::microsoft name::swinv2-tiny-patch4-window8-256 downloads::1,754 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly,daily author::microsoft name::swinv2-tiny-patch4-window8-256 downloads::1,754 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import AutoFeatureExtractor, SwinForImageClassification
 from PIL import Image
 import requests

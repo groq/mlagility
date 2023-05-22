@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::patrickvonplaten name::longformer2roberta-cnn_dailymail-fp16 downloads::513 task::Text2Text_Generation
+# labels: test_group::monthly author::patrickvonplaten name::longformer2roberta-cnn_dailymail-fp16 downloads::513 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import LongformerTokenizer, EncoderDecoderModel
 
 model = EncoderDecoderModel.from_pretrained("patrickvonplaten/longformer2roberta-cnn_dailymail-fp16")

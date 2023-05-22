@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::flax-community name::t5-large-wikisplit downloads::5,896 task::Text2Text_Generation
+# labels: test_group::monthly author::flax-community name::t5-large-wikisplit downloads::5,896 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 tokenizer = AutoTokenizer.from_pretrained("flax-community/t5-large-wikisplit")
 model = AutoModelForSeq2SeqLM.from_pretrained("flax-community/t5-large-wikisplit")

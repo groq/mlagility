@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Jean-Baptiste name::camembert-ner downloads::11,200,580 task::Token_Classification
+# labels: test_group::monthly author::Jean-Baptiste name::camembert-ner downloads::11,200,580 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
 tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/camembert-ner")

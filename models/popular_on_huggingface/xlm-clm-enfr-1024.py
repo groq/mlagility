@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::huggingface name::xlm-clm-enfr-1024 downloads::247 task::Fill-Mask
+# labels: test_group::monthly author::huggingface name::xlm-clm-enfr-1024 downloads::247 task::Natural_Language_Processing sub_task::Fill-Mask
 import torch
 from transformers import XLMTokenizer, XLMWithLMHeadModel
 

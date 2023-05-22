@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cointegrated name::LaBSE-en-ru downloads::19,848 task::Feature_Extraction
+# labels: test_group::monthly author::cointegrated name::LaBSE-en-ru downloads::19,848 task::Multimodal sub_task::Feature_Extraction
 import torch
 from transformers import AutoTokenizer, AutoModel
 tokenizer = AutoTokenizer.from_pretrained("cointegrated/LaBSE-en-ru")

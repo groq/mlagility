@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Sentdex name::GPyT downloads::249 license::mit task::Text_Generation
+# labels: test_group::monthly author::Sentdex name::GPyT downloads::249 license::mit task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelWithLMHead
 
 tokenizer = AutoTokenizer.from_pretrained("Sentdex/GPyT")

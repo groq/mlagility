@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nvidia name::mit-b3 downloads::2,356 license::other task::Image_Classification
+# labels: test_group::monthly author::nvidia name::mit-b3 downloads::2,356 license::other task::Computer_Vision sub_task::Image_Classification
 from transformers import SegformerFeatureExtractor, SegformerForImageClassification
 from PIL import Image
 import requests

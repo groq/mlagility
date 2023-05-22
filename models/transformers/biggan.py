@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::biggan author::transformers
+# labels: test_group::mlagility name::biggan author::transformers task::Generative_AI
 """https://github.com/huggingface/pytorch-pretrained-BigGAN/blob/master/README.md"""
 from mlagility.parser import parse
 import torch

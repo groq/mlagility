@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nickmuchi name::yolos-small-rego-plates-detection downloads::541 license::apache-2.0 task::Object_Detection
+# labels: test_group::monthly author::nickmuchi name::yolos-small-rego-plates-detection downloads::541 license::apache-2.0 task::Computer_Vision sub_task::Object_Detection
 from transformers import YolosFeatureExtractor, YolosForObjectDetection
 from PIL import Image
 import requests

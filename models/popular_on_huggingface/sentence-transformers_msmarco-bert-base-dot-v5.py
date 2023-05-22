@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::sentence-transformers name::msmarco-bert-base-dot-v5 downloads::41,358 task::Sentence_Similarity
+# labels: test_group::monthly author::sentence-transformers name::msmarco-bert-base-dot-v5 downloads::41,358 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer, util
 
 query = "How many people live in London?"

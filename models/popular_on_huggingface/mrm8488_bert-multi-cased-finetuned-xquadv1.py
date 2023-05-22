@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::bert-multi-cased-finetuned-xquadv1 downloads::930 task::Question_Answering
+# labels: test_group::monthly author::mrm8488 name::bert-multi-cased-finetuned-xquadv1 downloads::930 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 from transformers import pipeline

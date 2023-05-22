@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Huffon name::sentence-klue-roberta-base task::unknown downloads::810
+# labels: test_group::monthly author::Huffon name::sentence-klue-roberta-base task::Natural_Language_Processing downloads::810
 import torch
 from sentence_transformers import SentenceTransformer, util
 

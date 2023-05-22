@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::sagorsarker name::codeswitch-spaeng-sentiment-analysis-lince downloads::236 license::mit task::Text_Classification
+# labels: test_group::monthly author::sagorsarker name::codeswitch-spaeng-sentiment-analysis-lince downloads::236 license::mit task::Natural_Language_Processing sub_task::Text_Classification
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 

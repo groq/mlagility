@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::dkleczek name::bert-base-polish-uncased-v1 downloads::12,447 task::Fill-Mask
+# labels: test_group::monthly author::dkleczek name::bert-base-polish-uncased-v1 downloads::12,447 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import *
 model = BertForMaskedLM.from_pretrained("dkleczek/bert-base-polish-uncased-v1")
 tokenizer = BertTokenizer.from_pretrained("dkleczek/bert-base-polish-uncased-v1")

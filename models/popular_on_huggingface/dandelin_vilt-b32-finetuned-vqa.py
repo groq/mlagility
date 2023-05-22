@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::dandelin name::vilt-b32-finetuned-vqa downloads::6,178 license::apache-2.0 task::Visual_Question_Answering
+# labels: test_group::monthly author::dandelin name::vilt-b32-finetuned-vqa downloads::6,178 license::apache-2.0 task::Multimodal sub_task::Visual_Question_Answering
 from transformers import ViltProcessor, ViltForQuestionAnswering
 import requests
 from PIL import Image

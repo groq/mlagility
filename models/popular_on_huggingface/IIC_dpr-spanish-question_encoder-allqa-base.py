@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::IIC name::dpr-spanish-question_encoder-allqa-base downloads::391 task::Fill-Mask
+# labels: test_group::monthly author::IIC name::dpr-spanish-question_encoder-allqa-base downloads::391 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import DPRQuestionEncoder, DPRQuestionEncoderTokenizer
 
 model_str = "IIC/dpr-spanish-question_encoder-allqa-base"

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::persiannlp name::mt5-large-parsinlu-arc-comqa-obqa-multiple-choice downloads::246 license::cc-by-nc-sa-4.0 task::Text2Text_Generation
+# labels: test_group::monthly author::persiannlp name::mt5-large-parsinlu-arc-comqa-obqa-multiple-choice downloads::246 license::cc-by-nc-sa-4.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import MT5ForConditionalGeneration, MT5Tokenizer
 
 model_size = "large"

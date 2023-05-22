@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::HooshvareLab name::bert-fa-zwnj-base-ner downloads::187 task::Token_Classification
+# labels: test_group::monthly author::HooshvareLab name::bert-fa-zwnj-base-ner downloads::187 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer
 from transformers import AutoModelForTokenClassification  # for pytorch
 from transformers import TFAutoModelForTokenClassification  # for tensorflow

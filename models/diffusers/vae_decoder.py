@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::vae_decoder author::diffusers
+# labels: test_group::mlagility name::vae_decoder author::diffusers task::Generative_AI
 # https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 # Use Stable Diffusion to instantiate the VAE decoder model, then return the VAE
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::strombergnlp name::dant5-large downloads::332 license::cc-by-4.0 task::Text2Text_Generation
+# labels: test_group::monthly author::strombergnlp name::dant5-large downloads::332 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, T5ForConditionalGeneration
 
 model_name = "strombergnlp/dant5-large"

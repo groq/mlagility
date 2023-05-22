@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::phpaiola name::ptt5-base-summ-cstnews downloads::323 license::mit task::Summarization
+# labels: test_group::monthly author::phpaiola name::ptt5-base-summ-cstnews downloads::323 license::mit task::Natural_Language_Processing sub_task::Summarization
 # Tokenizer 
 from transformers import T5Tokenizer
 

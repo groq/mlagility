@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::ddpm-celebahq-256 downloads::1,827 license::apache-2.0 task::Unconditional_Image_Generation
+# labels: test_group::monthly,daily author::google name::ddpm-celebahq-256 downloads::1,827 license::apache-2.0 task::Computer_Vision sub_task::Unconditional_Image_Generation
 # !pip install diffusers
 from diffusers import DDPMPipeline, DDIMPipeline, PNDMPipeline
 

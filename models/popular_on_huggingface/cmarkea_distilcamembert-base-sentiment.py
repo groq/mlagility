@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cmarkea name::distilcamembert-base-sentiment downloads::2,818 license::mit task::Text_Classification
+# labels: test_group::monthly author::cmarkea name::distilcamembert-base-sentiment downloads::2,818 license::mit task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 
 analyzer = pipeline(

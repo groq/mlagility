@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::recobo name::agriculture-bert-uncased downloads::369 task::Fill-Mask
+# labels: test_group::monthly author::recobo name::agriculture-bert-uncased downloads::369 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import pipeline
 fill_mask = pipeline(
     "fill-mask",

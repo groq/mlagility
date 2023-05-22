@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::pnaconv author::graph_convolutions
+# labels: test_group::mlagility name::pnaconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The Principal Neighbourhood Aggregation graph convolution operator from the
 `"Principal Neighbourhood Aggregation for Graph Nets"

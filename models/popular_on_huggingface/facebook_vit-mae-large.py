@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::facebook name::vit-mae-large task::unknown downloads::5,655 license::apache-2.0
+# labels: test_group::monthly,daily author::facebook name::vit-mae-large task::Computer_Vision downloads::5,655 license::apache-2.0
 from transformers import AutoFeatureExtractor, ViTMAEForPreTraining
 from PIL import Image
 import requests

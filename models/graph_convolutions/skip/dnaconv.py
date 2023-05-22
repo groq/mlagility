@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::dnaconv author::graph_convolutions
+# labels: test_group::mlagility name::dnaconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The dynamic neighborhood aggregation operator from the
 `"Just Jump: Towards Dynamic Neighborhood Aggregation in Graph Neural Networks"

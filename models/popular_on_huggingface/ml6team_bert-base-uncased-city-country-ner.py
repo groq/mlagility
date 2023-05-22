@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ml6team name::bert-base-uncased-city-country-ner downloads::36,981 task::Token_Classification
+# labels: test_group::monthly author::ml6team name::bert-base-uncased-city-country-ner downloads::36,981 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
 tokenizer = AutoTokenizer.from_pretrained("ml6team/bert-base-uncased-city-country-ner")

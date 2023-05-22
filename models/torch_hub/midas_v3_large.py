@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::midas_v3_large author::torch_hub
+# labels: test_group::mlagility name::midas_v3_large author::torch_hub task::Computer_Vision
 """https://pytorch.org/hub/intelisl_midas_v2/"""
 from mlagility.parser import parse
 import torch

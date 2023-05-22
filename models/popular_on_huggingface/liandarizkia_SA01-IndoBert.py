@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::liandarizkia name::SA01-IndoBert downloads::944 task::Text_Classification
+# labels: test_group::monthly author::liandarizkia name::SA01-IndoBert downloads::944 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cmarkea name::distilcamembert-base-ner downloads::6,491 license::mit task::Token_Classification
+# labels: test_group::monthly author::cmarkea name::distilcamembert-base-ner downloads::6,491 license::mit task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import pipeline
 
 ner = pipeline(

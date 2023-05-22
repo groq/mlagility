@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::BM-K name::KoSimCSE-roberta downloads::634 task::Feature_Extraction
+# labels: test_group::monthly author::BM-K name::KoSimCSE-roberta downloads::634 task::Multimodal sub_task::Feature_Extraction
 import torch
 from transformers import AutoModel, AutoTokenizer
 

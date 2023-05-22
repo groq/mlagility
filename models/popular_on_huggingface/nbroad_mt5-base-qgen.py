@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nbroad name::mt5-base-qgen downloads::216 task::Text2Text_Generation
+# labels: test_group::monthly author::nbroad name::mt5-base-qgen downloads::216 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
   
 tokenizer = AutoTokenizer.from_pretrained("nbroad/mt5-base-qgen")

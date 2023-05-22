@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::t5-small-ssm-nq downloads::2,505 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly,daily author::google name::t5-small-ssm-nq downloads::2,505 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 t5_qa_model = AutoModelForSeq2SeqLM.from_pretrained("google/t5-small-ssm-nq")

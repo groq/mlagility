@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::inkoziev name::rugpt_chitchat downloads::434 license::unlicense task::Text_Generation
+# labels: test_group::monthly author::inkoziev name::rugpt_chitchat downloads::434 license::unlicense task::Natural_Language_Processing sub_task::Text_Generation
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 

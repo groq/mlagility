@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Bhuvana name::t5-base-spellchecker downloads::215 task::Text2Text_Generation
+# labels: test_group::monthly author::Bhuvana name::t5-base-spellchecker downloads::215 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 tokenizer = AutoTokenizer.from_pretrained("Bhuvana/t5-base-spellchecker")

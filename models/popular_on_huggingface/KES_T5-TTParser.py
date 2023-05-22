@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::KES name::T5-TTParser downloads::1,381 license::cc-by-nc-sa-4.0 task::Text2Text_Generation
+# labels: test_group::monthly author::KES name::T5-TTParser downloads::1,381 license::cc-by-nc-sa-4.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 

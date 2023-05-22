@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ken11 name::albert-base-japanese-v1 downloads::3,207 license::mit task::Fill-Mask
+# labels: test_group::monthly author::ken11 name::albert-base-japanese-v1 downloads::3,207 license::mit task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import (
     AlbertForMaskedLM, AlbertTokenizerFast
 )

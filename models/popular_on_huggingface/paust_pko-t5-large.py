@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::paust name::pko-t5-large downloads::390 license::cc-by-4.0 task::Text2Text_Generation
+# labels: test_group::monthly author::paust name::pko-t5-large downloads::390 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import T5TokenizerFast, T5ForConditionalGeneration
 
 tokenizer = T5TokenizerFast.from_pretrained('paust/pko-t5-large')

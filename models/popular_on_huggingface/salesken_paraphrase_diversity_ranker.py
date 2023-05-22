@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::salesken name::paraphrase_diversity_ranker downloads::681 license::apache-2.0 task::Text_Classification
+# labels: test_group::monthly author::salesken name::paraphrase_diversity_ranker downloads::681 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, AutoModelForSequenceClassification  
 import torch
 import pandas as pd

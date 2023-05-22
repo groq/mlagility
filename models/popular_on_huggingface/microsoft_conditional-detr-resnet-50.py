@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::microsoft name::conditional-detr-resnet-50 downloads::221 license::apache-2.0 task::Object_Detection
+# labels: test_group::monthly author::microsoft name::conditional-detr-resnet-50 downloads::221 license::apache-2.0 task::Computer_Vision sub_task::Object_Detection
 from transformers import AutoFeatureExtractor, ConditionalDetrForObjectDetection
 import torch
 from PIL import Image

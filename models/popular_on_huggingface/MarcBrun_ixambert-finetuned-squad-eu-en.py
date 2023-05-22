@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MarcBrun name::ixambert-finetuned-squad-eu-en downloads::886 task::Question_Answering
+# labels: test_group::monthly author::MarcBrun name::ixambert-finetuned-squad-eu-en downloads::886 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
 model_name = "MarcBrun/ixambert-finetuned-squad-eu-en"

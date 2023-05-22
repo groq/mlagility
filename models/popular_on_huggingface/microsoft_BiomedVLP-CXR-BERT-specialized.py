@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::microsoft name::BiomedVLP-CXR-BERT-specialized downloads::5,824 license::mit task::Fill-Mask
+# labels: test_group::monthly author::microsoft name::BiomedVLP-CXR-BERT-specialized downloads::5,824 license::mit task::Natural_Language_Processing sub_task::Fill-Mask
 import torch
 from transformers import AutoModel, AutoTokenizer
 

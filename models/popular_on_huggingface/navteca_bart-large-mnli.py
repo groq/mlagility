@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::navteca name::bart-large-mnli downloads::1,332 license::mit task::Zero-Shot_Classification
+# labels: test_group::monthly author::navteca name::bart-large-mnli downloads::1,332 license::mit task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 # Load model & tokenizer

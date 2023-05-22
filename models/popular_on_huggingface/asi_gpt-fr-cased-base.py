@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::asi name::gpt-fr-cased-base downloads::638 license::apache-2.0 task::Text_Generation
+# labels: test_group::monthly author::asi name::gpt-fr-cased-base downloads::638 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
 # Load pretrained model and tokenizer

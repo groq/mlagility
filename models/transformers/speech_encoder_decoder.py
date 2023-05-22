@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::speech_encoder_decoder author::huggingface_pytorch
+# labels: test_group::mlagility name::speech_encoder_decoder author::huggingface_pytorch task::Audio
 from mlagility.parser import parse
 import transformers
 import torch

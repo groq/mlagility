@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::SkolkovoInstitute name::roberta_toxicity_classifier downloads::15,220 task::Text_Classification
+# labels: test_group::monthly author::SkolkovoInstitute name::roberta_toxicity_classifier downloads::15,220 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import RobertaTokenizer, RobertaForSequenceClassification
 
 # load tokenizer and model weights

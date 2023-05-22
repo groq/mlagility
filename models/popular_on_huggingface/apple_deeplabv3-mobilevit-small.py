@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::apple name::deeplabv3-mobilevit-small downloads::623 license::other task::Image_Segmentation
+# labels: test_group::monthly,daily author::apple name::deeplabv3-mobilevit-small downloads::623 license::other task::Computer_Vision sub_task::Image_Segmentation
 from transformers import MobileViTFeatureExtractor, MobileViTForSemanticSegmentation
 from PIL import Image
 import requests

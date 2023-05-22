@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ahmedrachid name::FinancialBERT-Sentiment-Analysis downloads::3,689 task::Text_Classification
+# labels: test_group::monthly author::ahmedrachid name::FinancialBERT-Sentiment-Analysis downloads::3,689 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import BertTokenizer, BertForSequenceClassification
 from transformers import pipeline
 

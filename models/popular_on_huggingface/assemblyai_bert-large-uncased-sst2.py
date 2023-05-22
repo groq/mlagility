@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::assemblyai name::bert-large-uncased-sst2 downloads::820 task::Text_Classification
+# labels: test_group::monthly author::assemblyai name::bert-large-uncased-sst2 downloads::820 task::Natural_Language_Processing sub_task::Text_Classification
 import torch.nn.functional as F 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 tokenizer = AutoTokenizer.from_pretrained("assemblyai/bert-large-uncased-sst2") 

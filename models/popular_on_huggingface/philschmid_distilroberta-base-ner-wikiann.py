@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::philschmid name::distilroberta-base-ner-wikiann downloads::233 license::apache-2.0 task::Token_Classification
+# labels: test_group::monthly author::philschmid name::distilroberta-base-ner-wikiann downloads::233 license::apache-2.0 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 

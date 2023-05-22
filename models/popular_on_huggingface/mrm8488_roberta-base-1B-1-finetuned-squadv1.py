@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::roberta-base-1B-1-finetuned-squadv1 downloads::185 task::Question_Answering
+# labels: test_group::monthly author::mrm8488 name::roberta-base-1B-1-finetuned-squadv1 downloads::185 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 QnA_pipeline = pipeline('question-answering', model='mrm8488/roberta-base-1B-1-finetuned-squadv1')

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::jaehyeong name::koelectra-base-v3-generalized-sentiment-analysis downloads::1,430 task::Text_Classification
+# labels: test_group::monthly author::jaehyeong name::koelectra-base-v3-generalized-sentiment-analysis downloads::1,430 task::Natural_Language_Processing sub_task::Text_Classification
 # import library
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline

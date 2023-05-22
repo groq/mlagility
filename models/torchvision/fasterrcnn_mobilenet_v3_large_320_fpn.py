@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::fasterrcnn_mobilenet_v3_large_320_fpn author::torchvision
+# labels: test_group::mlagility name::fasterrcnn_mobilenet_v3_large_320_fpn author::torchvision task::Computer_Vision
 """
 https://pytorch.org/vision/stable/models/faster_rcnn.html
 """

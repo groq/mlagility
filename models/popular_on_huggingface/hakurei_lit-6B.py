@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::hakurei name::lit-6B downloads::2,564 license::mit task::Text_Generation
+# labels: test_group::monthly author::hakurei name::lit-6B downloads::2,564 license::mit task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 model = AutoModelForCausalLM.from_pretrained('hakurei/lit-6B')

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::dandelin name::vilt-b32-mlm downloads::7,671 license::apache-2.0 task::Fill-Mask
+# labels: test_group::monthly author::dandelin name::vilt-b32-mlm downloads::7,671 license::apache-2.0 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import ViltProcessor, ViltForMaskedLM
 import requests
 from PIL import Image

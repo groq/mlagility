@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ydshieh name::vit-gpt2-coco-en task::unknown downloads::2,903
+# labels: test_group::monthly author::ydshieh name::vit-gpt2-coco-en task::Computer_Vision downloads::2,903
 
 import torch
 import requests

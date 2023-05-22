@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::valhalla name::bart-large-finetuned-squadv1 downloads::1,872 task::Question_Answering
+# labels: test_group::monthly author::valhalla name::bart-large-finetuned-squadv1 downloads::1,872 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import BartTokenizer, BartForQuestionAnswering
 import torch
 

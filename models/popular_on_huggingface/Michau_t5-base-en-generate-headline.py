@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Michau name::t5-base-en-generate-headline downloads::34,355 task::Text2Text_Generation
+# labels: test_group::monthly author::Michau name::t5-base-en-generate-headline downloads::34,355 task::Natural_Language_Processing sub_task::Text2Text_Generation
 import torch
 from transformers import T5ForConditionalGeneration,T5Tokenizer
 

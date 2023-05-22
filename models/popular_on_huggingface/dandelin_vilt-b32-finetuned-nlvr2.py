@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::dandelin name::vilt-b32-finetuned-nlvr2 task::unknown downloads::252 license::apache-2.0
+# labels: test_group::monthly author::dandelin name::vilt-b32-finetuned-nlvr2 task::MultiModal downloads::252 license::apache-2.0
 from transformers import ViltProcessor, ViltForImagesAndTextClassification
 import requests
 from PIL import Image

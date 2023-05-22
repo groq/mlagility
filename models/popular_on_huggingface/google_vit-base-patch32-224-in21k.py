@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::vit-base-patch32-224-in21k downloads::3,348 license::apache-2.0 task::Feature_Extraction
+# labels: test_group::monthly,daily author::google name::vit-base-patch32-224-in21k downloads::3,348 license::apache-2.0 task::Multimodal sub_task::Feature_Extraction
 from transformers import ViTFeatureExtractor, ViTModel
 from PIL import Image
 import requests

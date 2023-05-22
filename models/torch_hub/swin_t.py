@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::swin_t author::torch_hub
+# labels: test_group::mlagility name::swin_t author::torch_hub task::Computer_Vision
 from mlagility.parser import parse
 import torch
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Recognai name::bert-base-spanish-wwm-cased-xnli downloads::9,931 license::mit task::Zero-Shot_Classification
+# labels: test_group::monthly author::Recognai name::bert-base-spanish-wwm-cased-xnli downloads::9,931 license::mit task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 from transformers import pipeline
 classifier = pipeline("zero-shot-classification", 
                        model="Recognai/bert-base-spanish-wwm-cased-xnli")

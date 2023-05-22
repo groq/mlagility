@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Intel name::dpt-large task::unknown downloads::1,735 license::apache-2.0
+# labels: test_group::monthly author::Intel name::dpt-large task::Computer_Vision downloads::1,735 license::apache-2.0
 from transformers import DPTFeatureExtractor, DPTForDepthEstimation
 import torch
 import numpy as np

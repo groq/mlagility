@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::gilf name::french-camembert-postag-model downloads::459 task::Token_Classification
+# labels: test_group::monthly author::gilf name::french-camembert-postag-model downloads::459 task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
 tokenizer = AutoTokenizer.from_pretrained("gilf/french-camembert-postag-model")

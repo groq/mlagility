@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::mrm8488 name::t5-small-finetuned-quora-for-paraphrasing downloads::408 task::Text2Text_Generation
+# labels: test_group::monthly author::mrm8488 name::t5-small-finetuned-quora-for-paraphrasing downloads::408 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("mrm8488/t5-small-finetuned-quora-for-paraphrasing")

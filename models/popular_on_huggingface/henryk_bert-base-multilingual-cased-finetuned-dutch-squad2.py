@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::henryk name::bert-base-multilingual-cased-finetuned-dutch-squad2 downloads::655 task::Question_Answering
+# labels: test_group::monthly author::henryk name::bert-base-multilingual-cased-finetuned-dutch-squad2 downloads::655 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import pipeline
 
 qa_pipeline = pipeline(

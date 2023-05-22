@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::AmazonScience name::qanlu downloads::374 license::cc-by-4.0 task::Question_Answering
+# labels: test_group::monthly author::AmazonScience name::qanlu downloads::374 license::cc-by-4.0 task::Natural_Language_Processing sub_task::Question_Answering
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering, pipeline
   
 tokenizer = AutoTokenizer.from_pretrained("AmazonScience/qanlu", use_auth_token=True)

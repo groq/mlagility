@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cointegrated name::rubert-tiny2 downloads::8,646 license::mit task::Feature_Extraction
+# labels: test_group::monthly author::cointegrated name::rubert-tiny2 downloads::8,646 license::mit task::Multimodal sub_task::Feature_Extraction
 # pip install transformers sentencepiece
 import torch
 from transformers import AutoTokenizer, AutoModel

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Rostlab name::prot_t5_xl_uniref50 downloads::26,060 task::Text2Text_Generation
+# labels: test_group::monthly author::Rostlab name::prot_t5_xl_uniref50 downloads::26,060 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import T5Tokenizer, T5Model
 import re
 import torch

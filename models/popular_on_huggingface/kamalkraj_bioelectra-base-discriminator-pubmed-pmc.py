@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::kamalkraj name::bioelectra-base-discriminator-pubmed-pmc task::unknown downloads::469
+# labels: test_group::monthly author::kamalkraj name::bioelectra-base-discriminator-pubmed-pmc ask::Natural_Language_Processing downloads::469
 from transformers import ElectraForPreTraining, ElectraTokenizerFast
 import torch
 

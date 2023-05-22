@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::dcgan author::torch_hub
+# labels: test_group::mlagility name::dcgan author::torch_hub task::Generative_AI
 """https://pytorch.org/hub/facebookresearch_pytorch-gan-zoo_dcgan/"""
 
 from mlagility.parser import parse

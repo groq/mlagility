@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::ehdwns1516 name::klue-roberta-base-kornli downloads::390 task::Text_Classification
+# labels: test_group::monthly author::ehdwns1516 name::klue-roberta-base-kornli downloads::390 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import AutoTokenizer, pipeline
 
 tokenizer = AutoTokenizer.from_pretrained("ehdwns1516/klue-roberta-base-kornli")

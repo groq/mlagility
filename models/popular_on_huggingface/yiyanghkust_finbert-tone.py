@@ -1,4 +1,4 @@
-# labels: author::yiyanghkust name::finbert-tone downloads::22,877 task::Text_Classification
+# labels: author::yiyanghkust name::finbert-tone downloads::22,877 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import BertTokenizer, BertForSequenceClassification
 from transformers import pipeline
 

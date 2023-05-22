@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::tdobrxl name::ClinicBERT downloads::434 task::Fill-Mask
+# labels: test_group::monthly author::tdobrxl name::ClinicBERT downloads::434 task::Natural_Language_Processing sub_task::Fill-Mask
 from transformers import RobertaModel, RobertaTokenizer
 model = RobertaModel.from_pretrained("tdobrxl/ClinicBERT")
 tokenizer = RobertaTokenizer.from_pretrained("tdobrxl/ClinicBERT")

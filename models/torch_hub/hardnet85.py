@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::hardnet85 author::torch_hub
+# labels: test_group::mlagility name::hardnet85 author::torch_hub task::Computer_Vision
 """
 https://github.com/pytorch/hub/blob/master/pytorch_vision_hardnet.md
 """

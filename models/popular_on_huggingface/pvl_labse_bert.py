@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::pvl name::labse_bert task::unknown downloads::5,198 license::apache-2.0
+# labels: test_group::monthly author::pvl name::labse_bert task::Natural_Language_Processing downloads::5,198 license::apache-2.0
 from transformers import AutoTokenizer, AutoModel
 import torch
 

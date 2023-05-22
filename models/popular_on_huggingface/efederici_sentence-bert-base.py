@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::efederici name::sentence-bert-base downloads::189 task::Sentence_Similarity
+# labels: test_group::monthly author::efederici name::sentence-bert-base downloads::189 task::Natural_Language_Processing sub_task::Sentence_Similarity
 from sentence_transformers import SentenceTransformer
 sentences = ["Questo è un esempio di frase", "Questo è un ulteriore esempio"]
 

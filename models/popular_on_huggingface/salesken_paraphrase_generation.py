@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::salesken name::paraphrase_generation downloads::302 license::apache-2.0 task::Text_Generation
+# labels: test_group::monthly author::salesken name::paraphrase_generation downloads::302 license::apache-2.0 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelWithLMHead 
 
 import torch

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Visual-Attention-Network name::van-tiny downloads::305 license::apache-2.0 task::Image_Classification
+# labels: test_group::monthly author::Visual-Attention-Network name::van-tiny downloads::305 license::apache-2.0 task::Computer_Vision sub_task::Image_Classification
 from transformers import AutoFeatureExtractor, VanForImageClassification
 import torch
 from datasets import load_dataset

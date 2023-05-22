@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::taeminlee name::kogpt2 downloads::1,006 task::Text_Generation
+# labels: test_group::monthly author::taeminlee name::kogpt2 downloads::1,006 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import GPT2LMHeadModel, PreTrainedTokenizerFast
 
 model = GPT2LMHeadModel.from_pretrained("taeminlee/kogpt2")

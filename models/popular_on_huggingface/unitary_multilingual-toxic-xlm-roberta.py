@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::unitary name::multilingual-toxic-xlm-roberta downloads::951 task::Text_Classification
+# labels: test_group::monthly author::unitary name::multilingual-toxic-xlm-roberta downloads::951 task::Natural_Language_Processing sub_task::Text_Classification
 
 from detoxify import Detoxify
 

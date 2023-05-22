@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MoritzLaurer name::mDeBERTa-v3-base-mnli-xnli downloads::9,503 license::mit task::Zero-Shot_Classification
+# labels: test_group::monthly author::MoritzLaurer name::mDeBERTa-v3-base-mnli-xnli downloads::9,503 license::mit task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 from transformers import pipeline
 classifier = pipeline("zero-shot-classification", model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
 

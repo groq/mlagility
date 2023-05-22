@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::huggingface name::ctrl task::unknown downloads::11,873 license::bsd-3-clause
+    # labels: test_group::monthly author::huggingface name::ctrl task::Natural_Language_Processing downloads::11,873 license::bsd-3-clause
 from transformers import CTRLTokenizer, CTRLModel
 import torch
 

@@ -1,4 +1,4 @@
-# labels: test_group::monthly,daily author::google name::byt5-small downloads::41,266 license::apache-2.0 task::Text2Text_Generation
+# labels: test_group::monthly,daily author::google name::byt5-small downloads::41,266 license::apache-2.0 task::Natural_Language_Processing sub_task::Text2Text_Generation
 from transformers import T5ForConditionalGeneration
 import torch
 

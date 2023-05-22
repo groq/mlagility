@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::cointegrated name::rubert-tiny-toxicity downloads::5,614 task::Text_Classification
+# labels: test_group::monthly author::cointegrated name::rubert-tiny-toxicity downloads::5,614 task::Natural_Language_Processing sub_task::Text_Classification
 # !pip install transformers sentencepiece --quiet
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification

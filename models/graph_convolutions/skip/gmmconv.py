@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::gmmconv author::graph_convolutions
+# labels: test_group::mlagility name::gmmconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The gaussian mixture model convolutional operator from the
 `"Geometric Deep Learning on Graphs and Manifolds using Mixture Model CNNs"

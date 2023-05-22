@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::microsoft name::tapex-large-finetuned-tabfact downloads::201 license::mit task::Text_Classification
+# labels: test_group::monthly author::microsoft name::tapex-large-finetuned-tabfact downloads::201 license::mit task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import TapexTokenizer, BartForSequenceClassification
 import pandas as pd
 

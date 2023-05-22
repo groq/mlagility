@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::chebconv author::graph_convolutions
+# labels: test_group::mlagility name::chebconv author::graph_convolutions task::Graph_Machine_Learning
 """
 The chebyshev spectral graph convolutional operator from the `"Convolutional
 Neural Networks on Graphs with Fast Localized Spectral Filtering"

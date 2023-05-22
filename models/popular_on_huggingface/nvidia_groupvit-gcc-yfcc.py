@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::nvidia name::groupvit-gcc-yfcc downloads::787 task::Feature_Extraction
+# labels: test_group::monthly author::nvidia name::groupvit-gcc-yfcc downloads::787 task::Multimodal sub_task::Feature_Extraction
 from PIL import Image
 import requests
 from transformers import AutoProcessor, GroupViTModel

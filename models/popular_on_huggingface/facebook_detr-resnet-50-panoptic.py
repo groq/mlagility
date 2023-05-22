@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::facebook name::detr-resnet-50-panoptic downloads::51,551 license::apache-2.0 task::Image_Segmentation
+# labels: test_group::monthly author::facebook name::detr-resnet-50-panoptic downloads::51,551 license::apache-2.0 task::Computer_Vision sub_task::Image_Segmentation
 import io
 import requests
 from PIL import Image

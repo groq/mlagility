@@ -1,4 +1,4 @@
-# labels: name::swin_large_patch4_window12_384_in22k author::timm task::computer_vision
+# labels: name::swin_large_patch4_window12_384_in22k author::timm task::Computer_Vision
 import torch
 import timm
 from mlagility.parser import parse

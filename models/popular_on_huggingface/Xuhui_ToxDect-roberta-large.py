@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::Xuhui name::ToxDect-roberta-large downloads::642 task::Text_Classification
+# labels: test_group::monthly author::Xuhui name::ToxDect-roberta-large downloads::642 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 classifier = pipeline("text-classification",model='Xuhui/ToxDect-roberta-large', return_all_scores=True)
 prediction = classifier("You are f**king stupid!", )

@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::SenseTime name::deformable-detr downloads::719 license::apache-2.0 task::Object_Detection
+# labels: test_group::monthly author::SenseTime name::deformable-detr downloads::719 license::apache-2.0 task::Computer_Vision sub_task::Object_Detection
 from transformers import AutoFeatureExtractor, DeformableDetrForObjectDetection
 import torch
 from PIL import Image

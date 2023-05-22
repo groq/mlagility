@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::TristanBehrens name::js-fakes-4bars downloads::199 task::Text_Generation
+# labels: test_group::monthly author::TristanBehrens name::js-fakes-4bars downloads::199 task::Natural_Language_Processing sub_task::Text_Generation
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 tokenizer = AutoTokenizer.from_pretrained("TristanBehrens/js-fakes-4bars")

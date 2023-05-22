@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::chkla name::parlbert-topic-german downloads::35,916 task::Text_Classification
+# labels: test_group::monthly author::chkla name::parlbert-topic-german downloads::35,916 task::Natural_Language_Processing sub_task::Text_Classification
 from transformers import pipeline
 
 pipeline_classification_topics = pipeline("text-classification", model="chkla/parlbert-topic-german", tokenizer="bert-base-german-cased", return_all_scores=False)

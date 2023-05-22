@@ -1,4 +1,4 @@
-# labels: test_group::mlagility name::layoutlm author::transformers
+# labels: test_group::mlagility name::layoutlm author::transformers task::Natural_Language_Processing
 from mlagility.parser import parse
 import transformers
 import torch

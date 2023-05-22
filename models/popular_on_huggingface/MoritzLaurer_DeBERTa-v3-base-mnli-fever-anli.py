@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::MoritzLaurer name::DeBERTa-v3-base-mnli-fever-anli downloads::4,615 license::mit task::Zero-Shot_Classification
+# labels: test_group::monthly author::MoritzLaurer name::DeBERTa-v3-base-mnli-fever-anli downloads::4,615 license::mit task::Natural_Language_Processing sub_task::Zero-Shot_Classification
 from transformers import pipeline
 classifier = pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli")
 sequence_to_classify = "Angela Merkel is a politician in Germany and leader of the CDU"

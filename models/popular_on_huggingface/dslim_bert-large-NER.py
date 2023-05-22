@@ -1,4 +1,4 @@
-# labels: test_group::monthly author::dslim name::bert-large-NER downloads::950,542 license::mit task::Token_Classification
+# labels: test_group::monthly author::dslim name::bert-large-NER downloads::950,542 license::mit task::Natural_Language_Processing sub_task::Token_Classification
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 
