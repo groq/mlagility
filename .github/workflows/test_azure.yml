@@ -25,10 +25,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y azure-cli
-      - name: Turn on Azure VM
+      - name: Log in to CLI
         run: |
           az login --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_PWD }}
-  build:
+  build_and_test:
     needs: install_cli
     timeout-minutes: 10
     if: ${{ needs.install_cli.result == 'success' }}
@@ -52,7 +52,7 @@ jobs:
           python src/mlagility/cli/cloud/control.py create setup selftest info stop --cluster --name github-test-azure --size 2 --hardware cpu-small
           python src/mlagility/cli/cloud/control.py start run delete --cluster --name github-test-azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
   clean_up:
-    needs: build
+    needs: build_and_test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
