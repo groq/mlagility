@@ -53,6 +53,7 @@ jobs:
           python src/mlagility/cli/cloud/control.py start run delete --cluster --name github-test-azure --size 2 --hardware cpu-small --input-files models/selftest/*.py
   clean_up:
     needs: build_and_test
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
