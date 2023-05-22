@@ -70,32 +70,6 @@ def local_command(command: str):
     subprocess.run(command, check=True, shell=True)
 
 
-def get_ssh_keys():
-    if os.environ.get("MLAGILITY_AZURE_SSH_BASEPATH"):
-        SSH_KEY_NAME = os.environ.get("MLAGILITY_AZURE_SSH_BASEPATH")
-        SSH_PUBLIC_KEY = f"{SSH_KEY_NAME}.pub"
-        SSH_PRIVATE_KEY = f"{SSH_KEY_NAME}.pem"
-        if not os.path.exists(SSH_PUBLIC_KEY):
-            raise ValueError(
-                f"{SSH_PUBLIC_KEY} must be the location of a .pub SSH key. You"
-                "can change the base path where the .pub file is expected by changing "
-                "the MLAGILITY_AZURE_SSH_BASEPATH environment variable."
-            )
-        if not os.path.exists(SSH_PRIVATE_KEY):
-            raise ValueError(
-                f"{SSH_PRIVATE_KEY} must be the location of a .pem SSH key. You"
-                "can change the base path where the .pem file is expected by changing "
-                "the MLAGILITY_AZURE_SSH_BASEPATH environment variable."
-            )
-    else:
-        raise ValueError(
-            "Environment variable MLAGILITY_AZURE_SSH_BASEPATH "
-            "must be set to access VM(s)."
-        )
-
-    return SSH_PUBLIC_KEY, SSH_PRIVATE_KEY
-
-
 def auth():
     # Acquire a credential object using CLI-based authentication.
     credential = AzureCliCredential()
@@ -333,8 +307,6 @@ class Device:
 
         self._ip = None
 
-        self.public_key, self.private_key = get_ssh_keys()
-
         self.hardware = hardware
         self.device = hardware_to_device[self.hardware]
 
@@ -413,6 +385,14 @@ class Device:
                 "to create VM(s). This will be the admin password for the VM(s)."
             )
 
+        if os.environ.get("MLAGILITY_AZURE_PUBLIC_KEY"):
+            ssh_key = os.environ.get("MLAGILITY_AZURE_PUBLIC_KEY")
+        else:
+            raise ValueError(
+                "You must set the MLAGILITY_AZURE_PUBLIC_KEY environment variable "
+                "to create VM(s). This will be the public ssh key added to the VM."
+            )
+
         if create_shared_resources:
             create_resource_group(self.resource_client, self.RG_NAME)
 
@@ -481,11 +461,6 @@ class Device:
 
         nic_result = poller.result()
         print("Provisioned NIC", nic_result.name)
-
-        with open(
-            os.path.expanduser(self.public_key), mode="r", encoding="utf-8"
-        ) as keyfile:
-            ssh_key = keyfile.read()
 
         vm_spec = {
             "location": LOCATION,
