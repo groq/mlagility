@@ -57,6 +57,7 @@ def benchmark_command(args):
         runtimes=args.runtimes,
         analyze_only=args.analyze_only,
         build_only=args.build_only,
+        export_only=args.export_only,
         resume=args.resume,
         script_args=args.script_args,
         max_depth=args.max_depth,
@@ -226,9 +227,16 @@ def main():
     )
 
     benchmark_parser.add_argument(
+        "--export-only",
+        dest="export_only",
+        help="Stop this command after the ONNX export in the build phase",
+        action="store_true",
+    )
+
+    benchmark_parser.add_argument(
         "--resume",
         dest="resume",
-        help="Resume a benchit run by skipping any input scripts that have already been visted",
+        help="Resume a benchit run by skipping any input scripts that have already been visited",
         action="store_true",
     )
 

@@ -26,6 +26,7 @@ import mlagility.common.filesystem as filesystem
 
 class Action(Enum):
     ANALYZE = "analyze"
+    EXPORT = "export"
     BUILD = "build"
     BENCHMARK = "benchmark"
 
@@ -139,6 +140,7 @@ def call_benchit(
                 build_name=build_name,
                 cache_dir=tracer_args.cache_dir,
                 build_only=Action.BENCHMARK not in tracer_args.actions,
+                export_only=Action.EXPORT in tracer_args.actions,
                 lean_cache=tracer_args.lean_cache,
                 groq_num_chips=tracer_args.groq_num_chips,
                 groq_compiler_flags=tracer_args.groq_compiler_flags,
@@ -279,6 +281,9 @@ def store_model_info(
             model_already_found = True
 
     if not model_already_found:
+        build_model = (Action.BUILD in tracer_args.actions) or (
+            Action.EXPORT in tracer_args.actions
+        )
         tracer_args.models_found[model_hash] = util.ModelInfo(
             model=model,
             name=model_name,
@@ -288,7 +293,7 @@ def store_model_info(
             hash=model_hash,
             parent_hash=parent_hash,
             is_target=model_hash in tracer_args.targets or tracer_args.targets == [],
-            build_model=Action.BUILD in tracer_args.actions,
+            build_model=build_model,
             model_type=model_type,
             script_name=tracer_args.script_name,
         )

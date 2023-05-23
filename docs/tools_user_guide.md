@@ -510,6 +510,20 @@ Also available as API arguments:
 
 > See the [Build Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/build.md#build-only) for a detailed example.
 
+### Export Only
+
+Instruct `benchit`, `benchmark_script()`, or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command, and to stop the Build phase after exporting the ONNX file. Similar to [Build Only](#build-only), except that no optimization Stages will be applied to the ONNX file.
+
+Usage:
+- `benchit benchmark INPUT_FILES --export-only`
+  - This exports ONNX files for the models within the input script, however does not optimize those ONNX files nor run any benchmark.
+
+> _Note_: any benchmark-specific options will be ignored, such as `--backend`.
+
+Also available as API arguments:
+- `benchmark_script(export_only=True/False)` (default False)
+- `benchmark_model(export_only=True/False)` (default False)
+
 ### Resume
 
 Instruct `benchit` or `benchmark_script()` to skip over any input scripts that have been previously attempted. 
