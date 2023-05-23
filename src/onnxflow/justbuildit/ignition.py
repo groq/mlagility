@@ -521,7 +521,7 @@ def validate_inputs(inputs: Dict):
 
 def identify_model_type(model) -> build.ModelType:
     # Validate that the model's type is supported by build_model()
-    # and assign a ModelTye tag
+    # and assign a ModelType tag
     if isinstance(model, (torch.nn.Module, torch.jit.ScriptModule)):
         model_type = build.ModelType.PYTORCH
     elif isinstance(model, str):
