@@ -97,6 +97,7 @@ def run_benchit(
     onnx_opset: Optional[int] = None,
     analyze_only: Optional[bool] = None,
     build_only: Optional[bool] = None,
+    export_only: Optional[bool] = False,
     lean_cache: Optional[bool] = None,
     working_dir: str = os.getcwd(),
     ml_cache_dir: Optional[str] = os.environ.get("SLURM_ML_CACHE"),
@@ -117,13 +118,14 @@ def run_benchit(
     onnx_opset_str = value_arg(onnx_opset, "--onnx-opset")
     analyze_only_str = bool_arg(analyze_only, "--analyze-only")
     build_only_str = bool_arg(build_only, "--build-only")
+    export_only_str = bool_arg(export_only, "--export-only")
     lean_cache_str = bool_arg(lean_cache, "--lean-cache")
 
     args = (
         f"{op} {script}{device_str}{cache_dir_str}{rebuild_str}"
         f"{compiler_flags_str}{assembler_flags_str}{num_chips_str}{groqview_str}"
         f"{runtimes_str}{max_depth_str}{onnx_opset_str}{analyze_only_str}"
-        f"{build_only_str}{lean_cache_str}"
+        f"{build_only_str}{export_only_str}{lean_cache_str}"
     )
 
     if target == Target.SLURM:

@@ -95,6 +95,7 @@ def benchmark_script(
     runtimes: List[str] = None,
     analyze_only: bool = False,
     build_only: bool = False,
+    export_only: bool = False,
     resume: bool = False,
     script_args: Optional[str] = None,
     max_depth: int = 0,
@@ -149,6 +150,11 @@ def benchmark_script(
     if analyze_only:
         actions = [
             Action.ANALYZE,
+        ]
+    elif export_only:
+        actions = [
+            Action.ANALYZE,
+            Action.EXPORT,
         ]
     elif build_only:
         actions = [
@@ -233,6 +239,7 @@ def benchmark_script(
                     onnx_opset=onnx_opset,
                     analyze_only=analyze_only,
                     build_only=build_only,
+                    export_only=export_only,
                     lean_cache=lean_cache,
                 )
 
@@ -291,6 +298,7 @@ def benchmark_files(
     runtimes: List[str] = None,
     analyze_only: bool = False,
     build_only: bool = False,
+    export_only: bool = False,
     resume: bool = False,
     script_args: Optional[str] = None,
     max_depth: int = 0,
@@ -332,6 +340,7 @@ def benchmark_files(
             runtimes=runtimes,
             analyze_only=analyze_only,
             build_only=build_only,
+            export_only=export_only,
             resume=resume,
             script_args=script_args,
             max_depth=max_depth,
@@ -370,6 +379,7 @@ def benchmark_files(
                 backend=backend,
                 runtime=runtime,
                 build_only=build_only,
+                export_only=export_only,
                 lean_cache=lean_cache,
                 rebuild=rebuild,
                 onnx_opset=onnx_opset,

@@ -24,30 +24,48 @@ polish_onnx_sequence = stage.Sequence(
     ],
 )
 
+default_pytorch_export_sequence = stage.Sequence(
+    "default_pytorch_export_sequence",
+    "Exporting PyTorch Model",
+    [export.ExportPytorchModel()],
+)
+
 default_pytorch_sequence = stage.Sequence(
     "default_pytorch_export_sequence",
     "Exporting PyTorch Model",
-    [export.ExportPytorchModel(), polish_onnx_sequence],
+    [default_pytorch_export_sequence, polish_onnx_sequence],
 )
 
 pytorch_sequence_with_quantization = stage.Sequence(
     "pytorch_export_sequence_with_quantization",
     "Exporting PyTorch Model and Quantizing Exported ONNX",
     [
-        export.ExportPytorchModel(),
+        default_pytorch_export_sequence,
         export.OptimizeOnnxModel(),
         export.QuantizeONNXModel(),
         export.SuccessStage(),
     ],
 )
 
+default_keras_export_sequence = stage.Sequence(
+    "default_keras_export_sequence",
+    "Building Keras Model",
+    [export.ExportKerasModel()],
+)
+
 default_keras_sequence = stage.Sequence(
     "default_keras_sequence",
     "Building Keras Model",
     [
-        export.ExportKerasModel(),
+        default_keras_export_sequence,
         polish_onnx_sequence,
     ],
+)
+
+default_onnx_export_sequence = stage.Sequence(
+    "default_onnx_export_sequence",
+    "Building ONNX Model",
+    [export.ReceiveOnnxModel()],
 )
 
 
@@ -55,16 +73,22 @@ default_onnx_sequence = stage.Sequence(
     "default_onnx_sequence",
     "Building ONNX Model",
     [
-        export.ReceiveOnnxModel(),
+        default_onnx_export_sequence,
         polish_onnx_sequence,
     ],
+)
+
+default_hummingbird_export_sequence = stage.Sequence(
+    "default_hummingbird_export_sequence",
+    "Building Hummingbird Model",
+    [hummingbird.ConvertHummingbirdModel()],
 )
 
 default_hummingbird_sequence = stage.Sequence(
     "default_hummingbird_sequence",
     "Building Hummingbird Model",
     [
-        hummingbird.ConvertHummingbirdModel(),
+        default_hummingbird_export_sequence,
         export.OptimizeOnnxModel(),
         export.SuccessStage(),
     ],
@@ -447,6 +471,13 @@ model_type_to_sequence = {
     build.ModelType.HUMMINGBIRD: default_hummingbird_sequence,
 }
 
+model_type_to_export_sequence = {
+    build.ModelType.PYTORCH: default_pytorch_export_sequence,
+    build.ModelType.KERAS: default_keras_export_sequence,
+    build.ModelType.ONNX_FILE: default_onnx_export_sequence,
+    build.ModelType.HUMMINGBIRD: default_hummingbird_export_sequence,
+}
+
 model_type_to_sequence_with_quantization = {
     build.ModelType.PYTORCH: pytorch_sequence_with_quantization,
 }
@@ -478,7 +509,7 @@ def validate_inputs(inputs: Dict):
 
 def identify_model_type(model) -> build.ModelType:
     # Validate that the model's type is supported by build_model()
-    # and assign a ModelType tag
+    # and assign a ModelTye tag
     if isinstance(model, (torch.nn.Module, torch.jit.ScriptModule)):
         model_type = build.ModelType.PYTORCH
     elif isinstance(model, str):
@@ -516,6 +547,7 @@ def model_intake(
         Dict[build.ModelType, stage.Sequence]
     ] = None,
     override_sequence_map: Dict[build.ModelType, stage.Sequence] = None,
+    export_only: bool = False,
 ) -> Tuple[Any, Any, stage.Sequence, build.ModelType, str]:
 
     # Model intake structure options:
@@ -535,7 +567,10 @@ def model_intake(
         quantization_sequence_map = override_quantization_sequence_map
 
     if override_sequence_map is None:
-        sequence_map = model_type_to_sequence
+        if export_only:
+            sequence_map = model_type_to_export_sequence
+        else:
+            sequence_map = model_type_to_sequence
     else:
         sequence_map = override_sequence_map
 
