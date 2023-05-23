@@ -18,6 +18,7 @@ import yaml
 import onnx
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
+import mlagility.api.report as report_api
 from mlagility.common import filesystem
 import mlagility.api.ortmodel as ortmodel
 import mlagility.api.trtmodel as trtmodel
@@ -425,6 +426,13 @@ class Testing(unittest.TestCase):
         assert (
             linear_summary["onnx_converted"] == "True"
         ), f"onnx_converted must be True, got {linear_summary['onnx_converted']}"
+
+        # Make sure the report.get_dict() API works
+        result_dict = report_api.get_dict(summary_csv_path, "onnx_exported")
+        for result in result_dict.values():
+            # All of the models should have exported to ONNX, so the "onnx_exported" value
+            # should be True for all of them
+            assert result
 
     def test_005_cli_list(self):
         # NOTE: this is not a unit test, it relies on other command
