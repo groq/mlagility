@@ -27,20 +27,23 @@ polish_onnx_sequence = stage.Sequence(
 default_pytorch_export_sequence = stage.Sequence(
     "default_pytorch_export_sequence",
     "Exporting PyTorch Model",
-    [export.ExportPytorchModel()],
+    [
+        export.ExportPytorchModel(),
+        export.SuccessStage(),
+    ],
 )
 
 default_pytorch_sequence = stage.Sequence(
     "default_pytorch_export_sequence",
     "Exporting PyTorch Model",
-    [default_pytorch_export_sequence, polish_onnx_sequence],
+    [export.ExportPytorchModel(), polish_onnx_sequence],
 )
 
 pytorch_sequence_with_quantization = stage.Sequence(
     "pytorch_export_sequence_with_quantization",
     "Exporting PyTorch Model and Quantizing Exported ONNX",
     [
-        default_pytorch_export_sequence,
+        export.ExportPytorchModel(),
         export.OptimizeOnnxModel(),
         export.QuantizeONNXModel(),
         export.SuccessStage(),
@@ -50,14 +53,17 @@ pytorch_sequence_with_quantization = stage.Sequence(
 default_keras_export_sequence = stage.Sequence(
     "default_keras_export_sequence",
     "Building Keras Model",
-    [export.ExportKerasModel()],
+    [
+        export.ExportKerasModel(),
+        export.SuccessStage(),
+    ],
 )
 
 default_keras_sequence = stage.Sequence(
     "default_keras_sequence",
     "Building Keras Model",
     [
-        default_keras_export_sequence,
+        export.ExportKerasModel(),
         polish_onnx_sequence,
     ],
 )
@@ -65,7 +71,10 @@ default_keras_sequence = stage.Sequence(
 default_onnx_export_sequence = stage.Sequence(
     "default_onnx_export_sequence",
     "Building ONNX Model",
-    [export.ReceiveOnnxModel()],
+    [
+        export.ReceiveOnnxModel(),
+        export.SuccessStage(),
+    ],
 )
 
 
@@ -73,7 +82,7 @@ default_onnx_sequence = stage.Sequence(
     "default_onnx_sequence",
     "Building ONNX Model",
     [
-        default_onnx_export_sequence,
+        export.ReceiveOnnxModel(),
         polish_onnx_sequence,
     ],
 )
@@ -81,14 +90,17 @@ default_onnx_sequence = stage.Sequence(
 default_hummingbird_export_sequence = stage.Sequence(
     "default_hummingbird_export_sequence",
     "Building Hummingbird Model",
-    [hummingbird.ConvertHummingbirdModel()],
+    [
+        hummingbird.ConvertHummingbirdModel(),
+        export.SuccessStage(),
+    ],
 )
 
 default_hummingbird_sequence = stage.Sequence(
     "default_hummingbird_sequence",
     "Building Hummingbird Model",
     [
-        default_hummingbird_export_sequence,
+        hummingbird.ConvertHummingbirdModel(),
         export.OptimizeOnnxModel(),
         export.SuccessStage(),
     ],
