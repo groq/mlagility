@@ -232,6 +232,8 @@ def assert_success_of_builds(
     check_perf: bool = False,
     check_opset: int = None,
     runtime: str = "ort",
+    check_file: str = None,
+    check_no_file: str = None,
 ) -> int:
     # Figure out the build name by surveying the build cache
     # for a build that includes test_script_name in the name
@@ -279,6 +281,12 @@ def assert_success_of_builds(
                     onnx_model = onnx.load(build_state.converted_onnx_file)
                     model_opset = getattr(onnx_model.opset_import[0], "version", None)
                     assert model_opset == check_opset
+
+                if check_file == "base_onnx":
+                    assert os.path.exists(build_state.base_onnx_file)
+
+                if check_no_file == "opt_onnx":
+                    assert not os.path.exists(build_state.opt_onnx_file)
 
         assert script_build_found
 
@@ -936,6 +944,23 @@ class Testing(unittest.TestCase):
             testargs = ["benchit", "gobbledegook"]
             with patch.object(sys, "argv", flatten(testargs)):
                 benchitcli()
+
+    def test_020_cli_export_only(self):
+        # Test the first model in the corpus
+        test_script = list(test_scripts_dot_py.keys())[0]
+
+        testargs = [
+            "benchit",
+            "benchmark",
+            os.path.join(corpus_dir, test_script),
+            "--export-only",
+            "--cache-dir",
+            cache_dir,
+        ]
+        with patch.object(sys, "argv", testargs):
+            benchitcli()
+
+        assert_success_of_builds([test_script], cache_dir, check_file="base_onnx", check_no_file="opt_onnx")
 
 
 if __name__ == "__main__":

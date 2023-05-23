@@ -32,6 +32,7 @@ def benchmark_model(
     runtime: str = "ort",
     backend: str = "local",
     build_only: bool = False,
+    export_only: bool = False,
     lean_cache: bool = False,
     rebuild: str = MLAGILITY_DEFAULT_REBUILD_POLICY,
     onnx_opset: int = build.DEFAULT_ONNX_OPSET,
@@ -134,6 +135,7 @@ def benchmark_model(
                 rebuild=rebuild,
                 sequence=sequence,
                 onnx_opset=onnx_opset,
+                export_only=export_only,
             )
 
             if not build_only:
@@ -153,6 +155,7 @@ def benchmark_model(
                 rebuild=rebuild,
                 sequence=sequence,
                 onnx_opset=onnx_opset,
+                export_only=export_only,
             )
 
             if not build_only:
