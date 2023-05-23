@@ -591,9 +591,6 @@ class Testing(unittest.TestCase):
     def test_014_export_only(self):
         build_name = "export_only"
 
-        user_opset = 15
-        assert user_opset != build.DEFAULT_ONNX_OPSET
-
         omodel = build_model(
             pytorch_model,
             inputs,
