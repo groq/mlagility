@@ -46,6 +46,7 @@ setup(
         "pyyaml>=5.4",
         "typeguard>=2.3.13",
         "packaging>=20.9",
+        "pandas>=1.5.3",
     ],
     extras_require={
         "tensorflow": [
