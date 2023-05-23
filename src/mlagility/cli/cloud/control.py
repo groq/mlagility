@@ -888,13 +888,15 @@ class Cluster(Device):
     def wipe_mlagility_cache(self):
         self.parallelize(super().wipe_mlagility_cache)
 
-    def run(self, input_files: str):
+    def run(self, input_files: str, benchit_args: str = ""):
         # TODO: create more jobs based on permutations such as
         # batch size, data type, etc.
         device_type = hardware_to_device[self.hardware]
 
         jobs = [
-            benchit_prefix(f"mlagility{input[2:]} --lean-cache --device {device_type}")
+            benchit_prefix(
+                f"mlagility{input.split('mlagility')[1]} --lean-cache --device {device_type} {benchit_args}"
+            )
             for input in input_files
         ]
 
@@ -1049,8 +1051,16 @@ def main():
     parser.add_argument(
         "--input-files",
         "-f",
-        help="Path to input files for job",
+        help="Path to input files for job. Must be an absolute path that includes a "
+        "clone of mlagility (e.g., /home/jfowers/mlagility/models/selftest/*.py)",
         nargs="*",
+    )
+
+    parser.add_argument(
+        "--benchit-args",
+        "-a",
+        help="Arguments to pass to benchit while running a job",
+        default="",
     )
 
     # Parse the arguments
@@ -1097,7 +1107,7 @@ def main():
 
     for command in args.commands:
         if command == "run":
-            handle.run(args.input_files)
+            handle.run(args.input_files, args.benchit_args)
         else:
             command_to_function[command]()
 
