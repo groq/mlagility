@@ -588,6 +588,23 @@ class Testing(unittest.TestCase):
         model_opset = getattr(onnx_model.opset_import[0], "version", None)
         assert user_opset == model_opset
 
+    def test_014_export_only(self):
+        build_name = "export_only"
+
+        omodel = build_model(
+            pytorch_model,
+            inputs,
+            build_name=build_name,
+            rebuild="always",
+            monitor=False,
+            cache_dir=cache_location,
+            export_only=True,
+        )
+
+        assert omodel.state.build_status == build.Status.SUCCESSFUL_BUILD
+        assert os.path.exists(omodel.state.base_onnx_file)
+        assert not os.path.exists(omodel.state.opt_onnx_file)
+
 
 if __name__ == "__main__":
     unittest.main()

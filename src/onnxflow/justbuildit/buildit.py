@@ -18,6 +18,7 @@ def build_model(
     sequence: Optional[List[stage.Stage]] = None,
     quantization_samples: Collection = None,
     onnx_opset: int = build.DEFAULT_ONNX_OPSET,
+    export_only: bool = False,
 ) -> omodel.BaseModel:
 
     """Use build a model instance into an optimized ONNX file.
@@ -51,6 +52,8 @@ def build_model(
             argument needs to be manually set to "always" in the current build
             in order to create a new ONNX file.
         onnx_opset: ONNX opset to use during ONNX export.
+        export_only: Export the model to ONNX but do not apply any optimizations to the
+            resulting ONNX file.
     """
 
     # Support "~" in the cache_dir argument
@@ -71,6 +74,7 @@ def build_model(
         inputs,
         sequence,
         user_quantization_samples=quantization_samples,
+        export_only=export_only,
     )
 
     # Get the state of the model from the cache if a valid build is available
