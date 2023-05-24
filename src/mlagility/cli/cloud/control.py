@@ -596,7 +596,7 @@ class Device:
         if success_term in result:
             print(f"\n\nSuccess on {self.VM_NAME}!\n\n")
         else:
-            raise Exception("Error! Success term not in result")
+            raise Exception(f"Error! Success term not in result: {result}")
 
     def run_async_command(self, command):
         full_command = (
