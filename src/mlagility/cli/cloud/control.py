@@ -7,6 +7,7 @@ import argparse
 import subprocess
 import shutil
 import time
+import datetime
 from typing import Optional, Callable
 import concurrent.futures
 from azure.identity import AzureCliCredential
@@ -46,8 +47,8 @@ hardware_to_device = {
 hardware_to_vm_size = {
     "t4": "Standard_NC4as_T4_v3",  # Nvidia T4 with 4 EPYC vCPUs
     "icelake": "Standard_D16ds_v5",  # 16-core Xeon IceLake with 64 GB RAM
-    "cpu-small": "Standard_E2s_v3",  # 2-core Xeon (unknown generation) with 16 GB RAM
-    "cpu-big-ram": "Standard_E16-4s_v3",  # 4-core Xeon with 128 GB RAM
+    "cpu-small": "Standard_D2s_v3",  # 2-core Xeon (unknown generation) with 8 GB RAM
+    "cpu-big-ram": "Standard_E8-4s_v3",  # 4-core Xeon with 64 GB RAM
 }
 
 vm_size_to_hardware = {v: k for k, v in hardware_to_vm_size.items()}
@@ -304,6 +305,9 @@ class Device:
 
         self.async_process = None
         self.async_command = None
+        self.async_start_time = None
+        self.async_timeout = 3600
+        self.async_commands_completed = 0
 
         self._ip = None
 
@@ -462,14 +466,25 @@ class Device:
         nic_result = poller.result()
         print("Provisioned NIC", nic_result.name)
 
+        # Give x86 devices bigger hard drives than their default size
+        # which is typically 30 GB
+        if self.device == "x86":
+            os_disk = {
+                "create_option": "FromImage",
+                "deleteOption": "Delete",
+                "disk_size_gb": 128,
+            }
+        else:
+            os_disk = {
+                "create_option": "FromImage",
+                "deleteOption": "Delete",
+            }
+
         vm_spec = {
             "location": LOCATION,
             "storage_profile": {
                 "image_reference": device_to_image_reference[self.device],
-                "os_disk": {
-                    "create_option": "FromImage",
-                    "deleteOption": "Delete",
-                },
+                "os_disk": os_disk,
             },
             "hardware_profile": {"vm_size": hardware_to_vm_size[self.hardware]},
             "os_profile": {
@@ -510,37 +525,9 @@ class Device:
         print(f"Provisioned virtual machine {vm_result.name}")
 
     def delete(self):
-        """
-        Deletes the resources associated with a specific VM. Note: this may leave behind
-        a resource group and other artifacts, so generally it is a good idea to go to
-        portal.azure.com and finish cleaning up there.
-
-        We don't delete the resource group when deleting a single VM since we don't want
-        to make assumptions about what else is in that resource group.
-        """
-
-        print("Deleting VM", self.VM_NAME)
-        # NOTE: we call result() to make sure the delete operation finishes before we move on to the next one
-        self.compute_client.virtual_machines.begin_delete(
-            resource_group_name=self.RG_NAME, vm_name=self.VM_NAME
-        ).result()
-
-        print("Deleting nic", self.NIC_NAME)
-        self.network_client.network_interfaces.begin_delete(
-            self.RG_NAME, self.NIC_NAME
-        ).result()
-        print("Deleting ip", self.IP_NAME)
-        self.network_client.public_ip_addresses.begin_delete(
-            self.RG_NAME, self.IP_NAME
-        ).result()
-        print("Deleting subnet", self.SUBNET_NAME)
-        self.network_client.subnets.begin_delete(
-            self.RG_NAME, self.VNET_NAME, self.SUBNET_NAME
-        ).result()
-        print("Deleting vnet", self.VNET_NAME)
-        self.network_client.virtual_networks.begin_delete(
-            self.RG_NAME, self.VNET_NAME
-        ).result()
+        poller = self.resource_client.resource_groups.begin_delete(self.RG_NAME)
+        poller.result()
+        print(f"Deleted resource group {self.RG_NAME}")
 
     def stop(self):
         print("Stopping VM", self.VM_NAME)
@@ -568,8 +555,11 @@ class Device:
         print(f"Running command on {self.VM_NAME}: {command}")
         subprocess.run(command.split(" "), check=True)
 
-    def get_dir(self, remote_dir, local_destination):
+    def get_dir(self, remote_dir, local_dir):
         # NOTE: removes anything currently at local_destination!
+
+        local_destination = os.path.join(local_dir, self.VM_NAME)
+
         if os.path.isdir(local_destination):
             shutil.rmtree(local_destination)
 
@@ -593,9 +583,10 @@ class Device:
         # Clean up the tar file
         local_command(f"rm {local_cache_tar_path}")
 
-    def run_command(self, command):
+    def run_command(self, command, verbosity="high"):
         full_command = f"ssh {USERNAME}@{self.ip_address} {command}"
-        print(f"Running command on {self.VM_NAME}: {full_command}")
+        if verbosity == "high":
+            print(f"Running command on {self.VM_NAME}: {full_command}")
         subprocess.run(full_command.split(" "), check=True)
 
     def check_command(self, command, success_term):
@@ -605,15 +596,19 @@ class Device:
         if success_term in result:
             print(f"\n\nSuccess on {self.VM_NAME}!\n\n")
         else:
-            raise Exception("Error! Success term not in result")
+            raise Exception(f"Error! Success term not in result: {result}")
 
     def run_async_command(self, command):
-        full_command = f"ssh {USERNAME}@{self.ip_address} {command}"
-        print(f"Running async command on {self.VM_NAME}: {full_command}")
+        full_command = (
+            f"timeout --foreground {self.async_timeout} ssh -tt "
+            f"{USERNAME}@{self.ip_address} {command}"
+        )
+        print(f"Starting on {self.VM_NAME}: {full_command}")
         self.async_process = subprocess.Popen(
             full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         self.async_command = full_command
+        self.async_start_time = time.time()
 
     def poll_async_command(self, verbosity: str = "low"):
         """
@@ -622,17 +617,31 @@ class Device:
         Otherwise, returns None
         """
 
+        time_elapsed = time.time() - self.async_start_time
+
         if self.async_process.poll() is not None:
+            self.async_commands_completed = self.async_commands_completed + 1
+
             out, errs = self.async_process.communicate()
             self.async_process = None
             if verbosity == "low" or verbosity == "high":
-                print(f"{self.VM_NAME} finished job: {self.async_command}")
+
+                print(
+                    f"{self.VM_NAME} finished ({time_elapsed:.1f}s, "
+                    f"{self.async_commands_completed} completed) : {self.async_command}"
+                )
 
             if verbosity == "high":
                 print(out.decode())
                 print(errs.decode())
+
             return out, errs
         else:
+            print(
+                f"{self.VM_NAME} ({self.async_commands_completed} completed) "
+                f"running {self.async_command} ({time_elapsed:.1f}s "
+                f"elapsed / {self.async_timeout}s timeout)"
+            )
             return None
 
     def finish_async_command(
@@ -717,12 +726,12 @@ class Device:
         )
         self.wipe_mlagility_cache()
 
-    def wipe_models_cache(self):
+    def wipe_models_cache(self, verbosity="high"):
         # NOTE: this method needs to be kept up-to-date with MLAgility's corpus
         # such that it deletes all cached model files on disk. Otherwise the
         # VM disks will fill up.
         command = "rm -rf .cache/huggingface .cache/torch-hub"
-        self.run_command(command)
+        self.run_command(command, verbosity)
 
     def wipe_mlagility_cache(self):
         command = benchit_prefix("cache delete --all")
@@ -811,14 +820,31 @@ class Cluster(Device):
                     f"of quota for {hardware_to_vm_size[vm.hardware]}."
                 )
 
-    def parallelize(self, method: Callable, **kwargs):
+    def parallelize(self, method: Callable, device_set=None, **kwargs):
         """
         Run a method on all VMs in parallel
         """
         method_name = method.__name__
         futures = []
-        with concurrent.futures.ThreadPoolExecutor(self.size) as executor:
-            for device in self.devices:
+        if self.size < 8 or (
+            method_name != "create"
+            and method_name != "info"
+            and method_name != "start"
+            and method_name != "stop"
+        ):
+            threads = self.size
+        else:
+            # Only use 8 threads for methods that access the Azure API
+            # because it can fail authentication if too many APIs are called at once
+            threads = 8
+
+        if device_set is None:
+            devices = self.devices
+        else:
+            devices = device_set
+
+        with concurrent.futures.ThreadPoolExecutor(threads) as executor:
+            for device in devices:
                 method_ref = getattr(device, method_name)
                 if kwargs is None:
                     futures.append(executor.submit(method_ref))
@@ -888,6 +914,9 @@ class Cluster(Device):
     def wipe_mlagility_cache(self):
         self.parallelize(super().wipe_mlagility_cache)
 
+    def wipe_models_cache(self, verbosity="high"):
+        self.parallelize(super().wipe_models_cache, verbosity=verbosity)
+
     def run(self, input_files: str, benchit_args: str = ""):
         # TODO: create more jobs based on permutations such as
         # batch size, data type, etc.
@@ -900,50 +929,68 @@ class Cluster(Device):
             for input in input_files
         ]
 
+        total_jobs = len(jobs)
+
         print(jobs)
 
         job = jobs.pop(0)
         busy = True
+        iterations = 0
         while job is not None or busy is True:
-            job_assigned = False
-
-            # Attempt to assign job to cluster
-            if job is not None:
-                for vm in self.devices:
-                    if vm.async_process is None:
-                        vm.run_async_command(job)
-                        job_assigned = True
-                        print(f"Job {job} assigned to {vm.VM_NAME}")
-                        break
 
             # Check if any VMs are done with their last job
+            jobs_in_flight = 0
+            vms_to_wipe = []
             for vm in self.devices:
                 if vm.async_process is not None:
-                    print("Polling VM", vm.VM_NAME)
                     if vm.poll_async_command():
-                        vm.wipe_models_cache()
+                        vms_to_wipe.append(vm)
+                        # vm.wipe_models_cache(verbosity="quiet")
+                    else:
+                        jobs_in_flight = jobs_in_flight + 1
 
-            # Get a new job if this job was assigned
-            if job_assigned and len(jobs) > 0:
-                print("Jobs remaining", len(jobs))
-                job = jobs.pop(0)
-            elif job_assigned and len(jobs) == 0:
-                job = None
+            # Wipe the model cache of all VMs that have finished a job
+            self.parallelize(
+                super().wipe_models_cache, device_set=vms_to_wipe, verbosity="high"
+            )
+
+            # Assign jobs to VMs
+            for vm in self.devices:
+                if job is not None:
+                    if vm.async_process is None:
+                        vm.run_async_command(job)
+                        jobs_in_flight = jobs_in_flight + 1
+
+                        if len(jobs) > 0:
+                            job = jobs.pop(0)
+                        else:
+                            job = None
 
             # Determine whether the cluster is busy or not
-            busy = False
-            for vm in self.devices:
-                if vm.async_process is not None:
-                    busy = True
+            busy = jobs_in_flight > 0
+
+            # Print status
+            jobs_remaining = len(jobs) + jobs_in_flight
+            percent_completed = 100 - (jobs_remaining / total_jobs * 100)
+
+            print(
+                f"{datetime.datetime.now()}: Jobs remaining: "
+                f"{jobs_remaining} ({percent_completed:.1f}% completed, "
+                f"{jobs_in_flight} in flight)\n\n"
+            )
 
             time.sleep(1)
 
+            iterations = iterations + 1
+
+        self.report()
+
+    def report(self):
         result_dir = "result"
 
-        # Gather cache directories
-        for vm in self.devices:
-            vm_result_dir = os.path.join(result_dir, vm.VM_NAME)
-            vm.get_dir(".cache/mlagility", vm_result_dir)
+        self.parallelize(
+            super().get_dir, remote_dir=".cache/mlagility", local_dir="result"
+        )
 
         # Create report
         local_command(
@@ -1007,7 +1054,9 @@ def main():
             "info",
             "selftest",
             "run",
+            "report",
             "wipe-mla-cache",
+            "wipe-models-cache",
             "stop",
             "delete",
         ],
@@ -1101,6 +1150,7 @@ def main():
         "info": handle.info,
         "selftest": handle.selftest,
         "wipe-mla-cache": handle.wipe_mlagility_cache,
+        "wipe-models-cache": handle.wipe_models_cache,
         "stop": handle.stop,
         "delete": handle.delete,
     }
@@ -1108,13 +1158,15 @@ def main():
     for command in args.commands:
         if command == "run":
             handle.run(args.input_files, args.benchit_args)
+        elif command == "report":
+            handle.report()
         else:
             command_to_function[command]()
 
     end_time = time.time()
     total_time = end_time - start_time
 
-    print("Time elapsed (seconds):", total_time)
+    print(f"Time elapsed (seconds): {total_time:.1f}")
 
 
 if __name__ == "__main__":
