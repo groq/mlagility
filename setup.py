@@ -25,6 +25,8 @@ setup(
         "mlagility_models",
         "mlagility_models.diffusers",
         "mlagility_models.graph_convolutions",
+        "mlagility_models.llm",
+        "mlagility_models.llm_layer",
         "mlagility_models.popular_on_huggingface",
         "mlagility_models.selftest",
         "mlagility_models.timm",

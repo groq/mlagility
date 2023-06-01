@@ -1,10 +1,7 @@
-# labels: name::gpt_neo author::huggingface_pytorch
+# labels: name::gpt_neo author::transformers task::Natural_Language_Processing
 from mlagility.parser import parse
 import transformers
 import torch
-
-# Reason for skipping: estimated to require ~27 GroqChip1 processors (1315M parameters),
-#   and we skip any model that requires > 16 GroqChip1 processors
 
 # Parsing command-line arguments
 batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
