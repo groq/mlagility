@@ -1,7 +1,6 @@
 sentence-transformers
 pandas
 simpletransformers
-detoxify
 roformer
 torch<=1.14.0
 datasets>=2.3.2
