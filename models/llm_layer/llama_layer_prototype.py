@@ -3,15 +3,22 @@ from mlagility.parser import parse
 import transformers
 import torch
 
-"""
-This file defines a generic function for instantiating and calling a layer of the LLaMA model.
-There are other scripts in this directory (models/llm_layer) that call this function with a
-variety of arguments. We implement this way to avoid duplicating the same source code across
-many llama_*b_*.py scripts.
-"""
+# This file defines a generic function for instantiating and calling a layer of the LLaMA model.
+# There are other scripts in this directory (models/llm_layer) that call this function with a
+# variety of arguments. We implement this way to avoid duplicating the same source code across
+# many llama_*b_*.py scripts.
 
 
 def call_llama_layer(params="7B", use_cache=False):
+
+    # Use different torch seeds for KV caching vs. not, so that
+    # the models end up with different mlagility hashes
+    # Remove the if-statement when
+    # https://github.com/groq/mlagility/issues/316 is fixed
+    if use_cache:
+        torch.manual_seed(0)
+    else:
+        torch.manual_seed(1)
 
     # Parsing command-line arguments
     batch_size, max_seq_length = parse(["batch_size", "max_seq_length"])
