@@ -873,7 +873,7 @@ class Testing(unittest.TestCase):
 
         # Ensure that we have two benchmarking results as part of the state file
         build_dir = filesystem.get_available_builds(cache_dir)[0]
-        stats_file = os.path.join(build_dir, "mlagility_stats.yaml")
+        stats_file = os.path.join(cache_dir, build_dir, "mlagility_stats.yaml")
         with open(stats_file, "r", encoding="utf8") as stream:
             stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
         assert len(stats_dict["performance"]) == 2
