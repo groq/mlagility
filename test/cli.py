@@ -420,7 +420,7 @@ class Testing(unittest.TestCase):
             linear_summary["model_class"] == "TwoLayerModel"
         ), f"Wrong class found {linear_summary['model_class']}"
         assert (
-            linear_summary["hash"] == "80b93950"
+            linear_summary["hash"] == "54dedbb1"
         ), f"Wrong hash found {linear_summary['hash']}"
         assert (
             float(linear_summary["x86_latency"]) > 0
@@ -872,10 +872,8 @@ class Testing(unittest.TestCase):
             benchitcli()
 
         # Ensure that we have two benchmarking results as part of the state file
-        stats_file = os.path.join(
-            build.output_dir(cache_dir, "linear_benchit_d5b1df11"),
-            "mlagility_stats.yaml",
-        )
+        build_dir = filesystem.get_available_builds(cache_dir)[0]
+        stats_file = os.path.join(build_dir, "mlagility_stats.yaml")
         with open(stats_file, "r", encoding="utf8") as stream:
             stats_dict = yaml.load(stream, Loader=yaml.FullLoader)
         assert len(stats_dict["performance"]) == 2
@@ -960,7 +958,9 @@ class Testing(unittest.TestCase):
         with patch.object(sys, "argv", testargs):
             benchitcli()
 
-        assert_success_of_builds([test_script], cache_dir, check_file="base_onnx", check_no_file="opt_onnx")
+        assert_success_of_builds(
+            [test_script], cache_dir, check_file="base_onnx", check_no_file="opt_onnx"
+        )
 
 
 if __name__ == "__main__":
