@@ -152,6 +152,20 @@ def unique_id():
     return hashlib.sha256(f"{pid}{start_time}".encode()).hexdigest()
 
 
+def _get_shape_and_dtype(name, value):
+    if torch.is_tensor(value) or tf_helpers.is_keras_tensor(value):
+        return np.array(value).shape, np.array(value).dtype.name
+    elif isinstance(value, np.ndarray):
+        return value.shape, value.dtype.name
+    elif isinstance(value, (bool, int, float)):
+        return (1,), type(value).__name__
+    else:
+        raise exp.Error(
+            "One of the provided inputs contains the unsupported "
+            f' type {type(value)} at key "{name}".'
+        )
+
+
 def get_shapes_and_dtypes(inputs: dict):
     """
     Return the shape and data type of each value in the inputs dict
@@ -165,25 +179,11 @@ def get_shapes_and_dtypes(inputs: dict):
             (list, tuple),
         ):
             for v, i in zip(value, range(len(value))):
-                subkey = f"{key}[{i}]"
-                shapes[subkey] = np.array(v).shape
-                dtypes[subkey] = np.array(v).dtype.name
-        elif torch.is_tensor(value) or tf_helpers.is_keras_tensor(value):
-            shapes[key] = np.array(value).shape
-            dtypes[key] = np.array(value).dtype.name
-        elif isinstance(value, np.ndarray):
-            shapes[key] = value.shape
-            dtypes[key] = value.dtype.name
-        elif isinstance(value, (bool, int, float)):
-            shapes[key] = (1,)
-            dtypes[key] = type(value).__name__
-        elif value is None:
-            pass
-        else:
-            raise exp.Error(
-                "One of the provided inputs contains the unsupported "
-                f' type {type(value)} at key "{key}".'
-            )
+                if v is not None:
+                    subkey = f"{key}[{i}]"
+                    shapes[subkey], dtypes[subkey] = _get_shape_and_dtype(key, v)
+        elif value is not None:
+            shapes[key], dtypes[key] = _get_shape_and_dtype(key, value)
 
     return shapes, dtypes
 
