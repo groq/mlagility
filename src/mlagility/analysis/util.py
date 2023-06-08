@@ -103,7 +103,7 @@ def populate_onnx_model_info(onnx_model) -> Dict:
         )
     except ValueError:
         # Models >2GB on disk cannot have their model size measured this
-        # way and will throw a ValueError
+        # way and will throw a ValueError https://github.com/groq/mlagility/issues/318
         pass
 
     return result_dict
