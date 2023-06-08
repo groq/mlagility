@@ -1,4 +1,4 @@
-# labels: name::gptj author::transformers task::Natural_Language_Processing
+# labels: name::gptj author::transformers task::Generative_AI
 from mlagility.parser import parse
 import transformers
 import torch

@@ -1,4 +1,4 @@
-# labels: name::gpt_neox_layer author::transformers task::Natural_Language_Processing
+# labels: name::gpt_neox_layer author::transformers task::Generative_AI
 from mlagility.parser import parse
 import transformers
 import torch

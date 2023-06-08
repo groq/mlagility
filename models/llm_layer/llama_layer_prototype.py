@@ -1,12 +1,13 @@
-# labels: name::llama_7b_cache_layer author::transformers task::Natural_Language_Processing
+"""
+This file defines a generic function for instantiating and calling a layer of the LLaMA model.
+There are other scripts in this directory (models/llm_layer) that call this function with a
+variety of arguments. We implement this way to avoid duplicating the same source code across
+many llama_*b_*.py scripts.
+"""
+
 from mlagility.parser import parse
 import transformers
 import torch
-
-# This file defines a generic function for instantiating and calling a layer of the LLaMA model.
-# There are other scripts in this directory (models/llm_layer) that call this function with a
-# variety of arguments. We implement this way to avoid duplicating the same source code across
-# many llama_*b_*.py scripts.
 
 
 def call_llama_layer(params="7B", use_cache=False):
