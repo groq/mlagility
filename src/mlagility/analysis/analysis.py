@@ -247,7 +247,7 @@ def call_benchit(
 def get_model_hash(
     model: Union[torch.nn.Module, "tf.keras.Model"], model_type: build.ModelType
 ):
-    return build.hash_model(model, model_type, hash_params=False)[:8]
+    return build.hash_model(model, model_type, hash_params=True)[:8]
 
 
 def store_model_info(

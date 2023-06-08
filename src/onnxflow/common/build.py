@@ -76,7 +76,6 @@ def state_file(cache_dir, build_name):
 
 
 def hash_model(model, model_type: ModelType, hash_params: bool = True):
-
     # If the model is a path to a file, hash the file
     if model_type == ModelType.ONNX_FILE:
         # TODO: Implement a way of hashing the models but not the parameters
@@ -161,14 +160,15 @@ def get_shapes_and_dtypes(inputs: dict):
     dtypes = {}
     for key in sorted(inputs):
         value = inputs[key]
-        if (
-            isinstance(
-                value,
-                (list, tuple),
-            )
-            or torch.is_tensor(value)
-            or tf_helpers.is_keras_tensor(value)
+        if isinstance(
+            value,
+            (list, tuple),
         ):
+            for v, i in zip(value, range(len(value))):
+                subkey = f"{key}[{i}]"
+                shapes[subkey] = np.array(v).shape
+                dtypes[subkey] = np.array(v).dtype.name
+        elif torch.is_tensor(value) or tf_helpers.is_keras_tensor(value):
             shapes[key] = np.array(value).shape
             dtypes[key] = np.array(value).dtype.name
         elif isinstance(value, np.ndarray):

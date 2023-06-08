@@ -91,11 +91,21 @@ def populate_onnx_model_info(onnx_model) -> Dict:
         {
             "ir_version": getattr(model, "ir_version", None),
             "opset": getattr(model.opset_import[0], "version", None),
-            "size on disk (KiB)": round(
-                model.SerializeToString().__sizeof__() / 1024, 4
-            ),
         }
     )
+    try:
+        result_dict.update(
+            {
+                "size on disk (KiB)": round(
+                    model.SerializeToString().__sizeof__() / 1024, 4
+                ),
+            }
+        )
+    except ValueError:
+        # Models >2GB on disk cannot have their model size measured this
+        # way and will throw a ValueError https://github.com/groq/mlagility/issues/318
+        pass
+
     return result_dict
 
 
