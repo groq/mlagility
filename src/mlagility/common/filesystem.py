@@ -6,6 +6,7 @@ import datetime
 from typing import Dict, List
 import importlib.util
 import yaml
+from fasteners import InterProcessLock
 import onnxflow.common.printing as printing
 import onnxflow.common.cache as cache
 import onnxflow.common.build as build
@@ -39,16 +40,22 @@ class CacheError(exc.Error):
 
 
 def _load_yaml(file) -> Dict:
-    if os.path.isfile(file):
-        with open(file, "r", encoding="utf8") as stream:
-            return yaml.load(stream, Loader=yaml.FullLoader)
-    else:
-        return {}
+    with _get_file_lock(file):
+        if os.path.isfile(file):
+            with open(file, "r", encoding="utf8") as stream:
+                return yaml.load(stream, Loader=yaml.FullLoader)
+        else:
+            return {}
 
 
 def _save_yaml(dict: Dict, file):
-    with open(file, "w", encoding="utf8") as outfile:
-        yaml.dump(dict, outfile)
+    with _get_file_lock(file):
+        with open(file, "w", encoding="utf8") as outfile:
+            yaml.dump(dict, outfile)
+
+
+def _get_file_lock(file):
+    return InterProcessLock(file.replace(".yaml", ".lock"))
 
 
 def print_yaml_file(file_path, description):
