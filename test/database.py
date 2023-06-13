@@ -269,6 +269,29 @@ class Testing(unittest.TestCase):
         # Now the database should exist
         assert db.exists()
 
+    def test_012_add_multiple_scripts_simultaneously(self):
+        script_names = [f"test_script_{i}" for i in range(50)]
+
+        db = fs.CacheDatabase(cache_dir)
+
+        from multiprocessing import Process
+
+        p = {}
+        for script_name in script_names:
+            p[script_name] = Process(target=db.add_script, args=(script_name,))
+            p[script_name].start()
+
+        for script_name in script_names:
+            p[script_name].join()
+
+        database_path = os.path.join(cache_dir, database_file)
+
+        with open(database_path, "r", encoding="utf8") as stream:
+            database = yaml.load(stream, Loader=yaml.FullLoader)
+
+        for script_name in script_names:
+            assert script_name in database.keys(), database.keys()
+
 
 if __name__ == "__main__":
     unittest.main()

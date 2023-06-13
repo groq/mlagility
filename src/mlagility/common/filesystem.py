@@ -40,22 +40,16 @@ class CacheError(exc.Error):
 
 
 def _load_yaml(file) -> Dict:
-    with _get_file_lock(file):
-        if os.path.isfile(file):
-            with open(file, "r", encoding="utf8") as stream:
-                return yaml.load(stream, Loader=yaml.FullLoader)
-        else:
-            return {}
+    if os.path.isfile(file):
+        with open(file, "r", encoding="utf8") as stream:
+            return yaml.load(stream, Loader=yaml.FullLoader)
+    else:
+        return {}
 
 
 def _save_yaml(dict: Dict, file):
-    with _get_file_lock(file):
-        with open(file, "w", encoding="utf8") as outfile:
-            yaml.dump(dict, outfile)
-
-
-def _get_file_lock(file):
-    return InterProcessLock(file.replace(".yaml", ".lock"))
+    with open(file, "w", encoding="utf8") as outfile:
+        yaml.dump(dict, outfile)
 
 
 def print_yaml_file(file_path, description):
@@ -82,6 +76,14 @@ class CacheDatabase:
     def _database(self) -> Dict[str, Dict[str, str]]:
         return _load_yaml(self._database_file)
 
+    def dbtransaction(func):
+        def safe_transaction(self, *args, **kwargs):
+            with InterProcessLock(os.path.join(self.cache_dir, ".cache_database.lock")):
+                return func(self, *args, **kwargs)
+
+        return safe_transaction
+
+    @dbtransaction
     def script_in_database(self, script_name) -> bool:
         return script_name in self._database.keys()
 
@@ -92,9 +94,11 @@ class CacheDatabase:
                 "that has not been added to the database yet."
             )
 
+    @dbtransaction
     def exists(self) -> bool:
         return len(self._database) > 0
 
+    @dbtransaction
     def add_script(self, script_name: str):
         database_dict = self._database
 
@@ -103,6 +107,7 @@ class CacheDatabase:
 
         _save_yaml(database_dict, self._database_file)
 
+    @dbtransaction
     def add_build(self, script_name, build_name):
         self.add_script(script_name)
 
@@ -112,6 +117,7 @@ class CacheDatabase:
 
         _save_yaml(database_dict, self._database_file)
 
+    @dbtransaction
     def remove_script(self, script_name: str) -> Dict[str, Dict[str, str]]:
         self._validate_script_in_database(script_name, "remove_script")
 
@@ -123,6 +129,7 @@ class CacheDatabase:
 
         return database_dict
 
+    @dbtransaction
     def remove_build(self, build_name: str):
         database_dict = self._database
 
