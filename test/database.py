@@ -3,6 +3,7 @@ import shutil
 import unittest
 from pathlib import Path
 import yaml
+from multiprocessing import Process
 from onnxflow.common import cache
 import mlagility.common.filesystem as fs
 
@@ -273,8 +274,6 @@ class Testing(unittest.TestCase):
         script_names = [f"test_script_{i}" for i in range(50)]
 
         db = fs.CacheDatabase(cache_dir)
-
-        from multiprocessing import Process
 
         p = {}
         for script_name in script_names:
