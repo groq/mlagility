@@ -270,6 +270,8 @@ class Testing(unittest.TestCase):
         # Now the database should exist
         assert db.exists()
 
+    # Note: This test attempts to create a race condition that should be handled by the
+    # database lock file. This test could end up looking flakey if a bug is introduced.
     def test_012_add_multiple_scripts_simultaneously(self):
         script_names = [f"test_script_{i}" for i in range(50)]
 
