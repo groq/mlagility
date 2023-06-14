@@ -9,7 +9,7 @@ import functools
 import dataclasses
 import traceback
 import hashlib
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Tuple
 from types import FrameType, TracebackType
 from enum import Enum
 import torch
@@ -64,28 +64,31 @@ class TracerArgs:
         return act
 
 
-def _store_traceback(model_info: util.ModelInfo):
+def _store_traceback(workload_info: util.WorkloadInfo):
     """
-    Store the traceback from an exception into model_info so that
+    Store the traceback from an exception into workload_info so that
     we can print it during the status update.
     """
 
     exc_type, exc_value, exc_traceback = sys.exc_info()
-    model_info.traceback = traceback.format_exception(
+    workload_info.traceback = traceback.format_exception(
         exc_type, exc_value, exc_traceback
     )
 
 
 def call_benchit(
-    model_inputs: dict, model_info: util.ModelInfo, tracer_args: TracerArgs
+    model_inputs: dict,
+    model_info: util.ModelInfo,
+    workload_info: util.WorkloadInfo,
+    tracer_args: TracerArgs,
 ) -> None:
     """
     Calls the benchit function from within the model forward function
     """
 
     # Update status to "computing"
-    model_info.status_message = "Computing..."
-    model_info.status_message_color = printing.Colors.OKBLUE
+    workload_info.status_message = "Computing..."
+    workload_info.status_message_color = printing.Colors.OKBLUE
     status.update(tracer_args.models_found)
 
     # Get a copy of the keyword arguments
@@ -112,10 +115,10 @@ def call_benchit(
                 inputs[all_args[i]] = torch.tensor(args[i].detach().numpy())
             else:
                 inputs[all_args[i]] = args[i]
-    model_info.inputs = inputs
+    workload_info.inputs = inputs
 
     build_name = filesystem.get_build_name(
-        tracer_args.script_name, tracer_args.labels, model_info.hash
+        tracer_args.script_name, tracer_args.labels, workload_info.hash
     )
 
     # Save model labels
@@ -125,12 +128,12 @@ def call_benchit(
     perf = None
     try:
         if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
-            model_info.status_message = (
+            workload_info.status_message = (
                 "Skipping model compiled using torch.compile(). "
                 "benchit requires models to be in eager mode "
                 "(regardless of what runtime you have selected)."
             )
-            model_info.status_message_color = printing.Colors.WARNING
+            workload_info.status_message_color = printing.Colors.WARNING
         else:
             perf = benchmark_model(
                 model_info.model,
@@ -151,36 +154,36 @@ def call_benchit(
                 onnx_opset=tracer_args.onnx_opset,
             )
             if Action.BENCHMARK in tracer_args.actions:
-                model_info.status_message = "Model successfully benchmarked!"
-                model_info.performance = perf
-                model_info.status_message_color = printing.Colors.OKGREEN
+                workload_info.status_message = "Model successfully benchmarked!"
+                workload_info.performance = perf
+                workload_info.status_message_color = printing.Colors.OKGREEN
             else:
-                model_info.status_message = "Model successfully built!"
-                model_info.status_message_color = printing.Colors.OKGREEN
+                workload_info.status_message = "Model successfully built!"
+                workload_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.StageError:
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
-        model_info.status_message = "Build Error: see log files for details."
-        model_info.status_message_color = printing.Colors.WARNING
+        workload_info.status_message = "Build Error: see log files for details."
+        workload_info.status_message_color = printing.Colors.WARNING
 
-        _store_traceback(model_info)
+        _store_traceback(workload_info)
 
     except exp.Error:
-        model_info.status_message = "GroqFlowError: see log files for details."
-        model_info.status_message_color = printing.Colors.WARNING
+        workload_info.status_message = "GroqFlowError: see log files for details."
+        workload_info.status_message_color = printing.Colors.WARNING
 
-        _store_traceback(model_info)
+        _store_traceback(workload_info)
 
     # This broad exception is ok since enumerating all exceptions is
     # not possible, as the tested software continuously evolves.
     except Exception as e:  # pylint: disable=broad-except
         util.stop_stdout_forward()
-        model_info.status_message = f"Unknown benchit error: {e}"
-        model_info.status_message_color = printing.Colors.WARNING
+        workload_info.status_message = f"Unknown benchit error: {e}"
+        workload_info.status_message_color = printing.Colors.WARNING
 
-        _store_traceback(model_info)
+        _store_traceback(workload_info)
     finally:
         # Ensure that stdout is not being forwarded before updating status
         if hasattr(sys.stdout, "terminal"):
@@ -251,12 +254,19 @@ def get_model_hash(
     return build.hash_model(model, model_type, hash_params=False)[:8]
 
 
-def get_workload_hash(model_hash, *args, **kwargs):
-    hashable_content = model_hash
-    if args:
-        hashable_content += f"{[[b.shape for b in a] for a in args]}"
-    if kwargs:
-        hashable_content += f"{[a.shape for a in kwargs.keys()]}"
+def get_workload_hash(model_hash: str, args: Tuple, kwargs: Dict) -> str:
+    """
+    Combines the model hash and the input shapes to create the workload hash
+    """
+
+    # Merge positional and keyword args
+    args = {"positional{}".format(i + 1): arg for i, arg in enumerate(args)}
+    kwargs = {**kwargs, **args}
+
+    # Get input shapes and types
+    input_shapes, input_dtypes = build.get_shapes_and_dtypes(kwargs)
+
+    hashable_content = f"{model_hash}{input_shapes}{input_dtypes}"
     return hashlib.sha256(hashable_content.encode()).hexdigest()[:8]
 
 
@@ -455,23 +465,22 @@ def explore_frame(
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
                     hash=workload_hash
                 )
-            model_exec_info = model_info.workloads[workload_hash]
-            model_exec_info.exec_time = (
-                model_exec_info.exec_time + end_time - start_time
-            )
+            workload_info = model_info.workloads[workload_hash]
+            workload_info.exec_time = workload_info.exec_time + end_time - start_time
 
-            model_exec_info.executed = model_exec_info.executed + 1
+            workload_info.executed = workload_info.executed + 1
 
             # Call groqit if this is the first time the model is being executed
             # and this model has been selected by the user
             if (
-                model_exec_info.executed == 1
+                workload_info.executed == 1
                 and model_info.is_target
                 and (model_info.build_model)
             ):
                 call_benchit(
                     model_inputs=[args, kwargs],
                     model_info=model_info,
+                    workload_info=workload_info,
                     tracer_args=tracer_args,
                 )
                 # Ensure that groqit() doesn't interfere with our execution count
