@@ -49,6 +49,7 @@ setup(
         "typeguard>=2.3.13",
         "packaging>=20.9",
         "pandas>=1.5.3",
+        "fasteners",
     ],
     extras_require={
         "tensorflow": [

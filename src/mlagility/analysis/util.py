@@ -2,6 +2,7 @@ import sys
 from dataclasses import dataclass
 from typing import Callable, List, Union, Dict
 import inspect
+import dataclasses
 import torch
 import onnx
 from onnxflow.common import printing
@@ -16,6 +17,19 @@ class AnalysisException(Exception):
 
 
 @dataclass
+class WorkloadInfo:
+    hash: Union[str, None] = None
+    performance: MeasuredPerformance = None
+    traceback: List[str] = None
+    inputs: Union[dict, None] = None
+    executed: int = 0
+    exec_time: float = 0.0
+    status_message: str = ""
+    status_message_color: printing.Colors = printing.Colors.ENDC
+    traceback_message_color: printing.Colors = printing.Colors.FAIL
+
+
+@dataclass
 class ModelInfo:
     model: torch.nn.Module
     name: str
@@ -26,18 +40,13 @@ class ModelInfo:
     depth: int = 0
     hash: Union[str, None] = None
     parent_hash: Union[str, None] = None
-    inputs: Union[dict, None] = None
-    executed: int = 0
-    exec_time: float = 0.0
     old_forward: Union[Callable, None] = None
-    status_message: str = ""
-    status_message_color: printing.Colors = printing.Colors.ENDC
-    traceback_message_color: printing.Colors = printing.Colors.FAIL
+    workloads: Union[Dict[str, WorkloadInfo], None] = dataclasses.field(
+        default_factory=dict
+    )
     is_target: bool = False
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
-    performance: MeasuredPerformance = None
-    traceback: List[str] = None
 
     def __post_init__(self):
         self.params = count_parameters(self.model, self.model_type)

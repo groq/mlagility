@@ -8,6 +8,7 @@ import shlex
 import functools
 import dataclasses
 import traceback
+import hashlib
 from typing import Union, List, Dict
 from types import FrameType, TracebackType
 from enum import Enum
@@ -247,7 +248,16 @@ def call_benchit(
 def get_model_hash(
     model: Union[torch.nn.Module, "tf.keras.Model"], model_type: build.ModelType
 ):
-    return build.hash_model(model, model_type, hash_params=True)[:8]
+    return build.hash_model(model, model_type, hash_params=False)[:8]
+
+
+def get_workload_hash(model_hash, *args, **kwargs):
+    hashable_content = model_hash
+    if args:
+        hashable_content += f"{[[b.shape for b in a] for a in args]}"
+    if kwargs:
+        hashable_content += f"{[a.shape for a in kwargs.keys()]}"
+    return hashlib.sha256(hashable_content.encode()).hexdigest()[:8]
 
 
 def store_model_info(
@@ -439,15 +449,23 @@ def explore_frame(
                     parent_hash,
                 )
             model_hash = get_model_hash(local_var, model_type)
+            workload_hash = get_workload_hash(model_hash, args, kwargs)
             model_info = tracer_args.models_found[model_hash]
-            model_info.exec_time = model_info.exec_time + end_time - start_time
+            if workload_hash not in model_info.workloads:
+                model_info.workloads[workload_hash] = util.WorkloadInfo(
+                    hash=workload_hash
+                )
+            model_exec_info = model_info.workloads[workload_hash]
+            model_exec_info.exec_time = (
+                model_exec_info.exec_time + end_time - start_time
+            )
 
-            model_info.executed = model_info.executed + 1
+            model_exec_info.executed = model_exec_info.executed + 1
 
             # Call groqit if this is the first time the model is being executed
             # and this model has been selected by the user
             if (
-                model_info.executed == 1
+                model_exec_info.executed == 1
                 and model_info.is_target
                 and (model_info.build_model)
             ):

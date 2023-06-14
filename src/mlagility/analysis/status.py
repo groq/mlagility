@@ -23,25 +23,48 @@ def recursive_print(
     models_found: Dict[str, ModelInfo],
     parent_hash: Union[str, None] = None,
     script_names_visited: List[str] = False,
+    depth: int = 0,
 ) -> None:
     script_names_visited = []
 
-    for h in models_found.keys():
-        if parent_hash == models_found[h].parent_hash and models_found[h].executed > 0:
-            print_file_name = models_found[h].script_name not in script_names_visited
+    for model_hash in models_found.keys():
+        workloads_executed = False
+        for workload_hash in models_found[model_hash].workloads.keys():
+            workload = models_found[model_hash].workloads[workload_hash]
 
-            print_model(models_found[h], h, print_file_name)
+            if (
+                parent_hash == models_found[model_hash].parent_hash
+                and workload.executed > 0
+            ):
 
-            if print_file_name:
-                script_names_visited.append(models_found[h].script_name)
+                workloads_executed = True
+                print_file_name = False
+                if models_found[model_hash].script_name not in script_names_visited:
+                    script_names_visited.append(models_found[model_hash].script_name)
+                    if depth == 0:
+                        print_file_name = True
 
+                print_workload(
+                    models_found[model_hash], model_hash, workload_hash, print_file_name
+                )
+
+                if print_file_name:
+                    script_names_visited.append(models_found[model_hash].script_name)
+
+        if workloads_executed:
             recursive_print(
-                models_found, parent_hash=h, script_names_visited=script_names_visited
+                models_found,
+                parent_hash=model_hash,
+                script_names_visited=script_names_visited,
+                depth=depth + 1,
             )
 
 
-def print_model(
-    model_info: ModelInfo, model_hash: Union[str, None], print_file_name: bool = False
+def print_workload(
+    model_info: ModelInfo,
+    model_hash: Union[str, None],
+    workload_hash: Union[str, None],
+    print_file_name: bool = False,
 ) -> None:
     """
     Print information about a given model or submodel
@@ -54,12 +77,13 @@ def print_model(
     # Show the number of times the model has been executed
     # Only show the execution time if we are not running benchit() as this
     # impacts time measurement.
-    if model_info.exec_time == 0 or model_info.build_model:
+    workload = model_info.workloads[workload_hash]
+    if workload.exec_time == 0 or model_info.build_model:
         exec_time = ""
     else:
-        exec_time = f" - {model_info.exec_time:.2f}s"
+        exec_time = f" - {workload.exec_time:.2f}s"
     printing.logn(
-        f"(executed {model_info.executed}x{exec_time})",
+        f"(executed {workload.executed}x{exec_time})",
         c=printing.Colors.OKGREEN,
     )
 
@@ -81,31 +105,29 @@ def print_model(
     print(f"{ident}\tHash:\t\t" + model_hash)
 
     # Print benchit results if benchit was run
-    if model_info.performance:
+    if workload.performance:
         printing.log(f"{ident}\tStatus:\t\t")
         printing.logn(
-            f"Successfully benchmarked on {model_info.performance.device} ({model_info.performance.runtime} v{model_info.performance.runtime_version})",
-            c=model_info.status_message_color,
+            f"Successfully benchmarked on {workload.performance.device} ({workload.performance.runtime} v{workload.performance.runtime_version})",
+            c=workload.status_message_color,
         )
         printing.logn(
-            f"{ident}\t\t\tMean Latency:\t{model_info.performance.mean_latency:.3f}"
-            f"\t{model_info.performance.latency_units}"
+            f"{ident}\t\t\tMean Latency:\t{workload.performance.mean_latency:.3f}"
+            f"\t{workload.performance.latency_units}"
         )
         printing.logn(
-            f"{ident}\t\t\tThroughput:\t{model_info.performance.throughput:.1f}"
-            f"\t{model_info.performance.throughput_units}"
+            f"{ident}\t\t\tThroughput:\t{workload.performance.throughput:.1f}"
+            f"\t{workload.performance.throughput_units}"
         )
         print()
     else:
         if model_info.is_target and model_info.build_model:
             printing.log(f"{ident}\tStatus:\t\t")
-            printing.logn(
-                f"{model_info.status_message}", c=model_info.status_message_color
-            )
+            printing.logn(f"{workload.status_message}", c=workload.status_message_color)
 
-            if model_info.traceback is not None:
+            if workload.traceback is not None:
                 if os.environ.get("MLAGILITY_TRACEBACK") != "False":
-                    for line in model_info.traceback:
+                    for line in workload.traceback:
                         for subline in line.split("\n")[:-1]:
                             print(f"{ident}\t{subline}")
 

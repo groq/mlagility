@@ -74,6 +74,8 @@ def state_file(cache_dir, build_name):
     path = os.path.join(output_dir(cache_dir, build_name), state_file_name)
     return path
 
+def hash_inputs(inputs: dict):
+    return hashlib.sha256(inputs).hexdigest()
 
 def hash_model(model, model_type: ModelType, hash_params: bool = True):
     # If the model is a path to a file, hash the file
