@@ -6,6 +6,7 @@ import tensorflow as tf
 import numpy as np
 import sklearn.ensemble
 import xgboost  # pylint: disable=import-error
+import lightgbm  # pylint: disable=import-error
 from onnxmltools.utils.float16_converter import convert_float_to_float16
 from onnxmltools.utils import save_model
 from onnxmltools.utils import load_model
@@ -85,6 +86,9 @@ rf_model = sklearn.ensemble.RandomForestClassifier(
 )
 xgb_model = xgboost.XGBClassifier(
     n_estimators=10, max_depth=5, random_state=0, objective="binary:logistic"
+)
+lgbm_model = lightgbm.LGBMClassifier(
+    n_estimators=10, max_depth=5, random_state=0
 )
 
 # Run build_model() and get results
@@ -169,6 +173,21 @@ def full_compilation_hummingbird_xgb():
     build_name = "full_compilation_hummingbird_xgb"
     omodel = build_model(
         xgb_model,
+        {"input_0": rf_inputs},
+        build_name=build_name,
+        rebuild="always",
+        monitor=False,
+        cache_dir=cache_location,
+    )
+    return omodel.state.build_status == build.Status.SUCCESSFUL_BUILD
+
+
+def full_compilation_hummingbird_lgbm():
+    lgbm_model.fit(rf_inputs, np.random.randint(2, size=rf_batch_size))
+
+    build_name = "full_compilation_hummingbird_lgbm"
+    omodel = build_model(
+        lgbm_model,
         {"input_0": rf_inputs},
         build_name=build_name,
         rebuild="always",
@@ -604,6 +623,9 @@ class Testing(unittest.TestCase):
         assert omodel.state.build_status == build.Status.SUCCESSFUL_BUILD
         assert os.path.exists(omodel.state.base_onnx_file)
         assert not os.path.exists(omodel.state.opt_onnx_file)
+
+    def test_015_full_compilation_hummingbird_lgbm(self):
+        assert full_compilation_hummingbird_lgbm()
 
 
 if __name__ == "__main__":
