@@ -3,6 +3,7 @@ import shutil
 import unittest
 from pathlib import Path
 import yaml
+from multiprocessing import Process
 from onnxflow.common import cache
 import mlagility.common.filesystem as fs
 
@@ -268,6 +269,29 @@ class Testing(unittest.TestCase):
 
         # Now the database should exist
         assert db.exists()
+
+    # Note: This test attempts to create a race condition that should be handled by the
+    # database lock file. This test could end up looking flakey if a bug is introduced.
+    def test_012_add_multiple_scripts_simultaneously(self):
+        script_names = [f"test_script_{i}" for i in range(50)]
+
+        db = fs.CacheDatabase(cache_dir)
+
+        p = {}
+        for script_name in script_names:
+            p[script_name] = Process(target=db.add_script, args=(script_name,))
+            p[script_name].start()
+
+        for script_name in script_names:
+            p[script_name].join()
+
+        database_path = os.path.join(cache_dir, database_file)
+
+        with open(database_path, "r", encoding="utf8") as stream:
+            database = yaml.load(stream, Loader=yaml.FullLoader)
+
+        for script_name in script_names:
+            assert script_name in database.keys(), database.keys()
 
 
 if __name__ == "__main__":
