@@ -220,7 +220,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py::bf68fb06",
+                "linear_pytorch.py::87cea470",
                 "--max-depth",
                 "1",
                 "--build-only",
@@ -231,7 +231,7 @@ class Testing(unittest.TestCase):
         assert np.array_equal(output, (2, 0, 1))
 
     def test_05_cache(self):
-        model_hash = "bf68fb06"
+        model_hash = "87cea470"
         run_analysis(
             [
                 "benchit",
@@ -321,7 +321,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py::bf68fb06",
+                "linear_pytorch.py::87cea470",
                 "--build-only",
                 "--max-depth",
                 "1",
@@ -332,7 +332,7 @@ class Testing(unittest.TestCase):
         assert np.array_equal(output, (2, 0, 1))
 
     def test_13_clean_cache(self):
-        model_hash = "bf68fb06"
+        model_hash = "87cea470"
         run_analysis(
             [
                 "benchit",
