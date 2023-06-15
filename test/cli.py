@@ -420,7 +420,7 @@ class Testing(unittest.TestCase):
             linear_summary["model_class"] == "TwoLayerModel"
         ), f"Wrong class found {linear_summary['model_class']}"
         assert (
-            linear_summary["hash"] == "54dedbb1"
+            linear_summary["hash"] == "80b93950"
         ), f"Wrong hash found {linear_summary['hash']}"
         assert (
             float(linear_summary["x86_latency"]) > 0
