@@ -312,7 +312,6 @@ def store_model_info(
             depth=depth,
             hash=model_hash,
             parent_hash=parent_hash,
-            is_target=model_hash in tracer_args.targets or tracer_args.targets == [],
             build_model=build_model,
             model_type=model_type,
             script_name=tracer_args.script_name,
@@ -463,7 +462,9 @@ def explore_frame(
             model_info = tracer_args.models_found[model_hash]
             if workload_hash not in model_info.workloads:
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
-                    hash=workload_hash
+                    hash=workload_hash,
+                    is_target=workload_hash in tracer_args.targets
+                    or tracer_args.targets == [],
                 )
             workload_info = model_info.workloads[workload_hash]
             workload_info.exec_time = workload_info.exec_time + end_time - start_time
@@ -474,7 +475,7 @@ def explore_frame(
             # and this model has been selected by the user
             if (
                 workload_info.executed == 1
-                and model_info.is_target
+                and workload_info.is_target
                 and (model_info.build_model)
             ):
                 call_benchit(

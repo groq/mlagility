@@ -118,7 +118,7 @@ def print_workload(
         )
         print()
     else:
-        if model_info.is_target and model_info.build_model:
+        if workload.is_target and model_info.build_model:
             printing.log(f"{ident}\tStatus:\t\t")
             printing.logn(f"{workload.status_message}", c=workload.status_message_color)
 

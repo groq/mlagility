@@ -25,6 +25,7 @@ class WorkloadInfo:
     executed: int = 0
     exec_time: float = 0.0
     status_message: str = ""
+    is_target: bool = False
     status_message_color: printing.Colors = printing.Colors.ENDC
     traceback_message_color: printing.Colors = printing.Colors.FAIL
 
@@ -44,7 +45,6 @@ class ModelInfo:
     workloads: Union[Dict[str, WorkloadInfo], None] = dataclasses.field(
         default_factory=dict
     )
-    is_target: bool = False
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
 
