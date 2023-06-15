@@ -119,6 +119,26 @@ parsed_args = parse(["height", "width", "num_channels"])
 print(parsed_args)
 
 """,
+    "two_executions": """
+import torch
+import timm
+from mlagility.parser import parse
+
+# Parsing command-line arguments
+batch_size = parse(["batch_size"])
+
+# Creating model and set it to evaluation mode
+model = timm.create_model("mobilenetv2_035", pretrained=False)
+model.eval()
+
+# Creating inputs
+inputs1 = torch.rand((1, 3, 28, 28))
+inputs2 = torch.rand((1, 3, 224, 224))
+
+# Calling model
+model(inputs1)
+model(inputs2)
+""",
 }
 minimal_tokenizer = """
 {
@@ -357,6 +377,16 @@ class Testing(unittest.TestCase):
         subprocess.run(cmd, check=True)
 
         assert cache_is_lean(cache_dir, build_name)
+
+    def test_14_same_model_different_input_shapes(self):
+        output = run_analysis(
+            [
+                "benchit",
+                "two_executions.py",
+                "--analyze-only",
+            ]
+        )
+        assert np.array_equal(output, (2, 0, 0))
 
 
 if __name__ == "__main__":
