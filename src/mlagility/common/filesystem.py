@@ -40,22 +40,16 @@ class CacheError(exc.Error):
 
 
 def _load_yaml(file) -> Dict:
-    with _get_file_lock(file):
-        if os.path.isfile(file):
-            with open(file, "r", encoding="utf8") as stream:
-                return yaml.load(stream, Loader=yaml.FullLoader)
-        else:
-            return {}
+    if os.path.isfile(file):
+        with open(file, "r", encoding="utf8") as stream:
+            return yaml.load(stream, Loader=yaml.FullLoader)
+    else:
+        return {}
 
 
 def _save_yaml(dict: Dict, file):
-    with _get_file_lock(file):
-        with open(file, "w", encoding="utf8") as outfile:
-            yaml.dump(dict, outfile)
-
-
-def _get_file_lock(file):
-    return InterProcessLock(file.replace(".yaml", ".lock"))
+    with open(file, "w", encoding="utf8") as outfile:
+        yaml.dump(dict, outfile)
 
 
 def print_yaml_file(file_path, description):
