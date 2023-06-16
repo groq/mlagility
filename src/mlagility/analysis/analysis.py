@@ -254,9 +254,12 @@ def get_model_hash(
     return build.hash_model(model, model_type, hash_params=False)[:8]
 
 
-def get_workload_hash(model_hash: str, args: Tuple, kwargs: Dict) -> str:
+def get_workload_hash(
+    model_hash: str, parent_workload_hash: str, args: Tuple, kwargs: Dict
+) -> str:
     """
     Combines the model hash and the input shapes to create the workload hash
+    We also ensure that workloads that come from different workload parents have different hashes
     """
 
     # Merge positional and keyword args
@@ -266,7 +269,7 @@ def get_workload_hash(model_hash: str, args: Tuple, kwargs: Dict) -> str:
     # Get input shapes and types
     input_shapes, input_dtypes = build.get_shapes_and_dtypes(kwargs)
 
-    hashable_content = f"{model_hash}{input_shapes}{input_dtypes}"
+    hashable_content = f"{model_hash}{parent_workload_hash}{input_shapes}{input_dtypes}"
     return hashlib.sha256(hashable_content.encode()).hexdigest()[:8], input_shapes
 
 
@@ -452,9 +455,6 @@ def explore_frame(
                     depth,
                     parent_hash,
                 )
-            model_hash = get_model_hash(local_var, model_type)
-            workload_hash, input_shapes = get_workload_hash(model_hash, args, kwargs)
-            model_info = tracer_args.models_found[model_hash]
 
             # Here we get the parent workload hash by getting the hash of the last workload
             # added to the parent model.
@@ -464,6 +464,12 @@ def explore_frame(
                 parent_workloads = list(tracer_args.models_found[parent_hash].workloads)
                 if parent_workloads:
                     parent_workload_hash = parent_workloads[-1]
+
+            model_hash = get_model_hash(local_var, model_type)
+            workload_hash, input_shapes = get_workload_hash(
+                model_hash, parent_workload_hash, args, kwargs
+            )
+            model_info = tracer_args.models_found[model_hash]
 
             if workload_hash not in model_info.workloads:
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
