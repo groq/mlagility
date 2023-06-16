@@ -440,11 +440,6 @@ def explore_frame(
                 # do so by setting the max_depth flag.
                 return old_forward(*args, **kwargs)
 
-            # Keep track of execution time
-            start_time = time.time()
-            outputs = old_forward(*args, **kwargs)
-            end_time = time.time()
-
             # We can only keep track of keras models once they have been executed
             if model_type == build.ModelType.KERAS:
                 store_model_info(
@@ -460,16 +455,32 @@ def explore_frame(
             model_hash = get_model_hash(local_var, model_type)
             workload_hash, input_shapes = get_workload_hash(model_hash, args, kwargs)
             model_info = tracer_args.models_found[model_hash]
+
+            # Here we get the parent workload hash by getting the hash of the last workload
+            # added to the parent model.
+            parent_workload_hash = "-"
+            if parent_hash:
+                parent_workload_hash = "PR found, but workloads is empty"
+                parent_workloads = list(tracer_args.models_found[parent_hash].workloads)
+                if parent_workloads:
+                    parent_workload_hash = parent_workloads[-1]
+
             if workload_hash not in model_info.workloads:
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
                     hash=workload_hash,
                     is_target=workload_hash in tracer_args.targets
                     or tracer_args.targets == [],
                     input_shapes=input_shapes,
+                    parent_hash=parent_workload_hash,
                 )
+
+            # Keep track of execution time
+            start_time = time.time()
+            outputs = old_forward(*args, **kwargs)
+            end_time = time.time()
+
             workload_info = model_info.workloads[workload_hash]
             workload_info.exec_time = workload_info.exec_time + end_time - start_time
-
             workload_info.executed = workload_info.executed + 1
 
             # Call groqit if this is the first time the model is being executed

@@ -19,6 +19,7 @@ class AnalysisException(Exception):
 @dataclass
 class WorkloadInfo:
     hash: Union[str, None] = None
+    parent_hash: Union[str, None] = None
     performance: MeasuredPerformance = None
     traceback: List[str] = None
     inputs: Union[dict, None] = None

@@ -101,6 +101,7 @@ def print_workload(
     )
     print(f"{ident}\tInput Shape:\t{input_shape}")
     print(f"{ident}\tHash:\t\t" + workload_hash)
+    print(f"{ident}\tParent Hash:\t" + model_info.workloads[workload_hash].parent_hash)
 
     # Print benchit results if benchit was run
     if workload.performance:
