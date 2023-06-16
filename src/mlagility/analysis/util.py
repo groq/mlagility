@@ -22,6 +22,7 @@ class WorkloadInfo:
     performance: MeasuredPerformance = None
     traceback: List[str] = None
     inputs: Union[dict, None] = None
+    input_shapes: Union[dict, None] = None
     executed: int = 0
     exec_time: float = 0.0
     status_message: str = ""

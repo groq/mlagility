@@ -23,7 +23,6 @@ def recursive_print(
     models_found: Dict[str, ModelInfo],
     parent_hash: Union[str, None] = None,
     script_names_visited: List[str] = False,
-    depth: int = 0,
 ) -> None:
     script_names_visited = []
 
@@ -41,7 +40,7 @@ def recursive_print(
                 print_file_name = False
                 if models_found[model_hash].script_name not in script_names_visited:
                     script_names_visited.append(models_found[model_hash].script_name)
-                    if depth == 0:
+                    if models_found[model_hash].depth == 0:
                         print_file_name = True
 
                 print_workload(models_found[model_hash], workload_hash, print_file_name)
@@ -54,7 +53,6 @@ def recursive_print(
                 models_found,
                 parent_hash=model_hash,
                 script_names_visited=script_names_visited,
-                depth=depth + 1,
             )
 
 
@@ -99,6 +97,8 @@ def print_workload(
     model_size = model_info.params * 2 / (1024 * 1024)
     model_size = "{:.1f}".format(model_size) if model_size > 0.1 else "<0.1"
     print(f"{ident}\tParameters:\t{'{:,}'.format(model_info.params)} ({model_size} MB)")
+    if len(model_info.workloads) > 1:
+        print(f"{ident}\tInput Shape:\t" + str(model_info.workloads[workload_hash].input_shapes))
     print(f"{ident}\tHash:\t\t" + workload_hash)
 
     # Print benchit results if benchit was run

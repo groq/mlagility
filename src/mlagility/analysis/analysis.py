@@ -260,14 +260,14 @@ def get_workload_hash(model_hash: str, args: Tuple, kwargs: Dict) -> str:
     """
 
     # Merge positional and keyword args
-    args = {"positional{}".format(i + 1): arg for i, arg in enumerate(args)}
+    args = {"Positional Arg {}".format(i + 1): arg for i, arg in enumerate(args)}
     kwargs = {**kwargs, **args}
 
     # Get input shapes and types
     input_shapes, input_dtypes = build.get_shapes_and_dtypes(kwargs)
 
     hashable_content = f"{model_hash}{input_shapes}{input_dtypes}"
-    return hashlib.sha256(hashable_content.encode()).hexdigest()[:8]
+    return hashlib.sha256(hashable_content.encode()).hexdigest()[:8], input_shapes
 
 
 def store_model_info(
@@ -458,13 +458,14 @@ def explore_frame(
                     parent_hash,
                 )
             model_hash = get_model_hash(local_var, model_type)
-            workload_hash = get_workload_hash(model_hash, args, kwargs)
+            workload_hash, input_shapes = get_workload_hash(model_hash, args, kwargs)
             model_info = tracer_args.models_found[model_hash]
             if workload_hash not in model_info.workloads:
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
                     hash=workload_hash,
                     is_target=workload_hash in tracer_args.targets
                     or tracer_args.targets == [],
+                    input_shapes=input_shapes,
                 )
             workload_info = model_info.workloads[workload_hash]
             workload_info.exec_time = workload_info.exec_time + end_time - start_time
