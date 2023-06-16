@@ -458,7 +458,7 @@ def explore_frame(
 
             # Here we get the parent workload hash by getting the hash of the last workload
             # added to the parent model.
-            parent_workload_hash = "-"
+            parent_workload_hash = None
             if parent_hash:
                 parent_workload_hash = "PR found, but workloads is empty"
                 parent_workloads = list(tracer_args.models_found[parent_hash].workloads)

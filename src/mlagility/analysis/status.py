@@ -16,12 +16,13 @@ def update(models_found: Dict[str, ModelInfo]) -> None:
         "\nModels discovered during profiling:\n",
         c=printing.Colors.BOLD,
     )
-    recursive_print(models_found, None, [])
+    recursive_print(models_found, None, None, [])
 
 
 def recursive_print(
     models_found: Dict[str, ModelInfo],
-    parent_hash: Union[str, None] = None,
+    parent_model_hash: Union[str, None] = None,
+    parent_workload_hash: Union[str, None] = None,
     script_names_visited: List[str] = False,
 ) -> None:
     script_names_visited = []
@@ -31,8 +32,12 @@ def recursive_print(
             workload = models_found[model_hash].workloads[workload_hash]
 
             if (
-                parent_hash == models_found[model_hash].parent_hash
+                parent_model_hash == models_found[model_hash].parent_hash
                 and workload.executed > 0
+                and (
+                    models_found[model_hash].workloads[workload_hash].parent_hash
+                    == parent_workload_hash
+                )
             ):
 
                 print_file_name = False
@@ -48,7 +53,8 @@ def recursive_print(
 
                 recursive_print(
                     models_found,
-                    parent_hash=model_hash,
+                    parent_model_hash=model_hash,
+                    parent_workload_hash=workload_hash,
                     script_names_visited=script_names_visited,
                 )
 
@@ -101,7 +107,6 @@ def print_workload(
     )
     print(f"{ident}\tInput Shape:\t{input_shape}")
     print(f"{ident}\tHash:\t\t" + workload_hash)
-    print(f"{ident}\tParent Hash:\t" + model_info.workloads[workload_hash].parent_hash)
 
     # Print benchit results if benchit was run
     if workload.performance:
