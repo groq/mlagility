@@ -89,7 +89,7 @@ def print_workload(
     else:
         exec_time = f" - {workload.exec_time:.2f}s"
 
-    if model_info.depth == 0:
+    if model_info.depth == 0 and len(model_info.workloads) > 1:
         if not model_visited:
             printing.logn(f"{ident}{model_info.name}")
     else:
@@ -119,7 +119,7 @@ def print_workload(
             f"{ident}\tParameters:\t{'{:,}'.format(model_info.params)} ({model_size} MB)"
         )
 
-    if model_info.depth == 0:
+    if model_info.depth == 0 and len(model_info.workloads) > 1:
         printing.logn(
             f"\n{ident}\tWorkload {workload_idx+1} (executed {workload.executed}x{exec_time})",
             c=printing.Colors.OKGREEN,

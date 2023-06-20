@@ -124,9 +124,6 @@ import torch
 import timm
 from mlagility.parser import parse
 
-# Parsing command-line arguments
-batch_size = parse(["batch_size"])
-
 # Creating model and set it to evaluation mode
 model = timm.create_model("mobilenetv2_035", pretrained=False)
 model.eval()
@@ -138,6 +135,7 @@ inputs2 = torch.rand((1, 3, 224, 224))
 # Calling model
 model(inputs1)
 model(inputs2)
+model(inputs1)
 """,
 }
 minimal_tokenizer = """
@@ -387,6 +385,18 @@ class Testing(unittest.TestCase):
             ]
         )
         assert np.array_equal(output, (2, 0, 0))
+
+    def test_15_same_model_different_input_shapes_maxdepth(self):
+        output = run_analysis(
+            [
+                "benchit",
+                "two_executions.py",
+                "--analyze-only",
+                "--max-depth",
+                "1",
+            ]
+        )
+        assert np.array_equal(output, (6, 0, 0))
 
 
 if __name__ == "__main__":
