@@ -13,6 +13,7 @@ import onnxflow.justbuildit.stage as stage
 import onnxflow.common.exceptions as exp
 import onnxflow.common.build as build
 import onnxflow.common.tensor_helpers as tensor_helpers
+import onnxflow.common.onnx_helpers as onnx_helpers
 import onnxflow.common.quantization_helpers as quant_helpers
 
 
@@ -85,7 +86,7 @@ class ReceiveOnnxModel(stage.Stage):
         state.inputs = dict(zip(dummy_input_names, dummy_inputs))
 
         model = onnx.load(state.model)
-        opset = getattr(model.opset_import[0], "version", None)
+        opset = onnx_helpers.get_opset(model)
         input_shapes = [
             [d.dim_value for d in _input.type.tensor_type.shape.dim]
             for _input in model.graph.input  # pylint: disable=no-member
