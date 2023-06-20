@@ -76,7 +76,7 @@ def _store_traceback(workload_info: util.WorkloadInfo):
     )
 
 
-def call_benchit(
+def explore_workload(
     model_inputs: dict,
     model_info: util.ModelInfo,
     workload_info: util.WorkloadInfo,
@@ -495,7 +495,7 @@ def explore_frame(
                 and workload_info.is_target
                 and (model_info.build_model)
             ):
-                call_benchit(
+                explore_workload(
                     model_inputs=[args, kwargs],
                     model_info=model_info,
                     workload_info=workload_info,
