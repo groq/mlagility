@@ -47,6 +47,7 @@ class ModelInfo:
     workloads: Union[Dict[str, WorkloadInfo], None] = dataclasses.field(
         default_factory=dict
     )
+    last_workload_executed: Union[str, None] = None
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
 

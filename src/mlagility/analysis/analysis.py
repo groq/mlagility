@@ -456,14 +456,12 @@ def explore_frame(
                     parent_hash,
                 )
 
-            # Here we get the parent workload hash by getting the hash of the last workload
-            # added to the parent model.
+            # Get parent workload hash
             parent_workload_hash = None
             if parent_hash:
-                parent_workload_hash = "PR found, but workloads is empty"
-                parent_workloads = list(tracer_args.models_found[parent_hash].workloads)
-                if parent_workloads:
-                    parent_workload_hash = parent_workloads[-1]
+                parent_workload_hash = tracer_args.models_found[
+                    parent_hash
+                ].last_workload_executed
 
             model_hash = get_model_hash(local_var, model_type)
             workload_hash, input_shapes = get_workload_hash(
@@ -479,6 +477,7 @@ def explore_frame(
                     input_shapes=input_shapes,
                     parent_hash=parent_workload_hash,
                 )
+            model_info.last_workload_executed = workload_hash
 
             # Keep track of execution time
             start_time = time.time()
