@@ -468,7 +468,9 @@ def load_or_make_state(
                     problem_report = "\n".join(cache_problems)
 
                     if rebuild == "if_needed":
-                        return _rebuild_if_needed(problem_report, state_args)
+                        return _rebuild_if_needed(
+                            problem_report, state_args, state_type
+                        )
                     if rebuild == "never":
                         msg = (
                             "build_model() discovered a cached build of "
