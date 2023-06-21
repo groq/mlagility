@@ -180,6 +180,7 @@ def benchmark_model(
             # have a place to store our results.
             if not os.path.isfile(build.state_file(cache_dir, build_name)):
                 config = ignition.lock_config(
+                    model=model,
                     build_name=build_name,
                     sequence=sequence,
                 )
