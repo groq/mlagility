@@ -112,7 +112,7 @@ You can see that `hello_world.py`, `two_models.py`, and `max_depth.py` are all e
 
 > See the [Benchmark Multiple Scripts documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#benchmark-multiple-scripts) for more details.
 
-### Maximum Analysis Depth
+## Maximum Analysis Depth
 
 PyTorch models (eg, `torch.nn.Module`) are often built out of a collection of smaller instances. For example, a PyTorch multilayer perceptron (MLP) model may be built out of many `torch.nn.Linear` modules.
 

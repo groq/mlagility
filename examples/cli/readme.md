@@ -17,6 +17,7 @@ In this tutorial you will learn things such as:
 - [A "hello world" example, which is the easiest way to get started](#hello-world)
 - [Benchmarking on Nvidia GPUs](#nvidia-benchmarking)
 - [Working with scripts that invoke more than one model](#multiple-models-per-script)
+- [Working with scripts that a model multiple times](#multiple-invocations-of-a-model)
 - [Benchmarking an ONNX file](#onnx-benchmarking)
 
 # Just Benchmark BERT
@@ -170,6 +171,44 @@ Woohoo! The 'benchmark' command is complete.
 ```
 
 You can see that both model instances in `two_models.py`, `pytorch_model` and `another_pytorch_model`, are both discovered and benchmarked.
+
+## Multiple Invocations of a Model
+
+The same model may be invoked using different input shapes (e.g. when varying the batch size). Only one invocation is processed my MLAgility if the same model is invoked multiple times using inputs of the same shape. However, multiple invocation are processed my MLAgility if the same model is invoked multiple times using inputs of different shapes.
+
+The `multiple_invocations.py` script instantiates a single script and invokes it three times. The fist two times the model is invoked with inputs of the same shape (batch 1), while the third invocation uses a different input shape (batch 2). Note that two unique static model invocations are identified. 
+
+Run the following command:
+
+```
+benchit scripts/multiple_invocations.py
+```
+
+To get a result like:
+```
+Models discovered during profiling:
+
+multiple_invocations.py:
+        pytorch_model
+                Model Type:     Pytorch (torch.nn.Module)
+                Class:          SmallModel (<class 'multiple_invocations.SmallModel'>)
+                Location:       /net/home/dhnoronha/mlagility/examples/cli/scripts/multiple_invocations.py, line 40
+                Parameters:     60 (<0.1 MB)
+
+                With input shape 1 (executed 2x)
+                Input Shape:    'x': (1, 11)
+                Hash:           b4aa73ae
+                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz (ort v1.14.1)
+                                Mean Latency:   0.013   milliseconds (ms)
+                                Throughput:     77909.6 inferences per second (IPS)
+
+                With input shape 2 (executed 1x)
+                Input Shape:    'x': (2, 11)
+                Hash:           cfaa2e2c
+                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz (ort v1.14.1)
+                                Mean Latency:   0.015   milliseconds (ms)
+                                Throughput:     64938.1 inferences per second (IPS)
+```
 
 ## ONNX Benchmarking
 

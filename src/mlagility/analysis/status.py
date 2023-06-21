@@ -121,7 +121,7 @@ def print_invocation(
 
     if model_info.depth == 0 and len(model_info.unique_invocations) > 1:
         printing.logn(
-            f"\n{ident}\twith input shape {invocation_idx+1} (executed {unique_invocation.executed}x{exec_time})",
+            f"\n{ident}\tWith input shape {invocation_idx+1} (executed {unique_invocation.executed}x{exec_time})",
             c=printing.Colors.OKGREEN,
         )
 
