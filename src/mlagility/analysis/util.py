@@ -17,7 +17,12 @@ class AnalysisException(Exception):
 
 
 @dataclass
-class WorkloadInfo:
+class UniqueInvocationInfo:
+    """
+    Refers to unique static model invocations
+    (i.e. models executed with unique input shapes)
+    """
+
     hash: Union[str, None] = None
     parent_hash: Union[str, None] = None
     performance: MeasuredPerformance = None
@@ -44,10 +49,10 @@ class ModelInfo:
     hash: Union[str, None] = None
     parent_hash: Union[str, None] = None
     old_forward: Union[Callable, None] = None
-    workloads: Union[Dict[str, WorkloadInfo], None] = dataclasses.field(
-        default_factory=dict
-    )
-    last_workload_executed: Union[str, None] = None
+    unique_invocations: Union[
+        Dict[str, UniqueInvocationInfo], None
+    ] = dataclasses.field(default_factory=dict)
+    last_unique_invocation_executed: Union[str, None] = None
     build_model: bool = False
     model_type: build.ModelType = build.ModelType.PYTORCH
 

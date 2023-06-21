@@ -64,22 +64,22 @@ class TracerArgs:
         return act
 
 
-def _store_traceback(workload_info: util.WorkloadInfo):
+def _store_traceback(invocation_info: util.UniqueInvocationInfo):
     """
-    Store the traceback from an exception into workload_info so that
+    Store the traceback from an exception into invocation_info so that
     we can print it during the status update.
     """
 
     exc_type, exc_value, exc_traceback = sys.exc_info()
-    workload_info.traceback = traceback.format_exception(
+    invocation_info.traceback = traceback.format_exception(
         exc_type, exc_value, exc_traceback
     )
 
 
-def explore_workload(
+def explore_invocation(
     model_inputs: dict,
     model_info: util.ModelInfo,
-    workload_info: util.WorkloadInfo,
+    invocation_info: util.UniqueInvocationInfo,
     tracer_args: TracerArgs,
 ) -> None:
     """
@@ -87,8 +87,8 @@ def explore_workload(
     """
 
     # Update status to "computing"
-    workload_info.status_message = "Computing..."
-    workload_info.status_message_color = printing.Colors.OKBLUE
+    invocation_info.status_message = "Computing..."
+    invocation_info.status_message_color = printing.Colors.OKBLUE
     status.update(tracer_args.models_found)
 
     # Get a copy of the keyword arguments
@@ -115,10 +115,10 @@ def explore_workload(
                 inputs[all_args[i]] = torch.tensor(args[i].detach().numpy())
             else:
                 inputs[all_args[i]] = args[i]
-    workload_info.inputs = inputs
+    invocation_info.inputs = inputs
 
     build_name = filesystem.get_build_name(
-        tracer_args.script_name, tracer_args.labels, workload_info.hash
+        tracer_args.script_name, tracer_args.labels, invocation_info.hash
     )
 
     # Save model labels
@@ -128,12 +128,12 @@ def explore_workload(
     perf = None
     try:
         if model_info.model_type == build.ModelType.PYTORCH_COMPILED:
-            workload_info.status_message = (
+            invocation_info.status_message = (
                 "Skipping model compiled using torch.compile(). "
                 "benchit requires models to be in eager mode "
                 "(regardless of what runtime you have selected)."
             )
-            workload_info.status_message_color = printing.Colors.WARNING
+            invocation_info.status_message_color = printing.Colors.WARNING
         else:
             perf = benchmark_model(
                 model_info.model,
@@ -154,36 +154,36 @@ def explore_workload(
                 onnx_opset=tracer_args.onnx_opset,
             )
             if Action.BENCHMARK in tracer_args.actions:
-                workload_info.status_message = "Model successfully benchmarked!"
-                workload_info.performance = perf
-                workload_info.status_message_color = printing.Colors.OKGREEN
+                invocation_info.status_message = "Model successfully benchmarked!"
+                invocation_info.performance = perf
+                invocation_info.status_message_color = printing.Colors.OKGREEN
             else:
-                workload_info.status_message = "Model successfully built!"
-                workload_info.status_message_color = printing.Colors.OKGREEN
+                invocation_info.status_message = "Model successfully built!"
+                invocation_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.StageError:
         build_state = build.load_state(
             cache_dir=tracer_args.cache_dir, build_name=build_name
         )
-        workload_info.status_message = "Build Error: see log files for details."
-        workload_info.status_message_color = printing.Colors.WARNING
+        invocation_info.status_message = "Build Error: see log files for details."
+        invocation_info.status_message_color = printing.Colors.WARNING
 
-        _store_traceback(workload_info)
+        _store_traceback(invocation_info)
 
     except exp.Error:
-        workload_info.status_message = "GroqFlowError: see log files for details."
-        workload_info.status_message_color = printing.Colors.WARNING
+        invocation_info.status_message = "GroqFlowError: see log files for details."
+        invocation_info.status_message_color = printing.Colors.WARNING
 
-        _store_traceback(workload_info)
+        _store_traceback(invocation_info)
 
     # This broad exception is ok since enumerating all exceptions is
     # not possible, as the tested software continuously evolves.
     except Exception as e:  # pylint: disable=broad-except
         util.stop_stdout_forward()
-        workload_info.status_message = f"Unknown benchit error: {e}"
-        workload_info.status_message_color = printing.Colors.WARNING
+        invocation_info.status_message = f"Unknown benchit error: {e}"
+        invocation_info.status_message_color = printing.Colors.WARNING
 
-        _store_traceback(workload_info)
+        _store_traceback(invocation_info)
     finally:
         # Ensure that stdout is not being forwarded before updating status
         if hasattr(sys.stdout, "terminal"):
@@ -254,12 +254,12 @@ def get_model_hash(
     return build.hash_model(model, model_type, hash_params=False)[:8]
 
 
-def get_workload_hash(
-    model_hash: str, parent_workload_hash: str, args: Tuple, kwargs: Dict
+def get_invocation_hash(
+    model_hash: str, parent_invocation_hash: str, args: Tuple, kwargs: Dict
 ) -> str:
     """
-    Combines the model hash and the input shapes to create the workload hash
-    We also ensure that workloads that come from different workload parents have different hashes
+    Combines the model hash and the input shapes to create the invocation hash
+    We also ensure that invocations that come from different parents have different hashes
     """
 
     # Merge positional and keyword args
@@ -269,7 +269,9 @@ def get_workload_hash(
     # Get input shapes and types
     input_shapes, input_dtypes = build.get_shapes_and_dtypes(kwargs)
 
-    hashable_content = f"{model_hash}{parent_workload_hash}{input_shapes}{input_dtypes}"
+    hashable_content = (
+        f"{model_hash}{parent_invocation_hash}{input_shapes}{input_dtypes}"
+    )
     return hashlib.sha256(hashable_content.encode()).hexdigest()[:8], input_shapes
 
 
@@ -456,49 +458,53 @@ def explore_frame(
                     parent_hash,
                 )
 
-            # Get parent workload hash
-            parent_workload_hash = None
+            # Get parent invocation hash
+            parent_invocation_hash = None
             if parent_hash:
-                parent_workload_hash = tracer_args.models_found[
+                parent_invocation_hash = tracer_args.models_found[
                     parent_hash
-                ].last_workload_executed
+                ].last_unique_invocation_executed
 
             model_hash = get_model_hash(local_var, model_type)
-            workload_hash, input_shapes = get_workload_hash(
-                model_hash, parent_workload_hash, args, kwargs
+            invocation_hash, input_shapes = get_invocation_hash(
+                model_hash, parent_invocation_hash, args, kwargs
             )
             model_info = tracer_args.models_found[model_hash]
 
-            if workload_hash not in model_info.workloads:
-                model_info.workloads[workload_hash] = util.WorkloadInfo(
-                    hash=workload_hash,
-                    is_target=workload_hash in tracer_args.targets
+            if invocation_hash not in model_info.unique_invocations:
+                model_info.unique_invocations[
+                    invocation_hash
+                ] = util.UniqueInvocationInfo(
+                    hash=invocation_hash,
+                    is_target=invocation_hash in tracer_args.targets
                     or len(tracer_args.targets) == 0,
                     input_shapes=input_shapes,
-                    parent_hash=parent_workload_hash,
+                    parent_hash=parent_invocation_hash,
                 )
-            model_info.last_workload_executed = workload_hash
+            model_info.last_unique_invocation_executed = invocation_hash
 
             # Keep track of execution time
             start_time = time.time()
             outputs = old_forward(*args, **kwargs)
             end_time = time.time()
 
-            workload_info = model_info.workloads[workload_hash]
-            workload_info.exec_time = workload_info.exec_time + end_time - start_time
-            workload_info.executed = workload_info.executed + 1
+            invocation_info = model_info.unique_invocations[invocation_hash]
+            invocation_info.exec_time = (
+                invocation_info.exec_time + end_time - start_time
+            )
+            invocation_info.executed = invocation_info.executed + 1
 
             # Call groqit if this is the first time the model is being executed
             # and this model has been selected by the user
             if (
-                workload_info.executed == 1
-                and workload_info.is_target
+                invocation_info.executed == 1
+                and invocation_info.is_target
                 and (model_info.build_model)
             ):
-                explore_workload(
+                explore_invocation(
                     model_inputs=[args, kwargs],
                     model_info=model_info,
-                    workload_info=workload_info,
+                    invocation_info=invocation_info,
                     tracer_args=tracer_args,
                 )
                 # Ensure that groqit() doesn't interfere with our execution count
