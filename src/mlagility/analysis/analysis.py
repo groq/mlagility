@@ -473,7 +473,7 @@ def explore_frame(
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
                     hash=workload_hash,
                     is_target=workload_hash in tracer_args.targets
-                    or tracer_args.targets == [],
+                    or len(tracer_args.targets) == 0,
                     input_shapes=input_shapes,
                     parent_hash=parent_workload_hash,
                 )

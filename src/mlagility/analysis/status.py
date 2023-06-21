@@ -121,7 +121,7 @@ def print_workload(
 
     if model_info.depth == 0 and len(model_info.workloads) > 1:
         printing.logn(
-            f"\n{ident}\tWorkload {workload_idx+1} (executed {workload.executed}x{exec_time})",
+            f"\n{ident}\twith input shape {workload_idx+1} (executed {workload.executed}x{exec_time})",
             c=printing.Colors.OKGREEN,
         )
 
