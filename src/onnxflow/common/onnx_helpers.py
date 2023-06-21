@@ -130,3 +130,7 @@ def dummy_inputs(onnx_file: str) -> dict:
         datatype = dtype_ort2str(dtype_str.group(1))
         input_feed[stat[0]] = np.random.rand(*stat[1]).astype(datatype)
     return input_feed
+
+
+def get_opset(model: onnx.ModelProto) -> int:
+    return getattr(model.opset_import[0], "version", None)

@@ -3,15 +3,16 @@ from collections.abc import Collection
 import sys
 import os
 import torch
+import onnx
 import onnxflow.common.build as build
 import onnxflow.common.cache as cache
 import onnxflow.common.exceptions as exp
 import onnxflow.common.printing as printing
 import onnxflow.common.tf_helpers as tf_helpers
+import onnxflow.common.onnx_helpers as onnx_helpers
 import onnxflow.justbuildit.export as export
 import onnxflow.justbuildit.stage as stage
 import onnxflow.justbuildit.hummingbird as hummingbird
-import onnxflow.common.onnx_helpers as onnx_helpers
 from onnxflow.version import __version__ as onnxflow_version
 
 polish_onnx_sequence = stage.Sequence(
@@ -115,6 +116,7 @@ default_assembler_flags = [
 
 
 def lock_config(
+    model: build.UnionValidModelInstanceTypes,
     build_name: Optional[str] = None,
     sequence: stage.Sequence = None,
     onnx_opset: int = build.DEFAULT_ONNX_OPSET,
@@ -140,12 +142,31 @@ def lock_config(
     else:
         stage_names = sequence.get_names()
 
+    # Detect and validate ONNX opset
+    if isinstance(model, str) and model.endswith(".onnx"):
+        onnx_file_opset = onnx_helpers.get_opset(onnx.load(model))
+
+        if onnx_opset is not None and onnx_opset != onnx_file_opset:
+            raise ValueError(
+                "When using a '.onnx' file as input, the onnx_opset argument must "
+                "be None or exactly match the ONNX opset of the '.onnx' file. However, the "
+                f"'.onnx' file has opset {onnx_file_opset}, while onnx_opset was set "
+                f"to {onnx_opset}"
+            )
+
+        opset_to_use = onnx_file_opset
+    else:
+        if onnx_opset is None:
+            opset_to_use = build.DEFAULT_ONNX_OPSET
+        else:
+            opset_to_use = onnx_opset
+
     # Store the args that should be immutable
     config = build.Config(
         build_name=build_name,
         auto_name=auto_name,
         sequence=stage_names,
-        onnx_opset=onnx_opset,
+        onnx_opset=opset_to_use,
     )
 
     return config

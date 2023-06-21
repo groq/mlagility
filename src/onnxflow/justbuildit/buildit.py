@@ -17,7 +17,7 @@ def build_model(
     rebuild: Optional[str] = None,
     sequence: Optional[List[stage.Stage]] = None,
     quantization_samples: Collection = None,
-    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
+    onnx_opset: Optional[int] = None,
     export_only: bool = False,
 ) -> omodel.BaseModel:
 
@@ -62,6 +62,7 @@ def build_model(
     # Validate and lock in the config (user arguments that
     # configure the build) that will be used by the rest of the toolchain
     config = ignition.lock_config(
+        model=model,
         build_name=build_name,
         sequence=sequence,
         onnx_opset=onnx_opset,
