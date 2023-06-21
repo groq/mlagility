@@ -13,7 +13,6 @@ import onnxflow.common.onnx_helpers as onnx_helpers
 import onnxflow.justbuildit.export as export
 import onnxflow.justbuildit.stage as stage
 import onnxflow.justbuildit.hummingbird as hummingbird
-import onnxflow.common.onnx_helpers as onnx_helpers
 from onnxflow.version import __version__ as onnxflow_version
 
 polish_onnx_sequence = stage.Sequence(
