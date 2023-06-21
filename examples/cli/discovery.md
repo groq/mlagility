@@ -1,24 +1,24 @@
-# Guiding Workload Discovery
+# Guiding Model Discovery
 
-This chapter of the `benchit` CLI tutorial is focused on how to guide the tool as it discovers workloads. You will learn things such as:
-- [How to run workload discovery, without spending time on builds or benchmarking](#analyze-only)
-- [How to benchmark all the workloads in all the scripts in a directory](#benchmark-multiple-scripts)
-- [How to analyze the building blocks of a workload](#maximum-analysis-depth)
-- [How to filter which workloads are passed to the build and benchmark operations](#filtering-workload-hashes)
+This chapter of the `benchit` CLI tutorial is focused on how to guide the tool as it discovers models. You will learn things such as:
+- [How to run model discovery, without spending time on builds or benchmarking](#analyze-only)
+- [How to benchmark all the models in all the scripts in a directory](#benchmark-multiple-scripts)
+- [How to analyze the building blocks of a model](#maximum-analysis-depth)
+- [How to filter which models are passed to the build and benchmark operations](#filtering-model-hashes)
 
 The tutorial chapters are:
 1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
-1. Guiding Workload Discovery (this document): `benchit` arguments that customize the workload discovery process to help streamline your workflow.
+1. Guiding Model Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
 
-# Workload Discovery Tutorials
+# Model Discovery Tutorials
 
 All of the tutorials assume that your current working directory is in the same location as this readme file (`examples/cli`).
 
 ## Analyze Only
 
-`benchit` provides the `--analyze-only` argument for when you want to analyze the workloads in a script, without actually building or benchmarking them.
+`benchit` provides the `--analyze-only` argument for when you want to analyze the models in a script, without actually building or benchmarking them.
 
 You can try it out with this command:
 
@@ -29,7 +29,7 @@ benchit benchmark scripts/hello_world.py --analyze-only
 Which gives a result like:
 
 ```
-Workloads discovered during profiling:
+Models discovered during profiling:
 
 hello_world.py:
         pytorch_model (executed 1x - 0.00s)
@@ -44,13 +44,13 @@ pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<
 Woohoo! The 'benchmark' command is complete.
 ```
 
-You can see that the workload is discovered, and some stats are printed, but no build or benchmark took place.
+You can see that the model is discovered, and some stats are printed, but no build or benchmark took place.
 
 > See the [Analyze Only documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#analyze-only) for more details.
 
 ## Benchmark Multiple Scripts
 
-If you want to benchmark an entire corpus of models, but you don't want to call `benchit` individually on each python file you may provide more than one python file to benchit at a time.
+If you want to benchmark an entire corpus of models, but you don't want to call `benchit` individually on each model you may provide more than one python file to benchit at a time.
 
 For example, the command:
 
@@ -64,11 +64,11 @@ or the command
 benchit scripts/*.py
 ```
 
-Will iterate over every workload in every script in the `scripts` directory, producing a result like this:
+Will iterate over every model in every script in the `scripts` directory, producing a result like this:
 
 ```
 
-Workloads discovered during profiling:
+Models discovered during profiling:
 
 hello_world.py:
         pytorch_model (executed 1x)
@@ -77,7 +77,7 @@ hello_world.py:
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/hello_world.py, line 29
                 Parameters:     55 (<0.1 MB)
                 Hash:           479b1332
-                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     657792.2        inferences per second (IPS)
 
@@ -88,7 +88,7 @@ two_models.py:
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/two_models.py, line 40
                 Parameters:     510 (<0.1 MB)
                 Hash:           215ca1e3
-                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     509528.6        inferences per second (IPS)
 
@@ -99,7 +99,7 @@ max_depth.py:
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/max_depth.py, line 41
                 Parameters:     85 (<0.1 MB)
                 Hash:           80b93950
-                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     693955.3        inferences per second (IPS)
 
@@ -135,7 +135,7 @@ benchit benchmark scripts/max_depth.py --max-depth 1
 You get a result like:
 
 ```
-Workloads discovered during profiling:
+Models discovered during profiling:
 
 max_depth.py:
         pytorch_model (executed 1x)
@@ -144,7 +144,7 @@ max_depth.py:
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/max_depth.py, line 41
                 Parameters:     85 (<0.1 MB)
                 Hash:           80b93950
-                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     533884.4        inferences per second (IPS)
 
@@ -154,7 +154,7 @@ max_depth.py:
                                 Class:          Linear (<class 'torch.nn.modules.linear.Linear'>)
                                 Parameters:     55 (<0.1 MB)
                                 Hash:           6d5eb4ee
-                                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                                 Mean Latency:   0.000   milliseconds (ms)
                                                 Throughput:     809701.4        inferences per second (IPS)
 
@@ -163,7 +163,7 @@ max_depth.py:
                                 Class:          Linear (<class 'torch.nn.modules.linear.Linear'>)
                                 Parameters:     30 (<0.1 MB)
                                 Hash:           d4b2ffa7
-                                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                                 Mean Latency:   0.000   milliseconds (ms)
                                                 Throughput:     677945.2        inferences per second (IPS)
 ```
@@ -174,22 +174,22 @@ You can see that the two instances of `torch.nn.Linear`, `fc` and `fc2`, are ben
 
 
 
-## Filtering Workload Hashes
+## Filtering Model Hashes
 
-When you ran the example from the [Multiple Workloads per Script](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-workloads-per-script) tutorial, you saw that `benchit` discovered, built, and benchmarked two workloads. What if you only wanted to build and benchmark one of the workloads?
+When you ran the example from the [Multiple Models per Script](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-models-per-script) tutorial, you saw that `benchit` discovered, built, and benchmarked two models. What if you only wanted to build and benchmark one of the models?
 
-You can leverage the workload hashes feature of `benchit` to filter which workloads are acted on. You can see in the result from [Multiple Workloads per Script](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-workloads-per-script) that the two workloads, `pytorch_model` and `another_pytorch_model`, have hashes `f93db89f` and `c69b7dea`, respectively.
+You can leverage the model hashes feature of `benchit` to filter which models are acted on. You can see in the result from [Multiple Models per Script](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-models-per-script) that the two models, `pytorch_model` and `another_pytorch_model`, have hashes `479b1332` and `215ca1e3`, respectively.
 
-If you wanted to only build and benchmark `another_pytorch_model`, you could use this command, which filters `two_models.py` with the hash `c69b7dea`:
+If you wanted to only build and benchmark `another_pytorch_model`, you could use this command, which filters `two_models.py` with the hash `215ca1e3`:
 
 ```
-benchit benchmark scripts/two_models.py::c69b7dea
+benchit benchmark scripts/two_models.py::215ca1e3
 ```
 
 That would produce a result like:
 
 ```
-Workloads discovered during profiling:
+Models discovered during profiling:
 
 two_models.py:
         pytorch_model (executed 1x)
@@ -197,15 +197,15 @@ two_models.py:
                 Class:          SmallModel (<class 'two_models.SmallModel'>)
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/two_models.py, line 32
                 Parameters:     55 (<0.1 MB)
-                Hash:           f93db89f
+                Hash:           479b1332
 
         another_pytorch_model (executed 1x)
                 Model Type:     Pytorch (torch.nn.Module)
                 Class:          SmallModel (<class 'two_models.SmallModel'>)
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/two_models.py, line 40
                 Parameters:     510 (<0.1 MB)
-                Hash:           c69b7dea
-                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Hash:           215ca1e3
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     499272.2        inferences per second (IPS)
 
@@ -216,15 +216,15 @@ more_pytorch_outputs: tensor([-0.1198, -0.5344, -0.1920, -0.1565,  0.2279,  0.69
 Woohoo! The 'benchmark' command is complete.
 ```
 
-You can see that both workloads are discovered, but only `another_pytorch_model` was built and benchmarked.
+You can see that both models are discovered, but only `another_pytorch_model` was built and benchmarked.
 
 > See the [Input Script documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#input-script) for more details.
 
-## Filtering Script Labels
+## Filtering Model Labels
 
-You can also leverage the labels feature of `benchit` to filter which scripts are acted on. Labels are pragmas added by the user to the first line of a `.py` file to list some of the attributes of that given script. `hello_world.py`, for example has the label `test_group::a`, while `two_models.py` and `max_depth.py` have the label `test_group::b`.
+You can also leverage the labels feature of `benchit` to filter which models are acted on. Labels are pragmas added by the user to the first line of a `.py` file to list some of the attributes of that given script. `hello_world.py`, for example has the label `test_group::a`, while `two_models.py` and `max_depth.py` have the label `test_group::b`.
 
-If you wanted to only build and benchmark scripts that have the label `test_group::a`, you could use the command:
+If you wanted to only build and benchmark models that have the label `test_group::a`, you could use the command:
 
 ```
 benchit scripts/*.py --labels test_group::a
@@ -233,7 +233,7 @@ benchit scripts/*.py --labels test_group::a
 That would produce a result like:
 
 ```
-Workloads discovered during profiling:
+Models discovered during profiling:
 
 hello_world.py:
         pytorch_model (executed 1x)
@@ -242,7 +242,7 @@ hello_world.py:
                 Location:       /net/home/dhnoronha/mlagility/examples/cli/scripts/hello_world.py, line 30
                 Parameters:     55 (<0.1 MB)
                 Hash:           479b1332
-                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     490444.1        inferences per second (IPS)
 
@@ -255,6 +255,6 @@ Woohoo! The 'benchmark' command is complete.
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
 1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
-1. Guiding Workload Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
+1. Guiding Model Discovery (this document): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.

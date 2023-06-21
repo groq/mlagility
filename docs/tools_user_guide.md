@@ -51,9 +51,9 @@ Example Output:
 Where `your_script.py` is a Python script that instantiates and executes a PyTorch model named `YourModel`. The benchmarking results are also saved to a `build directory` in the `MLAgility cache` (see [Build](#build)).
 
 The `benchit` CLI performs the following steps:
-1. [Analysis](#analysis): profile the Python script to identify the PyTorch workloads within
-2. [Build](#build): call the `benchmark_script()` [API](#the-mlagility-api) to prepare each workload for benchmarking
-3. [Benchmark](#benchmark): call the `benchmark_workload()` [API](#the-mlagility-api) on each workload to gather performance statistics
+1. [Analysis](#analysis): profile the Python script to identify the PyTorch models within
+2. [Build](#build): call the `benchmark_script()` [API](#the-mlagility-api) to prepare each model for benchmarking
+3. [Benchmark](#benchmark): call the `benchmark_model()` [API](#the-mlagility-api) on each model to gather performance statistics
 
 _Note_: The benchmarking methodology is defined [here](#benchmark). If you are looking for more detailed instructions on how to install mlagility, you can find that [here](https://github.com/groq/mlagility/blob/main/docs/install.md).
 
@@ -65,19 +65,19 @@ _Note_: The benchmarking methodology is defined [here](#benchmark). If you are l
 
 Most of the functionality provided by the `benchit` CLI is also available in the MLAgility API:
 - `mlagility.benchmark_script()` provides the same benchmarking functionality as the `benchit` CLI: it takes a script and target device, and returns performance results.
-- `mlagility.benchmark_workload()` provides a subset of this functionality: it takes a model and its inputs, and returns performance results.
-  - The main difference is that `benchmark_workload()` does not include the [Analysis](#analysis) feature, and `benchmark_script()` does.
+- `mlagility.benchmark_model()` provides a subset of this functionality: it takes a model and its inputs, and returns performance results.
+  - The main difference is that `benchmark_model()` does not include the [Analysis](#analysis) feature, and `benchmark_script()` does.
 
-Generally speaking, the `benchit` CLI is a command line interface for the `benchmark_script()` API, which internally calls `benchmark_workload()`. You can read more about this code organization [here](https://github.com/groq/mlagility/blob/main/docs/code.md).
+Generally speaking, the `benchit` CLI is a command line interface for the `benchmark_script()` API, which internally calls `benchmark_model()`. You can read more about this code organization [here](https://github.com/groq/mlagility/blob/main/docs/code.md).
 
 For example, the following script:
 
 ```python
-from mlagility import benchmark_workload
+from mlagility import benchmark_model
 
 model = YourModel()
 results = model(**inputs)
-perf = benchmark_workload(model, inputs)
+perf = benchmark_model(model, inputs)
 ```
 
 Will print an output like this:
@@ -88,7 +88,7 @@ Will print an output like this:
 > throughput: 21784.8 ips
 ```
 
-`benchmark_workload()` returns a `MeasuredPerformance` object that includes members:
+`benchmark_model()` returns a `MeasuredPerformance` object that includes members:
  - `latency_units`: unit of time used for measuring latency, which is set to `milliseconds (ms)`.
  - `mean_latency`: average benchmarking latency, measured in `latency_units`.
  - `throughput_units`: unit used for measuring throughput, which is set to `inferences per second (IPS)`.
@@ -106,40 +106,34 @@ A **model** is a PyTorch (torch.nn.Module) instance that has been instantiated i
 
 - Examples: BERT-Base, ResNet-50, etc.
 
-## Workload
-
-A **workload** is a model executed with inputs of a given shape. 
-
-- Example: BERT-Base executed with 'attention_mask' and 'input_ids' of shape (1, 128).
-
 ## Device
 
-A **device** is a piece of hardware capable of running a workload.
+A **device** is a piece of hardware capable of running a model.
 
 - Examples: Nvidia A100 40GB, Intel Xeon Platinum 8380, Groq GroqChip1
 
 ## Runtime
 
-A **runtime** is a piece of software that executes a workload on a device.
+A **runtime** is a piece of software that executes a model on a device.
 
 - Different runtimes can produce different performance results on the same device because:
-  - Runtimes often optimize the workload prior to execution.
+  - Runtimes often optimize the model prior to execution.
   - The runtime is responsible for orchestrating data movement, device invocation, etc.
 - Examples: ONNX Runtime, TensorRT, PyTorch Eager Execution, etc.
 
 ## Analysis
 
-**Analysis** is the process by which `benchmark_script()` inspects a Python script and identifies the PyTorch workloads within.
+**Analysis** is the process by which `benchmark_script()` inspects a Python script and identifies the PyTorch models within.
 
-`benchmark_script()` performs analysis by running and profiling your script. When a workload (see [Workload](#workload) is encountered, it is inspected to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchmark_workload()` API for benchmarking.
+`benchmark_script()` performs analysis by running and profiling your script. When a model object (see [Model](#model) is encountered, it is inspected to gather statistics (such as the number of parameters in the model) and/or pass it to the `benchmark_model()` API for benchmarking.
 
 > _Note_: the `benchit` CLI and `benchmark_script()` API both run your entire script. Please ensure that your script is safe to run, especially if you got it from the internet.
 
-> See the [Multiple Workloads per Script tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-workloads-per-script) for a detailed example of how analysis can discover multiple models from a single script.
+> See the [Multiple Models per Script tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#multiple-models-per-script) for a detailed example of how analysis can discover multiple models from a single script.
 
-## Workload Hashes
+## Model Hashes
 
-Each `workload` in a `script` is identified by a unique `hash`. The `analysis` phase of `benchmark_script()` will display the `hash` for each worload. The `build` phase will save exported workloads to into the `cache` according to the naming scheme `{script_name}_{hash}`.
+Each `model` in a `script` is identified by a unique `hash`. The `analysis` phase of `benchmark_script()` will display the `hash` for each model. The `build` phase will save exported models to into the `cache` according to the naming scheme `{script_name}_{hash}`.
 
 For example:
 
@@ -169,40 +163,40 @@ Once a script has been benchmarked, all labels that correspond to that script wi
 
 ## Build
 
-**Build** is the process by which the `benchmark_workload()` API consumes a [model](#model) and a corresponding set of `inputs` and produces ONNX files, Groq executables, and other artifacts needed for benchmarking.
+**Build** is the process by which the `benchmark_model()` API consumes a [model](#model) and produces ONNX files, Groq executables, and other artifacts needed for benchmarking.
 
 We refer to this collection of artifacts as the `build directory` and store each build in the MLAgility `cache` for later use.
 
 We leverage ONNX files because of their broad compatibility with model frameworks (PyTorch, Keras, etc.), software (ONNX Runtime, TensorRT, Groq Compiler, etc.), and devices (CPUs, GPUs, GroqChip processors, etc.). You can learn more about ONNX [here](https://onnx.ai/).
 
-The build functionality of `benchmark_workload()` includes the following steps:
-1. Take a `model` object and a corresponding set of `inputs`* (which we call a [workload](#workload)).
+The build functionality of `benchmark_model()` includes the following steps:
+1. Take a `model` object and a corresponding set of `inputs`*.
 1. Check the cache for a successful build we can load. If we get a cache hit, the build is done. If no build is found, or the build in the cache is stale**, continue.
 1. Pass the `model` and `inputs` to the ONNX exporter corresponding to the `model`'s framework (e.g., PyTorch models use `torch.onnx.export()`).
-1. Use [ONNX Runtime](https://github.com/microsoft/onnxruntime) and [ONNX ML tools](https://github.com/onnx/onnxmltools) to optimize the workload and convert it to float16, respectively.
+1. Use [ONNX Runtime](https://github.com/microsoft/onnxruntime) and [ONNX ML tools](https://github.com/onnx/onnxmltools) to optimize the model and convert it to float16, respectively.
 1. [If the build's device type is `groq`] Pass the optimized float16 ONNX file to Groq Compiler and Assembler to produce a Groq executable.
 1. Save the successful build to the cache for later use.
 
-> *_Note_: Each `build` corresponds to a set of static input shapes. `inputs` are passed into the `benchmark_workload()` API to provide those shapes.
+> *_Note_: Each `build` corresponds to a set of static input shapes. `inputs` are passed into the `benchmark_model()` API to provide those shapes.
 
 > **_Note_: A cached build can be stale because of any of the following changes since the last build:
 > * The model changed
 > * The shape of the inputs changed
-> * The arguments to `benchmark_workload()` changed
+> * The arguments to `benchmark_model()` changed
 > * MLAgility was updated to a new, incompatible version
 
 ## Benchmark
 
-*Benchmark* is the process by which the `benchmark_workload()` API collects performance statistics about a [workload](#workload). Specifically, `benchmark_workload()` takes a [build](#build) of a workload and executes it on a target device using target runtime software (see [Devices and Runtimes](#devices-and-runtimes)).
+*Benchmark* is the process by which the `benchmark_model()` API collects performance statistics about a [model](#model). Specifically, `benchmark_model()` takes a [build](#build) of a model and executes it on a target device using target runtime software (see [Devices and Runtimes](#devices-and-runtimes)).
 
-By default, `benchmark_workload()` will run the workload 100 times to collect the following statistics:
+By default, `benchmark_model()` will run the model 100 times to collect the following statistics:
 1. Mean Latency, in milliseconds (ms): the average time it takes the runtime/device combination to execute the model/inputs combination once. This includes the time spent invoking the device and transferring the model's inputs and outputs between host memory and the device (when applicable).
 1. Throughput, in inferences per second (IPS):  the number of times the model/inputs combination can be executed on the runtime/device combination per second.
-    > - _Note_: `benchmark_workload()` is not aware of whether `inputs` is a single input or a batch of inputs. If your `inputs` is actually a batch of inputs, you should multiply `benchmark_workload()`'s reported IPS by the batch size.
+    > - _Note_: `benchmark_model()` is not aware of whether `inputs` is a single input or a batch of inputs. If your `inputs` is actually a batch of inputs, you should multiply `benchmark_model()`'s reported IPS by the batch size.
 
 # Devices and Runtimes
 
-MLAgility can be used to benchmark a workload across a variety of runtimes and devices, as long as the device is available and the device/runtime combination is supported by MLAgility.
+MLAgility can be used to benchmark a model across a variety of runtimes and devices, as long as the device is available and the device/runtime combination is supported by MLAgility.
 
 ## Available Devices
 
@@ -214,7 +208,7 @@ If you are using a remote machine, it must:
 - include the target device
 - have `miniconda`, `python>=3.8`, and `docker>=20.10` installed
 
-When you call `benchit` CLI or `benchmark_workload()`, the following actions are performed on your behalf:
+When you call `benchit` CLI or `benchmark_model()`, the following actions are performed on your behalf:
 1. Perform a `build`, which exports all models from the script to ONNX and prepares for benchmarking.
     - If the device type selected is `groq`, this step also compiles the ONNX file into a Groq executable.
 1. [Remote mode only] `ssh` into the remote machine and transfer the `build`.
@@ -232,7 +226,7 @@ Specify a device type that will be used for benchmarking.
 
 Usage:
 - `benchit benchmark INPUT_FILES --device TYPE`
-  - Benchmark the workload(s) in `INPUT_FILES` on a locally installed device of type `TYPE` (eg, a locally installed Nvidia device).
+  - Benchmark the model(s) in `INPUT_FILES` on a locally installed device of type `TYPE` (eg, a locally installed Nvidia device).
 
 Valid values of `TYPE` include:
 - `x86` (default): Intel and AMD x86 CPUs.
@@ -245,7 +239,7 @@ Valid values of `TYPE` include:
 
 Also available as API arguments: 
 - `benchmark_script(device=...)`
-- `benchmark_workload(device=...)`.
+- `benchmark_model(device=...)`.
 
 > For a detailed example, see the [CLI Nvidia tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md#nvidia-benchmarking).
 
@@ -269,7 +263,7 @@ Valid values:
 
 Also available as API arguments:
 - `benchmark_script(backend=...)`
-- `benchmark_workload(backend=...)`
+- `benchmark_model(backend=...)`
 
 ### Runtimes
 
@@ -290,7 +284,7 @@ Each device type has its own default runtime, as indicated below.
 
 This feature is also be available as an API argument: 
 - `benchmark_script(runtimes=[...])`
-- `benchmark_workload(runtime=...)`
+- `benchmark_model(runtime=...)`
 
 > _Note_: `torch-eager` and `torch-compiled` are not available whe using the `remote` backend.
 
@@ -303,7 +297,7 @@ The default usage of `benchit` is to directly provide it with a python script, f
 _Note_: Some of these tasks have to do with the MLAgility `cache`, which stores the `build directories` (see [Build](#build)).
 
 The commands are:
-- [`benchmark`](#benchmark-command) (default command): benchmark the workload(s) in one or more scripts
+- [`benchmark`](#benchmark-command) (default command): benchmark the model(s) in one or more scripts
 - [`cache list`](#list-command): list the available builds in the cache
 - [`cache print`](#print-command): print the [state](https://github.com/groq/groqflow/blob/main/docs/user_guide.md#stateyaml-file) of a build from the cache
 - [`cache delete`](#delete-command): delete one or more builds from the cache
@@ -334,27 +328,27 @@ Examples:
 - `benchit *.py`
   - Benchmark all scripts which can be found at the current working directory.
 - `benchit models/*/*.py`
-  - Benchmark the entire corpora of MLAgility.
+  - Benchmark the entire corpora of MLAgility models.
 - `benchit *.onnx`
   - Benchmark all ONNX files which can be found at the current working directory.
 
 > See the [Benchmark Multiple Scripts tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#benchmark-multiple-scripts) for a detailed example.
 
-You can also leverage workload hashes (see [Workload Hashes](#workload-hashes)) to filter which workloads in a script will be acted on, in the following manner:
-  - `benchit example.py::hash_0` will only benchmark the workload corresponding to `hash_0`.
-  - You can also supply multiple hashes, for example `benchit example.py::hash_0,hash_1` will benchmark the workloads corresponding to both `hash_0` and `hash_1`.
+You can also leverage model hashes (see [Model Hashes](#model-hashes)) to filter which models in a script will be acted on, in the following manner:
+  - `benchit example.py::hash_0` will only benchmark the model corresponding to `hash_0`.
+  - You can also supply multiple hashes, for example `benchit example.py::hash_0,hash_1` will benchmark the models corresponding to both `hash_0` and `hash_1`.
 
-> _Note_: Using bash regular expressions and filtering workload by hashes are mutually exclusive. To filter workloads by hashes, provide the full path of the Python script rather than a regular expression.
+> _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 
-> See the [Filtering Workload Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-workload-hashes) for a detailed example.
+> See the [Filtering Model Hashes tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md#filtering-model-hashes) for a detailed example.
 
-Additionally, you can leverage labels (see [Labels](#labels)) to filter which workloads in a script will be acted on, in the following manner:
+Additionally, you can leverage labels (see [Labels](#labels)) to filter which models in a script will be acted on, in the following manner:
   - `benchit *.py --labels test_group::a` will only benchmark the scripts labels with `test_group::a`.
   - You can also supply multiple labels, for example `benchit *.py --labels test_group::a domain::nlp` only benchmark scripts that have both `test_group::a`, and `domain::nlp` labels.
 
-> _Note_: Using bash regular expressions and filtering workload by hashes are mutually exclusive. To filter workloads by hashes, provide the full path of the Python script rather than a regular expression.
+> _Note_: Using bash regular expressions and filtering model by hashes are mutually exclusive. To filter models by hashes, provide the full path of the Python script rather than a regular expression.
 
-> _Note_: ONNX file input currently supports only workloads of size less than 2 GB. ONNX files passed directly into `benchit *.onnx` are benchmarked as-is without applying any additional build stages.
+> _Note_: ONNX file input currently supports only models of size less than 2 GB. ONNX files passed directly into `benchit *.onnx` are benchmarked as-is without applying any additional build stages.
 
 ### Use Slurm
 
@@ -377,7 +371,7 @@ Available as an API argument:
 
 ### Process Isolation
 
-Evaluate each `benchit` input in its own isolated subprocess. This option allows the main process to continue on to the next input if the current input fails for any reason (e.g., a bug in the input script, the operating system running out of memory, incompatibility between a workload and the selected benchmarking runtime, etc.). 
+Evaluate each `benchit` input in its own isolated subprocess. This option allows the main process to continue on to the next input if the current input fails for any reason (e.g., a bug in the input script, the operating system running out of memory, incompatibility between a model and the selected benchmarking runtime, etc.). 
 
 Usage:
 - `benchit benchmark INPUT_FILES --process-isolation`
@@ -397,7 +391,7 @@ Also available as an API argument:
 
 Also available as API arguments:
 - `benchmark_script(cache_dir=...)`
-- `benchmark_workload(cache_dir=...)`
+- `benchmark_model(cache_dir=...)`
 
 > See the [Cache Directory tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md#cache-directory) for a detailed example.
 
@@ -407,9 +401,9 @@ Also available as API arguments:
 
 Also available as API arguments: 
 - `benchmark_script(lean_cache=True/False, ...)` (default False)
-- `benchmark_workload(lean_cache=True/False, ...)` (default False)
+- `benchmark_model(lean_cache=True/False, ...)` (default False)
 
-> _Note_: useful for benchmarking many workloads, since the `build` artifacts from the workloads can take up a significant amount of hard drive space.
+> _Note_: useful for benchmarking many models, since the `build` artifacts from the models can take up a significant amount of hard drive space.
 
 > See the [Lean Cache tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md#lean-cache) for a detailed example.
 
@@ -418,19 +412,19 @@ Also available as API arguments:
 `--rebuild REBUILD` Sets a cache policy that decides whether to load or rebuild a cached build.
 
 Takes one of the following values:
-  - *Default*: `"if_needed"` will use a cached workload if available, build one if it is not available,and rebuild any stale builds.
-  - Set `"always"` to force `benchit` to always rebuild your workload, regardless of whether it is available in the cache or not.
-  - Set `"never"` to make sure `benchit` never rebuilds your workload, even if it is stale. `benchit`will attempt to load any previously built workload in the cache, however there is no guarantee it will be functional or correct.
+  - *Default*: `"if_needed"` will use a cached model if available, build one if it is not available,and rebuild any stale builds.
+  - Set `"always"` to force `benchit` to always rebuild your model, regardless of whether it is available in the cache or not.
+  - Set `"never"` to make sure `benchit` never rebuilds your model, even if it is stale. `benchit`will attempt to load any previously built model in the cache, however there is no guarantee it will be functional or correct.
 
 Also available as API arguments: 
 - `benchmark_script(rebuild=...)`
-- `benchmark_workload(rebuild=...)`
+- `benchmark_model(rebuild=...)`
 
 > See the [GroqFlow rebuild examples](https://github.com/groq/groqflow/tree/main/examples) to learn more.
 
 ### Sequence File
 
-Replaces the default build sequence in `benchmark_workload()` with a custom build sequence, defined in a Python script.
+Replaces the default build sequence in `benchmark_model()` with a custom build sequence, defined in a Python script.
 
 Usage:
 - `benchit benchmark INPUT_FILES --sequence-file FILE`
@@ -439,9 +433,9 @@ This script must define a function, `get_sequence()`, that returns an instance o
 
 Also available as API arguments:
 - `benchmark_script(sequence=...)`
-- `benchmark_workload(sequence=...)`
+- `benchmark_model(sequence=...)`
 
-> _Note_: the `sequence` argument to `benchmark_script()` can be either a sequence file or a `Sequence` instance. The `sequence` argument to `benchmark_workload()` must be a `Sequence` instance.
+> _Note_: the `sequence` argument to `benchmark_script()` can be either a sequence file or a `Sequence` instance. The `sequence` argument to `benchmark_model()` must be a `Sequence` instance.
 
 > See the [Sequence File tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/build.md#sequence-file) for a detailed example.
 
@@ -460,7 +454,7 @@ Also available as an API argument:
 
 ### Maximum Analysis Depth
 
-Depth of sub-workloads to inspect within the script. Default value is 0, indicating to only analyze workloads at the top level of the script. Depth of 1 would indicate to analyze the first level of sub-workloads within the top-level workloads.
+Depth of sub-models to inspect within the script. Default value is 0, indicating to only analyze models at the top level of the script. Depth of 1 would indicate to analyze the first level of sub-models within the top-level models.
 
 Usage:
 - `benchit benchmark INPUT_FILES --max-depth DEPTH`
@@ -481,17 +475,17 @@ Usage:
 
 Also available as API arguments:
 - `benchmark_script(onnx_opset=...)`
-- `benchmark_workloads(onnx_opset=...)`
+- `benchmark_models(onnx_opset=...)`
 
 > _Note_: ONNX opset can also be set by an environment variable. The --onnx-opset argument takes precedence over the environment variable. See [MLAGILITY_ONNX_OPSET](#set-the-onnx-opset).
 
 ### Analyze Only
 
-Instruct `benchit` or `benchmark_workload()` to only run the [Analysis](#analysis) phase of the `benchmark` command.
+Instruct `benchit` or `benchmark_model()` to only run the [Analysis](#analysis) phase of the `benchmark` command.
 
 Usage:
 - `benchit benchmark INPUT_FILES --analyze-only`
-  - This discovers workloads within the input script and prints information about them, but does not perform any build or benchmarking.
+  - This discovers models within the input script and prints information about them, but does not perform any build or benchmarking.
 
 > _Note_: any build- or benchmark-specific options will be ignored, such as `--backend`, `--device`, `--groqview`, etc.
 
@@ -502,33 +496,33 @@ Also available as an API argument:
 
 ### Build Only
 
-Instruct `benchit`, `benchmark_script()`, or `benchmark_workload()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
+Instruct `benchit`, `benchmark_script()`, or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command.
 
 Usage:
 - `benchit benchmark INPUT_FILES --build-only`
-  - This builds the workloads within the input script, however does not run any benchmark.
+  - This builds the models within the input script, however does not run any benchmark.
 
 > _Note_: any benchmark-specific options will be ignored, such as `--backend`.
 
 Also available as API arguments:
 - `benchmark_script(build_only=True/False)` (default False)
-- `benchmark_workload(build_only=True/False)` (default False)
+- `benchmark_model(build_only=True/False)` (default False)
 
 > See the [Build Only tutorial](https://github.com/groq/mlagility/blob/main/examples/cli/build.md#build-only) for a detailed example.
 
 ### Export Only
 
-Instruct `benchit`, `benchmark_script()`, or `benchmark_workload()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command, and to stop the Build phase after exporting the ONNX file. Similar to [Build Only](#build-only), except that no optimization Stages will be applied to the ONNX file.
+Instruct `benchit`, `benchmark_script()`, or `benchmark_model()` to only run the [Analysis](#analysis) and [Build](#build) phases of the `benchmark` command, and to stop the Build phase after exporting the ONNX file. Similar to [Build Only](#build-only), except that no optimization Stages will be applied to the ONNX file.
 
 Usage:
 - `benchit benchmark INPUT_FILES --export-only`
-  - This exports ONNX files for the workloads within the input script, however does not optimize those ONNX files nor run any benchmark.
+  - This exports ONNX files for the models within the input script, however does not optimize those ONNX files nor run any benchmark.
 
 > _Note_: any benchmark-specific options will be ignored, such as `--backend`.
 
 Also available as API arguments:
 - `benchmark_script(export_only=True/False)` (default False)
-- `benchmark_workload(export_only=True/False)` (default False)
+- `benchmark_model(export_only=True/False)` (default False)
 
 ### Resume
 
@@ -538,7 +532,7 @@ For example:
 - `benchit benchmark INPUT_FILES` will benchmark everything in `INPUT_FILES`, regardless of whether benchmarking those scripts has been attempted previously.
 - `benchit benchmark INPUT_FILES --resume` will benchmark everything `INPUT_FILES` that has not been previously attempted.
 
-The `--resume` behavior is useful for when you are benchmarking a large corpus of workloads, and one of the workloads crashes your run. If you repeat the same command, but with the `--resume` argument, then the new run will pick up where the last run left off, including skipping over any input scripts that crashed previously.
+The `--resume` behavior is useful for when you are benchmarking a large corpus of models, and one of the models crashes your run. If you repeat the same command, but with the `--resume` argument, then the new run will pick up where the last run left off, including skipping over any input scripts that crashed previously.
 
 > _Note_: if `--resume` is skipping over any input scripts that you *do* want to evaluate, you have two options:
 > - Manually build the input script with `benchit benchmark INPUT_SCRIPT` without setting `--resume`
@@ -551,13 +545,13 @@ Also available as an API argument:
 
 The following options are specific to Groq builds and benchmarks, and are passed into the [GroqFlow build tool](https://github.com/groq/groqflow). Learn more about them in the [GroqFlow user guide](https://github.com/groq/groqflow/blob/main/docs/user_guide.md).
 - `--groq-compiler-flags COMPILER_FLAGS [COMPILER_FLAGS ...]` Sets the groqit(compiler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default compiler flags)
-  - Also available as API arguments: `benchmark_script(groq_compiler_flags=...)`, `benchmark_workload(groq_compiler_flags=...)`.
+  - Also available as API arguments: `benchmark_script(groq_compiler_flags=...)`, `benchmark_model(groq_compiler_flags=...)`.
 - `--groq-assembler-flags ASSEMBLER_FLAGS [ASSEMBLER_FLAGS ...]` Sets the groqit(assembler_flags=...) arg within the GroqFlow build tool (default behavior is to use groqit()'s default assembler flags)
-  - Also available as API arguments: `benchmark_script(groq_assembler_flags=...)`, `benchmark_workload(groq_assembler_flags=...)`.
+  - Also available as API arguments: `benchmark_script(groq_assembler_flags=...)`, `benchmark_model(groq_assembler_flags=...)`.
 - `--groq-num-chips NUM_CHIPS` Sets the groqit(num_chips=...) arg (default behavior is to let groqit() automatically select the number of chips)
-  - Also available as API arguments: `benchmark_script(groq_num_chips=...)`, `benchmark_workload(groq_num_chips=...)`.
+  - Also available as API arguments: `benchmark_script(groq_num_chips=...)`, `benchmark_model(groq_num_chips=...)`.
 - `--groqview` Enables GroqView for the build(s)
-  - Also available as API arguments: `benchmark_script(groqview=True/False,)`, `benchmark_workload(groqview=True/False,)`.
+  - Also available as API arguments: `benchmark_script(groqview=True/False,)`, `benchmark_model(groqview=True/False,)`.
 
 
 ## Cache Commands
@@ -658,7 +652,7 @@ export MLAGILITY_CACHE_DIR=~/a_different_cache_dir
 
 ### Show Traceback
 
-By default, `benchit` and `benchmark_script()` will display the traceback for any exceptions caught during workload build. However, you may sometimes want a cleaner output on your terminal. To accomplish this, set the `MLAGILITY_TRACEBACK` environment variable to `False`, which will catch any exceptions during workload build and benchmark and display a simple error message like `Status: Unknown benchit error: {e}`. 
+By default, `benchit` and `benchmark_script()` will display the traceback for any exceptions caught during model build. However, you may sometimes want a cleaner output on your terminal. To accomplish this, set the `MLAGILITY_TRACEBACK` environment variable to `False`, which will catch any exceptions during model build and benchmark and display a simple error message like `Status: Unknown benchit error: {e}`. 
 
 For example:
 
@@ -668,7 +662,7 @@ export MLAGILITY_TRACEBACK=False
 
 ### Preserve Terminal Outputs
 
-By default, `benchit` and `benchmark_script()` will erase the contents of the terminal in order to present a clean status update for each script and workload evaluated. 
+By default, `benchit` and `benchmark_script()` will erase the contents of the terminal in order to present a clean status update for each script and model evaluated. 
 
 However, you may want to see everything that is being printed to the terminal. You can accomplish this by setting the `MLAGILITY_DEBUG` environment variable to `True`. For example:
 
@@ -678,7 +672,7 @@ export MLAGILITY_DEBUG=True
 
 ### Set the ONNX Opset
 
-By default, `benchit`, `benchmark_script()`, and `benchmark_workload()` will use the default ONNX opset defined in `onnxflow.common.build.DEFAULT_ONNX_OPSET`. You can set a different default ONNX opset by setting the `MLAGILITY_ONNX_OPSET` environment variable.
+By default, `benchit`, `benchmark_script()`, and `benchmark_model()` will use the default ONNX opset defined in `onnxflow.common.build.DEFAULT_ONNX_OPSET`. You can set a different default ONNX opset by setting the `MLAGILITY_ONNX_OPSET` environment variable.
 
 For example:
 

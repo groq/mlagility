@@ -6,7 +6,7 @@ This chapter of the `benchit` CLI tutorial focuses on techniques to customize th
 
 The tutorial chapters are:
 1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
-1. [Guiding Workload Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the workload discovery process to help streamline your workflow.
+1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. Customizing Builds (this document): `benchit` arguments that customize build behavior to unlock new workflows.
 
@@ -16,7 +16,7 @@ All of the tutorials assume that your current working directory is in the same l
 
 ## Build Only
 
-`benchit` provides the `--build-only` argument for when you want to analyze and build the workloads in a script, without actually benchmarking them.
+`benchit` provides the `--build-only` argument for when you want to analyze and build the models in a script, without actually benchmarking them.
 
 You can try it out with this command:
 
@@ -43,7 +43,7 @@ pytorch_outputs: tensor([-0.1675,  0.1548, -0.1627,  0.0067,  0.3353], grad_fn=<
 Woohoo! The 'benchmark' command is complete.
 ```
 
-You can see that the workload is discovered and built, but no benchmark took place.
+You can see that the model is discovered and built, but no benchmark took place.
 
 > See the [Build Only documentation](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build-only) for more details.
 
@@ -51,7 +51,7 @@ You can see that the workload is discovered and built, but no benchmark took pla
 
 You can customize the behavior of the [Build](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md#build) stage of `benchit` by creating a custom `Sequence`.
 
-A `Sequence` tells the `benchmark_workload()` API within `benchit` how to `build` a model to prepare it for benchmarking.
+A `Sequence` tells the `benchmark_model()` API within `benchit` how to `build` a model to prepare it for benchmarking.
 
 The default `Sequence` for CPU and GPU benchmarking performs the following build steps:
 1. Export the model to an ONNX file
@@ -97,6 +97,6 @@ If we then repeat the `benchit cache stats hello_world_479b1332` we will see tha
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
 1. [Getting Started](https://github.com/groq/mlagility/blob/main/examples/cli/readme.md)
-1. [Guiding Workload Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the workload discovery process to help streamline your workflow.
+1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. Customizing Builds (this document): `benchit` arguments that customize build behavior to unlock new workflows.

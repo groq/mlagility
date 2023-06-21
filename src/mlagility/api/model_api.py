@@ -22,7 +22,7 @@ from mlagility.api.devices import SUPPORTED_DEVICES, BenchmarkException
 MLAGILITY_DEFAULT_REBUILD_POLICY = "if_needed"
 
 
-def benchmark_workload(
+def benchmark_model(
     model: Any,
     inputs: Dict[str, Any],
     build_name: str,

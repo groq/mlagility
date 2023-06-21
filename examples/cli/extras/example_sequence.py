@@ -1,7 +1,7 @@
 """
 This script is an example of a sequence.py file. Such a sequence.py file
 can be used to redefine the build phase of the benchit CLI, benchmark_script(),
-and benchmark_workload() to have any custom behavior.
+and benchmark_model() to have any custom behavior.
 
 In this example sequence.py file we are setting the build sequence to simply
 export from pytorch to ONNX. This differs from the default build sequence, which

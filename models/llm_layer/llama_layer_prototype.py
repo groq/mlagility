@@ -12,6 +12,10 @@ import torch
 
 def call_llama_layer(params="7B", use_cache=False):
 
+    # Use different torch seeds for KV caching vs. not, so that
+    # the models end up with different mlagility hashes
+    # Remove the if-statement when
+    # https://github.com/groq/mlagility/issues/316 is fixed
     torch.manual_seed(0)
 
     # Parsing command-line arguments

@@ -8,7 +8,7 @@ import onnxflow.justbuildit.stage as stage
 import onnxflow.common.cache as cache
 import onnxflow.justbuildit.export as export
 import onnxflow.common.build as build
-from mlagility import benchmark_workload
+from mlagility import benchmark_model
 
 
 class SmallPytorchModel(torch.nn.Module):
@@ -62,7 +62,7 @@ class Testing(unittest.TestCase):
 
     def test_001_build_pytorch_model(self):
         build_name = "build_pytorch_model"
-        benchmark_workload(
+        benchmark_model(
             pytorch_model,
             inputs,
             build_name=build_name,
@@ -104,7 +104,7 @@ class Testing(unittest.TestCase):
             ],
         )
 
-        benchmark_workload(
+        benchmark_model(
             pytorch_model,
             inputs,
             build_name=build_name,
@@ -119,7 +119,7 @@ class Testing(unittest.TestCase):
 
     def test_003_local_benchmark(self):
         build_name = "local_benchmark"
-        perf = benchmark_workload(
+        perf = benchmark_model(
             pytorch_model,
             inputs,
             device="x86",
@@ -147,7 +147,7 @@ class Testing(unittest.TestCase):
         user_opset = 15
         assert user_opset != build.DEFAULT_ONNX_OPSET
 
-        perf = benchmark_workload(
+        perf = benchmark_model(
             pytorch_model,
             inputs,
             device="x86",

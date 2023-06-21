@@ -3,7 +3,7 @@
 This directory contains documentation for the MLAgility project:
 - [code.md](https://github.com/groq/mlagility/blob/main/docs/code.md): Code organization for the benchmark and tools.
 - [install.md](https://github.com/groq/mlagility/blob/main/docs/install.md): Installation instructions for the MLAgility project.
-- [tools_user_guide.md](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md): User guide for the MLAgility benchmarking tools: `benchit` CLI, `benchmark_script()`, and `benchmark_workload()`.
+- [tools_user_guide.md](https://github.com/groq/mlagility/blob/main/docs/tools_user_guide.md): User guide for the MLAgility benchmarking tools: `benchit` CLI, `benchmark_script()`, and `benchmark_model()`.
 - [versioning.md](https://github.com/groq/mlagility/blob/main/docs/versioning.md): Defines the semantic versioning rules for the `mlagility` package.
 
 There is more useful documentation avialable in:

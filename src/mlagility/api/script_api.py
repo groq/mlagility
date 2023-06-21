@@ -11,7 +11,7 @@ import onnxflow.justbuildit.export as export
 import mlagility.cli.spawn as spawn
 import mlagility.common.filesystem as filesystem
 import mlagility.common.labels as labels_library
-from mlagility.api.model_api import benchmark_workload
+from mlagility.api.model_api import benchmark_model
 from mlagility.api.devices import SUPPORTED_DEVICES, DEFAULT_RUNTIME
 from mlagility.analysis.analysis import (
     evaluate_script,
@@ -312,7 +312,7 @@ def benchmark_files(
 
     """
     Inspect the input_files and sort them into .py and .onnx files.
-    Pass .py files into benchmark_script() and .onnx files into benchmark_workload().
+    Pass .py files into benchmark_script() and .onnx files into benchmark_model().
     """
 
     python_scripts = []
@@ -352,7 +352,7 @@ def benchmark_files(
             groqview=groqview,
         )
 
-    # Iterate and pass each ONNX file into benchmark_workload() one at a time
+    # Iterate and pass each ONNX file into benchmark_model() one at a time
     for onnx_file in onnx_files:
         build_name = filesystem.clean_script_name(onnx_file)
 
@@ -370,7 +370,7 @@ def benchmark_files(
             )
 
         for runtime in runtimes:
-            benchmark_workload(
+            benchmark_model(
                 model=onnx_file,
                 inputs=None,
                 build_name=build_name,

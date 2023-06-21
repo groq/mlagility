@@ -1,6 +1,6 @@
 import argparse
 import torch
-from mlagility import benchmark_workload
+from mlagility import benchmark_model
 
 torch.manual_seed(0)
 
@@ -56,7 +56,7 @@ def main():
 
     # Benchmark the model on the specified device and backend
     print(f"Benchmarking on {args.device} {args.backend}...")
-    benchmark_workload(
+    benchmark_model(
         pytorch_model,
         inputs,
         build_name="hello_api_world",

@@ -21,7 +21,7 @@ import mlagility.analysis.status as status
 import mlagility.analysis.util as util
 import mlagility.analysis.tf_helpers as tf_helpers
 import mlagility.common.labels as labels
-from mlagility.api.model_api import benchmark_workload
+from mlagility.api.model_api import benchmark_model
 import mlagility.common.filesystem as filesystem
 
 
@@ -135,7 +135,7 @@ def explore_workload(
             )
             workload_info.status_message_color = printing.Colors.WARNING
         else:
-            perf = benchmark_workload(
+            perf = benchmark_model(
                 model_info.model,
                 inputs,
                 device=tracer_args.device,
@@ -154,11 +154,11 @@ def explore_workload(
                 onnx_opset=tracer_args.onnx_opset,
             )
             if Action.BENCHMARK in tracer_args.actions:
-                workload_info.status_message = "Successfully benchmarked!"
+                workload_info.status_message = "Model successfully benchmarked!"
                 workload_info.performance = perf
                 workload_info.status_message_color = printing.Colors.OKGREEN
             else:
-                workload_info.status_message = "Successfully built!"
+                workload_info.status_message = "Model successfully built!"
                 workload_info.status_message_color = printing.Colors.OKGREEN
 
     except exp.StageError:
@@ -473,7 +473,7 @@ def explore_frame(
                 model_info.workloads[workload_hash] = util.WorkloadInfo(
                     hash=workload_hash,
                     is_target=workload_hash in tracer_args.targets
-                    or len(tracer_args.targets) == 0,
+                    or tracer_args.targets == [],
                     input_shapes=input_shapes,
                     parent_hash=parent_workload_hash,
                 )
