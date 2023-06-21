@@ -201,9 +201,9 @@ def run_analysis(args):
     output = run_cli(args)
 
     # Process outputs
-    output = output[output.rfind("Models discovered") :]
+    output = output[output.rfind("Workloads discovered") :]
     models_executed = output.count("(executed")
-    models_built = output.count("Model successfully built!")
+    models_built = output.count("Successfully built!")
     return models_executed, 0, models_built
 
 
