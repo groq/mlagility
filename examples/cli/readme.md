@@ -8,7 +8,7 @@ Once you've familiarized yourself with these features, head over to the [`models
 
 The tutorials are organized into a few chapters:
 1. Getting Started (this document)
-1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
+1. [Guiding Workload Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/build.md): `benchit` arguments that customize build behavior to unlock new workflows.
 
@@ -16,7 +16,7 @@ In this tutorial you will learn things such as:
 - [How to benchmark BERT with one command](#just-benchmark-bert)
 - [A "hello world" example, which is the easiest way to get started](#hello-world)
 - [Benchmarking on Nvidia GPUs](#nvidia-benchmarking)
-- [Working with scripts that invoke more than one model](#multiple-models-per-script)
+- [Working with scripts that invoke more than one workload](#multiple-workloads-per-script)
 - [Benchmarking an ONNX file](#onnx-benchmarking)
 
 # Just Benchmark BERT
@@ -33,7 +33,7 @@ benchit $models/transformers/bert.py
 This will produce a result that looks like this, which shows you the performance of BERT-Base on your CPU:
 
 ```
-Models discovered during profiling:
+Workloads discovered during profiling:
 
 bert.py:
         model (executed 1x)
@@ -66,14 +66,14 @@ That commands `benchit` benchmark `hello_world.py` on your CPU. Specifically, `b
 1. Pass `scripts/hello_world.py` as the input_script to the `benchmark` command of `benchit`.
   - _Note_: `benchit <.py file>` is a shorthand for `benchit benchmark <.py file>`.
 1. Run `hello_world.py` against a profiler and look for models from supported machine learning frameworks (e.g. Pytorch).
-1. Discover the `pytorch_model` instance of class `SmallModel`, which is a PyTorch model, and print some statistics about it.
-1. Export `pytorch_model` to an ONNX file, optimize that ONNX file, and convert it to the `float16` data type.
-1. Measure the performance of the ONNX file on your x86 CPU and report the `mean latency` and `throughput`.
+2. Discover the `pytorch_model` instance of class `SmallModel` and print some statistics about it.
+3. Export `pytorch_model` to an ONNX file, optimize that ONNX file, and convert it to the `float16` data type.
+4. Measure the performance of the ONNX file on your x86 CPU and report the `mean latency` and `throughput`.
 
 The result looks like this:
 
 ```
-Models discovered during profiling:
+Workloads discovered during profiling:
 
 hello_world.py:
         pytorch_model (executed 1x)
@@ -82,7 +82,7 @@ hello_world.py:
                 Location:       /home/jfowers/mlagility/examples/cli/hello_world.py, line 29
                 Parameters:     55 (<0.1 MB)
                 Hash:           479b1332
-                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.001   milliseconds (ms)
                                 Throughput:     185964.8        inferences per second (IPS)
 
@@ -106,7 +106,7 @@ benchit scripts/hello_world.py --device nvidia
 To get a result like this:
 
 ```
-Models discovered during profiling:
+Workloads discovered during profiling:
 
 hello_world.py:
 	pytorch_model (executed 1x)
@@ -115,7 +115,7 @@ hello_world.py:
 		Location:	/home/jfowers/mlagility/examples/cli/hello_world.py, line 29
 		Parameters:	55 (<0.1 MB)
 		Hash:		479b1332
-		Status:		Model successfully benchmarked on NVIDIA A100-SXM4-40GB
+		Status:		Successfully benchmarked on NVIDIA A100-SXM4-40GB
 				Mean Latency:	0.027	milliseconds (ms)
 				Throughput:	21920.5	inferences per second (IPS)
 
@@ -126,9 +126,9 @@ Woohoo! The 'benchmark' command is complete.
 
 You can see that the device mentioned in the status is a `NVIDIA A100-SXM4-40GB`.
 
-## Multiple Models per Script
+## Multiple Workloads per Script
 
-The MLAgility tools will benchmark all models discovered in the input script. We can demonstrate this with the `two_models.py` script.
+The MLAgility tools will benchmark all workloads discovered in the input script. We can demonstrate this with the `two_models.py` script.
 
 Run the following command:
 
@@ -139,7 +139,7 @@ benchit scripts/two_models.py
 To get a result like:
 
 ```
-Models discovered during profiling:
+Workloads discovered during profiling:
 
 two_models.py:
         pytorch_model (executed 1x)
@@ -148,7 +148,7 @@ two_models.py:
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/two_models.py, line 32
                 Parameters:     55 (<0.1 MB)
                 Hash:           479b1332
-                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     640717.1        inferences per second (IPS)
 
@@ -158,7 +158,7 @@ two_models.py:
                 Location:       /home/jfowers/mlagility/examples/cli/scripts/two_models.py, line 40
                 Parameters:     510 (<0.1 MB)
                 Hash:           215ca1e3
-                Status:         Model successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
+                Status:         Successfully benchmarked on Intel(R) Xeon(R) CPU @ 2.20GHz
                                 Mean Latency:   0.000   milliseconds (ms)
                                 Throughput:     642021.1        inferences per second (IPS)
 
@@ -169,7 +169,7 @@ more_pytorch_outputs: tensor([-0.1198, -0.5344, -0.1920, -0.1565,  0.2279,  0.69
 Woohoo! The 'benchmark' command is complete.
 ```
 
-You can see that both model instances in `two_models.py`, `pytorch_model` and `another_pytorch_model`, are both discovered and benchmarked.
+You can see that both workloads in `two_models.py`, `pytorch_model` and `another_pytorch_model`, are discovered and benchmarked.
 
 ## ONNX Benchmarking
 
@@ -200,6 +200,6 @@ Info: Performance of build sample on x86 device Intel(R) Xeon(R) CPU @ 2.20GHz i
 # Thanks!
 
 Now that you have completed this tutorial, make sure to check out the other tutorials if you want to learn more:
-1. [Guiding Model Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
+1. [Guiding Workload Discovery](https://github.com/groq/mlagility/blob/main/examples/cli/discovery.md): `benchit` arguments that customize the model discovery process to help streamline your workflow.
 1. [Working with the Cache](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments and commands that help you understand, inspect, and manipulate the `mlagility cache`.
 1. [Customizing Builds](https://github.com/groq/mlagility/blob/main/examples/cli/cache.md): `benchit` arguments that customize build behavior to unlock new workflows.

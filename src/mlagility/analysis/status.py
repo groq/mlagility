@@ -13,7 +13,7 @@ def update(models_found: Dict[str, ModelInfo]) -> None:
         os.system("clear")
 
     printing.logn(
-        "\nModels discovered during profiling:\n",
+        "\nWorkloads discovered during profiling:\n",
         c=printing.Colors.BOLD,
     )
     recursive_print(models_found, None, None, [])
