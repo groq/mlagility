@@ -87,9 +87,7 @@ rf_model = sklearn.ensemble.RandomForestClassifier(
 xgb_model = xgboost.XGBClassifier(
     n_estimators=10, max_depth=5, random_state=0, objective="binary:logistic"
 )
-lgbm_model = lightgbm.LGBMClassifier(
-    n_estimators=10, max_depth=5, random_state=0
-)
+lgbm_model = lightgbm.LGBMClassifier(n_estimators=10, max_depth=5, random_state=0)
 
 # Run build_model() and get results
 def full_compilation_pytorch_model():
@@ -624,7 +622,51 @@ class Testing(unittest.TestCase):
         assert os.path.exists(omodel.state.base_onnx_file)
         assert not os.path.exists(omodel.state.opt_onnx_file)
 
-    def test_015_full_compilation_hummingbird_lgbm(self):
+    def test_015_receive_onnx(self):
+        """
+        Manually export an ONNX file with an opset other than the default
+        Then make sure that the onnxflow state file correctly reflects that opset
+        """
+        build_name = "receive_onnx"
+        onnx_file = f"{build_name} + .onnx"
+        user_opset = build.MINIMUM_ONNX_OPSET
+
+        # Make sure we are using an non-default ONNX opset
+        assert user_opset != build.DEFAULT_ONNX_OPSET
+
+        # Create ONNX file
+        torch.onnx.export(
+            pytorch_model,
+            input_tensor,
+            onnx_file,
+            opset_version=user_opset,
+            input_names=["input"],
+            output_names=["output"],
+        )
+
+        # Process the ONNX file with onnxflow
+        omodel = build_model(
+            onnx_file,
+            inputs,
+            build_name=build_name,
+            rebuild="always",
+            monitor=False,
+        )
+
+        # Make sure the build was successful
+        assert omodel.state.build_status == build.Status.SUCCESSFUL_BUILD
+
+        # Get ONNX file's opset
+        onnx_model = onnx.load(onnx_file)
+        model_opset = getattr(onnx_model.opset_import[0], "version", None)
+
+        # Make sure the ONNX file matches the opset we asked for
+        assert user_opset == model_opset
+
+        # Make sure the ONNX file matches the onnxflow state file
+        assert model_opset == omodel.state.config.onnx_opset
+
+    def test_016_full_compilation_hummingbird_lgbm(self):
         assert full_compilation_hummingbird_lgbm()
 
 
