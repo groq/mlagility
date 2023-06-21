@@ -119,7 +119,7 @@ def lock_config(
     model: build.UnionValidModelInstanceTypes,
     build_name: Optional[str] = None,
     sequence: stage.Sequence = None,
-    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
+    onnx_opset: Optional[int] = None,
 ) -> build.Config:
 
     """
