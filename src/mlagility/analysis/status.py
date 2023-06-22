@@ -113,6 +113,7 @@ def print_invocation(
             print(f"{ident}\tLocation:\t{model_info.file}, line {model_info.line}")
 
         # Converting number of parameters to MB assuming 2 bytes per parameter
+        # NOTE: https://github.com/groq/mlagility/issues/330 suggests eliminating this assumption
         model_size = model_info.params * 2 / (1024 * 1024)
         model_size = "{:.1f}".format(model_size) if model_size > 0.1 else "<0.1"
         print(
