@@ -19,7 +19,7 @@ import onnx
 from mlagility.cli.cli import main as benchitcli
 import mlagility.cli.report as report
 import mlagility.api.report as report_api
-from mlagility.common [import filesyste]m
+import mlagility.common.filesystem as filesystem
 import mlagility.api.ortmodel as ortmodel
 import mlagility.api.trtmodel as trtmodel
 import onnxflow.common.build as build
