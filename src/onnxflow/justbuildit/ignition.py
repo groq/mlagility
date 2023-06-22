@@ -119,7 +119,7 @@ def lock_config(
     model: build.UnionValidModelInstanceTypes,
     build_name: Optional[str] = None,
     sequence: stage.Sequence = None,
-    onnx_opset: int = build.DEFAULT_ONNX_OPSET,
+    onnx_opset: Optional[int] = None,
 ) -> build.Config:
 
     """
@@ -468,7 +468,9 @@ def load_or_make_state(
                     problem_report = "\n".join(cache_problems)
 
                     if rebuild == "if_needed":
-                        return _rebuild_if_needed(problem_report, state_args)
+                        return _rebuild_if_needed(
+                            problem_report, state_args, state_type
+                        )
                     if rebuild == "never":
                         msg = (
                             "build_model() discovered a cached build of "
