@@ -174,9 +174,11 @@ You can see that both model instances in `two_models.py`, `pytorch_model` and `a
 
 ## Multiple Invocations of a Model
 
-The same model may be invoked using different input shapes (e.g. when varying the batch size). Only one invocation is processed my MLAgility if the same model is invoked multiple times using inputs of the same shape. However, multiple invocation are processed my MLAgility if the same model is invoked multiple times using inputs of different shapes.
+A single script may invoke the same model multiple times using different input shapes (e.g. when varying the batch size). When this happens, MLAgility will benchmark and display each of those invocations as sub-results of the same model instance. 
 
-The `multiple_invocations.py` script instantiates a single script and invokes it three times. The fist two times the model is invoked with inputs of the same shape (batch 1), while the third invocation uses a different input shape (batch 2). Note that two unique static model invocations are identified. 
+> **Note**: multiple invocations of a model with the same input shape will only be benchmarked once.
+
+The `multiple_invocations.py` script instantiates a single model and invokes it three times. The fist two times the model is invoked with inputs of the same shape (batch 1), while the third invocation uses a different input shape (batch 2). Note that two unique static model invocations are identified. 
 
 Run the following command:
 
