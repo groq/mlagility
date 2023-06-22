@@ -17,7 +17,7 @@ In this tutorial you will learn things such as:
 - [A "hello world" example, which is the easiest way to get started](#hello-world)
 - [Benchmarking on Nvidia GPUs](#nvidia-benchmarking)
 - [Working with scripts that invoke more than one model](#multiple-models-per-script)
-- [Working with scripts that a model multiple times](#multiple-invocations-of-a-model)
+- [Working with scripts that invoke a model multiple times](#multiple-invocations-of-a-model)
 - [Benchmarking an ONNX file](#onnx-benchmarking)
 
 # Just Benchmark BERT
