@@ -3,11 +3,10 @@ from typing import Dict, Union, List
 from onnxflow.common import printing
 import onnxflow.common.build as build
 from mlagility.analysis.util import ModelInfo
-import mlagility.common.filesystem as filesystem
 
 def update(models_found: Dict[str, ModelInfo],
-           build_name,
-           cache_dir) -> None:
+           build_name: str,
+           cache_dir: str) -> None:
     """
     Prints all models and submodels found
     """
@@ -23,8 +22,8 @@ def update(models_found: Dict[str, ModelInfo],
 
 def recursive_print(
     models_found: Dict[str, ModelInfo],
-    build_name,
-    cache_dir,
+    build_name: str,
+    cache_dir: str,
     parent_model_hash: Union[str, None] = None,
     parent_invocation_hash: Union[str, None] = None,
     script_names_visited: List[str] = False,
@@ -79,8 +78,8 @@ def recursive_print(
 
 def print_invocation(
     model_info: ModelInfo,
-    build_name,
-    cache_dir,
+    build_name: str,
+    cache_dir: str,
     invocation_hash: Union[str, None],
     print_file_name: bool = False,
     invocation_idx: int = 0,
