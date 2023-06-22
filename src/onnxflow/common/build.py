@@ -168,7 +168,10 @@ def get_shapes_and_dtypes(inputs: dict):
                 subkey = f"{key}[{i}]"
                 shapes[subkey] = np.array(v).shape
                 dtypes[subkey] = np.array(v).dtype.name
-        elif torch.is_tensor(value) or tf_helpers.is_keras_tensor(value):
+        elif torch.is_tensor(value):
+            shapes[key] = np.array(value.detach()).shape
+            dtypes[key] = np.array(value.detach()).dtype.name
+        elif tf_helpers.is_keras_tensor(value):
             shapes[key] = np.array(value).shape
             dtypes[key] = np.array(value).dtype.name
         elif isinstance(value, np.ndarray):

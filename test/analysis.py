@@ -119,6 +119,24 @@ parsed_args = parse(["height", "width", "num_channels"])
 print(parsed_args)
 
 """,
+    "two_executions": """
+import torch
+import timm
+from mlagility.parser import parse
+
+# Creating model and set it to evaluation mode
+model = timm.create_model("mobilenetv2_035", pretrained=False)
+model.eval()
+
+# Creating inputs
+inputs1 = torch.rand((1, 3, 28, 28))
+inputs2 = torch.rand((1, 3, 224, 224))
+
+# Calling model
+model(inputs1)
+model(inputs2)
+model(inputs1)
+""",
 }
 minimal_tokenizer = """
 {
@@ -220,7 +238,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py::bf68fb06",
+                "linear_pytorch.py::76af2f62",
                 "--max-depth",
                 "1",
                 "--build-only",
@@ -231,7 +249,7 @@ class Testing(unittest.TestCase):
         assert np.array_equal(output, (2, 0, 1))
 
     def test_05_cache(self):
-        model_hash = "bf68fb06"
+        model_hash = "76af2f62"
         run_analysis(
             [
                 "benchit",
@@ -321,7 +339,7 @@ class Testing(unittest.TestCase):
         output = run_analysis(
             [
                 "benchit",
-                "linear_pytorch.py::bf68fb06",
+                "linear_pytorch.py::76af2f62",
                 "--build-only",
                 "--max-depth",
                 "1",
@@ -332,7 +350,7 @@ class Testing(unittest.TestCase):
         assert np.array_equal(output, (2, 0, 1))
 
     def test_13_clean_cache(self):
-        model_hash = "bf68fb06"
+        model_hash = "76af2f62"
         run_analysis(
             [
                 "benchit",
@@ -357,6 +375,28 @@ class Testing(unittest.TestCase):
         subprocess.run(cmd, check=True)
 
         assert cache_is_lean(cache_dir, build_name)
+
+    def test_14_same_model_different_input_shapes(self):
+        output = run_analysis(
+            [
+                "benchit",
+                "two_executions.py",
+                "--analyze-only",
+            ]
+        )
+        assert np.array_equal(output, (2, 0, 0))
+
+    def test_15_same_model_different_input_shapes_maxdepth(self):
+        output = run_analysis(
+            [
+                "benchit",
+                "two_executions.py",
+                "--analyze-only",
+                "--max-depth",
+                "1",
+            ]
+        )
+        assert np.array_equal(output, (6, 0, 0))
 
 
 if __name__ == "__main__":
