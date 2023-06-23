@@ -142,8 +142,7 @@ def print_invocation(
 
     print(f"{ident}\tInput Shape:\t{input_shape}")
     print(f"{ident}\tHash:\t\t" + invocation_hash)
-    print(f"{ident}\tBuild Name:\t" + build_name)
-    print(f"{ident}\tCache dir:\t" + cache_dir + '/' + build_name)
+    print(f"{ident}\tBuild dir:\t" + cache_dir + '/' + build_name)
 
     # Print benchit results if benchit was run
     if unique_invocation.performance:
