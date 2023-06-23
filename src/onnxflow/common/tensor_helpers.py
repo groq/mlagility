@@ -29,7 +29,7 @@ def check_shapes_and_dtypes(inputs, expected_shapes, expected_dtypes):
 
 def save_inputs(inputs, inputs_file, input_dtypes=None, downcast=True):
 
-    # Convert inputs to fp16 and int32
+    # Detach and downcast inputs
     inputs_converted = copy.deepcopy(inputs)
     for i in range(len(inputs_converted)):
         inputs_converted[i] = {

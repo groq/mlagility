@@ -6,6 +6,7 @@ import sys
 import copy
 from typing import Union
 import torch
+import numpy as np
 import onnxruntime
 import onnxmltools
 import onnx
@@ -121,10 +122,8 @@ class ReceiveOnnxModel(stage.Stage):
 
         shutil.copy(state.model, state.base_onnx_file)
 
-        # Save inputs and convert to fp16 and int32 (no int64 nor float32/64)
-        to_downcast = False if state.quantization_samples else True
         tensor_helpers.save_inputs(
-            [state.inputs], state.original_inputs_file, downcast=to_downcast
+            [state.inputs], state.original_inputs_file, downcast=False
         )
 
         # Check the if the base mode has been exported successfully
@@ -244,11 +243,8 @@ class ExportPytorchModel(stage.Stage):
         # Restore default warnings behavior
         warnings.showwarning = default_warnings
 
-        # Save inputs and convert to fp16 and int32 (no int64 nor float32/64)
-        to_downcast = False if state.quantization_samples else True
-        print("to_downcast: ", to_downcast)
         tensor_helpers.save_inputs(
-            [state.inputs], state.original_inputs_file, downcast=to_downcast
+            [state.inputs], state.original_inputs_file, downcast=False
         )
 
         # Check the if the base mode has been exported successfully
@@ -363,10 +359,8 @@ class ExportKerasModel(stage.Stage):
 
         state.inputs = dict(zip(tuple(input_names), tuple(inputs)))
 
-        # Save inputs and convert to fp16 and int32 (no int64 nor float32/64)
-        to_downcast = False if state.quantization_samples else True
         tensor_helpers.save_inputs(
-            [state.inputs], state.original_inputs_file, downcast=to_downcast
+            [state.inputs], state.original_inputs_file, downcast=False
         )
 
         # Check the if the base mode has been exported successfully
@@ -501,6 +495,13 @@ class ConvertOnnxToFp16(stage.Stage):
         fp16_model = onnxmltools.utils.float16_converter.convert_float_to_float16(
             fp32_model, op_block_list=op_block_list, disable_shape_infer=True
         )
+
+        # Load inputs and convert to fp32
+        inputs_file = state.original_inputs_file
+        if os.path.isfile(inputs_file):
+            inputs = np.load(inputs_file,allow_pickle=True)
+            to_downcast = False if state.quantization_samples else True
+            tensor_helpers.save_inputs(inputs, inputs_file, downcast=to_downcast)
 
         # Save FP16 model (use external data format if needed)
         output_path = state.converted_onnx_file
