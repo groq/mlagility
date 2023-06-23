@@ -4,8 +4,9 @@ from onnxflow.common import printing
 import onnxflow.common.build as build
 from mlagility.analysis.util import ModelInfo
 
-
-def update(models_found: Dict[str, ModelInfo]) -> None:
+def update(models_found: Dict[str, ModelInfo],
+           build_name: str,
+           cache_dir: str) -> None:
     """
     Prints all models and submodels found
     """
@@ -16,11 +17,13 @@ def update(models_found: Dict[str, ModelInfo]) -> None:
         "\nModels discovered during profiling:\n",
         c=printing.Colors.BOLD,
     )
-    recursive_print(models_found, None, None, [])
+    recursive_print(models_found, build_name, cache_dir, None, None, [])
 
 
 def recursive_print(
     models_found: Dict[str, ModelInfo],
+    build_name: str,
+    cache_dir: str,
     parent_model_hash: Union[str, None] = None,
     parent_invocation_hash: Union[str, None] = None,
     script_names_visited: List[str] = False,
@@ -50,6 +53,8 @@ def recursive_print(
 
                 print_invocation(
                     model_info,
+                    build_name,
+                    cache_dir,
                     invocation_hash,
                     print_file_name,
                     invocation_idx=invocation_idx,
@@ -63,6 +68,8 @@ def recursive_print(
 
                 recursive_print(
                     models_found,
+                    build_name,
+                    cache_dir,
                     parent_model_hash=model_hash,
                     parent_invocation_hash=invocation_hash,
                     script_names_visited=script_names_visited,
@@ -71,6 +78,8 @@ def recursive_print(
 
 def print_invocation(
     model_info: ModelInfo,
+    build_name: str,
+    cache_dir: str,
     invocation_hash: Union[str, None],
     print_file_name: bool = False,
     invocation_idx: int = 0,
@@ -133,6 +142,7 @@ def print_invocation(
 
     print(f"{ident}\tInput Shape:\t{input_shape}")
     print(f"{ident}\tHash:\t\t" + invocation_hash)
+    print(f"{ident}\tBuild dir:\t" + cache_dir + '/' + build_name)
 
     # Print benchit results if benchit was run
     if unique_invocation.performance:

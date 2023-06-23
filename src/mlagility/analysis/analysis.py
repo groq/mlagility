@@ -89,7 +89,11 @@ def explore_invocation(
     # Update status to "computing"
     invocation_info.status_message = "Computing..."
     invocation_info.status_message_color = printing.Colors.OKBLUE
-    status.update(tracer_args.models_found)
+
+    build_name = filesystem.get_build_name(
+        tracer_args.script_name, tracer_args.labels, invocation_info.hash
+    )
+    status.update(tracer_args.models_found, build_name, tracer_args.cache_dir)
 
     # Get a copy of the keyword arguments
     args, kwargs = model_inputs
@@ -116,10 +120,6 @@ def explore_invocation(
             else:
                 inputs[all_args[i]] = args[i]
     invocation_info.inputs = inputs
-
-    build_name = filesystem.get_build_name(
-        tracer_args.script_name, tracer_args.labels, invocation_info.hash
-    )
 
     # Save model labels
     tracer_args.labels["class"] = [f"{type(model_info.model).__name__}"]
@@ -188,7 +188,7 @@ def explore_invocation(
         # Ensure that stdout is not being forwarded before updating status
         if hasattr(sys.stdout, "terminal"):
             sys.stdout = sys.stdout.terminal
-        status.update(tracer_args.models_found)
+        status.update(tracer_args.models_found, build_name, tracer_args.cache_dir)
 
         if tracer_args.device == "groq":
             import groqflow.common.build as groq_build
@@ -510,7 +510,10 @@ def explore_frame(
                 # Ensure that groqit() doesn't interfere with our execution count
                 model_info.executed = 1
 
-            status.update(tracer_args.models_found)
+            build_name = filesystem.get_build_name(
+                tracer_args.script_name, tracer_args.labels, invocation_info.hash
+            )
+            status.update(tracer_args.models_found, build_name, tracer_args.cache_dir)
 
             # Turn tracing on again after computing the outputs
             sys.setprofile(tracer)
