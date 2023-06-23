@@ -496,12 +496,16 @@ class ConvertOnnxToFp16(stage.Stage):
             fp32_model, op_block_list=op_block_list, disable_shape_infer=True
         )
 
-        # Load inputs and convert to fp32
+        # Load inputs and convert to fp16
         inputs_file = state.original_inputs_file
         if os.path.isfile(inputs_file):
-            inputs = np.load(inputs_file,allow_pickle=True)
+            inputs = np.load(inputs_file, allow_pickle=True)
             to_downcast = False if state.quantization_samples else True
             tensor_helpers.save_inputs(inputs, inputs_file, downcast=to_downcast)
+        else:
+            raise exp.StageError(
+                "Attempted to convert inputs to FP16, however inputs file was not found."
+            )
 
         # Save FP16 model (use external data format if needed)
         output_path = state.converted_onnx_file

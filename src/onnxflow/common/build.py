@@ -305,7 +305,7 @@ class State:
     @property
     def original_inputs_file(self):
         return os.path.join(
-            output_dir(self.cache_dir, self.config.build_name), "inputs_original.npy"
+            output_dir(self.cache_dir, self.config.build_name), "inputs.npy"
         )
 
     @property
