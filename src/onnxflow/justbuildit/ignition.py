@@ -222,7 +222,7 @@ def validate_cached_model(
     if inputs is not None:
         input_shapes, input_dtypes = build.get_shapes_and_dtypes(inputs)
 
-        # If we are modifying the data type of inputs on a later stage we 
+        # If we are modifying the data type of inputs on a later stage we
         # verify input type based on the future data type conversion
         if 'fp16_conversion' in state.info.all_build_stages:
             for key, value in input_dtypes.items():
