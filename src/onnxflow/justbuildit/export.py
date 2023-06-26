@@ -506,7 +506,7 @@ class ConvertOnnxToFp16(stage.Stage):
             raise exp.StageError(
                 "Attempted to convert inputs to FP16, however inputs file was not found."
             )
-                
+
         # Overwrite expected dtypes
         _, state.expected_input_dtypes = build.get_shapes_and_dtypes(inputs_converted[0])
 
