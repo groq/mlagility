@@ -221,6 +221,16 @@ def validate_cached_model(
 
     if inputs is not None:
         input_shapes, input_dtypes = build.get_shapes_and_dtypes(inputs)
+
+        # If we are modifying the data type of inputs on a later stage we 
+        # verify input type based on the future data type conversion
+        if 'fp16_conversion' in state.info.all_build_stages:
+            for key, value in input_dtypes.items():
+                if value == "float32":
+                    input_dtypes[key] = "float16"
+                elif value == "int64":
+                    input_dtypes[key] = "int32"
+
         input_shapes_changed = state.expected_input_shapes != input_shapes
         input_dtypes_changed = state.expected_input_dtypes != input_dtypes
     else:
