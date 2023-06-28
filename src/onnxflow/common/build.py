@@ -272,6 +272,10 @@ class State:
     expected_input_shapes: Optional[Dict[str, list]] = None
     expected_input_dtypes: Optional[Dict[str, list]] = None
     expected_output_names: Optional[List] = None
+
+    # Wether or not inputs must be downcasted during inference
+    downcast_applied: bool = False
+
     # The results of the most recent stage that was executed
     intermediate_results: Any = None
 

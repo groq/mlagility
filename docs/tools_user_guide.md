@@ -288,6 +288,8 @@ This feature is also be available as an API argument:
 
 > _Note_: `torch-eager` and `torch-compiled` are not available whe using the `remote` backend.
 
+> _Note_: Inputs to `torch-eager` and `torch-compiled` are not downcasted to FP16 by default. Downcast inputs before benchmarking for a fair comparison between runtimes.
+
 # Additional Commands and Options
 
 `benchit` and the APIs provide a variety of additional commands and options for users.

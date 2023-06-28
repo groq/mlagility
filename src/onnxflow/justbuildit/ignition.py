@@ -224,7 +224,7 @@ def validate_cached_model(
 
         # If we are modifying the data type of inputs on a later stage we
         # verify input type based on the future data type conversion
-        if 'fp16_conversion' in state.info.all_build_stages:
+        if state.downcast_applied:
             for key, value in input_dtypes.items():
                 if value == "float32":
                     input_dtypes[key] = "float16"
@@ -243,7 +243,6 @@ def validate_cached_model(
             changed_args.append((key, vars(config)[key], vars(state.config)[key]))
 
     # Show an error if the model changed
-
     build_conditions_changed = (
         model_changed
         or input_shapes_changed
