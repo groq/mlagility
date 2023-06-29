@@ -11,7 +11,9 @@ import onnxflow.common.build as build
 import onnxflow.common.tf_helpers as tf_helpers
 
 # Checks whether a given input has the expected shape
-def check_shapes_and_dtypes(inputs, expected_shapes, expected_dtypes, expect_downcast=False, raise_error=True):
+def check_shapes_and_dtypes(
+    inputs, expected_shapes, expected_dtypes, expect_downcast=False, raise_error=True
+):
     current_shapes, current_dtypes = build.get_shapes_and_dtypes(inputs)
 
     # If we are modifying the data type of inputs on a later stage we
