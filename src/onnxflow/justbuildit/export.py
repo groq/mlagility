@@ -510,7 +510,7 @@ class ConvertOnnxToFp16(stage.Stage):
         # Overwrite expected dtypes
         _, state.expected_input_dtypes = build.get_shapes_and_dtypes(inputs_converted[0])
 
-        # Indicate that inputs must be casted downcasted during inference
+        # Indicate that inputs must be downcasted during inference
         state.downcast_applied = True
 
         # Save FP16 model (use external data format if needed)

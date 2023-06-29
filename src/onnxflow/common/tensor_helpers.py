@@ -11,8 +11,18 @@ import onnxflow.common.build as build
 import onnxflow.common.tf_helpers as tf_helpers
 
 # Checks whether a given input has the expected shape
-def check_shapes_and_dtypes(inputs, expected_shapes, expected_dtypes):
+def check_shapes_and_dtypes(inputs, expected_shapes, expected_dtypes, expect_downcast=False):
     current_shapes, current_dtypes = build.get_shapes_and_dtypes(inputs)
+
+    # If we are modifying the data type of inputs on a later stage we
+    # verify input type based on the future data type conversion
+    if expect_downcast:
+        for key, value in current_dtypes.items():
+            if value == "float32":
+                current_dtypes[key] = "float16"
+            elif value == "int64":
+                current_dtypes[key] = "int32"
+    
     if not expected_shapes == current_shapes:
         msg = f"""
         Model built to always take input of shape
