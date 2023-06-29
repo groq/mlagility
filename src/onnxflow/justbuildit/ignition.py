@@ -10,6 +10,7 @@ import onnxflow.common.exceptions as exp
 import onnxflow.common.printing as printing
 import onnxflow.common.tf_helpers as tf_helpers
 import onnxflow.common.onnx_helpers as onnx_helpers
+import onnxflow.common.tensor_helpers as tensor_helpers
 import onnxflow.justbuildit.export as export
 import onnxflow.justbuildit.stage as stage
 import onnxflow.justbuildit.hummingbird as hummingbird
@@ -220,19 +221,13 @@ def validate_cached_model(
         model_changed = False
 
     if inputs is not None:
-        input_shapes, input_dtypes = build.get_shapes_and_dtypes(inputs)
-
-        # If we are modifying the data type of inputs on a later stage we
-        # verify input type based on the future data type conversion
-        if state.downcast_applied:
-            for key, value in input_dtypes.items():
-                if value == "float32":
-                    input_dtypes[key] = "float16"
-                elif value == "int64":
-                    input_dtypes[key] = "int32"
-
-        input_shapes_changed = state.expected_input_shapes != input_shapes
-        input_dtypes_changed = state.expected_input_dtypes != input_dtypes
+        input_shapes_changed, input_dtypes_changed = tensor_helpers.check_shapes_and_dtypes(
+                inputs,
+                state.expected_input_shapes,
+                state.expected_input_dtypes,
+                expect_downcast=state.downcast_applied,
+                raise_error=False
+            )
     else:
         input_shapes_changed = False
         input_dtypes_changed = False
@@ -268,6 +263,7 @@ def validate_cached_model(
             result.append(msg)
 
         if input_shapes_changed:
+            input_shapes, _ = build.get_shapes_and_dtypes(inputs)
             msg = (
                 f'Input shape of model "{config.build_name}" changed from '
                 f"{state.expected_input_shapes} to {input_shapes} "
@@ -276,6 +272,7 @@ def validate_cached_model(
             result.append(msg)
 
         if input_dtypes_changed:
+            _, input_dtypes = build.get_shapes_and_dtypes(inputs)
             msg = (
                 f'Input data type of model "{config.build_name}" changed from '
                 f"{state.expected_input_dtypes} to {input_dtypes} "
