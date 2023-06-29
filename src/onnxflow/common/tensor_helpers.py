@@ -22,7 +22,7 @@ def check_shapes_and_dtypes(inputs, expected_shapes, expected_dtypes, expect_dow
                 current_dtypes[key] = "float16"
             elif value == "int64":
                 current_dtypes[key] = "int32"
-    
+
     input_shapes_changed = expected_shapes != current_shapes
     input_dtypes_changed = expected_dtypes != current_dtypes
 
