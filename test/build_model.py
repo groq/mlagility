@@ -669,6 +669,58 @@ class Testing(unittest.TestCase):
     def test_016_full_compilation_hummingbird_lgbm(self):
         assert full_compilation_hummingbird_lgbm()
 
+    def test_017_inputs_conversion(self):
+        custom_sequence_fp32 = stage.Sequence(
+            "custom_sequence_fp32",
+            "Building Pytorch Model without fp16 conversion",
+            [
+                export.ExportPytorchModel(),
+                export.OptimizeOnnxModel(),
+            ],
+            enable_model_validation=True,
+        )
+
+        custom_sequence_fp16 = stage.Sequence(
+            "custom_sequence_fp16",
+            "Building Pytorch Model with fp16 conversion",
+            [
+                export.ExportPytorchModel(),
+                export.OptimizeOnnxModel(),
+                export.ConvertOnnxToFp16(),
+            ],
+            enable_model_validation=True,
+        )
+
+        # Build model using fp32 inputs
+        build_name = "custom_sequence_fp32"
+        build_model(
+            pytorch_model,
+            inputs,
+            build_name=build_name,
+            rebuild="always",
+            monitor=False,
+            cache_dir=cache_location,
+            sequence=custom_sequence_fp32,
+        )
+
+        inputs_path = os.path.join(cache_location, build_name, "inputs.npy")
+        assert np.load(inputs_path, allow_pickle=True)[0]["x"].dtype == np.float32
+
+        # Build model using fp16 inputs
+        build_name = "custom_sequence_fp16"
+        build_model(
+            pytorch_model,
+            inputs,
+            build_name="custom_sequence_fp16",
+            rebuild="always",
+            monitor=False,
+            cache_dir=cache_location,
+            sequence=custom_sequence_fp16,
+        )
+
+        inputs_path = os.path.join(cache_location, build_name, "inputs.npy")
+        assert np.load(inputs_path, allow_pickle=True)[0]["x"].dtype == np.float16
+
 
 if __name__ == "__main__":
     unittest.main()

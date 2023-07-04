@@ -61,7 +61,10 @@ class BaseModel:
         # Check whether the inputs provided have the shapes required by the model's
         # forward function
         tensor_helpers.check_shapes_and_dtypes(
-            inputs, self.state.expected_input_shapes, self.state.expected_input_dtypes
+            inputs,
+            self.state.expected_input_shapes,
+            self.state.expected_input_dtypes,
+            self.state.downcast_applied
         )
 
     # Models with a single output are returned as either a torch.tensor,

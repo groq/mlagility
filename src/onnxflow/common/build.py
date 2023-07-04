@@ -272,6 +272,10 @@ class State:
     expected_input_shapes: Optional[Dict[str, list]] = None
     expected_input_dtypes: Optional[Dict[str, list]] = None
     expected_output_names: Optional[List] = None
+
+    # Whether or not inputs must be downcasted during inference
+    downcast_applied: bool = False
+
     # The results of the most recent stage that was executed
     intermediate_results: Any = None
 
@@ -305,7 +309,7 @@ class State:
     @property
     def original_inputs_file(self):
         return os.path.join(
-            output_dir(self.cache_dir, self.config.build_name), "inputs_original.npy"
+            output_dir(self.cache_dir, self.config.build_name), "inputs.npy"
         )
 
     @property
