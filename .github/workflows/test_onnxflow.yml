@@ -58,6 +58,8 @@ jobs:
           python examples/onnxflow/xgbclassifier.py
           rm -rf ~/.cache/onnxflow_test_cache
           python examples/onnxflow/lgbmclassifier.py
+          rm -rf ~/.cache/onnxflow_test_cache
+          python examples/onnxflow/kneighborsclassifier.py
 
           # onnxflow tests
           rm -rf ~/.cache/onnxflow_test_cache

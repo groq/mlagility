@@ -18,6 +18,7 @@ try:
     from sklearn.naive_bayes import BernoulliNB
     from sklearn.naive_bayes import GaussianNB
     from sklearn.naive_bayes import MultinomialNB
+    from sklearn.neighbors import KNeighborsClassifier
     from sklearn.neural_network import MLPClassifier
     from sklearn.pipeline import Pipeline
     from sklearn.preprocessing import StandardScaler
@@ -47,20 +48,21 @@ except ImportError as e:
 
 def is_supported_sklearn_model(model) -> bool:
     return (
-        isinstance(model, RandomForestClassifier)
-        or isinstance(model, DecisionTreeClassifier)
-        or isinstance(model, ExtraTreesClassifier)
+        isinstance(model, ExtraTreesClassifier)
         or isinstance(model, GradientBoostingClassifier)
         or isinstance(model, IsolationForest)
+        or isinstance(model, RandomForestClassifier)
         or isinstance(model, RandomForestRegressor)
         or isinstance(model, SGDClassifier)
-        or isinstance(model, LinearSVC)
         or isinstance(model, BernoulliNB)
         or isinstance(model, GaussianNB)
-        or isinstance(model, MLPClassifier)
         or isinstance(model, MultinomialNB)
-        or isinstance(model, StandardScaler)
+        or isinstance(model, KNeighborsClassifier)
+        or isinstance(model, MLPClassifier)
         or isinstance(model, Pipeline)
+        or isinstance(model, StandardScaler)
+        or isinstance(model, LinearSVC)
+        or isinstance(model, DecisionTreeClassifier)
     )
 
 
@@ -123,6 +125,7 @@ class ConvertHummingbirdModel(stage.Stage):
               - sklearn.naive_bayes.BernoulliNB
               - sklearn.naive_bayes.GaussianNB
               - sklearn.naive_bayes.MultinomialNB
+              - sklearn.neighbors.KNeighborsClassifier
               - sklearn.neural_network.MLPClassifier
               - sklearn.pipeline.Pipeline
               - sklearn.preprocessing.StandardScaler
@@ -161,6 +164,7 @@ class ConvertHummingbirdModel(stage.Stage):
         extra_config = {
             "onnx_target_opset": state.config.onnx_opset,
             "tree_implementation": tree_implementation_strategy,
+            "batch_size": batch_size,
         }
 
         try:
