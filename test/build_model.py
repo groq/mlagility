@@ -5,6 +5,7 @@ import onnx
 import tensorflow as tf
 import numpy as np
 import sklearn.ensemble
+import sklearn.neighbors
 import xgboost  # pylint: disable=import-error
 import lightgbm  # pylint: disable=import-error
 from onnxmltools.utils.float16_converter import convert_float_to_float16
@@ -88,6 +89,7 @@ xgb_model = xgboost.XGBClassifier(
     n_estimators=10, max_depth=5, random_state=0, objective="binary:logistic"
 )
 lgbm_model = lightgbm.LGBMClassifier(n_estimators=10, max_depth=5, random_state=0)
+kn_model = sklearn.neighbors.KNeighborsClassifier(n_neighbors=10)
 
 # Run build_model() and get results
 def full_compilation_pytorch_model():
@@ -186,6 +188,21 @@ def full_compilation_hummingbird_lgbm():
     build_name = "full_compilation_hummingbird_lgbm"
     omodel = build_model(
         lgbm_model,
+        {"input_0": rf_inputs},
+        build_name=build_name,
+        rebuild="always",
+        monitor=False,
+        cache_dir=cache_location,
+    )
+    return omodel.state.build_status == build.Status.SUCCESSFUL_BUILD
+
+
+def full_compilation_hummingbird_kn():
+    kn_model.fit(rf_inputs, np.random.randint(2, size=rf_batch_size))
+
+    build_name = "full_compilation_hummingbird_kn"
+    omodel = build_model(
+        kn_model,
         {"input_0": rf_inputs},
         build_name=build_name,
         rebuild="always",
@@ -720,6 +737,9 @@ class Testing(unittest.TestCase):
 
         inputs_path = os.path.join(cache_location, build_name, "inputs.npy")
         assert np.load(inputs_path, allow_pickle=True)[0]["x"].dtype == np.float16
+
+    def test_018_full_compilation_hummingbird_kn(self):
+        assert full_compilation_hummingbird_kn()
 
 
 if __name__ == "__main__":
