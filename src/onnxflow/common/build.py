@@ -29,9 +29,9 @@ UnionValidModelInstanceTypes = Union[
 if os.environ.get("MLAGILITY_ONNX_OPSET"):
     DEFAULT_ONNX_OPSET = int(os.environ.get("MLAGILITY_ONNX_OPSET"))
 else:
-    DEFAULT_ONNX_OPSET = 14
+    DEFAULT_ONNX_OPSET = 17
 
-MINIMUM_ONNX_OPSET = 11
+MINIMUM_ONNX_OPSET = 13
 
 DEFAULT_CACHE_DIR = os.getcwd()
 DEFAULT_REBUILD_POLICY = "if_needed"

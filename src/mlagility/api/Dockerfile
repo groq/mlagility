@@ -25,4 +25,4 @@ RUN update-alternatives --set python3 /usr/local/bin/python3.8
 RUN rm -rf /tmp/Python-3.8.13 && \
     rm /tmp/Python-3.8.13.tgz
 
-RUN python3 -m pip install onnxruntime==1.14.1
+RUN python3 -m pip install onnxruntime==1.15.1
