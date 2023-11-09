@@ -73,8 +73,6 @@ jobs:
           python test/analysis.py
           rm -rf ~/.cache/mlagility
           python test/model_api.py
-          rm -rf ~/.cache/mlagility
-          python test/analysis.py
       - name: Install and Start Slurm
         shell: bash -el {0}
         run: |

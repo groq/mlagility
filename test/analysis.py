@@ -333,7 +333,7 @@ class Testing(unittest.TestCase):
                 "--analyze-only",
             ]
         )
-        assert np.array_equal(output, (1, 0, 0))
+        assert np.array_equal(output, (2, 0, 0))
 
     def test_12_benchit_hashes(self):
         output = run_analysis(
