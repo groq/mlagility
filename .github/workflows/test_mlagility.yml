@@ -64,7 +64,7 @@ jobs:
           rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py --sequence-file examples/cli/extras/example_sequence.py --build-only
           rm -rf ~/.cache/mlagility
-          benchit examples/cli/onnx/sample.onnx
+          benchit examples/cli/onnx/sample.onnx --onnx-opset=14
 
           # E2E tests
           rm -rf ~/.cache/mlagility
