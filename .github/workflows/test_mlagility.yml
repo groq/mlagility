@@ -64,7 +64,7 @@ jobs:
           rm -rf ~/.cache/mlagility
           benchit examples/cli/scripts/hello_world.py --sequence-file examples/cli/extras/example_sequence.py --build-only
           rm -rf ~/.cache/mlagility
-          benchit examples/cli/onnx/sample.onnx
+          benchit examples/cli/onnx/sample.onnx --onnx-opset=14
 
           # E2E tests
           rm -rf ~/.cache/mlagility
@@ -73,8 +73,6 @@ jobs:
           python test/analysis.py
           rm -rf ~/.cache/mlagility
           python test/model_api.py
-          rm -rf ~/.cache/mlagility
-          python test/analysis.py
       - name: Install and Start Slurm
         shell: bash -el {0}
         run: |
