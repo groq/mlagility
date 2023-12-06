@@ -193,7 +193,7 @@ def explore_invocation(
         if tracer_args.device == "groq":
             import groqflow.common.build as groq_build
 
-            state_type = groq_build.State
+            state_type = groq_build.GroqState
         else:
             state_type = build.State
 
