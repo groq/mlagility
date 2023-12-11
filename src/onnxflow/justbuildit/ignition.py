@@ -209,7 +209,7 @@ def validate_cached_model(
         msg = (
             f"Your build {state.config.build_name} was previously built against "
             f"onnxflow version {state.onnxflow_version}, "
-            f"however you are now using onxxflow version {onnxflow_version}. The previous build is "
+            f"however you are now using onnxflow version {onnxflow_version}. The previous build is "
             f"incompatible with this version of onnxflow, as indicated by the {out_of_date} "
             "version number changing. See **docs/versioning.md** for details."
         )

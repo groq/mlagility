@@ -45,7 +45,7 @@ setup(
         "onnxruntime==1.15.1",
         "paramiko==2.11.0",
         "torch==2.1.0",
-        "protobuf==3.20.2",
+        "torchvision==0.16.0",
         "pyyaml>=5.4",
         "packaging>=20.9",
         "pandas>=1.5.3",
