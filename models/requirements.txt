@@ -18,3 +18,13 @@ sentence_transformers
 scipy
 numpy
 timm
+### for IMPROVE
+matplotlib
+h5py
+pubchempy
+rdkit
+networkx
+pyarrow
+psutil
+git+https://github.com/ECP-CANDLE/candle_lib@develop
+lightgbm
