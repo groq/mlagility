@@ -5,6 +5,8 @@ setup.py
 models/__init__.py
 models/readme.md
 models/requirements.txt
+models/determinism/__init__.py
+models/determinism/scatter_reduce.py
 models/diffusers/__init__.py
 models/diffusers/clip_text_encoder.py
 models/diffusers/safety_clipvision.py

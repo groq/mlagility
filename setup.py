@@ -23,6 +23,7 @@ setup(
         "onnxflow.justbuildit",
         "onnxflow.model",
         "mlagility_models",
+        "mlagility_models.determinism",
         "mlagility_models.diffusers",
         "mlagility_models.graph_convolutions",
         "mlagility_models.llm",
