@@ -7,6 +7,7 @@ https://pytorch.org/docs/stable/generated/torch.nn.Conv3d.html#torch.nn.Conv3d
 import torch
 
 torch.manual_seed(0)
+torch.use_deterministic_algorithms(True)
 
 class Conv1dModel(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size):

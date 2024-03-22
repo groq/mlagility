@@ -39,3 +39,34 @@ inputs = {
 }
 
 model(**inputs)
+
+
+class ScatterAdd(torch.nn.Module):
+    def __init__(self):
+        super(ScatterAdd, self).__init__()
+    def forward(self, x, dim, index, src):
+        return x.scatter_add_(dim, index, src)
+    
+model = ScatterAdd()
+inputs = {
+    "x": torch.zeros(3,5),
+    "dim": 0,
+    "index": torch.tensor([[0,1,2,0,0]]),
+    "src": torch.ones((2,5)),
+}
+
+model(**inputs)
+
+class Scatter(torch.nn.Module):
+    def __init__(self):
+        super(Scatter, self).__init__()
+    def forward(self, x, dim, index, src):
+        return x.scatter_(dim, index, src)
+    
+model = Scatter()
+inputs = {
+    "x": torch.zeros(3,5),
+    "dim": 0,
+    "index": torch.tensor([[0,1,2,0]]),
+    "src": torch.arange(1,11).reshape((2,5))
+}
