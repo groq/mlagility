@@ -250,7 +250,7 @@ class State:
     inputs: Optional[Dict[str, Any]] = None
 
     # Optional information about the build
-    info: Info = Info()
+    info: Info = dataclasses.field(default_factory=Info)	
 
     # Member variable that helps the code know if State has called
     # __post_init__ yet
