@@ -2,7 +2,7 @@ sentence-transformers
 pandas
 simpletransformers
 roformer
-torch==2.1.0
+torch==2.2.0
 datasets>=2.3.2
 torchvision==0.16.0
 torchaudio==2.1.0
